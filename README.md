@@ -1,8 +1,6 @@
 Quizmaster
 ===============
 
-[![Build Status](https://travis-ci.org/nymanjens/quizmaster.svg?branch=master)](https://travis-ci.org/nymanjens/quizmaster)
-
 This is a web-app to run locally while conducting a quiz (in real life) with about 4 groups.
 
 ## Screenshot
