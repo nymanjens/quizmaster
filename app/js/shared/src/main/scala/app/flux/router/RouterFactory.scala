@@ -55,7 +55,7 @@ private[router] final class RouterFactory(
           | staticRoute(RouterFactory.pathPrefix, StandardPages.Root)
             ~> redirectToPage(AppPages.Quiz)(Redirect.Replace)
 
-//          | staticRuleFromPage(AppPages.Start, reactAppModule.playlist.apply)
+          | staticRuleFromPage(AppPages.Quiz, reactAppModule.quizView.apply)
 
         // Fallback
         ).notFound(redirectToPage(StandardPages.Root)(Redirect.Replace))

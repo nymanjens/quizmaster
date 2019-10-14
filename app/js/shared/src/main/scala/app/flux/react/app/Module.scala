@@ -1,5 +1,6 @@
 package app.flux.react.app
 
+import app.flux.react.app.quiz.QuizView
 import hydro.common.I18n
 import app.flux.stores._
 import app.models.user.User
@@ -30,4 +31,6 @@ final class Module(
   implicit private lazy val sbadminLayout = hydroUielementsModule.sbadminLayout
 
   implicit lazy val layout: Layout = new Layout
+
+  implicit lazy val quizView: QuizView = new QuizView()
 }
