@@ -3,6 +3,7 @@ package app.flux.react.app
 import app.flux.react.app.quiz.QuizView
 import hydro.common.I18n
 import app.flux.stores._
+import app.models.quiz.config.QuizConfig
 import app.models.user.User
 import hydro.common.time.Clock
 import hydro.flux.action.Dispatcher
@@ -20,6 +21,7 @@ final class Module(
     applicationIsOnlineStore: ApplicationIsOnlineStore,
     dispatcher: Dispatcher,
     clock: Clock,
+    quizConfig: QuizConfig,
 ) {
 
   // Configuration of submodules

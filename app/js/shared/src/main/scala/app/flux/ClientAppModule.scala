@@ -12,6 +12,9 @@ final class ClientAppModule(
     scalaJsApiClient: ScalaJsApiClient,
 ) {
 
+  // Unpack getInitialDataResponse
+  implicit private val quizConfig = getInitialDataResponse.quizConfig
+
   // Create and unpack common modules
   private val commonTimeModule = new hydro.common.time.Module
   implicit private val clock = commonTimeModule.clock

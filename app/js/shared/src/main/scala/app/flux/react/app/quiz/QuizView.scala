@@ -1,5 +1,6 @@
 package app.flux.react.app.quiz
 
+import app.models.quiz.config.QuizConfig
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
@@ -12,6 +13,7 @@ import japgolly.scalajs.react.vdom.html_<^.<
 final class QuizView(
     implicit pageHeader: PageHeader,
     dispatcher: Dispatcher,
+    quizConfig: QuizConfig,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -31,7 +33,7 @@ final class QuizView(
     override def render(props: Props, state: State): VdomElement = logExceptions {
       implicit val router = props.router
 
-      <.span("Hello world!")
+      <.span(s"Hello world! ${quizConfig}")
     }
   }
 }
