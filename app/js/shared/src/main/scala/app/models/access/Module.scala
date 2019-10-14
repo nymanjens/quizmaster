@@ -30,7 +30,7 @@ final class Module(
     implicit val remoteDatabaseProxy =
       HybridRemoteDatabaseProxy.create(Promise[LocalDatabase]().future)
     val entityAccess = new JsEntityAccessImpl()
- 
+
     entityAccess.startCheckingForModifiedEntityUpdates()
 
     entityAccess
