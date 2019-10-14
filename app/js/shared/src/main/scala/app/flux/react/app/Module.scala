@@ -7,7 +7,6 @@ import app.models.user.User
 import hydro.common.time.Clock
 import hydro.flux.action.Dispatcher
 import hydro.flux.stores.ApplicationIsOnlineStore
-import hydro.flux.stores.LocalDatabaseHasBeenLoadedStore
 import hydro.flux.stores.PageLoadingStateStore
 import hydro.models.access.JsEntityAccess
 
@@ -19,7 +18,6 @@ final class Module(
     pageLoadingStateStore: PageLoadingStateStore,
     pendingModificationsStore: PendingModificationsStore,
     applicationIsOnlineStore: ApplicationIsOnlineStore,
-    localDatabaseHasBeenLoadedStore: LocalDatabaseHasBeenLoadedStore,
     dispatcher: Dispatcher,
     clock: Clock,
 ) {

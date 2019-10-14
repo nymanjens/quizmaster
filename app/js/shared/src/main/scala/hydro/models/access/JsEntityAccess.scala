@@ -19,8 +19,6 @@ trait JsEntityAccess extends EntityAccess {
     */
   def pendingModifications: PendingModifications
 
-  def localDatabaseHasBeenLoaded: Listenable[Boolean]
-
   // **************** Setters ****************//
   /**
     * Note: All read actions that are started after this call is started are postponed until the data backing
@@ -29,8 +27,6 @@ trait JsEntityAccess extends EntityAccess {
   def persistModifications(modifications: Seq[EntityModification]): Future[Unit]
   final def persistModifications(modifications: EntityModification*): Future[Unit] =
     persistModifications(modifications.toVector)
-
-  def clearLocalDatabase(): Future[Unit]
 
   // **************** Other ****************//
   def registerListener(listener: JsEntityAccess.Listener): Unit

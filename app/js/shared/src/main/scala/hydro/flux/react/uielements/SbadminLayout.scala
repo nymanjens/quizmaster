@@ -24,7 +24,6 @@ final class SbadminLayout(
     implicit globalMessages: GlobalMessages,
     pageLoadingSpinner: PageLoadingSpinner,
     applicationDisconnectedIcon: ApplicationDisconnectedIcon,
-    localDatabaseHasBeenLoadedIcon: LocalDatabaseHasBeenLoadedIcon,
     pendingModificationsCounter: PendingModificationsCounter,
     user: User,
     i18n: I18n,
@@ -60,7 +59,6 @@ final class SbadminLayout(
           ^.className := "nav navbar-top-links navbar-right",
           applicationDisconnectedIcon(),
           pendingModificationsCounter(),
-          localDatabaseHasBeenLoadedIcon(),
           s"v${AppVersion.versionString}",
           <.span(^.style := js.Dictionary("marginLeft" -> "15px")),
         ),
@@ -94,13 +92,5 @@ final class SbadminLayout(
 
     val windowHeight = if (dom.window.innerHeight > 0) dom.window.innerHeight else dom.window.screen.height
     windowHeight.toInt - 1 - topOffset
-  }
-
-  private def doLogout(e: ReactMouseEvent): Callback = LogExceptionsCallback {
-    e.preventDefault()
-    dispatcher.dispatch(StandardActions.SetPageLoadingState(isLoading = true))
-    jsEntityAccess.clearLocalDatabase() map { _ =>
-      dom.window.location.href = "/logout/"
-    }
   }
 }

@@ -6,7 +6,6 @@ import hydro.common.I18n
 import hydro.common.time.Clock
 import hydro.flux.action.Dispatcher
 import hydro.flux.stores.ApplicationIsOnlineStore
-import hydro.flux.stores.LocalDatabaseHasBeenLoadedStore
 import hydro.flux.stores.PageLoadingStateStore
 import hydro.models.access.JsEntityAccess
 
@@ -18,7 +17,6 @@ final class Module(
     pageLoadingStateStore: PageLoadingStateStore,
     pendingModificationsStore: PendingModificationsStore,
     applicationIsOnlineStore: ApplicationIsOnlineStore,
-    localDatabaseHasBeenLoadedStore: LocalDatabaseHasBeenLoadedStore,
     dispatcher: Dispatcher,
     clock: Clock,
 ) {
@@ -27,8 +25,6 @@ final class Module(
   implicit lazy val globalMessages: GlobalMessages = new GlobalMessages
   implicit lazy val pageLoadingSpinner: PageLoadingSpinner = new PageLoadingSpinner
   implicit lazy val applicationDisconnectedIcon: ApplicationDisconnectedIcon = new ApplicationDisconnectedIcon
-  implicit lazy val localDatabaseHasBeenLoadedIcon: LocalDatabaseHasBeenLoadedIcon =
-    new LocalDatabaseHasBeenLoadedIcon
   implicit lazy val pendingModificationsCounter: PendingModificationsCounter = new PendingModificationsCounter
   implicit lazy val sbadminMenu: SbadminMenu = new SbadminMenu()
   implicit lazy val sbadminLayout: SbadminLayout = new SbadminLayout()

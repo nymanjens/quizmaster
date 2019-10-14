@@ -25,34 +25,6 @@ class JsEntityAccessImpl()(
     PendingModifications(Seq(), persistedLocally = false)
   private var isCallingListeners: Boolean = false
   private val queryBlockingFutures: mutable.Buffer[Future[Unit]] = mutable.Buffer()
-  private val _localDatabaseHasBeenLoaded: WritableListenable[Boolean] = WritableListenable(false)
-
-  // Attach events to local database loading
-  async {
-    await(remoteDatabaseProxy.localDatabaseReadyFuture)
-    val existingPendingModifications = await(remoteDatabaseProxy.pendingModifications())
-
-    _pendingModifications = _pendingModifications.copy(persistedLocally = true)
-
-    // Heuristic: When the local database is also loaded and the pending modifications are loaded, pending
-    // modifications will be stored or at least start being stored
-    invokeListenersAsync(_.pendingModificationsPersistedLocally())
-
-    if (existingPendingModifications.nonEmpty) {
-      await(persistModifications(existingPendingModifications))
-    }
-
-    // Send pending modifications whenever connection with the server is restored
-    hydroPushSocketClientFactory.pushClientsAreOnline.registerListener { isOnline =>
-      if (isOnline) {
-        if (_pendingModifications.modifications.nonEmpty) {
-          persistModifications(_pendingModifications.modifications)
-        }
-      }
-    }
-
-    _localDatabaseHasBeenLoaded.set(true)
-  }
 
   // **************** Getters ****************//
   override def newQuery[E <: Entity: EntityType](): DbResultSet.Async[E] = {
@@ -73,8 +45,6 @@ class JsEntityAccessImpl()(
   }
 
   override def pendingModifications = _pendingModifications
-
-  override def localDatabaseHasBeenLoaded: Listenable[Boolean] = _localDatabaseHasBeenLoaded
 
   // **************** Setters ****************//
   override def persistModifications(modifications: Seq[EntityModification]): Future[Unit] = logExceptions {
@@ -97,10 +67,6 @@ class JsEntityAccessImpl()(
       await(persistResponse.completelyDoneFuture)
       await(listenersInvoked)
     }
-  }
-
-  override def clearLocalDatabase(): Future[Unit] = {
-    remoteDatabaseProxy.clearLocalDatabase()
   }
 
   // **************** Other ****************//
