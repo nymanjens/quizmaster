@@ -8,10 +8,6 @@ GET  /app/                             hydro.controllers.StandardActions.reactAp
 GET  /app/*anyString                   hydro.controllers.StandardActions.reactApp(anyString)
 GET  /appwithoutcreds/                 hydro.controllers.StandardActions.reactAppWithoutCredentials
 
-# Javscript files
-GET  /localDatabaseWebWorker.js        hydro.controllers.JavascriptFiles.localDatabaseWebWorker
-GET  /serviceWorker.js                 hydro.controllers.JavascriptFiles.serviceWorker
-
 # Internal API
 POST /scalajsapi/*path                 hydro.controllers.InternalApi.scalaJsApiPost(path: String)
 GET  /scalajsapi/*path                 hydro.controllers.InternalApi.scalaJsApiGet(path: String)

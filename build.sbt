@@ -55,33 +55,8 @@ lazy val client: Project = (project in file("app/js/client"))
   .enablePlugins(ScalaJSBundlerPlugin, ScalaJSWeb)
   .dependsOn(sharedJsCopy, jsShared)
 
-lazy val webworkerClient: Project = (project in file("app/js/webworker"))
-  .settings(
-    // Basic settings
-    name := "webworker-client",
-    version := BuildSettings.version,
-    scalaVersion := BuildSettings.versions.scala,
-    scalacOptions ++= BuildSettings.scalacOptions,
-    scalacOptions in fullOptJS ++= Seq("-Xelide-below", "WARNING"),
-    libraryDependencies ++= BuildSettings.scalajsDependencies.value,
-    // use Scala.js provided launcher code to start the client app
-    scalaJSUseMainModuleInitializer := true,
-    // Fix for bug that produces a huge amount of warnings (https://github.com/webpack/webpack/issues/4518).
-    // Unfortunately, this means no source maps :-/
-    emitSourceMaps in fastOptJS := false,
-    // scalajs-bundler NPM packages
-    npmDependencies in Compile ++= BuildSettings.npmDependencies(baseDirectory.value / "../../.."),
-    // Custom webpack config
-    // Enable faster builds when developing
-    webpackConfigFile in fastOptJS := Some(baseDirectory.value / "../webpack.dev.js"),
-    webpackConfigFile in fullOptJS := Some(baseDirectory.value / "../webpack.prod.js"),
-    webpackBundlingMode := BundlingMode.LibraryOnly()
-  )
-  .enablePlugins(ScalaJSBundlerPlugin, ScalaJSWeb)
-  .dependsOn(sharedJsCopy, jsShared)
-
 // Client projects
-lazy val clientProjects = Seq(client, webworkerClient)
+lazy val clientProjects = Seq(client)
 
 lazy val server = (project in file("app/jvm"))
   .settings(
