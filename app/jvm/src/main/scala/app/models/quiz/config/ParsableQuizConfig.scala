@@ -1,12 +1,17 @@
 package app.models.quiz.config
 
-import java.util
+import hydro.common.GuavaReplacement.Preconditions.checkNotNull
+
+import scala.collection.JavaConverters._
+import scala.concurrent.duration._
 
 case class ParsableQuizConfig(
     rounds: java.util.List[ParsableQuizConfig.Round],
 ) {
   def this() = this(null)
-  def parse: QuizConfig = ???
+  def parse: QuizConfig = QuizConfig(
+    rounds = rounds.asScala.toVector.map(_.parse),
+  )
 }
 
 object ParsableQuizConfig {
@@ -15,7 +20,10 @@ object ParsableQuizConfig {
       questions: java.util.List[ParsableQuizConfig.Question],
   ) {
     def this() = this(null, null)
-    def parse: QuizConfig.Round = ???
+    def parse: QuizConfig.Round = QuizConfig.Round(
+      name = checkNotNull(name),
+      questions = questions.asScala.toVector.map(_.parse),
+    )
   }
 
   trait Question {
@@ -33,12 +41,19 @@ object ParsableQuizConfig {
       def this() = this(
         question = null,
         answer = null,
-        choices = new util.ArrayList(),
+        choices = null,
         pointsToGain = 1,
         maxTimeSeconds = 0,
         onlyFirstGainsPoints = false,
       )
-      override def parse: QuizConfig.Question = ???
+      override def parse: QuizConfig.Question = QuizConfig.Question.Single(
+        question = checkNotNull(question),
+        answer = checkNotNull(answer),
+        choices = if (choices == null) None else Some(choices.asScala.toVector),
+        pointsToGain = pointsToGain,
+        maxTime = if (maxTimeSeconds == 0) None else Some(maxTimeSeconds.seconds),
+        onlyFirstGainsPoints = onlyFirstGainsPoints,
+      )
     }
     case class Double(
         verbalQuestion: String,
@@ -56,7 +71,14 @@ object ParsableQuizConfig {
         textualChoices = null,
         pointsToGain = 1,
       )
-      override def parse: QuizConfig.Question = ???
+      override def parse: QuizConfig.Question = QuizConfig.Question.Double(
+        verbalQuestion = checkNotNull(verbalQuestion),
+        verbalAnswer = checkNotNull(verbalAnswer),
+        textualQuestion = checkNotNull(textualQuestion),
+        textualAnswer = checkNotNull(textualAnswer),
+        textualChoices = checkNotNull(textualChoices.asScala.toVector),
+        pointsToGain = pointsToGain,
+      )
     }
   }
 }
