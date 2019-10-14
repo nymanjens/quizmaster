@@ -30,7 +30,6 @@ final class GlobalMessagesStore(
     dispatcher: Dispatcher,
 ) extends StateStore[Option[Message]] {
   dispatcher.registerPartialSync(dispatcherListener)
-  startCheckingLoggedInState()
 
   private var _state: Option[Unique[Message]] = None
 
@@ -85,17 +84,6 @@ final class GlobalMessagesStore(
   private def setState(state: Option[Message]): Unit = {
     _state = state.map(Unique.apply)
     invokeStateUpdateListeners()
-  }
-
-  private def startCheckingLoggedInState(): Unit = {
-    dom.window.setInterval(() => checkLoggedInState(), timeout = 60 * 1000.0)
-  }
-
-  private def checkLoggedInState(): Unit = async {
-    val response = await(dom.ext.Ajax.get(url = "/loggedin/")).responseText
-    if (response != "true") {
-      setState(Message(string = i18n("app.no-longer-logged-in"), messageType = Message.Type.Failure))
-    }
   }
 }
 
