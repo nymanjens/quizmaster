@@ -33,7 +33,7 @@ final class SbadminLayout(
 ) {
 
   // **************** API ****************//
-  def apply(title: TagMod, leftMenu: VdomElement, pageContent: VdomElement, extraFooter: Seq[TagMod] = Seq())(
+  def apply(title: TagMod, leftMenu: VdomElement, pageContent: VdomElement)(
       implicit router: RouterContext): VdomElement = {
     <.div(
       ^.id := "wrapper",
@@ -61,14 +61,9 @@ final class SbadminLayout(
           applicationDisconnectedIcon(),
           pendingModificationsCounter(),
           localDatabaseHasBeenLoadedIcon(),
+          s"v${AppVersion.versionString}",
+          <.span(^.style := js.Dictionary("marginLeft" -> "15px")),
         ),
-        <.div(
-          ^.className := "navbar-default sidebar",
-          ^.role := "navigation",
-          <.div(
-            ^^.classes(Seq("sidebar-nav", "navbar-collapse") ++ ifThenSeq(navbarCollapsed, "collapse")),
-            leftMenu)
-        )
       ),
       // Page Content
       <.div(
@@ -80,12 +75,7 @@ final class SbadminLayout(
             Bootstrap.Col(lg = 12)(
               globalMessages(),
               pageContent,
-              <.hr(),
-              s"v${AppVersion.versionString}",
-              <.span(^.style := js.Dictionary("marginLeft" -> "45px")),
-              <.span(^.dangerouslySetInnerHtml := "&copy;"),
-              " 2019 Jens Nyman"
-            )(extraFooter: _*)
+            )
           )
         )
       )
