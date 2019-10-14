@@ -3,11 +3,9 @@ package app.tools
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import hydro.common.ResourceFiles
 import app.models.access.JvmEntityAccess
-import hydro.models.modification.EntityModification
-import app.models.user.Users
 import com.google.inject.Inject
+import hydro.common.ResourceFiles
 import hydro.common.time.Clock
 import play.api.Application
 import play.api.Mode
@@ -24,75 +22,17 @@ final class ApplicationStartHook @Inject()(
   private def onStart(): Unit = {
     processFlags()
 
-    // Set up database if necessary
-    if (app.mode == Mode.Test || app.mode == Mode.Dev) {
-      if (AppConfigHelper.dropAndCreateNewDb) {
-        dropAndCreateNewDb()
-      }
-    }
-
     // Populate the database with dummy data
     if (app.mode == Mode.Test || app.mode == Mode.Dev) {
-      if (AppConfigHelper.loadDummyUsers) {
-        loadDummyUsers()
-      }
       if (AppConfigHelper.loadDummyData) {
         loadDummyData()
       }
     }
   }
 
-  private def processFlags(): Unit = {
-    if (CommandLineFlags.dropAndCreateNewDb) {
-      println("")
-      println("  Dropping the database tables (if present) and creating new ones...")
-      dropAndCreateNewDb()
-      println("  Done. Exiting.")
-
-      System.exit(0)
-    }
-
-    if (CommandLineFlags.createAdminUser) {
-      implicit val user = Users.getOrCreateRobotUser()
-
-      val loginName = "admin"
-      val password = AppConfigHelper.defaultPassword getOrElse "changeme"
-
-      println("")
-      println(s"  Creating admin user...")
-      println(s"      loginName: $loginName")
-      println(s"      password: $password")
-      entityAccess.persistEntityModifications(
-        EntityModification.createAddWithRandomId(
-          Users.createUser(loginName, password, name = "Admin", isAdmin = true)))
-      println("  Done. Exiting.")
-
-      System.exit(0)
-    }
-  }
-
-  private def dropAndCreateNewDb(): Unit = {
-    entityAccess.dropAndCreateTables()
-  }
-
-  private def loadDummyUsers(): Unit = {
-    implicit val user = Users.getOrCreateRobotUser()
-
-    entityAccess.persistEntityModifications(
-      EntityModification
-        .createAddWithId(
-          1111,
-          Users.createUser(loginName = "admin", password = "a", name = "Admin", isAdmin = true)),
-      EntityModification
-        .createAddWithId(2222, Users.createUser(loginName = "alice", password = "a", name = "Alice")),
-      EntityModification
-        .createAddWithId(3333, Users.createUser(loginName = "bob", password = "b", name = "Bob"))
-    )
-  }
+  private def processFlags(): Unit = {}
 
   private def loadDummyData(): Unit = {
-    implicit val user = Users.getOrCreateRobotUser()
-
     // TODO: Implement
   }
 

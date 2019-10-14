@@ -1,5 +1,6 @@
 package app.models.access
 
+import app.models.access.ModelFields.QuizState
 import app.models.media.Album
 import app.models.media.Artist
 import app.models.media.PlaylistEntry
@@ -16,16 +17,5 @@ import hydro.models.slick.SlickEntityTableDef
 
 final class JvmEntityAccess @Inject()(implicit clock: Clock) extends JvmEntityAccessBase {
 
-  protected def getEntityTableDef(entityType: EntityType.any): SlickEntityTableDef[entityType.get] = {
-    val tableDef = entityType match {
-      case User.Type           => SlickEntityTableDefs.UserDef
-      case Song.Type           => SlickEntityTableDefs.SongDef
-      case Album.Type          => SlickEntityTableDefs.AlbumDef
-      case Artist.Type         => SlickEntityTableDefs.ArtistDef
-      case PlaylistEntry.Type  => SlickEntityTableDefs.PlaylistEntryDef
-      case PlayStatus.Type     => SlickEntityTableDefs.PlayStatusDef
-      case SongAnnotation.Type => SlickEntityTableDefs.SongAnnotationDef
-    }
-    tableDef.asInstanceOf[SlickEntityTableDef[entityType.get]]
-  }
+  protected def getEntityTableDef(entityType: EntityType.any): SlickEntityTableDef[entityType.get] = ???
 }

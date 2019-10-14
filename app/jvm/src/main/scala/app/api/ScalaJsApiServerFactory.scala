@@ -1,18 +1,15 @@
 package app.api
 
 import app.api.ScalaJsApi._
-import hydro.common.UpdateTokens.toUpdateToken
-import hydro.common.PlayI18n
 import app.models.access.JvmEntityAccess
-import app.models.media.PlayStatus
-import app.models.media.PlaylistEntry
-import hydro.models.modification.EntityModification
-import hydro.models.modification.EntityType
 import app.models.user.User
-import app.models.user.Users
 import com.google.inject._
 import hydro.api.PicklableDbQuery
+import hydro.common.PlayI18n
+import hydro.common.UpdateTokens.toUpdateToken
 import hydro.common.time.Clock
+import hydro.models.modification.EntityModification
+import hydro.models.modification.EntityType
 import hydro.models.Entity
 import hydro.models.access.DbQuery
 
@@ -28,7 +25,6 @@ final class ScalaJsApiServerFactory @Inject()(
 
     override def getInitialData() =
       GetInitialDataResponse(
-        user = user,
         i18nMessages = i18n.allI18nMessages,
         nextUpdateToken = toUpdateToken(clock.nowInstant)
       )
@@ -48,11 +44,6 @@ final class ScalaJsApiServerFactory @Inject()(
     }
 
     override def persistEntityModifications(modifications: Seq[EntityModification]): Unit = {
-      // check permissions
-      for (modification <- modifications) {
-        require(modification.entityType != User.Type, "Please modify users by calling upsertUser() instead")
-      }
-
       entityAccess.persistEntityModificationsAsync(modifications) // Don't wait for it to finish
     }
 
@@ -72,60 +63,6 @@ final class ScalaJsApiServerFactory @Inject()(
         entityAccess.queryExecutor[E].count(query)
       }
       internal
-    }
-
-    override def upsertUser(userProto: UserPrototype): Unit = {
-      def requireNonEmpty(s: Option[String]): Unit = {
-        require(s.isDefined, "field is missing")
-        require(s.get.nonEmpty, "field contains an empty string")
-      }
-      def requireNonEmptyIfSet(s: Option[String]): Unit = {
-        if (s.isDefined) {
-          require(s.get.nonEmpty, "field contains an empty string")
-        }
-      }
-
-      userProto.id match {
-        case None => // Add user
-          requireNonEmpty(userProto.loginName)
-          requireNonEmpty(userProto.plainTextPassword)
-          requireNonEmpty(userProto.name)
-
-          // Check permissions
-          require(user.isAdmin, "Only an admin can add users")
-
-          entityAccess.persistEntityModifications(
-            EntityModification.createAddWithRandomId(
-              Users.createUser(
-                loginName = userProto.loginName.get,
-                password = userProto.plainTextPassword.get,
-                name = userProto.name.get,
-                isAdmin = userProto.isAdmin getOrElse false
-              )))
-
-        case Some(id) => // Update user
-          requireNonEmptyIfSet(userProto.loginName)
-          requireNonEmptyIfSet(userProto.plainTextPassword)
-          requireNonEmptyIfSet(userProto.name)
-
-          // Check permissions
-          require(user.isAdmin || id == user.id, "Changing an other user's password")
-
-          val existingUser = entityAccess.newQuerySync[User]().findById(id)
-          val updatedUser = {
-            var result = existingUser.copy(
-              loginName = userProto.loginName getOrElse existingUser.loginName,
-              name = userProto.name getOrElse existingUser.name,
-              isAdmin = userProto.isAdmin getOrElse existingUser.isAdmin
-            )
-            if (userProto.plainTextPassword.isDefined) {
-              result = Users.copyUserWithPassword(result, userProto.plainTextPassword.get)
-            }
-            result
-          }
-
-          entityAccess.persistEntityModifications(EntityModification.createUpdateAllFields(updatedUser))
-      }
     }
   }
 }

@@ -2,14 +2,13 @@ package app.controllers.helpers
 
 import java.nio.ByteBuffer
 
-import app.api.ScalaJsApi.UserPrototype
+import app.api.Picklers._
 import app.api.ScalaJsApiServerFactory
-import hydro.controllers.InternalApi.ScalaJsApiCaller
 import app.models.user.User
 import boopickle.Default._
-import app.api.Picklers._
 import com.google.inject.Inject
 import hydro.api.PicklableDbQuery
+import hydro.controllers.InternalApi.ScalaJsApiCaller
 import hydro.models.Entity
 import hydro.models.modification.EntityModification
 import hydro.models.modification.EntityType
@@ -37,9 +36,6 @@ final class ScalaJsApiCallerImpl @Inject()(implicit scalaJsApiServerFactory: Sca
       case "executeCountQuery" =>
         val dbQuery = Unpickle[PicklableDbQuery].fromBytes(argsMap("dbQuery"))
         Pickle.intoBytes(scalaJsApiServer.executeCountQuery(dbQuery))
-      case "upsertUser" =>
-        val userPrototype = Unpickle[UserPrototype].fromBytes(argsMap("userPrototype"))
-        Pickle.intoBytes(scalaJsApiServer.upsertUser(userPrototype))
     }
   }
 }
