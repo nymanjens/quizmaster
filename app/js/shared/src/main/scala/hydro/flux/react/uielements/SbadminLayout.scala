@@ -59,8 +59,12 @@ final class SbadminLayout(
           ^.className := "nav navbar-top-links navbar-right",
           applicationDisconnectedIcon(),
           pendingModificationsCounter(),
-          s"v${AppVersion.versionString}",
-          <.span(^.style := js.Dictionary("marginLeft" -> "15px")),
+          Bootstrap.NavbarBrand()(
+            ^.style := js.Dictionary(
+              "marginRight" -> "15px",
+            ),
+            s"v${AppVersion.versionString}",
+          ),
         ),
       ),
       // Page Content
