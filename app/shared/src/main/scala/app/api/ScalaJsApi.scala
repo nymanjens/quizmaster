@@ -1,6 +1,7 @@
 package app.api
 
 import app.api.ScalaJsApi._
+import app.models.quiz.config.QuizConfig
 import hydro.api.PicklableDbQuery
 import hydro.models.modification.EntityModification
 import hydro.models.modification.EntityType
@@ -35,6 +36,7 @@ object ScalaJsApi {
   case class GetInitialDataResponse(
       i18nMessages: Map[String, String],
       nextUpdateToken: UpdateToken,
+      quizConfig: QuizConfig,
   )
 
   case class GetAllEntitiesResponse(

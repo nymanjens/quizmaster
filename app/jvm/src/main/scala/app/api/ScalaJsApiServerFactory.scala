@@ -2,6 +2,7 @@ package app.api
 
 import app.api.ScalaJsApi._
 import app.models.access.JvmEntityAccess
+import app.models.quiz.config.QuizConfig
 import app.models.user.User
 import com.google.inject._
 import hydro.api.PicklableDbQuery
@@ -19,6 +20,7 @@ final class ScalaJsApiServerFactory @Inject()(
     implicit clock: Clock,
     entityAccess: JvmEntityAccess,
     i18n: PlayI18n,
+    quizConfig: QuizConfig,
 ) {
 
   def create()(implicit user: User): ScalaJsApi = new ScalaJsApi() {
@@ -26,7 +28,8 @@ final class ScalaJsApiServerFactory @Inject()(
     override def getInitialData() =
       GetInitialDataResponse(
         i18nMessages = i18n.allI18nMessages,
-        nextUpdateToken = toUpdateToken(clock.nowInstant)
+        nextUpdateToken = toUpdateToken(clock.nowInstant),
+        quizConfig = quizConfig,
       )
 
     override def getAllEntities(types: Seq[EntityType.any]) = {
