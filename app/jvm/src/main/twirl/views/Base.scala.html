@@ -1,0 +1,57 @@
+@(
+  title: String,
+  extrascript: Html = Html("")
+)(
+  content: Html
+)(
+  implicit env: play.api.Environment
+)
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>@title</title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Playlist Keeper">
+    <meta name="author" content="Jens Nyman">
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon192x192.png")">
+    <link rel="manifest" href="@routes.Assets.versioned("manifest.webmanifest")">
+    <meta name="theme-color" content="#f8f8f8">
+
+    @* ************ CSS ************ *@
+    @* Bootstrap Core CSS *@
+    <link href="@routes.Assets.versioned("bootstrap/dist/css/bootstrap.min.css")" rel="stylesheet">
+
+    @* Metis menu (used by Start Bootstrap) *@
+    <link href="@routes.Assets.versioned("metismenu/dist/metisMenu.min.css")" rel="stylesheet">
+
+    @* Custom Fonts *@
+    <link href="@routes.Assets.versioned("font-awesome/css/font-awesome.min.css")" rel="stylesheet">
+    <link href="@routes.Assets.versioned("lib/fontello/css/fontello.css")" rel="stylesheet">
+
+    @* startbootstrap-sb-admin-2 CSS *@
+    <link href="@routes.Assets.versioned("startbootstrap-sb-admin-2/dist/css/sb-admin-2.css")" rel="stylesheet">
+
+    @* Custom CSS *@
+    <link href="@routes.Assets.versioned("stylesheets/main.min.css")" rel="stylesheet">
+
+  </head>
+  <body>
+
+    @content
+
+    @* ************ JAVASCRIPT ************ *@
+    <script src="@routes.Assets.versioned("jquery/dist/jquery.min.js")"></script>
+    <script src="@routes.Assets.versioned("bootstrap/dist/js/bootstrap.min.js")"></script>
+    <script src="@routes.Assets.versioned("metismenu/dist/metisMenu.min.js")"></script>
+
+    @* startbootstrap-sb-admin-2 JavaScript *@
+    <script src="@routes.Assets.versioned("startbootstrap-sb-admin-2/dist/js/sb-admin-2.js")"></script>
+
+    @extrascript
+  </body>
+</html>

@@ -1,0 +1,34 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# General
+GET  /                                 hydro.controllers.StandardActions.index
+GET  /app/                             hydro.controllers.StandardActions.reactAppRoot
+GET  /app/*anyString                   hydro.controllers.StandardActions.reactApp(anyString)
+GET  /appwithoutcreds/                 hydro.controllers.StandardActions.reactAppWithoutCredentials
+
+# Javscript files
+GET  /localDatabaseWebWorker.js        hydro.controllers.JavascriptFiles.localDatabaseWebWorker
+GET  /serviceWorker.js                 hydro.controllers.JavascriptFiles.serviceWorker
+
+# Internal API
+POST /scalajsapi/*path                 hydro.controllers.InternalApi.scalaJsApiPost(path: String)
+GET  /scalajsapi/*path                 hydro.controllers.InternalApi.scalaJsApiGet(path: String)
+GET  /websocket/hydropush/:updateToken/  hydro.controllers.InternalApi.hydroPushSocketWebsocket(updateToken)
+
+# External API
+GET  /externalapi/healthcheck/         hydro.controllers.StandardActions.healthCheck
+GET  /externalapi/media/rescan/:appSecret/  app.controllers.ExternalApi.rescanMediaLibrary(appSecret)
+
+# Auth
+GET  /login/                           hydro.controllers.Auth.login(returnTo ?= "/")
+POST /login/                           hydro.controllers.Auth.authenticate(returnTo ?= "/")
+GET  /logout/                          hydro.controllers.Auth.logout
+GET  /loggedin/                        hydro.controllers.Auth.amILoggedIn
+
+# Map static resources from the /public folder to the /assets URL path
+GET  /assets/*file                     controllers.Assets.versioned(path="/public", file: Asset)
+
+# Other
+GET  /media/song/:songId/              app.controllers.Application.songFile(songId: Long)
