@@ -6,14 +6,13 @@ import app.models.modification.EntityTypes
 import app.models.user.User
 import hydro.common.time.Clock
 import hydro.models.access.EntitySyncLogic
-import hydro.models.access.HydroPushSocketClientFactory
 import hydro.models.access.HybridRemoteDatabaseProxy
+import hydro.models.access.HydroPushSocketClientFactory
 import hydro.models.access.JsEntityAccess
 import hydro.models.access.JsEntityAccessImpl
 import hydro.models.access.LocalDatabaseImpl
-import hydro.models.access.LocalDatabaseImpl.SecondaryIndexFunction
 
-import scala.collection.immutable.Seq
+import scala.concurrent.Future
 
 final class Module(
     implicit user: User,
@@ -22,26 +21,18 @@ final class Module(
     getInitialDataResponse: GetInitialDataResponse,
 ) {
 
-  implicit private val secondaryIndexFunction = Module.secondaryIndexFunction
-  implicit private val entitySyncLogic = new MusikEntitySyncLogic()
+  implicit private val entitySyncLogic = new EntitySyncLogic.FullySynced(EntityTypes.all)
 
   implicit val hydroPushSocketClientFactory: HydroPushSocketClientFactory =
     new HydroPushSocketClientFactory()
 
   implicit val entityAccess: JsEntityAccess = {
-    val webWorkerModule = new hydro.models.access.webworker.Module()
-    implicit val localDatabaseWebWorkerApiStub = webWorkerModule.localDatabaseWebWorkerApiStub
-    val localDatabaseFuture = LocalDatabaseImpl.create(separateDbPerCollection = true)
-    implicit val remoteDatabaseProxy = HybridRemoteDatabaseProxy.create(localDatabaseFuture)
+    implicit val remoteDatabaseProxy =
+      HybridRemoteDatabaseProxy.create(Future.successful(new LocalDatabaseImpl()))
     val entityAccess = new JsEntityAccessImpl()
 
     entityAccess.startCheckingForModifiedEntityUpdates()
 
     entityAccess
   }
-}
-object Module {
-  val secondaryIndexFunction: SecondaryIndexFunction = SecondaryIndexFunction({
-    case User.Type           => Seq()
-  })
 }

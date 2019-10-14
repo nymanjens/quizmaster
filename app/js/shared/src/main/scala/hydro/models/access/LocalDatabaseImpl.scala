@@ -6,7 +6,7 @@ import hydro.models.Entity
 
 import scala.collection.immutable.Seq
 
-private final class LocalDatabaseImpl extends LocalDatabase {
+final class LocalDatabaseImpl extends LocalDatabase {
 
   def queryExecutor[E <: Entity: EntityType]() = ???
   def pendingModifications() = ???

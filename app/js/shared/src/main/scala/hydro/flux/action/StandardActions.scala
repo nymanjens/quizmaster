@@ -1,7 +1,5 @@
 package hydro.flux.action
 
-import app.api.ScalaJsApi.UserPrototype
-
 object StandardActions {
 
   // **************** General actions **************** //
@@ -12,7 +10,4 @@ object StandardActions {
 
   /** Special action that gets sent to the dispatcher's callbacks after processing an action failed. */
   case class Failed private[action] (action: Action) extends Action
-
-  // **************** User-related actions **************** //
-  case class UpsertUser(userPrototype: UserPrototype) extends Action
 }

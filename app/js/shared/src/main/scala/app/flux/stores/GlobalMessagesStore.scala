@@ -65,14 +65,7 @@ final class GlobalMessagesStore(
       }
   }
 
-  private def getCompletionMessage: PartialFunction[Action, String] = {
-    // **************** User-related actions **************** //
-    case UpsertUser(userPrototype)
-        if userPrototype.id.isDefined && userPrototype.plainTextPassword.isDefined =>
-      i18n("app.successfully-updated-password")
-    case UpsertUser(userPrototype) if userPrototype.id.isEmpty =>
-      i18n("app.successfully-added-user", userPrototype.loginName getOrElse "<Unknown name>")
-  }
+  private def getCompletionMessage: PartialFunction[Action, String] = PartialFunction.empty
 
   /** Clear this message after some delay */
   private def clearMessageAfterDelay(): Unit = {

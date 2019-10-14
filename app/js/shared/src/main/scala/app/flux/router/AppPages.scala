@@ -10,4 +10,5 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 object AppPages {
 
   // **************** Quiz views **************** //
+  case object Start extends PageBase("app.start", iconClass = "fa fa-user fa-fw")
 }

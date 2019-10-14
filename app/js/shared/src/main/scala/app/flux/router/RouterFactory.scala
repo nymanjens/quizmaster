@@ -9,12 +9,9 @@ import hydro.flux.router.Page
 import hydro.flux.router.RouterContext
 import hydro.flux.router.StandardPages
 import hydro.models.access.EntityAccess
-import japgolly.scalajs.react.extra.router.StaticDsl.RouteB
 import japgolly.scalajs.react.extra.router._
+import japgolly.scalajs.react.extra.router.StaticDsl.RouteB
 import japgolly.scalajs.react.vdom.html_<^._
-import hydro.flux.react.uielements.Bootstrap.Variant
-import hydro.flux.react.uielements.Bootstrap.Size
-import hydro.flux.react.uielements.Bootstrap
 import org.scalajs.dom
 
 import scala.async.Async.async
@@ -56,25 +53,9 @@ private[router] final class RouterFactory(
         (emptyRule
 
           | staticRoute(RouterFactory.pathPrefix, StandardPages.Root)
-            ~> redirectToPage(AppPages.Playlist)(Redirect.Replace)
+            ~> redirectToPage(AppPages.Start)(Redirect.Replace)
 
-          | staticRuleFromPage(StandardPages.UserProfile, reactAppModule.userProfile.apply)
-
-          | staticRuleFromPage(StandardPages.UserAdministration, reactAppModule.userAdministration.apply)
-
-          | dynamicRuleFromPage(_ ~ query.caseClass[StandardPages.Search]) { (page, ctl) =>
-            reactAppModule.searchResults(page.query, ctl)
-          }
-
-          | staticRuleFromPage(AppPages.Playlist, reactAppModule.playlist.apply)
-
-          | dynamicRuleFromPage(_ / long.caseClass[AppPages.Artist]) { (page, ctl) =>
-            reactAppModule.artistDetail(page.artistId, ctl)
-          }
-
-          | dynamicRuleFromPage(_ / long.caseClass[AppPages.Album]) { (page, ctl) =>
-            reactAppModule.albumDetail(page.albumId, ctl)
-          }
+//          | staticRuleFromPage(AppPages.Start, reactAppModule.playlist.apply)
 
         // Fallback
         ).notFound(redirectToPage(StandardPages.Root)(Redirect.Replace))

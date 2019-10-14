@@ -16,10 +16,10 @@ private[app] final class Menu(implicit sbadminMenu: SbadminMenu) {
     sbadminMenu(
       menuItems = Seq(
         Seq(
-          MenuItem("<u>P</u>laylist", AppPages.Playlist, shortcuts = Seq("shift+alt+p")),
+          MenuItem("Start", AppPages.Start, shortcuts = Seq("shift+alt+s")),
         ),
       ),
-      enableSearch = true,
+      enableSearch = false,
       router = router,
       configureAdditionalKeyboardShortcuts = () => configureAdditionalKeyboardShortcuts(),
     )
