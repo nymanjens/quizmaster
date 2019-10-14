@@ -19,7 +19,6 @@ object ClientApp {
     // create stylesheet
     //GlobalStyles.addToDocument()
 
-    setUpServiceWorker()
     setUpNoSleep()
 
     val commonTimeModule = new hydro.common.time.Module
@@ -34,18 +33,6 @@ object ClientApp {
 
       // tell React to render the router in the document body
       globalModule.router().renderIntoDOM(dom.document.getElementById("root"))
-    }
-  }
-
-  private def setUpServiceWorker(): Unit = logExceptions {
-    val navigator = js.Dynamic.global.navigator
-    if (!js.isUndefined(navigator.serviceWorker)) {
-      navigator.serviceWorker
-        .register("/serviceWorker.js")
-        .`then`(
-          (registration: Any) => {},
-          (err: Any) => println(s"  Installation of service worker failed: ${err}")
-        )
     }
   }
 
