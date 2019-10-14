@@ -13,10 +13,6 @@ object StandardPages {
     override def iconClass = ""
   }
 
-  // **************** User management views **************** //
-  case object UserProfile extends PageBase("app.user-profile", iconClass = "fa fa-user fa-fw")
-  case object UserAdministration extends PageBase("app.user-administration", iconClass = "fa fa-cogs fa-fw")
-
   // **************** Menu bar search **************** //
   case class Search private (encodedQuery: String) extends Page {
     def query: String = {

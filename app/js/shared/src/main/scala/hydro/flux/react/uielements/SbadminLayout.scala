@@ -61,44 +61,6 @@ final class SbadminLayout(
           applicationDisconnectedIcon(),
           pendingModificationsCounter(),
           localDatabaseHasBeenLoadedIcon(),
-          <.li(
-            ^.className := "dropdown",
-            <.a(
-              ^.className := "dropdown-toggle",
-              VdomAttr("data-toggle") := "dropdown",
-              ^.href := "#",
-              Bootstrap.FontAwesomeIcon("user", fixedWidth = true),
-              " ",
-              Bootstrap.FontAwesomeIcon("caret-down"),
-            ),
-            <.ul(
-              ^.className := "dropdown-menu dropdown-user",
-              <.li(
-                router
-                  .anchorWithHrefTo(StandardPages.UserProfile)(
-                    <.i(^.className := StandardPages.UserProfile.iconClass),
-                    " ",
-                    StandardPages.UserProfile.titleSync
-                  )),
-              ^^.ifThen(user.isAdmin) {
-                <.li(
-                  router
-                    .anchorWithHrefTo(StandardPages.UserAdministration)(
-                      <.i(^.className := StandardPages.UserAdministration.iconClass),
-                      " ",
-                      StandardPages.UserAdministration.titleSync
-                    ))
-              },
-              <.li(^.className := "divider"),
-              <.li(
-                <.a(
-                  ^.href := "/logout/",
-                  ^.onClick ==> doLogout,
-                  <.i(^.className := "fa fa-sign-out fa-fw"),
-                  " ",
-                  i18n("app.logout")))
-            )
-          )
         ),
         <.div(
           ^.className := "navbar-default sidebar",

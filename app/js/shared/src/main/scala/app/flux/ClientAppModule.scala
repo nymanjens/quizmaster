@@ -34,7 +34,6 @@ final class ClientAppModule(
   implicit private val pendingModificationsStore = fluxStoresModule.pendingModificationsStore
   implicit private val applicationIsOnlineStore = fluxStoresModule.applicationIsOnlineStore
   implicit private val localDatabaseHasBeenLoadedStore = fluxStoresModule.localDatabaseHasBeenLoadedStore
-  implicit private val userStore = fluxStoresModule.userStore
 
   // Create other Flux modules
   implicit private val reactAppModule = new app.flux.react.app.Module
