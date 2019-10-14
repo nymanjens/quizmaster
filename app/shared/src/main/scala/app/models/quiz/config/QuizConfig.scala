@@ -33,7 +33,7 @@ object QuizConfig {
         verbalAnswer: String,
         textualQuestion: String,
         textualAnswer: String,
-        textualChoices: Option[Seq[String]],
+        textualChoices: Seq[String],
         pointsToGain: Int,
     ) extends Question {
       def maxTime: Duration = 3.seconds
