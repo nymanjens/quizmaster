@@ -29,7 +29,5 @@ final class Module(
   implicit private lazy val sbadminMenu = hydroUielementsModule.sbadminMenu
   implicit private lazy val sbadminLayout = hydroUielementsModule.sbadminLayout
 
-  implicit private lazy val menu: Menu = new Menu
-
   implicit lazy val layout: Layout = new Layout
 }

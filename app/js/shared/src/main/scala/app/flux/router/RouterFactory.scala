@@ -53,7 +53,7 @@ private[router] final class RouterFactory(
         (emptyRule
 
           | staticRoute(RouterFactory.pathPrefix, StandardPages.Root)
-            ~> redirectToPage(AppPages.Start)(Redirect.Replace)
+            ~> redirectToPage(AppPages.Quiz)(Redirect.Replace)
 
 //          | staticRuleFromPage(AppPages.Start, reactAppModule.playlist.apply)
 

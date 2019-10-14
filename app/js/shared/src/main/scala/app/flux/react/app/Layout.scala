@@ -6,8 +6,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 
 final class Layout(
-    implicit menu: Menu,
-    sbadminLayout: SbadminLayout,
+    implicit sbadminLayout: SbadminLayout,
 ) {
 
   private val component = ScalaComponent
@@ -16,7 +15,7 @@ final class Layout(
       implicit val router = props.router
       sbadminLayout(
         title = "Quizmaster",
-        leftMenu = menu(),
+        leftMenu = <.span(),
         pageContent = <.span(children),
       )
     }
