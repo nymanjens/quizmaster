@@ -10,9 +10,9 @@ import hydro.models.access.HybridRemoteDatabaseProxy
 import hydro.models.access.HydroPushSocketClientFactory
 import hydro.models.access.JsEntityAccess
 import hydro.models.access.JsEntityAccessImpl
-import hydro.models.access.LocalDatabaseImpl
+import hydro.models.access.LocalDatabase
 
-import scala.concurrent.Future
+import scala.concurrent.Promise
 
 final class Module(
     implicit user: User,
@@ -28,9 +28,9 @@ final class Module(
 
   implicit val entityAccess: JsEntityAccess = {
     implicit val remoteDatabaseProxy =
-      HybridRemoteDatabaseProxy.create(Future.successful(new LocalDatabaseImpl()))
+      HybridRemoteDatabaseProxy.create(Promise[LocalDatabase]().future)
     val entityAccess = new JsEntityAccessImpl()
-
+ 
     entityAccess.startCheckingForModifiedEntityUpdates()
 
     entityAccess
