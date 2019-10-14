@@ -1,10 +1,9 @@
 package app.api
 
 import app.api.ScalaJsApi._
+import hydro.api.PicklableDbQuery
 import hydro.models.modification.EntityModification
 import hydro.models.modification.EntityType
-import app.models.user.User
-import hydro.api.PicklableDbQuery
 import hydro.models.Entity
 
 import scala.collection.immutable.Seq
@@ -24,9 +23,6 @@ trait ScalaJsApi {
   def executeDataQuery(dbQuery: PicklableDbQuery): Seq[Entity]
 
   def executeCountQuery(dbQuery: PicklableDbQuery): Int
-
-  /** Adds or updates a user according to the present fields in the given prototype. */
-  def upsertUser(userPrototype: UserPrototype): Unit
 }
 
 object ScalaJsApi {
@@ -37,7 +33,6 @@ object ScalaJsApi {
     * @param nextUpdateToken An update token for all changes since this call
     */
   case class GetInitialDataResponse(
-      user: User,
       i18nMessages: Map[String, String],
       nextUpdateToken: UpdateToken,
   )
@@ -60,37 +55,5 @@ object ScalaJsApi {
     ) extends HydroPushSocketPacket
     object Heartbeat extends HydroPushSocketPacket
     case class VersionCheck(versionString: String) extends HydroPushSocketPacket
-  }
-
-  /**
-    * Copy of the User model with all fields optional.
-    *
-    * @param id Required for update. Unset for add.
-    * @param loginName Required for add.
-    * @param plainTextPassword Required for add.
-    * @param name Required for add.
-    */
-  case class UserPrototype(
-      id: Option[Long] = None,
-      loginName: Option[String] = None,
-      plainTextPassword: Option[String] = None,
-      name: Option[String] = None,
-      isAdmin: Option[Boolean] = None,
-  )
-  object UserPrototype {
-    def create(
-        id: java.lang.Long = null,
-        loginName: String = null,
-        plainTextPassword: String = null,
-        name: String = null,
-        isAdmin: java.lang.Boolean = null,
-    ): UserPrototype =
-      UserPrototype(
-        id = if (id == null) None else Some(id),
-        loginName = Option(loginName),
-        plainTextPassword = Option(plainTextPassword),
-        name = Option(name),
-        isAdmin = if (isAdmin == null) None else Some(isAdmin)
-      )
   }
 }

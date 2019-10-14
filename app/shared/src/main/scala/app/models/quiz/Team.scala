@@ -1,15 +1,13 @@
-package app.models.user
+package app.models.quiz
 
-import hydro.models.modification.EntityType
 import hydro.models.Entity
 import hydro.models.UpdatableEntity
 import hydro.models.UpdatableEntity.LastUpdateTime
+import hydro.models.modification.EntityType
 
-case class User(
-    loginName: String,
-    passwordHash: String,
+case class Team(
     name: String,
-    isAdmin: Boolean,
+    score: Int,
     override val idOption: Option[Long] = None,
     override val lastUpdateTime: LastUpdateTime = LastUpdateTime.neverUpdated,
 ) extends UpdatableEntity {
@@ -18,8 +16,8 @@ case class User(
   override def withLastUpdateTime(time: LastUpdateTime): Entity = copy(lastUpdateTime = time)
 }
 
-object User {
-  implicit val Type: EntityType[User] = EntityType()
+object Team {
+  implicit val Type: EntityType[Team] = EntityType()
 
   def tupled = (this.apply _).tupled
 }
