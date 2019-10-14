@@ -44,9 +44,6 @@ final class ApplicationStartHook @Inject()(
   private object CommandLineFlags {
     private val properties = System.getProperties.asScala
 
-    def dropAndCreateNewDb: Boolean = getBoolean("dropAndCreateNewDb")
-    def createAdminUser: Boolean = getBoolean("createAdminUser")
-
     private def getBoolean(name: String): Boolean = properties.get(name).isDefined
 
     private def getExistingPath(name: String): Option[Path] =
@@ -54,10 +51,7 @@ final class ApplicationStartHook @Inject()(
   }
 
   private object AppConfigHelper {
-    def dropAndCreateNewDb: Boolean = getBoolean("app.development.dropAndCreateNewDb")
-    def loadDummyUsers: Boolean = getBoolean("app.development.loadDummyUsers")
     def loadDummyData: Boolean = getBoolean("app.development.loadDummyData")
-    def defaultPassword: Option[String] = getString("app.setup.defaultPassword")
 
     private def getBoolean(cfgPath: String): Boolean =
       app.configuration.getOptional[Boolean](cfgPath) getOrElse false
