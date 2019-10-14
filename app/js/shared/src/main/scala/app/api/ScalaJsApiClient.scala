@@ -27,7 +27,6 @@ trait ScalaJsApiClient {
   def persistEntityModifications(modifications: Seq[EntityModification]): Future[Unit]
   def executeDataQuery[E <: Entity](dbQuery: DbQuery[E]): Future[Seq[E]]
   def executeCountQuery(dbQuery: DbQuery[_ <: Entity]): Future[Int]
-  def upsertUser(userPrototype: UserPrototype): Future[Unit]
 }
 
 object ScalaJsApiClient {
@@ -57,10 +56,6 @@ object ScalaJsApiClient {
     override def executeCountQuery(dbQuery: DbQuery[_ <: Entity]) = {
       val picklableDbQuery = PicklableDbQuery.fromRegular(dbQuery)
       HttpPostAutowireClient[ScalaJsApi].executeCountQuery(picklableDbQuery).call()
-    }
-
-    override def upsertUser(userPrototype: UserPrototype) = {
-      HttpPostAutowireClient[ScalaJsApi].upsertUser(userPrototype).call()
     }
 
     private object HttpPostAutowireClient extends autowire.Client[ByteBuffer, Pickler, Pickler] {

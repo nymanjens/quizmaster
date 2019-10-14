@@ -1,7 +1,6 @@
 package app.flux.react.app
 
 import app.flux.router.AppPages
-import app.flux.stores.media.PlayStatusStore
 import hydro.flux.react.uielements.SbadminMenu
 import hydro.flux.react.uielements.SbadminMenu.MenuItem
 import hydro.flux.router.RouterContext
@@ -10,7 +9,7 @@ import japgolly.scalajs.react.vdom.html_<^._
 
 import scala.collection.immutable.Seq
 
-private[app] final class Menu(implicit playStatusStore: PlayStatusStore, sbadminMenu: SbadminMenu) {
+private[app] final class Menu(implicit sbadminMenu: SbadminMenu) {
 
   // **************** API ****************//
   def apply()(implicit router: RouterContext): VdomElement = {
@@ -39,10 +38,5 @@ private[app] final class Menu(implicit playStatusStore: PlayStatusStore, sbadmin
         runnable()
       })
     }
-
-    bind("space", () => playStatusStore.togglePlay())
-    bind("ctrl+left", () => playStatusStore.advanceEntriesInPlaylist(step = -1))
-    bind("ctrl+right", () => playStatusStore.advanceEntriesInPlaylist(step = +1))
-    bindGlobal("ctrl+shift+space", () => playStatusStore.toggleStopAfterCurrentSong())
   }
 }

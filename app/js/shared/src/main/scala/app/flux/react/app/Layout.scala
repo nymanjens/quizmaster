@@ -1,18 +1,13 @@
 package app.flux.react.app
 
-import app.flux.react.uielements
 import hydro.flux.react.uielements.SbadminLayout
 import hydro.flux.router.RouterContext
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 
-import scala.collection.immutable.Seq
-import scala.scalajs.js
-
 final class Layout(
     implicit menu: Menu,
     sbadminLayout: SbadminLayout,
-    musicPlayerDiv: uielements.media.MusicPlayerDiv,
 ) {
 
   private val component = ScalaComponent
@@ -23,11 +18,6 @@ final class Layout(
         title = "Quizmaster",
         leftMenu = menu(),
         pageContent = <.span(children),
-        extraFooter = Seq(
-          musicPlayerDiv(),
-          // Add extra whitespace to make sure the MusicPlayerDiv isn't blocking any content
-          <.div(^.style := js.Dictionary("paddingTop" -> "200px")),
-        )
       )
     }
     .build

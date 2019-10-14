@@ -72,9 +72,6 @@ final class GlobalMessagesStore(
       i18n("app.successfully-updated-password")
     case UpsertUser(userPrototype) if userPrototype.id.isEmpty =>
       i18n("app.successfully-added-user", userPrototype.loginName getOrElse "<Unknown name>")
-    // **************** Media-related actions **************** //
-    case _: AddSongsToPlaylist          => "Added to playlist"
-    case UpdateSongLiked(songId, liked) => if (liked) "Song liked" else "Song no longer liked"
   }
 
   /** Clear this message after some delay */

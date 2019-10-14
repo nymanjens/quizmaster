@@ -2,12 +2,6 @@ package app.models.access
 
 import app.api.ScalaJsApi.GetInitialDataResponse
 import app.api.ScalaJsApiClient
-import app.models.media.Album
-import app.models.media.Artist
-import app.models.media.PlayStatus
-import app.models.media.PlaylistEntry
-import app.models.media.Song
-import app.models.media.SongAnnotation
 import app.models.modification.EntityTypes
 import app.models.user.User
 import hydro.common.time.Clock
@@ -49,11 +43,5 @@ final class Module(
 object Module {
   val secondaryIndexFunction: SecondaryIndexFunction = SecondaryIndexFunction({
     case User.Type           => Seq()
-    case Song.Type           => Seq()
-    case Album.Type          => Seq()
-    case Artist.Type         => Seq()
-    case PlaylistEntry.Type  => Seq()
-    case PlayStatus.Type     => Seq()
-    case SongAnnotation.Type => Seq()
   })
 }

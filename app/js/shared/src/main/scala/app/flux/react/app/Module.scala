@@ -2,7 +2,6 @@ package app.flux.react.app
 
 import hydro.common.I18n
 import app.flux.stores._
-import app.flux.stores.media._
 import app.models.user.User
 import hydro.common.time.Clock
 import hydro.flux.action.Dispatcher
@@ -22,13 +21,6 @@ final class Module(
     applicationIsOnlineStore: ApplicationIsOnlineStore,
     localDatabaseHasBeenLoadedStore: LocalDatabaseHasBeenLoadedStore,
     userStore: UserStore,
-    playlistStore: PlaylistStore,
-    playStatusStore: PlayStatusStore,
-    jsSongStoreFactory: JsSongStoreFactory,
-    jsAlbumStoreFactory: JsAlbumStoreFactory,
-    albumDetailStoreFactory: AlbumDetailStoreFactory,
-    artistDetailStoreFactory: ArtistDetailStoreFactory,
-    complexQueryStoreFactory: ComplexQueryStoreFactory,
     dispatcher: Dispatcher,
     clock: Clock,
 ) {
@@ -39,16 +31,7 @@ final class Module(
   implicit private lazy val sbadminMenu = hydroUielementsModule.sbadminMenu
   implicit private lazy val sbadminLayout = hydroUielementsModule.sbadminLayout
 
-  private val fluxUielementsModule = new app.flux.react.uielements.Module
-  implicit private val enqueueableSongDiv = fluxUielementsModule.enqueueableSongDiv
-  implicit private val musicPlayerDiv = fluxUielementsModule.musicPlayerDiv
-  implicit private val artistDiv = fluxUielementsModule.artistDiv
-  implicit private val enqueueableAlbumDiv = fluxUielementsModule.enqueueableAlbumDiv
-  implicit private val playlistEntryDiv = fluxUielementsModule.playlistEntryDiv
-  implicit private val albumPlaylistEntryDiv = fluxUielementsModule.albumPlaylistEntryDiv
-
   private val userManagementModule = new hydro.flux.react.uielements.usermanagement.Module
-  private val mediaModule = new app.flux.react.app.media.Module
 
   implicit private lazy val menu: Menu = new Menu
 
@@ -56,9 +39,4 @@ final class Module(
 
   implicit lazy val userProfile = userManagementModule.userProfile
   implicit lazy val userAdministration = userManagementModule.userAdministration
-
-  implicit lazy val playlist = mediaModule.playlist
-  implicit lazy val artistDetail = mediaModule.artistDetail
-  implicit lazy val albumDetail = mediaModule.albumDetail
-  implicit lazy val searchResults = mediaModule.searchResults
 }
