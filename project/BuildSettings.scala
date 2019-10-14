@@ -71,6 +71,7 @@ object BuildSettings {
       "org" % "jaudiotagger" % "2.0.3",
       "com.google.guava" % "guava" % "27.0-jre",
       "com.googlecode.json-simple" % "json-simple" % "1.1.1",
+      "org.yaml" % "snakeyaml" % "1.14",
       "net.jcip" % "jcip-annotations" % "1.0"
     ))
 
