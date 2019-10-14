@@ -4,31 +4,25 @@ import java.nio.ByteBuffer
 
 import akka.actor.ActorSystem
 import akka.stream.scaladsl._
+import app.api.Picklers._
 import app.api.ScalaJsApi.HydroPushSocketPacket
 import app.api.ScalaJsApi.HydroPushSocketPacket.EntityModificationsWithToken
 import app.api.ScalaJsApi.UpdateToken
 import app.api.ScalaJsApiServerFactory
 import app.models.access.JvmEntityAccess
 import app.models.user.User
-import boopickle.Default._
-import app.api.Picklers._
+import app.models.user.User.onlyUser
 import app.AppVersion
+import boopickle.Default._
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import hydro.api.ScalaJsApiRequest
-import hydro.common.UpdateTokens.toInstant
 import hydro.common.UpdateTokens.toUpdateToken
 import hydro.common.publisher.Publishers
 import hydro.common.publisher.TriggerablePublisher
 import hydro.common.time.Clock
-import hydro.controllers.InternalApi.ScalaJsApiCaller
-import hydro.controllers.helpers.AuthenticatedAction
 import hydro.controllers.InternalApi.HydroPushSocketHeartbeatScheduler
-import hydro.models.modification.EntityModificationEntity
-import hydro.models.slick.SlickUtils.dbApi._
-import hydro.models.slick.SlickUtils.dbRun
-import hydro.models.slick.SlickUtils.instantToSqlTimestampMapper
-import hydro.models.slick.StandardSlickEntityTableDefs.EntityModificationEntityDef
+import hydro.controllers.InternalApi.ScalaJsApiCaller
 import org.reactivestreams.Publisher
 import play.api.i18n.I18nSupport
 import play.api.i18n.MessagesApi
@@ -50,7 +44,7 @@ final class InternalApi @Inject()(
 ) extends AbstractController(components)
     with I18nSupport {
 
-  def scalaJsApiPost(path: String) = AuthenticatedAction(parse.raw) { implicit user => implicit request =>
+  def scalaJsApiPost(path: String) = Action(parse.raw) { implicit request =>
     val requestBuffer: ByteBuffer = request.body.asBytes(parse.UNLIMITED).get.asByteBuffer
     val argsMap = Unpickle[Map[String, ByteBuffer]].fromBytes(requestBuffer)
 
@@ -58,14 +52,12 @@ final class InternalApi @Inject()(
     Ok(bytes)
   }
 
-  def scalaJsApiGet(path: String) = AuthenticatedAction(parse.raw) { implicit user => implicit request =>
+  def scalaJsApiGet(path: String) = Action(parse.raw) { implicit request =>
     val bytes = doScalaJsApiCall(path, argsMap = Map())
     Ok(bytes)
   }
 
   def scalaJsApiWebsocket = WebSocket.accept[Array[Byte], Array[Byte]] { request =>
-    implicit val user = AuthenticatedAction.requireAuthenticatedUser(request)
-
     Flow[Array[Byte]].map { requestBytes =>
       val request = Unpickle[ScalaJsApiRequest].fromBytes(ByteBuffer.wrap(requestBytes))
 
@@ -75,8 +67,6 @@ final class InternalApi @Inject()(
 
   def hydroPushSocketWebsocket(updateToken: UpdateToken) = WebSocket.accept[Array[Byte], Array[Byte]] {
     request =>
-      AuthenticatedAction.requireAuthenticatedUser(request)
-
       def packetToBytes(packet: HydroPushSocketPacket): Array[Byte] = {
         val responseBuffer = Pickle.intoBytes(packet)
         val data: Array[Byte] = Array.ofDim[Byte](responseBuffer.remaining())
@@ -94,14 +84,7 @@ final class InternalApi @Inject()(
         // update token.
         val nextUpdateToken: UpdateToken = toUpdateToken(clock.nowInstant)
 
-        val modifications = {
-          val modificationEntities = dbRun(
-            entityAccess
-              .newSlickQuery[EntityModificationEntity]()
-              .filter(_.instant >= toInstant(updateToken))
-              .sortBy(m => (m.instant, m.instantNanos)))
-          modificationEntities.toStream.map(_.modification).toVector
-        }
+        val modifications = scala.collection.immutable.Seq()
 
         EntityModificationsWithToken(modifications, nextUpdateToken)
       }
@@ -123,8 +106,7 @@ final class InternalApi @Inject()(
 
   // Note: This action manually implements what autowire normally does automatically. Unfortunately, autowire
   // doesn't seem to work for some reason.
-  private def doScalaJsApiCall(path: String, argsMap: Map[String, ByteBuffer])(
-      implicit user: User): Array[Byte] = {
+  private def doScalaJsApiCall(path: String, argsMap: Map[String, ByteBuffer]): Array[Byte] = {
     val responseBuffer = scalaJsApiCaller(path, argsMap)
 
     val data: Array[Byte] = Array.ofDim[Byte](responseBuffer.remaining())
@@ -134,7 +116,7 @@ final class InternalApi @Inject()(
 }
 object InternalApi {
   trait ScalaJsApiCaller {
-    def apply(path: String, argsMap: Map[String, ByteBuffer])(implicit user: User): ByteBuffer
+    def apply(path: String, argsMap: Map[String, ByteBuffer]): ByteBuffer
   }
 
   @Singleton

@@ -2,7 +2,6 @@ package hydro.controllers
 
 import app.models.access.JvmEntityAccess
 import com.google.inject.Inject
-import hydro.controllers.helpers.AuthenticatedAction
 import play.api.i18n.I18nSupport
 import play.api.i18n.MessagesApi
 import play.api.mvc._
@@ -16,11 +15,11 @@ final class StandardActions @Inject()(
 ) extends AbstractController(components)
     with I18nSupport {
 
-  def index() = AuthenticatedAction { implicit user => implicit request =>
+  def index() = Action { implicit request =>
     Redirect(hydro.controllers.routes.StandardActions.reactAppRoot())
   }
 
-  def reactAppRoot = AuthenticatedAction { implicit user => implicit request =>
+  def reactAppRoot = Action { implicit request =>
     Ok(views.html.reactApp())
   }
 
@@ -31,7 +30,6 @@ final class StandardActions @Inject()(
   }
 
   def healthCheck = Action { implicit request =>
-    entityAccess.checkConsistentCaches()
     Ok("OK")
   }
 }

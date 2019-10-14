@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 
 import app.api.Picklers._
 import app.api.ScalaJsApiServerFactory
-import app.models.user.User
+import app.models.user.User.onlyUser
 import boopickle.Default._
 import com.google.inject.Inject
 import hydro.api.PicklableDbQuery
@@ -18,7 +18,7 @@ import scala.collection.immutable.Seq
 final class ScalaJsApiCallerImpl @Inject()(implicit scalaJsApiServerFactory: ScalaJsApiServerFactory)
     extends ScalaJsApiCaller {
 
-  override def apply(path: String, argsMap: Map[String, ByteBuffer])(implicit user: User): ByteBuffer = {
+  override def apply(path: String, argsMap: Map[String, ByteBuffer]): ByteBuffer = {
     val scalaJsApiServer = scalaJsApiServerFactory.create()
 
     path match {
