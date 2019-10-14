@@ -20,7 +20,7 @@ final class Layout(
     .renderPC { (_, props, children) =>
       implicit val router = props.router
       sbadminLayout(
-        title = "Playlist Keeper",
+        title = "Quizmaster",
         leftMenu = menu(),
         pageContent = <.span(children),
         extraFooter = Seq(
