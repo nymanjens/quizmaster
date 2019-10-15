@@ -1,5 +1,7 @@
 package app.flux.react.app.quiz
 
+import hydro.flux.react.ReactVdomUtils.<<
+import hydro.flux.react.ReactVdomUtils.^^
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState
@@ -13,6 +15,7 @@ import hydro.flux.react.uielements.Bootstrap
 import hydro.flux.react.uielements.Bootstrap.Size
 import hydro.flux.react.uielements.Bootstrap.Variant
 import hydro.flux.react.uielements.PageHeader
+import hydro.flux.react.ReactVdomUtils.<<
 import hydro.flux.router.RouterContext
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
@@ -52,57 +55,42 @@ final class MasterView(
     override def render(props: Props, state: State): VdomElement = logExceptions {
       implicit val router = props.router
 
-      state.quizState match {
-        case quizState if quizState.quizIsBeingSetUp =>
-          <.span(
-            startQuizButton(),
-            teamEditor(),
-          )
-        case quizState =>
-          quizState.question match {
-            case None =>
-              <.span(
-                nextPreviousButtons(),
+      <.span(
+        quizNavigationButtons(state.quizState),
+        state.quizState match {
+          case quizState if quizState.quizIsBeingSetUp =>
+            teamEditor()
+          case quizState =>
+            quizState.question match {
+              case None =>
                 showRound(quizState.round)
-              )
-            case Some(question) =>
-              <.span(
-                nextPreviousButtons(),
-                showQuestion(quizState.round, question, quizState.showSolution),
-              )
-          }
-      }
+              case Some(question) =>
+                showQuestion(quizState.round, question, quizState.showSolution)
+            }
+        },
+      )
     }
 
-    private def quizNavigationButtonsWrapper: VdomTag = {
+    private def quizNavigationButtons(quizState: QuizState): VdomTag = {
       <.div(
         ^.className := "quiz-navigation-buttons",
-      )
-    }
-
-    private def startQuizButton(): VdomElement = {
-      quizNavigationButtonsWrapper(
-        Bootstrap.Button(Variant.primary, Size.lg)(
-          ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.goToNextStep()).void,
-          Bootstrap.FontAwesomeIcon("play"),
-          " Start the quiz",
-        ),
-      )
-    }
-
-    private def nextPreviousButtons(): VdomElement = {
-      quizNavigationButtonsWrapper(
-        Bootstrap.Button(Variant.primary, Size.lg)(
-          ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.goToPreviousStep()).void,
-          Bootstrap.Glyphicon("arrow-left"),
-          " Previous",
-        ),
-        " ",
-        Bootstrap.Button(Variant.primary, Size.lg)(
-          ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.goToNextStep()).void,
-          Bootstrap.Glyphicon("arrow-right"),
-          " Next",
-        ),
+        <<.ifThen(!quizState.quizIsBeingSetUp) {
+          <.span(
+            Bootstrap.Button(Variant.primary, Size.lg)(
+              ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.goToPreviousStep()).void,
+              Bootstrap.Glyphicon("arrow-left"),
+              " Previous",
+            ),
+            " ",
+          )
+        },
+        <<.ifThen(!quizState.quizHasEnded) {
+          Bootstrap.Button(Variant.primary, Size.lg)(
+            ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.goToNextStep()).void,
+            Bootstrap.Glyphicon("arrow-right"),
+            " Next",
+          )
+        }
       )
     }
 
