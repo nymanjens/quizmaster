@@ -17,6 +17,7 @@ import scala.async.Async.async
 import scala.async.Async.await
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.collection.immutable.Seq
 
 final class TeamsAndQuizStateStore(
     implicit entityAccess: JsEntityAccess,
@@ -25,6 +26,7 @@ final class TeamsAndQuizStateStore(
     clock: Clock,
 ) extends AsyncEntityDerivedStateStore[State] {
 
+  // **************** Implementation of AsyncEntityDerivedStateStore methods **************** //
   override protected def calculateState(): Future[State] = async {
     State(
       teams = await(
@@ -42,7 +44,27 @@ final class TeamsAndQuizStateStore(
       state: State,
   ): Boolean = true
 
+  // **************** Additional public API **************** //
   def stateOrEmpty: State = state getOrElse State(teams = Seq(), maybeQuizState = None)
+
+  def addEmptyTeam(): Future[Unit] = {
+    entityAccess.persistModifications(
+      EntityModification.createAddWithRandomId(
+        Team(
+          name = "",
+          score = 0,
+          createTimeMillisSinceEpoch = clock.nowInstant.toEpochMilli,
+        )))
+  }
+  def updateName(team: Team, newName: String): Future[Unit] = {
+    entityAccess.persistModifications(EntityModification.createUpdateAllFields(team.copy(name = newName)))
+  }
+  def updateScore(team: Team, newScore: Int): Future[Unit] = {
+    entityAccess.persistModifications(EntityModification.createUpdateAllFields(team.copy(score = newScore)))
+  }
+  def deleteTeam(team: Team): Future[Unit] = {
+    entityAccess.persistModifications(EntityModification.createRemove(team))
+  }
 }
 
 object TeamsAndQuizStateStore {
