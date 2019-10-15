@@ -65,7 +65,7 @@ final class MasterView(
           case quizState =>
             quizState.question match {
               case None =>
-                showRound(quizState.round)
+                RoundComponent(quizState.round)
               case Some(question) =>
                 questionComponent(
                   question = question,
@@ -97,13 +97,6 @@ final class MasterView(
             " Next",
           )
         }
-      )
-    }
-
-    def showRound(round: QuizConfig.Round): VdomElement = {
-      <.div(
-        ^.className := "round-title",
-        round.name,
       )
     }
   }

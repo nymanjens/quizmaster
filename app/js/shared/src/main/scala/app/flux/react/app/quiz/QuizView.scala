@@ -17,7 +17,10 @@ final class QuizView(
     implicit pageHeader: PageHeader,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
+    teamEditor: TeamEditor,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
+    quizProgressIndicator: QuizProgressIndicator,
+    questionComponent: QuestionComponent,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -46,9 +49,21 @@ final class QuizView(
     override def render(props: Props, state: State): VdomElement = logExceptions {
       implicit val router = props.router
 
-      <.span(
+      val quizState = state.quizState
 
-        s"Hello world! ${state.quizState}",
+      <.span(
+        ^.className := "quiz-view",
+        quizProgressIndicator(state.quizState),
+        quizState.question match {
+          case None =>
+            RoundComponent(quizState.round)
+          case Some(question) =>
+            questionComponent(
+              question = question,
+              questionProgressIndex = if (quizState.showSolution) 1 else 0,
+              showMasterData = true,
+            )
+        },
       )
     }
   }
