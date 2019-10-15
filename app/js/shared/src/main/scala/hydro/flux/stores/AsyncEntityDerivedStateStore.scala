@@ -109,8 +109,6 @@ abstract class AsyncEntityDerivedStateStore[State](implicit entityAccess: JsEnti
   // **************** Inner type definitions ****************//
   private object JsEntityAccessListener extends JsEntityAccess.Listener {
     override def modificationsAddedOrPendingStateChanged(modifications: Seq[EntityModification]): Unit = {
-      checkNotCallingListeners()
-
       val modificationsCouldBeRelevant = _state match {
         case None    => true
         case Some(s) => impactsState(modifications, s)

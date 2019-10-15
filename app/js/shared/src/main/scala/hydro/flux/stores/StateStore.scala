@@ -17,15 +17,11 @@ abstract class StateStore[State] {
 
   // **************** Public API: Final ****************//
   final def register(listener: StateStore.Listener): Unit = {
-    checkNotCallingListeners()
-
     _stateUpdateListeners.add(listener)
     onStateUpdateListenersChange()
   }
 
   final def deregister(listener: StateStore.Listener): Unit = {
-    checkNotCallingListeners()
-
     _stateUpdateListeners.remove(listener)
     onStateUpdateListenersChange()
   }
@@ -35,17 +31,12 @@ abstract class StateStore[State] {
 
   // **************** Protected helper methods ****************//
   protected final def invokeStateUpdateListeners(): Unit = {
-    checkNotCallingListeners()
     isCallingListeners = true
     _stateUpdateListeners.foreach(_.onStateUpdate())
     isCallingListeners = false
   }
 
   final def stateUpdateListeners: scala.collection.Set[StateStore.Listener] = _stateUpdateListeners
-
-  protected final def checkNotCallingListeners(): Unit = {
-    require(!isCallingListeners, "checkNotCallingListeners(): But isCallingListeners is true")
-  }
 }
 
 object StateStore {
