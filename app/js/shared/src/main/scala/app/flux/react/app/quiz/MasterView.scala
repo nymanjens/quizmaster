@@ -4,9 +4,14 @@ import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState
 import app.models.quiz.Team
+import hydro.common.JsLoggingUtils
 import hydro.common.JsLoggingUtils.logExceptions
+import hydro.common.JsLoggingUtils.LogExceptionsCallback
 import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
+import hydro.flux.react.uielements.Bootstrap
+import hydro.flux.react.uielements.Bootstrap.Size
+import hydro.flux.react.uielements.Bootstrap.Variant
 import hydro.flux.react.uielements.PageHeader
 import hydro.flux.router.RouterContext
 import japgolly.scalajs.react._
@@ -47,8 +52,23 @@ final class MasterView(
     override def render(props: Props, state: State): VdomElement = logExceptions {
       implicit val router = props.router
 
-      <.span(
-        teamEditor(),
+      state.maybeQuizState match {
+        case None =>
+          <.span(
+            teamEditor(),
+            startQuizButton(),
+          )
+        case Some(quizState) =>
+          <.span()
+      }
+    }
+
+    private def startQuizButton(): VdomElement = {
+      Bootstrap.Button(Variant.primary, Size.lg)(
+//        ^.className := "btn-huge",
+        ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.startQuiz()).void,
+        Bootstrap.FontAwesomeIcon("play"),
+        " Start the quiz",
       )
     }
   }

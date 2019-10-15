@@ -65,6 +65,17 @@ final class TeamsAndQuizStateStore(
   def deleteTeam(team: Team): Future[Unit] = {
     entityAccess.persistModifications(EntityModification.createRemove(team))
   }
+
+  def startQuiz(): Future[Unit] = {
+    entityAccess.persistModifications(
+      EntityModification.Add(
+        QuizState(
+          partNumber = 0,
+          questionNumber = 0,
+          showSolution = false,
+        )
+      ))
+  }
 }
 
 object TeamsAndQuizStateStore {
