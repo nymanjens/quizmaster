@@ -7,6 +7,7 @@ import app.models.quiz.Team
 import app.models.quiz.config.QuizConfig
 import app.models.user.User
 import hydro.common.time.Clock
+import hydro.common.SerializingTaskQueue
 import hydro.flux.action.Dispatcher
 import hydro.flux.stores.AsyncEntityDerivedStateStore
 import hydro.models.access.DbQuery
@@ -28,6 +29,11 @@ final class TeamsAndQuizStateStore(
     quizConfig: QuizConfig,
 ) extends AsyncEntityDerivedStateStore[State] {
 
+  /**
+    * Queue that processes a single task at once to avoid concurrent update issues (on the same client tab).
+    */
+  private val updateStateQueue: SerializingTaskQueue = SerializingTaskQueue.create()
+
   // **************** Implementation of AsyncEntityDerivedStateStore methods **************** //
   override protected def calculateState(): Future[State] = async {
     State(
@@ -48,10 +54,11 @@ final class TeamsAndQuizStateStore(
       state: State,
   ): Boolean = true
 
-  // **************** Additional public API **************** //
+  // **************** Additional public API: Read methods **************** //
   def stateOrEmpty: State = state getOrElse State.nullInstance
 
-  def addEmptyTeam(): Future[Unit] = {
+  // **************** Additional public API: Write methods **************** //
+  def addEmptyTeam(): Future[Unit] = updateStateQueue.schedule {
     entityAccess.persistModifications(
       EntityModification.createAddWithRandomId(
         Team(
@@ -60,118 +67,122 @@ final class TeamsAndQuizStateStore(
           createTimeMillisSinceEpoch = clock.nowInstant.toEpochMilli,
         )))
   }
-  def updateName(team: Team, newName: String): Future[Unit] = {
+  def updateName(team: Team, newName: String): Future[Unit] = updateStateQueue.schedule {
     entityAccess.persistModifications(EntityModification.createUpdateAllFields(team.copy(name = newName)))
   }
-  def updateScore(team: Team, newScore: Int): Future[Unit] = {
+  def updateScore(team: Team, newScore: Int): Future[Unit] = updateStateQueue.schedule {
     entityAccess.persistModifications(EntityModification.createUpdateAllFields(team.copy(score = newScore)))
   }
-  def deleteTeam(team: Team): Future[Unit] = {
+  def deleteTeam(team: Team): Future[Unit] = updateStateQueue.schedule {
     entityAccess.persistModifications(EntityModification.createRemove(team))
   }
 
-  def goToPreviousStep(): Future[Unit] = async {
-    val quizState = await(stateFuture).quizState
-    val modifications =
-      quizState.roundIndex match {
-        case -1 => Seq() // Do nothing
-        case _ =>
-          quizState.question match {
-            case None if quizState.roundIndex == 0 =>
-              // Go back to setup
-              Seq(EntityModification.createRemove(quizState))
-            case None =>
-              // Go to end of last round
-              val newRoundIndex = quizState.roundIndex - 1
-              Seq(
-                EntityModification.createUpdateAllFields(
-                  quizState.copy(
-                    roundIndex = newRoundIndex,
-                    questionIndex = quizConfig.rounds(newRoundIndex).questions.size - 1,
-                    showSolution = true,
-                  )))
-            case Some(question) if !quizState.showSolution =>
-              // Go to previous question
-              Seq(
-                EntityModification.createUpdateAllFields(
-                  quizState.copy(
-                    questionIndex = quizState.questionIndex - 1,
-                    showSolution = true,
-                  )))
-            case Some(question) if quizState.showSolution =>
-              // Hide solution
-              Seq(
-                EntityModification.createUpdateAllFields(
-                  quizState.copy(
-                    showSolution = false,
-                  )))
-          }
-      }
+  def goToPreviousStep(): Future[Unit] = updateStateQueue.schedule {
+    async {
+      val quizState = await(stateFuture).quizState
+      val modifications =
+        quizState.roundIndex match {
+          case -1 => Seq() // Do nothing
+          case _ =>
+            quizState.question match {
+              case None if quizState.roundIndex == 0 =>
+                // Go back to setup
+                Seq(EntityModification.createRemove(quizState))
+              case None =>
+                // Go to end of last round
+                val newRoundIndex = quizState.roundIndex - 1
+                Seq(
+                  EntityModification.createUpdateAllFields(
+                    quizState.copy(
+                      roundIndex = newRoundIndex,
+                      questionIndex = quizConfig.rounds(newRoundIndex).questions.size - 1,
+                      showSolution = true,
+                    )))
+              case Some(question) if !quizState.showSolution =>
+                // Go to previous question
+                Seq(
+                  EntityModification.createUpdateAllFields(
+                    quizState.copy(
+                      questionIndex = quizState.questionIndex - 1,
+                      showSolution = true,
+                    )))
+              case Some(question) if quizState.showSolution =>
+                // Hide solution
+                Seq(
+                  EntityModification.createUpdateAllFields(
+                    quizState.copy(
+                      showSolution = false,
+                    )))
+            }
+        }
 
-    await(entityAccess.persistModifications(modifications))
+      await(entityAccess.persistModifications(modifications))
+    }
   }
 
-  def goToNextStep(): Future[Unit] = async {
-    val maybeQuizState = await(
-      entityAccess
-        .newQuery[QuizState]()
-        .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId))
+  def goToNextStep(): Future[Unit] = updateStateQueue.schedule {
+    async {
+      val maybeQuizState = await(
+        entityAccess
+          .newQuery[QuizState]()
+          .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId))
 
-    val modifications =
-      maybeQuizState match {
-        case None =>
-          Seq(
-            EntityModification.Add(
-              QuizState(
-                roundIndex = 0,
-              )))
-        case Some(quizState) =>
-          quizState.question match {
-            case None =>
-              if (quizState.round.questions.isEmpty) {
-                // Go to next round
-                Seq(
-                  EntityModification.createUpdateAllFields(
-                    QuizState(
-                      roundIndex = quizState.roundIndex + 1,
-                    )))
-              } else {
-                // Go to first question
+      val modifications =
+        maybeQuizState match {
+          case None =>
+            Seq(
+              EntityModification.Add(
+                QuizState(
+                  roundIndex = 0,
+                )))
+          case Some(quizState) =>
+            quizState.question match {
+              case None =>
+                if (quizState.round.questions.isEmpty) {
+                  // Go to next round
+                  Seq(
+                    EntityModification.createUpdateAllFields(
+                      QuizState(
+                        roundIndex = quizState.roundIndex + 1,
+                      )))
+                } else {
+                  // Go to first question
+                  Seq(
+                    EntityModification.createUpdateAllFields(
+                      quizState.copy(
+                        questionIndex = 0,
+                        showSolution = false,
+                      )))
+                }
+              case Some(question) if !quizState.showSolution =>
+                // Go to solution
                 Seq(
                   EntityModification.createUpdateAllFields(
                     quizState.copy(
-                      questionIndex = 0,
-                      showSolution = false,
+                      showSolution = true,
                     )))
-              }
-            case Some(question) if !quizState.showSolution =>
-              // Go to solution
-              Seq(
-                EntityModification.createUpdateAllFields(
-                  quizState.copy(
-                    showSolution = true,
-                  )))
-            case Some(question) if quizState.showSolution =>
-              if (quizState.questionIndex == quizState.round.questions.size - 1) {
-                // Go to next round
-                Seq(
-                  EntityModification.createUpdateAllFields(
-                    QuizState(
-                      roundIndex = quizState.roundIndex + 1,
-                    )))
-              } else {
-                // Go to next question
-                Seq(
-                  EntityModification.createUpdateAllFields(
-                    quizState.copy(
-                      questionIndex = quizState.questionIndex + 1,
-                      showSolution = false,
-                    )))
-              }
-          }
-      }
+              case Some(question) if quizState.showSolution =>
+                if (quizState.questionIndex == quizState.round.questions.size - 1) {
+                  // Go to next round
+                  Seq(
+                    EntityModification.createUpdateAllFields(
+                      QuizState(
+                        roundIndex = quizState.roundIndex + 1,
+                      )))
+                } else {
+                  // Go to next question
+                  Seq(
+                    EntityModification.createUpdateAllFields(
+                      quizState.copy(
+                        questionIndex = quizState.questionIndex + 1,
+                        showSolution = false,
+                      )))
+                }
+            }
+        }
 
-    await(entityAccess.persistModifications(modifications))
+      await(entityAccess.persistModifications(modifications))
+    }
   }
 }
 
