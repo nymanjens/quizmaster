@@ -8,36 +8,34 @@ import hydro.common.JsLoggingUtils.logExceptions
 import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
 import hydro.flux.react.uielements.PageHeader
-import hydro.flux.router.RouterContext
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
 
-final class MasterView(
+final class TeamsList(
     implicit pageHeader: PageHeader,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
-    teamEditor: TeamEditor,
-    teamsList: TeamsList,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
-  def apply(router: RouterContext): VdomElement = {
-    component(Props(router))
+  def apply(): VdomElement = {
+    component(Props())
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//
-  override protected val config = ComponentConfig(backendConstructor = new Backend(_), initialState = State())
-    .withStateStoresDependency(
-      teamsAndQuizStateStore,
-      _.copy(
-        teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-        maybeQuizState = teamsAndQuizStateStore.stateOrEmpty.maybeQuizState,
-      ))
+  override protected val config =
+    ComponentConfig(backendConstructor = new Backend(_), initialState = State())
+      .withStateStoresDependency(
+        teamsAndQuizStateStore,
+        _.copy(
+          teams = teamsAndQuizStateStore.stateOrEmpty.teams,
+          maybeQuizState = teamsAndQuizStateStore.stateOrEmpty.maybeQuizState,
+        ))
 
   // **************** Implementation of HydroReactComponent types ****************//
-  protected case class Props(router: RouterContext)
+  protected case class Props()
   protected case class State(
       teams: Seq[Team] = Seq(),
       maybeQuizState: Option[QuizState] = None,
@@ -46,15 +44,7 @@ final class MasterView(
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
 
     override def render(props: Props, state: State): VdomElement = logExceptions {
-      implicit val router = props.router
-
-      <.span(
-        teamsList(),
-        s"Master View",
-        <.br(),
-        <.br(),
-        teamEditor(),
-      )
+      <.span(s"TeamEditor")
     }
   }
 }

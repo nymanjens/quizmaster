@@ -3,8 +3,10 @@ package app.flux.react.app
 import app.flux.react.app.quiz.MasterView
 import app.flux.react.app.quiz.QuizView
 import app.flux.react.app.quiz.TeamEditor
+import app.flux.react.app.quiz.TeamsList
 import hydro.common.I18n
 import app.flux.stores._
+import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.user.User
 import hydro.common.time.Clock
@@ -21,6 +23,7 @@ final class Module(
     pageLoadingStateStore: PageLoadingStateStore,
     pendingModificationsStore: PendingModificationsStore,
     applicationIsOnlineStore: ApplicationIsOnlineStore,
+    teamsAndQuizStateStore: TeamsAndQuizStateStore,
     dispatcher: Dispatcher,
     clock: Clock,
     quizConfig: QuizConfig,
@@ -35,6 +38,7 @@ final class Module(
   implicit lazy val layout: Layout = new Layout
 
   implicit lazy private val teamEditor: TeamEditor = new TeamEditor()
+  implicit lazy private val teamsList: TeamsList = new TeamsList()
 
   implicit lazy val quizView: QuizView = new QuizView()
   implicit lazy val masterView: MasterView = new MasterView()

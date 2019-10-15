@@ -41,6 +41,8 @@ final class TeamsAndQuizStateStore(
       entityModification: EntityModification,
       state: State,
   ): Boolean = true
+
+  def stateOrEmpty: State = state getOrElse State(teams = Seq(), maybeQuizState = None)
 }
 
 object TeamsAndQuizStateStore {

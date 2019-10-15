@@ -8,6 +8,7 @@ import hydro.flux.action.Dispatcher
 import hydro.flux.stores.ApplicationIsOnlineStore
 import hydro.flux.stores.PageLoadingStateStore
 import hydro.models.access.JsEntityAccess
+import app.flux.stores.quiz.TeamsAndQuizStateStore
 
 final class Module(
     implicit i18n: I18n,
@@ -17,6 +18,7 @@ final class Module(
     pageLoadingStateStore: PageLoadingStateStore,
     pendingModificationsStore: PendingModificationsStore,
     applicationIsOnlineStore: ApplicationIsOnlineStore,
+    teamsAndQuizStateStore: TeamsAndQuizStateStore,
     dispatcher: Dispatcher,
     clock: Clock,
 ) {

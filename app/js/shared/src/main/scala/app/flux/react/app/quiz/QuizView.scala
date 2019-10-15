@@ -1,6 +1,9 @@
 package app.flux.react.app.quiz
 
+import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
+import app.models.quiz.QuizState
+import app.models.quiz.Team
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
@@ -14,6 +17,8 @@ final class QuizView(
     implicit pageHeader: PageHeader,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
+    teamsList: TeamsList,
+    teamsAndQuizStateStore: TeamsAndQuizStateStore,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -23,17 +28,29 @@ final class QuizView(
 
   // **************** Implementation of HydroReactComponent methods ****************//
   override protected val config = ComponentConfig(backendConstructor = new Backend(_), initialState = State())
+    .withStateStoresDependency(
+      teamsAndQuizStateStore,
+      _.copy(
+        teams = teamsAndQuizStateStore.stateOrEmpty.teams,
+        maybeQuizState = teamsAndQuizStateStore.stateOrEmpty.maybeQuizState,
+      ))
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(router: RouterContext)
-  protected case class State()
+  protected case class State(
+      teams: Seq[Team] = Seq(),
+      maybeQuizState: Option[QuizState] = None,
+  )
 
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
 
     override def render(props: Props, state: State): VdomElement = logExceptions {
       implicit val router = props.router
 
-      <.span(s"Hello world! ${quizConfig}")
+      <.span(
+        teamsList(),
+        s"Hello world! ${quizConfig}",
+      )
     }
   }
 }

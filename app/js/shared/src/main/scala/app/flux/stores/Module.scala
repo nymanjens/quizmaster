@@ -10,6 +10,7 @@ import hydro.flux.stores.ApplicationIsOnlineStore
 import hydro.flux.stores.PageLoadingStateStore
 import hydro.models.access.HydroPushSocketClientFactory
 import hydro.models.access.JsEntityAccess
+import app.flux.stores.quiz.TeamsAndQuizStateStore
 
 final class Module(
     implicit i18n: I18n,
@@ -26,4 +27,5 @@ final class Module(
   implicit val pageLoadingStateStore = new PageLoadingStateStore
   implicit val pendingModificationsStore = new PendingModificationsStore
   implicit val applicationIsOnlineStore = new ApplicationIsOnlineStore
+  implicit val teamsAndQuizStateStore = new TeamsAndQuizStateStore
 }

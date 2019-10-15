@@ -36,6 +36,7 @@ final class ClientAppModule(
   implicit private val pageLoadingStateStore = fluxStoresModule.pageLoadingStateStore
   implicit private val pendingModificationsStore = fluxStoresModule.pendingModificationsStore
   implicit private val applicationIsOnlineStore = fluxStoresModule.applicationIsOnlineStore
+  implicit private val teamsAndQuizStateStore = fluxStoresModule.teamsAndQuizStateStore
 
   // Create other Flux modules
   implicit private val reactAppModule = new app.flux.react.app.Module
