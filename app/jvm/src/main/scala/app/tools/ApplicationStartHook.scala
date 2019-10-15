@@ -4,11 +4,14 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 import app.models.access.JvmEntityAccess
+import app.models.quiz.Team
 import com.google.inject.Inject
 import hydro.common.ResourceFiles
 import hydro.common.time.Clock
 import play.api.Application
 import play.api.Mode
+import app.models.user.User.onlyUser
+import hydro.models.modification.EntityModification
 
 import scala.collection.JavaConverters._
 
@@ -33,7 +36,22 @@ final class ApplicationStartHook @Inject()(
   private def processFlags(): Unit = {}
 
   private def loadDummyData(): Unit = {
-    // TODO: Implement
+    entityAccess.persistEntityModifications(
+      EntityModification.createAddWithRandomId(
+        Team(
+          name = "Team awesome",
+          score = 0,
+          createTimeMillisSinceEpoch = 1,
+        ),
+      ),
+      EntityModification.createAddWithRandomId(
+        Team(
+          name = "The team formerly known as team awesome",
+          score = 20,
+          createTimeMillisSinceEpoch = 2,
+        ),
+      )
+    )
   }
 
   private def assertExists(path: Path): Path = {
