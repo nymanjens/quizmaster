@@ -1,5 +1,7 @@
 package app.models.access
 
+import java.time.Instant
+
 import app.models.quiz.QuizState
 import app.models.quiz.Team
 import hydro.common.CollectionUtils
@@ -26,6 +28,11 @@ object ModelFields {
     case object id extends IdModelField[E]
     case object name extends ModelField[String, E]("name", _.name, v => _.copy(name = v))
     case object score extends ModelField[Int, E]("score", _.score, v => _.copy(score = v))
+    case object createTimeMillisSinceEpoch
+        extends ModelField[Long, E](
+          "createTimeMillisSinceEpoch",
+          _.createTimeMillisSinceEpoch,
+          v => _.copy(createTimeMillisSinceEpoch = v))
   }
 
   object QuizState {
@@ -48,6 +55,7 @@ object ModelFields {
         Team.id,
         Team.name,
         Team.score,
+        Team.createTimeMillisSinceEpoch,
         QuizState.id,
         QuizState.partNumber,
         QuizState.questionNumber,

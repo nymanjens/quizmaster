@@ -12,9 +12,9 @@ case class QuizState(
     override val lastUpdateTime: LastUpdateTime = LastUpdateTime.neverUpdated,
 ) extends UpdatableEntity {
 
-  override val idOption: Option[Long] = Some(1)
+  override val idOption: Option[Long] = Some(QuizState.onlyPossibleId)
   override def withId(id: Long) = {
-    require(id == 1)
+    require(id == QuizState.onlyPossibleId)
     this
   }
   override def withLastUpdateTime(time: LastUpdateTime): Entity = copy(lastUpdateTime = time)
@@ -22,6 +22,8 @@ case class QuizState(
 
 object QuizState {
   implicit val Type: EntityType[QuizState] = EntityType()
+
+  val onlyPossibleId: Long = 1
 
   def tupled = (this.apply _).tupled
 }

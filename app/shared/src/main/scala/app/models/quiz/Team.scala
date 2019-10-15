@@ -8,6 +8,7 @@ import hydro.models.modification.EntityType
 case class Team(
     name: String,
     score: Int,
+    createTimeMillisSinceEpoch: Long,
     override val idOption: Option[Long] = None,
     override val lastUpdateTime: LastUpdateTime = LastUpdateTime.neverUpdated,
 ) extends UpdatableEntity {
