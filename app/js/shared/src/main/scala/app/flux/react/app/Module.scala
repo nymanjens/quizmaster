@@ -1,5 +1,6 @@
 package app.flux.react.app
 
+import app.flux.react.app.quiz.MasterView
 import app.flux.react.app.quiz.QuizView
 import hydro.common.I18n
 import app.flux.stores._
@@ -33,4 +34,5 @@ final class Module(
   implicit lazy val layout: Layout = new Layout
 
   implicit lazy val quizView: QuizView = new QuizView()
+  implicit lazy val masterView: MasterView = new MasterView()
 }

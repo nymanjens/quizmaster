@@ -57,6 +57,8 @@ private[router] final class RouterFactory(
 
           | staticRuleFromPage(AppPages.Quiz, reactAppModule.quizView.apply)
 
+          | staticRuleFromPage(AppPages.Master, reactAppModule.masterView.apply)
+
         // Fallback
         ).notFound(redirectToPage(StandardPages.Root)(Redirect.Replace))
           .onPostRender((_, _) =>
