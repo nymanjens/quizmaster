@@ -4,7 +4,7 @@ rounds:
     name: Geography
     questions:
       - !!app.models.quiz.config.ParsableQuizConfig$Question$Single
-        question: What is the capital of France
+        question: What is the capital of France?
         answer: Paris
         choices:
           - Paris
@@ -23,9 +23,9 @@ rounds:
     name: TV
     questions:
       - !!app.models.quiz.config.ParsableQuizConfig$Question$Double
-        verbalQuestion: How is the wizard called in Lord of the Rings
+        verbalQuestion: How is the wizard called in Lord of the Rings?
         verbalAnswer: Gandalf
-        textualQuestion: How is the wizard called in the Arthurian Myth
+        textualQuestion: How is the wizard called in the Arthurian Myth?
         textualAnswer: Merlin
         textualChoices:
           - Yoda

@@ -142,24 +142,49 @@ table.table-bordered {
   }
 }
 
-/****** TeamEditor ******/
-.table-teams {
-  form {
-    display: flex;
-    input {
-      flex: 2;
-      border: none;
+/****** Shared quiz-view / master-view ******/
+.quiz-view, .master-view {
+  .quiz-progres-indicator {
+    text-align: center;
+  }
+
+  .round-title {
+    text-align: center;
+    font-size: 70px;
+    font-weight: bold;
+    color: #006;
+  }
+  .question-wrapper {
+    text-align: center;
+    .question {
+      font-size: 60px;
     }
-    input.value-has-changed {
-      color: blue;
-    }
-    button {
-      margin-left: 10px;
+    .metadata {
+      font-size: 25px;
     }
   }
 }
 
-/****** quiz-navigation-buttons ******/
-.quiz-navigation-buttons {
-  padding-bottom: 40px;
+/****** master-view only ******/
+.master-view {
+  .quiz-navigation-buttons {
+    text-align: center;
+    padding-bottom: 40px;
+  }
+
+  .table-teams {
+    form {
+      display: flex;
+      input {
+        flex: 2;
+        border: none;
+      }
+      input.value-has-changed {
+        color: blue;
+      }
+      button {
+        margin-left: 10px;
+      }
+    }
+  }
 }

@@ -6,6 +6,7 @@ import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState
 import app.models.quiz.Team
+import app.models.quiz.config.QuizConfig.Question
 import hydro.common.JsLoggingUtils
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.JsLoggingUtils.LogExceptionsCallback
@@ -57,6 +58,7 @@ final class MasterView(
       implicit val router = props.router
 
       <.span(
+        ^.className := "master-view",
         quizNavigationButtons(state.quizState),
         quizProgressIndicator(state.quizState),
         state.quizState match {
@@ -102,9 +104,46 @@ final class MasterView(
         round.name,
       )
     }
+
     def showQuestion(
         round: QuizConfig.Round,
         question: QuizConfig.Question,
+        showSolution: Boolean,
+    ): VdomElement = {
+      <.div(
+        ^.className := "question-wrapper",
+        question match {
+          case single: Question.Single => showSingleQuestion(round, single, showSolution)
+          case double: Question.Double => showDoubleQuestion(round, double, showSolution)
+        },
+      )
+    }
+
+    def showSingleQuestion(
+        round: QuizConfig.Round,
+        question: QuizConfig.Question.Single,
+        showSolution: Boolean,
+    ): VdomElement = {
+      val pointsString = if (question.pointsToGain == 1) "1 point" else s"${question.pointsToGain} points"
+      <.div(
+        <.div(
+          ^.className := "question",
+          question.question
+        ),
+        <.div(
+          ^.className := "metadata",
+          if (question.onlyFirstGainsPoints) {
+            s"First right answer gains $pointsString"
+          } else {
+            s"All right answers gain $pointsString"
+          },
+        ),
+      )
+    }
+
+    def showDoubleQuestion(
+        round: QuizConfig.Round,
+        question: QuizConfig.Question.Double,
         showSolution: Boolean,
     ): VdomElement = {
       <.div(
