@@ -1,6 +1,7 @@
 package app.flux.react.app
 
 import app.flux.react.app.quiz.TeamsList
+import app.flux.router.AppPages
 import hydro.flux.react.uielements.SbadminLayout
 import hydro.flux.router.RouterContext
 import japgolly.scalajs.react._
@@ -22,7 +23,7 @@ final class Layout(
           ^.id := "content-wrapper",
           <.div(
             ^.id := "left-content-wrapper",
-            teamsList(),
+            teamsList(showScoreEditButtons = router.currentPage == AppPages.Master),
           ),
           <.div(
             ^.id := "right-content-wrapper",

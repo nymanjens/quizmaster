@@ -1,12 +1,17 @@
 package app.flux.react.app.quiz
 
+import hydro.flux.react.ReactVdomUtils.<<
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState
 import app.models.quiz.Team
 import hydro.common.JsLoggingUtils.logExceptions
+import hydro.common.JsLoggingUtils.LogExceptionsCallback
 import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
+import hydro.flux.react.uielements.Bootstrap
+import hydro.flux.react.uielements.Bootstrap.Size
+import hydro.flux.react.uielements.Bootstrap.Variant
 import hydro.flux.react.uielements.PageHeader
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
@@ -20,8 +25,8 @@ final class TeamsList(
 ) extends HydroReactComponent {
 
   // **************** API ****************//
-  def apply(): VdomElement = {
-    component(Props())
+  def apply(showScoreEditButtons: Boolean): VdomElement = {
+    component(Props(showScoreEditButtons = showScoreEditButtons))
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//
@@ -34,7 +39,7 @@ final class TeamsList(
         ))
 
   // **************** Implementation of HydroReactComponent types ****************//
-  protected case class Props()
+  protected case class Props(showScoreEditButtons: Boolean)
   protected case class State(
       teams: Seq[Team] = Seq(),
   )
@@ -53,7 +58,25 @@ final class TeamsList(
             ),
             <.div(
               ^.className := "score",
+              <<.ifThen(props.showScoreEditButtons) {
+                Bootstrap
+                  .Button()(
+                    ^.onClick --> LogExceptionsCallback(
+                      teamsAndQuizStateStore.updateScore(team, scoreDiff = -1)).void,
+                    Bootstrap.Glyphicon("minus"),
+                  )
+              },
+              " ",
               team.score,
+              " ",
+              <<.ifThen(props.showScoreEditButtons) {
+                Bootstrap
+                  .Button()(
+                    ^.onClick --> LogExceptionsCallback(
+                      teamsAndQuizStateStore.updateScore(team, scoreDiff = +1)).void,
+                    Bootstrap.Glyphicon("plus"),
+                  )
+              },
             ),
           )
         }).toVdomArray

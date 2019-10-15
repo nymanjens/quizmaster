@@ -47,6 +47,7 @@ final class QuizView(
       implicit val router = props.router
 
       <.span(
+
         s"Hello world! ${state.quizState}",
       )
     }
