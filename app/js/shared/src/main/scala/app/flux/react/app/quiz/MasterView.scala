@@ -97,14 +97,19 @@ final class MasterView(
     }
 
     def showRound(round: QuizConfig.Round): VdomElement = {
-      <.div()
+      <.div(
+        ^.className := "round-title",
+        round.name,
+      )
     }
     def showQuestion(
         round: QuizConfig.Round,
         question: QuizConfig.Question,
         showSolution: Boolean,
     ): VdomElement = {
-      <.div()
+      <.div(
+        ^.className := "question",
+      )
     }
   }
 }
