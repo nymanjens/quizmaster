@@ -83,7 +83,7 @@ final class MasterView(
     private def startQuizButton(): VdomElement = {
       quizNavigationButtonsWrapper(
         Bootstrap.Button(Variant.primary, Size.lg)(
-          ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.startQuiz()).void,
+          ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.goToNextStep()).void,
           Bootstrap.FontAwesomeIcon("play"),
           " Start the quiz",
         ),

@@ -68,26 +68,95 @@ final class TeamsAndQuizStateStore(
     entityAccess.persistModifications(EntityModification.createRemove(team))
   }
 
-  def startQuiz(): Future[Unit] = {
-    entityAccess.persistModifications(
-      EntityModification.Add(
-        QuizState(
-          roundIndex = 0,
-        )
-      ))
+  def goToPreviousStep(): Future[Unit] = async {
+    val modifications =
+      await(stateFuture).maybeQuizState match {
+        case None => Seq() // Do nothing
+        case Some(quizState) =>
+          quizState.question match {
+            case None if quizState.roundIndex == 0 =>
+              // Go back to setup
+              Seq(EntityModification.createRemove(quizState))
+            case None =>
+              // Go to end of last round
+              val newRoundIndex = quizState.roundIndex - 1
+              Seq(
+                EntityModification.createUpdateAllFields(
+                  quizState.copy(
+                    roundIndex = newRoundIndex,
+                    questionIndex = quizConfig.rounds(newRoundIndex).questions.size - 1,
+                    showSolution = true,
+                  )))
+            case Some(question) if !quizState.showSolution =>
+              // Go to previous question
+              Seq(
+                EntityModification.createUpdateAllFields(
+                  quizState.copy(
+                    questionIndex = quizState.questionIndex - 1,
+                    showSolution = true,
+                  )))
+            case Some(question) if quizState.showSolution =>
+              // Hide solution
+              Seq(
+                EntityModification.createUpdateAllFields(
+                  quizState.copy(
+                    showSolution = false,
+                  )))
+          }
+      }
+
+    await(entityAccess.persistModifications(modifications))
   }
 
-  def goToPreviousStep(): Future[Unit] = async {
-    await(stateFuture).maybeQuizState match {
-      case None => // Do nothing
-      case Some(quizState) =>
-        quizState.question match {
-          case None           => ???
-          case Some(question) => ???
-        }
-    }
+  def goToNextStep(): Future[Unit] = async {
+    val modifications =
+      await(stateFuture).maybeQuizState match {
+        case None =>
+          Seq(
+            EntityModification.Add(
+              QuizState(
+                roundIndex = 0,
+              )))
+        case Some(quizState) =>
+          quizState.question match {
+            case None =>
+              // Go to first question
+              Seq(
+                EntityModification.createUpdateAllFields(
+                  quizState.copy(
+                    questionIndex = 0,
+                    showSolution = false,
+                  )))
+            case Some(question) if !quizState.showSolution =>
+              // Go to solution
+              Seq(
+                EntityModification.createUpdateAllFields(
+                  quizState.copy(
+                    showSolution = true,
+                  )))
+            case Some(question) if quizState.showSolution =>
+              if (quizState.questionIndex == quizState.round.questions.size - 1) {
+                // Go to next round
+                Seq(
+                  EntityModification.createUpdateAllFields(
+                    QuizState(
+                      roundIndex = quizState.roundIndex + 1,
+                    )))
+
+              } else {
+                // Go to next question
+                Seq(
+                  EntityModification.createUpdateAllFields(
+                    quizState.copy(
+                      questionIndex = quizState.questionIndex + 1,
+                      showSolution = false,
+                    )))
+              }
+          }
+      }
+
+    await(entityAccess.persistModifications(modifications))
   }
-  def goToNextStep(): Future[Unit] = ???
 }
 
 object TeamsAndQuizStateStore {
