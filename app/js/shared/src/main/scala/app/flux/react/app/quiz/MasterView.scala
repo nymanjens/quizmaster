@@ -55,20 +55,66 @@ final class MasterView(
       state.maybeQuizState match {
         case None =>
           <.span(
-            teamEditor(),
             startQuizButton(),
+            teamEditor(),
           )
         case Some(quizState) =>
-          <.span()
+          quizState.question match {
+            case None =>
+              <.span(
+                nextPreviousButtons(),
+                showRound(quizState.round)
+              )
+            case Some(question) =>
+              <.span(
+                nextPreviousButtons(),
+                showQuestion(quizState.round, question, quizState.showSolution),
+              )
+          }
       }
     }
 
-    private def startQuizButton(): VdomElement = {
-      Bootstrap.Button(Variant.primary, Size.lg)(
-        ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.startQuiz()).void,
-        Bootstrap.FontAwesomeIcon("play"),
-        " Start the quiz",
+    private def quizNavigationButtonsWrapper: VdomTag = {
+      <.div(
+        ^.className := "quiz-navigation-buttons",
       )
+    }
+
+    private def startQuizButton(): VdomElement = {
+      quizNavigationButtonsWrapper(
+        Bootstrap.Button(Variant.primary, Size.lg)(
+          ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.startQuiz()).void,
+          Bootstrap.FontAwesomeIcon("play"),
+          " Start the quiz",
+        ),
+      )
+    }
+
+    private def nextPreviousButtons(): VdomElement = {
+      quizNavigationButtonsWrapper(
+        Bootstrap.Button(Variant.primary, Size.lg)(
+          ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.goToPreviousStep()).void,
+          Bootstrap.Glyphicon("arrow-left"),
+          " Previous",
+        ),
+        " ",
+        Bootstrap.Button(Variant.primary, Size.lg)(
+          ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.goToNextStep()).void,
+          Bootstrap.Glyphicon("arrow-right"),
+          " Next",
+        ),
+      )
+    }
+
+    def showRound(round: QuizConfig.Round): VdomElement = {
+      <.div()
+    }
+    def showQuestion(
+        round: QuizConfig.Round,
+        question: QuizConfig.Question,
+        showSolution: Boolean,
+    ): VdomElement = {
+      <.div()
     }
   }
 }

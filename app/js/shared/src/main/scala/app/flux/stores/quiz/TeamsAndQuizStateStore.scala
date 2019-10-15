@@ -71,11 +71,12 @@ final class TeamsAndQuizStateStore(
       EntityModification.Add(
         QuizState(
           partNumber = 0,
-          questionNumber = 0,
-          showSolution = false,
         )
       ))
   }
+
+  def goToPreviousStep(): Future[Unit] = ???
+  def goToNextStep(): Future[Unit] = ???
 }
 
 object TeamsAndQuizStateStore {
