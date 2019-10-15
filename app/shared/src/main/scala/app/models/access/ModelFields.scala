@@ -40,8 +40,8 @@ object ModelFields {
 
     case object id extends IdModelField[E]
     case object roundIndex extends ModelField[Int, E]("roundIndex", _.roundIndex, v => _.copy(roundIndex = v))
-    case object questionNumber
-        extends ModelField[Int, E]("questionNumber", _.questionNumber, v => _.copy(questionNumber = v))
+    case object questionIndex
+        extends ModelField[Int, E]("questionIndex", _.questionIndex, v => _.copy(questionIndex = v))
     case object showSolution
         extends ModelField[Boolean, E]("showSolution", _.showSolution, v => _.copy(showSolution = v))
   }
@@ -58,7 +58,7 @@ object ModelFields {
         Team.createTimeMillisSinceEpoch,
         QuizState.id,
         QuizState.roundIndex,
-        QuizState.questionNumber,
+        QuizState.questionIndex,
         QuizState.showSolution,
       )
     )

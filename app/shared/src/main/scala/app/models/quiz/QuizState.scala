@@ -12,7 +12,7 @@ case class QuizState(
     /** Number from 0 to `rounds.size - 1` */
     roundIndex: Int,
     /** Number from 0 to `questions.size - 1`. A value of -1 means that the round name should be shown. */
-    questionNumber: Int = -1,
+    questionIndex: Int = -1,
     showSolution: Boolean = false,
     override val lastUpdateTime: LastUpdateTime = LastUpdateTime.neverUpdated,
 ) extends UpdatableEntity {
@@ -28,10 +28,10 @@ case class QuizState(
   // **************** Additional public API **************** //
   def round(implicit quizConfig: QuizConfig): Round = quizConfig.rounds(roundIndex)
   def question(implicit quizConfig: QuizConfig): Option[Question] = {
-    if (questionNumber == -1) {
+    if (questionIndex == -1) {
       None
     } else {
-      Some(quizConfig.rounds(roundIndex).questions(questionNumber))
+      Some(quizConfig.rounds(roundIndex).questions(questionIndex))
     }
   }
 }
