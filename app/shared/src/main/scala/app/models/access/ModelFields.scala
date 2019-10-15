@@ -39,7 +39,7 @@ object ModelFields {
     private type E = QuizState
 
     case object id extends IdModelField[E]
-    case object partNumber extends ModelField[Int, E]("partNumber", _.partNumber, v => _.copy(partNumber = v))
+    case object roundIndex extends ModelField[Int, E]("roundIndex", _.roundIndex, v => _.copy(roundIndex = v))
     case object questionNumber
         extends ModelField[Int, E]("questionNumber", _.questionNumber, v => _.copy(questionNumber = v))
     case object showSolution
@@ -57,7 +57,7 @@ object ModelFields {
         Team.score,
         Team.createTimeMillisSinceEpoch,
         QuizState.id,
-        QuizState.partNumber,
+        QuizState.roundIndex,
         QuizState.questionNumber,
         QuizState.showSolution,
       )

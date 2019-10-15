@@ -72,7 +72,7 @@ final class TeamsAndQuizStateStore(
     entityAccess.persistModifications(
       EntityModification.Add(
         QuizState(
-          partNumber = 0,
+          roundIndex = 0,
         )
       ))
   }
