@@ -43,10 +43,17 @@ final class TeamsList(
 
     override def render(props: Props, state: State): VdomElement = logExceptions {
       <.ul(
+        ^.className := "teams-list",
         (for (team <- state.teams) yield {
           <.li(
-            <.div(team.name),
-            <.div(team.score),
+            <.div(
+              ^.className := "name",
+              team.name
+            ),
+            <.div(
+              ^.className := "score",
+              team.score,
+            ),
           )
         }).toVdomArray
       )

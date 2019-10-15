@@ -95,9 +95,46 @@ table.table-bordered {
 /************ quiz-specific styling ************/
 /***********************************************/
 
-/****** sbadmin overrides ******/
+/****** SbAdmin overrides ******/
 #page-wrapper {
   margin: 0; // Remove left sidebar
+  padding: 0;
+}
+
+/****** Global layout ******/
+#content-wrapper {
+  display: flex;
+
+  #left-content-wrapper {
+    flex-basis: 300px;
+    padding: 20px 10px 0px 10px;
+
+    ul.teams-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        padding-bottom: 30px;
+
+        .name {
+          font-weight: bold;
+          font-size: 30px;
+          text-align: center;
+        }
+        .score {
+          font-weight: bold;
+          font-size: 50px;
+          text-align: center;
+        }
+      }
+    }
+  }
+  #right-content-wrapper {
+    flex-grow: 1;
+    
+    padding: 20px 10px 0px 10px;
+  }
 }
 
 /****** TeamEditor ******/

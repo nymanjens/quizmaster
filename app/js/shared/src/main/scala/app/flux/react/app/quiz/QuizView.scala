@@ -17,7 +17,6 @@ final class QuizView(
     implicit pageHeader: PageHeader,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
-    teamsList: TeamsList,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
 ) extends HydroReactComponent {
 
@@ -48,7 +47,6 @@ final class QuizView(
       implicit val router = props.router
 
       <.span(
-        teamsList(),
         s"Hello world! ${quizConfig}",
       )
     }

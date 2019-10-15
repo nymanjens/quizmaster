@@ -1,5 +1,6 @@
 package app.flux.react.app
 
+import app.flux.react.app.quiz.TeamsList
 import hydro.flux.react.uielements.SbadminLayout
 import hydro.flux.router.RouterContext
 import japgolly.scalajs.react._
@@ -7,6 +8,7 @@ import japgolly.scalajs.react.vdom.html_<^._
 
 final class Layout(
     implicit sbadminLayout: SbadminLayout,
+    teamsList: TeamsList,
 ) {
 
   private val component = ScalaComponent
@@ -16,7 +18,17 @@ final class Layout(
       sbadminLayout(
         title = "Quizmaster",
         leftMenu = <.span(),
-        pageContent = <.span(children),
+        pageContent = <.div(
+          ^.id := "content-wrapper",
+          <.div(
+            ^.id := "left-content-wrapper",
+            teamsList(),
+          ),
+          <.div(
+            ^.id := "right-content-wrapper",
+            children
+          ),
+        ),
       )
     }
     .build

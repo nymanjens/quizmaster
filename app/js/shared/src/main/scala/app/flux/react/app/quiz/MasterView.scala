@@ -18,7 +18,6 @@ final class MasterView(
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
     teamEditor: TeamEditor,
-    teamsList: TeamsList,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
 ) extends HydroReactComponent {
 
@@ -49,10 +48,6 @@ final class MasterView(
       implicit val router = props.router
 
       <.span(
-        teamsList(),
-        s"Master View",
-        <.br(),
-        <.br(),
         teamEditor(),
       )
     }

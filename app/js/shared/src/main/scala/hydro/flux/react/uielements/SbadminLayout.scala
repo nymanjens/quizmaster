@@ -75,6 +75,9 @@ final class SbadminLayout(
           ^.className := "container-fluid",
           Bootstrap.Row(
             Bootstrap.Col(lg = 12)(
+              ^.style := js.Dictionary(
+                "padding" -> "0px",
+              ),
               globalMessages(),
               pageContent,
             )
