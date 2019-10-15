@@ -86,8 +86,7 @@ final class TeamsAndQuizStateStore(
           case _ =>
             quizState.question match {
               case None if quizState.roundIndex == 0 =>
-                // Go back to setup
-                Seq(EntityModification.createRemove(quizState))
+                Seq(EntityModification.createUpdateAllFields(QuizState.nullInstance))
               case None =>
                 // Go to end of last round
                 val newRoundIndex = quizState.roundIndex - 1
