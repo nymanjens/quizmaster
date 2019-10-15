@@ -120,13 +120,22 @@ final class TeamsAndQuizStateStore(
         case Some(quizState) =>
           quizState.question match {
             case None =>
-              // Go to first question
-              Seq(
-                EntityModification.createUpdateAllFields(
-                  quizState.copy(
-                    questionIndex = 0,
-                    showSolution = false,
-                  )))
+              if (quizState.round.questions.isEmpty) {
+                // Go to next round
+                Seq(
+                  EntityModification.createUpdateAllFields(
+                    QuizState(
+                      roundIndex = quizState.roundIndex + 1,
+                    )))
+              } else {
+                // Go to first question
+                Seq(
+                  EntityModification.createUpdateAllFields(
+                    quizState.copy(
+                      questionIndex = 0,
+                      showSolution = false,
+                    )))
+              }
             case Some(question) if !quizState.showSolution =>
               // Go to solution
               Seq(
@@ -142,7 +151,6 @@ final class TeamsAndQuizStateStore(
                     QuizState(
                       roundIndex = quizState.roundIndex + 1,
                     )))
-
               } else {
                 // Go to next question
                 Seq(

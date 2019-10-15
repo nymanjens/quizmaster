@@ -26,7 +26,15 @@ case class QuizState(
   override def withLastUpdateTime(time: LastUpdateTime): Entity = copy(lastUpdateTime = time)
 
   // **************** Additional public API **************** //
-  def round(implicit quizConfig: QuizConfig): Round = quizConfig.rounds(roundIndex)
+  def round(implicit quizConfig: QuizConfig): Round = {
+    if (roundIndex < 0) {
+      Round(name = "Welcome!", questions = Seq())
+    } else if (roundIndex < quizConfig.rounds.size) {
+      quizConfig.rounds(roundIndex)
+    } else {
+      Round(name = "End of the quiz!", questions = Seq())
+    }
+  }
   def question(implicit quizConfig: QuizConfig): Option[Question] = {
     if (questionIndex == -1) {
       None
