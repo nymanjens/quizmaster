@@ -4,6 +4,7 @@ import app.flux.stores.quiz.TeamsAndQuizStateStore.State
 import app.models.access.ModelFields
 import app.models.quiz.QuizState
 import app.models.quiz.Team
+import app.models.quiz.config.QuizConfig
 import app.models.user.User
 import hydro.common.time.Clock
 import hydro.flux.action.Dispatcher
@@ -24,6 +25,7 @@ final class TeamsAndQuizStateStore(
     user: User,
     dispatcher: Dispatcher,
     clock: Clock,
+    quizConfig: QuizConfig,
 ) extends AsyncEntityDerivedStateStore[State] {
 
   // **************** Implementation of AsyncEntityDerivedStateStore methods **************** //
@@ -45,7 +47,7 @@ final class TeamsAndQuizStateStore(
   ): Boolean = true
 
   // **************** Additional public API **************** //
-  def stateOrEmpty: State = state getOrElse State(teams = Seq(), maybeQuizState = None)
+  def stateOrEmpty: State = state getOrElse State.nullInstance
 
   def addEmptyTeam(): Future[Unit] = {
     entityAccess.persistModifications(
@@ -75,7 +77,16 @@ final class TeamsAndQuizStateStore(
       ))
   }
 
-  def goToPreviousStep(): Future[Unit] = ???
+  def goToPreviousStep(): Future[Unit] = async {
+    await(stateFuture).maybeQuizState match {
+      case None => // Do nothing
+      case Some(quizState) =>
+        quizState.question match {
+          case None           => ???
+          case Some(question) => ???
+        }
+    }
+  }
   def goToNextStep(): Future[Unit] = ???
 }
 
@@ -84,4 +95,7 @@ object TeamsAndQuizStateStore {
       teams: Seq[Team],
       maybeQuizState: Option[QuizState],
   )
+  object State {
+    val nullInstance = State(teams = Seq(), maybeQuizState = None)
+  }
 }

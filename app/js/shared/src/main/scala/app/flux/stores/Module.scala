@@ -11,6 +11,7 @@ import hydro.flux.stores.PageLoadingStateStore
 import hydro.models.access.HydroPushSocketClientFactory
 import hydro.models.access.JsEntityAccess
 import app.flux.stores.quiz.TeamsAndQuizStateStore
+import app.models.quiz.config.QuizConfig
 
 final class Module(
     implicit i18n: I18n,
@@ -21,6 +22,7 @@ final class Module(
     scalaJsApiClient: ScalaJsApiClient,
     hydroPushSocketClientFactory: HydroPushSocketClientFactory,
     getInitialDataResponse: GetInitialDataResponse,
+    quizConfig: QuizConfig,
 ) {
 
   implicit val globalMessagesStore = new GlobalMessagesStore
