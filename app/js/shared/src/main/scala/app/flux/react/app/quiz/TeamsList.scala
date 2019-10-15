@@ -31,20 +31,25 @@ final class TeamsList(
         teamsAndQuizStateStore,
         _.copy(
           teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-          maybeQuizState = teamsAndQuizStateStore.stateOrEmpty.maybeQuizState,
         ))
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props()
   protected case class State(
       teams: Seq[Team] = Seq(),
-      maybeQuizState: Option[QuizState] = None,
   )
 
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
 
     override def render(props: Props, state: State): VdomElement = logExceptions {
-      <.span(s"TeamEditor")
+      <.ul(
+        (for (team <- state.teams) yield {
+          <.li(
+            <.div(team.name),
+            <.div(team.score),
+          )
+        }).toVdomArray
+      )
     }
   }
 }
