@@ -9,8 +9,8 @@ import hydro.models.UpdatableEntity.LastUpdateTime
 import hydro.models.modification.EntityType
 
 case class QuizState(
-    /** Number from 0 to `rounds.size - 1` */
-    roundIndex: Int,
+    /** Number from 0 to `rounds.size - 1`. A value of -1 means that the quiz has not started yet. */
+    roundIndex: Int = -1,
     /** Number from 0 to `questions.size - 1`. A value of -1 means that the round name should be shown. */
     questionIndex: Int = -1,
     showSolution: Boolean = false,
@@ -35,6 +35,7 @@ case class QuizState(
       Round(name = "End of the quiz!", questions = Seq())
     }
   }
+
   def question(implicit quizConfig: QuizConfig): Option[Question] = {
     if (questionIndex == -1) {
       None
@@ -42,12 +43,16 @@ case class QuizState(
       Some(quizConfig.rounds(roundIndex).questions(questionIndex))
     }
   }
+
+  def quizIsBeingSetUp: Boolean = roundIndex < 0
+  def quizHasEnded(implicit quizConfig: QuizConfig): Boolean = roundIndex >= quizConfig.rounds.size
 }
 
 object QuizState {
   implicit val Type: EntityType[QuizState] = EntityType()
 
   val onlyPossibleId: Long = 1
+  val nullInstance: QuizState = QuizState()
 
   def tupled = (this.apply _).tupled
 }

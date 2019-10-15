@@ -31,14 +31,14 @@ final class QuizView(
       teamsAndQuizStateStore,
       _.copy(
         teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-        maybeQuizState = teamsAndQuizStateStore.stateOrEmpty.maybeQuizState,
+        quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
       ))
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(router: RouterContext)
   protected case class State(
       teams: Seq[Team] = Seq(),
-      maybeQuizState: Option[QuizState] = None,
+      quizState: QuizState = QuizState.nullInstance,
   )
 
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {

@@ -36,8 +36,10 @@ final class TeamsAndQuizStateStore(
           .newQuery[Team]()
           .sort(DbQuery.Sorting.ascBy(ModelFields.Team.createTimeMillisSinceEpoch))
           .data()),
-      maybeQuizState = await(
-        entityAccess.newQuery[QuizState]().findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId)),
+      quizState = await(
+        entityAccess
+          .newQuery[QuizState]()
+          .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId)) getOrElse QuizState.nullInstance,
     )
   }
 
@@ -69,10 +71,11 @@ final class TeamsAndQuizStateStore(
   }
 
   def goToPreviousStep(): Future[Unit] = async {
+    val quizState = await(stateFuture).quizState
     val modifications =
-      await(stateFuture).maybeQuizState match {
-        case None => Seq() // Do nothing
-        case Some(quizState) =>
+      quizState.roundIndex match {
+        case -1 => Seq() // Do nothing
+        case _ =>
           quizState.question match {
             case None if quizState.roundIndex == 0 =>
               // Go back to setup
@@ -109,8 +112,13 @@ final class TeamsAndQuizStateStore(
   }
 
   def goToNextStep(): Future[Unit] = async {
+    val maybeQuizState = await(
+      entityAccess
+        .newQuery[QuizState]()
+        .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId))
+
     val modifications =
-      await(stateFuture).maybeQuizState match {
+      maybeQuizState match {
         case None =>
           Seq(
             EntityModification.Add(
@@ -170,9 +178,9 @@ final class TeamsAndQuizStateStore(
 object TeamsAndQuizStateStore {
   case class State(
       teams: Seq[Team],
-      maybeQuizState: Option[QuizState],
+      quizState: QuizState,
   )
   object State {
-    val nullInstance = State(teams = Seq(), maybeQuizState = None)
+    val nullInstance = State(teams = Seq(), quizState = QuizState.nullInstance)
   }
 }

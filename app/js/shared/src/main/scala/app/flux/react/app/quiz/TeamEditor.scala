@@ -42,14 +42,12 @@ final class TeamEditor(
       teamsAndQuizStateStore,
       _.copy(
         teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-        maybeQuizState = teamsAndQuizStateStore.stateOrEmpty.maybeQuizState,
       ))
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props()
   protected case class State(
       teams: Seq[Team] = Seq(),
-      maybeQuizState: Option[QuizState] = None,
       teamIdToNameInput: Map[Long, String] = Map(),
   ) {
     def nameInput(team: Team): String = {

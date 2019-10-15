@@ -37,14 +37,14 @@ final class MasterView(
       teamsAndQuizStateStore,
       _.copy(
         teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-        maybeQuizState = teamsAndQuizStateStore.stateOrEmpty.maybeQuizState,
+        quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
       ))
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(router: RouterContext)
   protected case class State(
       teams: Seq[Team] = Seq(),
-      maybeQuizState: Option[QuizState] = None,
+      quizState: QuizState = QuizState.nullInstance,
   )
 
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
@@ -52,13 +52,13 @@ final class MasterView(
     override def render(props: Props, state: State): VdomElement = logExceptions {
       implicit val router = props.router
 
-      state.maybeQuizState match {
-        case None =>
+      state.quizState match {
+        case quizState if quizState.quizIsBeingSetUp =>
           <.span(
             startQuizButton(),
             teamEditor(),
           )
-        case Some(quizState) =>
+        case quizState =>
           quizState.question match {
             case None =>
               <.span(
