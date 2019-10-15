@@ -8,6 +8,7 @@ import hydro.models.modification.EntityType
 case class QuizState(
     partNumber: Int,
     questionNumber: Int,
+    showSolution: Boolean,
     override val lastUpdateTime: LastUpdateTime = LastUpdateTime.neverUpdated,
 ) extends UpdatableEntity {
 

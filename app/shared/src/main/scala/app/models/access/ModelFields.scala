@@ -35,6 +35,8 @@ object ModelFields {
     case object partNumber extends ModelField[Int, E]("partNumber", _.partNumber, v => _.copy(partNumber = v))
     case object questionNumber
         extends ModelField[Int, E]("questionNumber", _.questionNumber, v => _.copy(questionNumber = v))
+    case object showSolution
+        extends ModelField[Boolean, E]("showSolution", _.showSolution, v => _.copy(showSolution = v))
   }
 
   // **************** Field numbers **************** //
@@ -49,6 +51,7 @@ object ModelFields {
         QuizState.id,
         QuizState.partNumber,
         QuizState.questionNumber,
+        QuizState.showSolution,
       )
     )
   def toNumber(field: ModelField.any): Int = fieldToNumberMap.get(field)
