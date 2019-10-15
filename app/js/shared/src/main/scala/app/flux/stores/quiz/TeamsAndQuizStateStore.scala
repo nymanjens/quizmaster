@@ -95,7 +95,7 @@ final class TeamsAndQuizStateStore(
                 Seq(EntityModification.createUpdateAllFields(QuizState.nullInstance))
               case None =>
                 // Go to end of last round
-                val newRoundIndex = quizState.roundIndex - 1
+                val newRoundIndex = Math.min(quizState.roundIndex - 1, quizConfig.rounds.size - 1)
                 Seq(
                   EntityModification.createUpdateAllFields(
                     quizState.copy(
