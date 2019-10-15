@@ -46,6 +46,7 @@ final class TeamsList(
         ^.className := "teams-list",
         (for (team <- state.teams) yield {
           <.li(
+            ^.key := team.id,
             <.div(
               ^.className := "name",
               team.name

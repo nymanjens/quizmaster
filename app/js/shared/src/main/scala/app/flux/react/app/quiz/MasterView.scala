@@ -65,7 +65,6 @@ final class MasterView(
 
     private def startQuizButton(): VdomElement = {
       Bootstrap.Button(Variant.primary, Size.lg)(
-//        ^.className := "btn-huge",
         ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.startQuiz()).void,
         Bootstrap.FontAwesomeIcon("play"),
         " Start the quiz",
