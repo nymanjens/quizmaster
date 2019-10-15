@@ -1,6 +1,7 @@
 package app.flux.react.app
 
 import app.flux.react.app.quiz.MasterView
+import app.flux.react.app.quiz.QuizProgressIndicator
 import app.flux.react.app.quiz.QuizView
 import app.flux.react.app.quiz.TeamEditor
 import app.flux.react.app.quiz.TeamsList
@@ -37,6 +38,7 @@ final class Module(
 
   implicit lazy val layout: Layout = new Layout
 
+  implicit lazy private val quizProgressIndicator: QuizProgressIndicator = new QuizProgressIndicator()
   implicit lazy private val teamEditor: TeamEditor = new TeamEditor()
   implicit lazy private val teamsList: TeamsList = new TeamsList()
 

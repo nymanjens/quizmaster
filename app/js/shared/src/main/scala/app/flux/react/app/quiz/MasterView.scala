@@ -27,6 +27,7 @@ final class MasterView(
     quizConfig: QuizConfig,
     teamEditor: TeamEditor,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
+    quizProgressIndicator: QuizProgressIndicator,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -57,6 +58,7 @@ final class MasterView(
 
       <.span(
         quizNavigationButtons(state.quizState),
+        quizProgressIndicator(state.quizState),
         state.quizState match {
           case quizState if quizState.quizIsBeingSetUp =>
             teamEditor()
