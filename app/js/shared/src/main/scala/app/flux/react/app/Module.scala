@@ -1,15 +1,16 @@
 package app.flux.react.app
 
 import app.flux.react.app.quiz.MasterView
+import app.flux.react.app.quiz.QuestionComponent
 import app.flux.react.app.quiz.QuizProgressIndicator
 import app.flux.react.app.quiz.QuizView
 import app.flux.react.app.quiz.TeamEditor
 import app.flux.react.app.quiz.TeamsList
-import hydro.common.I18n
 import app.flux.stores._
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.user.User
+import hydro.common.I18n
 import hydro.common.time.Clock
 import hydro.flux.action.Dispatcher
 import hydro.flux.stores.ApplicationIsOnlineStore
@@ -41,6 +42,7 @@ final class Module(
   implicit lazy private val quizProgressIndicator: QuizProgressIndicator = new QuizProgressIndicator()
   implicit lazy private val teamEditor: TeamEditor = new TeamEditor()
   implicit lazy private val teamsList: TeamsList = new TeamsList()
+  implicit lazy private val question: QuestionComponent = new QuestionComponent()
 
   implicit lazy val quizView: QuizView = new QuizView()
   implicit lazy val masterView: MasterView = new MasterView()

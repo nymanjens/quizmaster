@@ -1,13 +1,10 @@
 package app.flux.react.app.quiz
 
-import hydro.flux.react.ReactVdomUtils.<<
-import hydro.flux.react.ReactVdomUtils.^^
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState
 import app.models.quiz.Team
 import app.models.quiz.config.QuizConfig.Question
-import hydro.common.JsLoggingUtils
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.JsLoggingUtils.LogExceptionsCallback
 import hydro.flux.action.Dispatcher
@@ -29,6 +26,7 @@ final class MasterView(
     teamEditor: TeamEditor,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     quizProgressIndicator: QuizProgressIndicator,
+    questionComponent: QuestionComponent,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -69,7 +67,11 @@ final class MasterView(
               case None =>
                 showRound(quizState.round)
               case Some(question) =>
-                showQuestion(quizState.round, question, quizState.showSolution)
+                questionComponent(
+                  question = question,
+                  questionProgressIndex = if (quizState.showSolution) 1 else 0,
+                  showMasterData = true,
+                )
             }
         },
       )
@@ -102,52 +104,6 @@ final class MasterView(
       <.div(
         ^.className := "round-title",
         round.name,
-      )
-    }
-
-    def showQuestion(
-        round: QuizConfig.Round,
-        question: QuizConfig.Question,
-        showSolution: Boolean,
-    ): VdomElement = {
-      <.div(
-        ^.className := "question-wrapper",
-        question match {
-          case single: Question.Single => showSingleQuestion(round, single, showSolution)
-          case double: Question.Double => showDoubleQuestion(round, double, showSolution)
-        },
-      )
-    }
-
-    def showSingleQuestion(
-        round: QuizConfig.Round,
-        question: QuizConfig.Question.Single,
-        showSolution: Boolean,
-    ): VdomElement = {
-      val pointsString = if (question.pointsToGain == 1) "1 point" else s"${question.pointsToGain} points"
-      <.div(
-        <.div(
-          ^.className := "question",
-          question.question
-        ),
-        <.div(
-          ^.className := "metadata",
-          if (question.onlyFirstGainsPoints) {
-            s"First right answer gains $pointsString"
-          } else {
-            s"All right answers gain $pointsString"
-          },
-        ),
-      )
-    }
-
-    def showDoubleQuestion(
-        round: QuizConfig.Round,
-        question: QuizConfig.Question.Double,
-        showSolution: Boolean,
-    ): VdomElement = {
-      <.div(
-        ^.className := "question",
       )
     }
   }
