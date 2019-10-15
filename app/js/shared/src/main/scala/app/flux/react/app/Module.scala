@@ -2,6 +2,7 @@ package app.flux.react.app
 
 import app.flux.react.app.quiz.MasterView
 import app.flux.react.app.quiz.QuizView
+import app.flux.react.app.quiz.TeamEditor
 import hydro.common.I18n
 import app.flux.stores._
 import app.models.quiz.config.QuizConfig
@@ -32,6 +33,8 @@ final class Module(
   implicit private lazy val sbadminLayout = hydroUielementsModule.sbadminLayout
 
   implicit lazy val layout: Layout = new Layout
+
+  implicit lazy private val teamEditor: TeamEditor = new TeamEditor()
 
   implicit lazy val quizView: QuizView = new QuizView()
   implicit lazy val masterView: MasterView = new MasterView()
