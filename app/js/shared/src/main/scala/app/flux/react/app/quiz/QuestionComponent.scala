@@ -1,5 +1,6 @@
 package app.flux.react.app.quiz
 
+import hydro.flux.react.ReactVdomUtils.<<
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
@@ -16,6 +17,7 @@ final class QuestionComponent(
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
+    timerBar: TimerBar,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -38,7 +40,7 @@ final class QuestionComponent(
       questionProgressIndex: Int,
       showMasterData: Boolean,
   )
-  protected case class State()
+  protected case class State(timeRanOut: Boolean = false)
 
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
 
@@ -68,6 +70,14 @@ final class QuestionComponent(
             s"All right answers gain $pointsString"
           },
         ),
+        <<.ifThen(question.isBeingAnswered(props.questionProgressIndex)) {
+          <<.ifDefined(question.maxTime) { maxTime =>
+            <.div(
+              ^.className := "timer",
+              timerBar(maxTime = maxTime, onFinished = () => $.modState(_.copy(timeRanOut = true)).runNow())
+            )
+          }
+        }
       )
     }
 

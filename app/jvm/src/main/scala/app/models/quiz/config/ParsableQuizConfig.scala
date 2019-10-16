@@ -3,7 +3,7 @@ package app.models.quiz.config
 import hydro.common.GuavaReplacement.Preconditions.checkNotNull
 
 import scala.collection.JavaConverters._
-import scala.concurrent.duration._
+import java.time.Duration
 
 case class ParsableQuizConfig(
     rounds: java.util.List[ParsableQuizConfig.Round],
@@ -51,7 +51,7 @@ object ParsableQuizConfig {
         answer = checkNotNull(answer),
         choices = if (choices == null) None else Some(choices.asScala.toVector),
         pointsToGain = pointsToGain,
-        maxTime = if (maxTimeSeconds == 0) None else Some(maxTimeSeconds.seconds),
+        maxTime = if (maxTimeSeconds == 0) None else Some(Duration.ofSeconds(maxTimeSeconds)),
         onlyFirstGainsPoints = onlyFirstGainsPoints,
       )
     }

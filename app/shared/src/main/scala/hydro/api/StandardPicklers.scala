@@ -2,6 +2,7 @@ package hydro.api
 
 import scala.collection.immutable.Seq
 import java.time.Instant
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -59,6 +60,16 @@ abstract class StandardPicklers {
     }
     override def unpickle(implicit state: UnpickleState): Instant = logExceptions {
       Instant.ofEpochSecond(state.unpickle[Long], state.unpickle[Int])
+    }
+  }
+
+  implicit object DurationPickler extends Pickler[Duration] {
+    override def pickle(duration: Duration)(implicit state: PickleState): Unit = logExceptions {
+      state.pickle(duration.getSeconds)
+      state.pickle(duration.getNano)
+    }
+    override def unpickle(implicit state: UnpickleState): Duration = logExceptions {
+      Duration.ZERO.plusSeconds(state.unpickle[Long]).plusNanos(state.unpickle[Int])
     }
   }
 

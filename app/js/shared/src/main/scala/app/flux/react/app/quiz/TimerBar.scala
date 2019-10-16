@@ -9,6 +9,7 @@ import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.time.Clock
 import hydro.flux.react.HydroReactComponent
 import hydro.flux.react.uielements.Bootstrap
+import hydro.flux.react.uielements.Bootstrap.Variant
 import hydro.jsfacades.Mousetrap
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
@@ -44,7 +45,9 @@ final class TimerBar(
     override def render(props: Props, state: State): VdomElement = logExceptions {
       val timeLeft = props.maxTime - state.elapsedTime
       val timeLeftFraction = timeLeft / props.maxTime
-      Bootstrap.ProgressBar(fraction = timeLeftFraction, label = s"${timeLeft.getSeconds} seconds left")
+      Bootstrap.ProgressBar(
+        fraction = timeLeftFraction,
+        variant = if (timeLeftFraction < 0.1) Variant.danger else Variant.info)
     }
 
     override def didMount(props: Props, state: State): Callback = {
@@ -80,7 +83,7 @@ final class TimerBar(
 
             lastIntervalCycleTime = now
           },
-          10
+          /* timeout in millis */ 10
         ))
     }
     private def clearInterval(): Unit = {
@@ -94,7 +97,7 @@ final class TimerBar(
           runnable()
         })
       }
-      bind("space", togglePaused)
+      bind("space", () => togglePaused())
     }
 
     private def togglePaused(): Unit = {
