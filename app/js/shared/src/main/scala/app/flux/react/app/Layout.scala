@@ -64,7 +64,6 @@ final class Layout(
         })
       }
 
-      bind("space", () => teamsAndQuizStateStore.goToNextStep())
       bind("ctrl+left", () => teamsAndQuizStateStore.goToPreviousStep())
       bind("ctrl+right", () => teamsAndQuizStateStore.goToNextStep())
       Callback.empty

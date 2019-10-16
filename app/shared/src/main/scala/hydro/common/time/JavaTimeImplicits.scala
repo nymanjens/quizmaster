@@ -22,6 +22,12 @@ object JavaTimeImplicits {
     def -(instant: Instant): Duration = Duration.between(instant, thisInstant)
   }
 
+  implicit class DurationWrapper(thisDuration: Duration) extends BaseWrapper[Duration](thisDuration) {
+    def -(duration: Duration): Duration = thisDuration minus duration
+    def +(duration: Duration): Duration = thisDuration plus duration
+    def /(duration: Duration): Double = thisDuration.toNanos * 1.0 / duration.toNanos
+  }
+
   implicit object LocalDateTimeOrdering extends Ordering[LocalDateTime] {
     override def compare(x: LocalDateTime, y: LocalDateTime): Int = x compareTo y
   }
@@ -42,5 +48,4 @@ object JavaTimeImplicits {
   implicit object DurationOrdering extends Ordering[Duration] {
     override def compare(x: Duration, y: Duration): Int = x compareTo y
   }
-  implicit class DurationWrapper(thisDuration: Duration) extends BaseWrapper[Duration](thisDuration)
 }

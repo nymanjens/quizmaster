@@ -4,6 +4,7 @@ import hydro.flux.react.ReactVdomUtils.^^
 import japgolly.scalajs.react.vdom.html_<^._
 
 import scala.collection.mutable
+import scala.scalajs.js
 
 object Bootstrap {
 
@@ -95,6 +96,21 @@ object Bootstrap {
   def FormHorizontal: VdomTag = <.form(^.className := "form-horizontal")
   def FormGroup: VdomTag = <.div(^.className := "form-group")
   def FormInline(tag: VdomTag = <.form): VdomTag = tag(^.className := "form-inline")
+
+  def ProgressBar(fraction: Double, label: String): VdomTag = {
+    val percentage = Math.round(fraction * 100).toInt
+    <.div(
+      ^.className := "progress",
+      <.div(
+        ^.className := "progress-bar progress-bar-striped active",
+        ^.aria.valueNow := percentage,
+        ^.aria.valueMin := 0,
+        ^.aria.valueMax := 100,
+        ^.style := js.Dictionary("width" -> s"$percentage%"),
+        label
+      )
+    )
+  }
 
   case class Variant private (name: String)
   object Variant {
