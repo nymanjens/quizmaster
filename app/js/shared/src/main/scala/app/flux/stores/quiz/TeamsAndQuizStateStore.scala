@@ -13,6 +13,7 @@ import hydro.flux.stores.AsyncEntityDerivedStateStore
 import hydro.models.access.DbQuery
 import hydro.models.access.DbQueryImplicits._
 import hydro.models.access.JsEntityAccess
+import hydro.models.access.ModelField
 import hydro.models.modification.EntityModification
 
 import scala.async.Async.async
@@ -187,6 +188,15 @@ final class TeamsAndQuizStateStore(
         }
 
       await(entityAccess.persistModifications(modifications))
+    }
+  }
+
+  def doQuizStateUpdate(fieldMask: Seq[ModelField[_, QuizState]])(
+      update: QuizState => QuizState): Future[Unit] = updateStateQueue.schedule {
+    async {
+      val quizState = await(stateFuture).quizState
+      val newQuizState = update(quizState)
+      await(entityAccess.persistModifications(EntityModification.createUpdate(newQuizState, fieldMask)))
     }
   }
 }

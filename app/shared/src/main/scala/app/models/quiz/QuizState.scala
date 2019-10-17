@@ -1,8 +1,12 @@
 package app.models.quiz
 
+import java.time.Duration
+import java.time.Instant
+
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.config.QuizConfig.Round
+import app.models.quiz.QuizState.TimerState
 import hydro.models.Entity
 import hydro.models.UpdatableEntity
 import hydro.models.UpdatableEntity.LastUpdateTime
@@ -14,6 +18,7 @@ case class QuizState(
     /** Number from 0 to `questions.size - 1`. A value of -1 means that the round name should be shown. */
     questionIndex: Int = -1,
     showSolution: Boolean = false,
+    timerState: TimerState = TimerState.nullInstance,
     override val lastUpdateTime: LastUpdateTime = LastUpdateTime.neverUpdated,
 ) extends UpdatableEntity {
 
@@ -55,4 +60,13 @@ object QuizState {
   val nullInstance: QuizState = QuizState()
 
   def tupled = (this.apply _).tupled
+
+  case class TimerState(
+      lastSnapshotTime: Instant = Instant.EPOCH,
+      lastSnapshotElapsed: Duration = Duration.ZERO,
+      timerRunning: Boolean = false,
+  )
+  object TimerState {
+    val nullInstance = TimerState()
+  }
 }

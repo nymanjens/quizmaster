@@ -3,6 +3,7 @@ package app.models.access
 import java.time.Instant
 
 import app.models.quiz.QuizState
+import app.models.quiz.QuizState.TimerState
 import app.models.quiz.Team
 import hydro.common.CollectionUtils
 import hydro.common.GuavaReplacement.ImmutableBiMap
@@ -44,6 +45,7 @@ object ModelFields {
         extends ModelField[Int, E]("questionIndex", _.questionIndex, v => _.copy(questionIndex = v))
     case object showSolution
         extends ModelField[Boolean, E]("showSolution", _.showSolution, v => _.copy(showSolution = v))
+    case object timerState extends ModelField[TimerState, E]("timerState", _.timerState, v => _.copy(timerState = v))
   }
 
   // **************** Field numbers **************** //

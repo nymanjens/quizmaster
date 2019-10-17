@@ -1,5 +1,6 @@
 package hydro.models.access
 
+import app.models.quiz.QuizState.TimerState
 import hydro.common.GuavaReplacement.ImmutableBiMap
 import hydro.common.OrderToken
 import hydro.common.time.LocalDateTime
@@ -41,6 +42,7 @@ object ModelField {
     implicit case object FiniteDurationType extends FieldType[FiniteDuration]
     implicit case object StringSeqType extends FieldType[Seq[String]]
     implicit case object OrderTokenType extends FieldType[OrderToken]
+    implicit case object TimerStateType extends FieldType[TimerState]
   }
 
   abstract class IdModelField[E <: Entity]
