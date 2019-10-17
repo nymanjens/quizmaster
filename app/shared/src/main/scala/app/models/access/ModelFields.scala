@@ -62,6 +62,7 @@ object ModelFields {
         QuizState.roundIndex,
         QuizState.questionIndex,
         QuizState.showSolution,
+        QuizState.timerState,
       )
     )
   def toNumber(field: ModelField.any): Int = fieldToNumberMap.get(field)
