@@ -4,6 +4,7 @@ import hydro.flux.react.ReactVdomUtils.<<
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
+import app.models.quiz.QuizState.TimerState
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
@@ -17,7 +18,7 @@ final class QuestionComponent(
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
-    timerBar: TimerBar,
+    syncedTimerBar: SyncedTimerBar,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -33,6 +34,9 @@ final class QuestionComponent(
   // **************** Implementation of HydroReactComponent methods ****************//
   override protected val config =
     ComponentConfig(backendConstructor = new Backend(_), initialState = State())
+      .withStateStoresDependency(
+        teamsAndQuizStateStore,
+        _.copy(timerState = teamsAndQuizStateStore.stateOrEmpty.quizState.timerState))
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(
@@ -40,7 +44,7 @@ final class QuestionComponent(
       questionProgressIndex: Int,
       showMasterData: Boolean,
   )
-  protected case class State(timeRanOut: Boolean = false)
+  protected case class State(timerState: TimerState = TimerState.nullInstance)
 
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
 
@@ -74,7 +78,7 @@ final class QuestionComponent(
           <<.ifDefined(question.maxTime) { maxTime =>
             <.div(
               ^.className := "timer",
-              timerBar(maxTime = maxTime, onFinished = () => $.modState(_.copy(timeRanOut = true)).runNow())
+              syncedTimerBar(maxTime = maxTime),
             )
           }
         }

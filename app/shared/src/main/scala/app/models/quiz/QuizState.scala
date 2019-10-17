@@ -1,8 +1,15 @@
 package app.models.quiz
 
+import hydro.common.time.JavaTimeImplicits._
+
+import java.time.Duration
+import java.time.Instant
+
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.config.QuizConfig.Round
+import app.models.quiz.QuizState.TimerState
+import hydro.common.time.Clock
 import hydro.models.Entity
 import hydro.models.UpdatableEntity
 import hydro.models.UpdatableEntity.LastUpdateTime
@@ -14,6 +21,7 @@ case class QuizState(
     /** Number from 0 to `questions.size - 1`. A value of -1 means that the round name should be shown. */
     questionIndex: Int = -1,
     showSolution: Boolean = false,
+    timerState: TimerState = TimerState.nullInstance,
     override val lastUpdateTime: LastUpdateTime = LastUpdateTime.neverUpdated,
 ) extends UpdatableEntity {
 
@@ -55,4 +63,32 @@ object QuizState {
   val nullInstance: QuizState = QuizState()
 
   def tupled = (this.apply _).tupled
+
+  case class TimerState(
+      lastSnapshotInstant: Instant = Instant.EPOCH,
+      lastSnapshotElapsedTime: Duration = Duration.ZERO,
+      timerRunning: Boolean = false,
+  ) {
+
+    def hasFinished(maxTime: Duration)(implicit clock: Clock): Boolean = {
+      elapsedTime() > maxTime
+    }
+
+    def elapsedTime()(implicit clock: Clock): Duration = {
+      if (timerRunning) {
+        lastSnapshotElapsedTime + (clock.nowInstant - lastSnapshotInstant)
+      } else {
+        lastSnapshotElapsedTime
+      }
+    }
+  }
+  object TimerState {
+    val nullInstance = TimerState()
+
+    def createStarted()(implicit clock: Clock): TimerState = TimerState(
+      lastSnapshotInstant = clock.nowInstant,
+      lastSnapshotElapsedTime = Duration.ZERO,
+      timerRunning = true,
+    )
+  }
 }

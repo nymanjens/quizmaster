@@ -29,59 +29,6 @@ import scala.scalajs.js.JSConverters._
 
 object StandardConverters {
 
-  // **************** Convertor generators **************** //
-  def fromModelField[V](modelField: ModelField[V, _]): Converter[V] = {
-    def fromFieldType[V1](fieldType: ModelField.FieldType[V1]): Converter[V1] = {
-      val result = fieldType match {
-        case ModelField.FieldType.OptionType(valueFieldType) => optionConverter(fromFieldType(valueFieldType))
-        case ModelField.FieldType.BooleanType                => BooleanConverter
-        case ModelField.FieldType.IntType                    => IntConverter
-        case ModelField.FieldType.LongType                   => LongConverter
-        case ModelField.FieldType.DoubleType                 => DoubleConverter
-        case ModelField.FieldType.StringType                 => StringConverter
-        case ModelField.FieldType.LocalDateTimeType          => LocalDateTimeConverter
-        case ModelField.FieldType.FiniteDurationType         => FiniteDurationConverter
-        case ModelField.FieldType.StringSeqType              => seqConverter(StringConverter)
-        case ModelField.FieldType.OrderTokenType             => OrderTokenConverter
-      }
-      result.asInstanceOf[Converter[V1]]
-    }
-    fromFieldType(modelField.fieldType)
-  }
-
-  def enumConverter[T](stableNameMapper: T => String, values: Seq[T]): Converter[T] = {
-    val valueToNumber: ImmutableBiMap[T, Int] =
-      CollectionUtils.toBiMapWithStableIntKeys(stableNameMapper = stableNameMapper, values = values)
-
-    new Converter[T] {
-      override def toJs(value: T) = Scala2Js.toJs(valueToNumber.get(value))
-      override def toScala(value: js.Any) = valueToNumber.inverse().get(Scala2Js.toScala[Int](value))
-    }
-  }
-
-  implicit def seqConverter[A: Converter]: Converter[Seq[A]] =
-    new Converter[Seq[A]] {
-      override def toJs(seq: Seq[A]) =
-        seq.toStream.map(Scala2Js.toJs[A]).toJSArray
-      override def toScala(value: js.Any) =
-        value.asInstanceOf[js.Array[js.Any]].toStream.map(Scala2Js.toScala[A]).toVector
-    }
-
-  implicit def optionConverter[V: Converter]: Converter[Option[V]] =
-    new Converter[Option[V]] {
-      override def toJs(option: Option[V]) = option match {
-        case Some(v) => Scala2Js.toJs(v)
-        case None    => null
-      }
-      override def toScala(value: js.Any) = {
-        if (value == null) {
-          None
-        } else {
-          Some(Scala2Js.toScala[V](value))
-        }
-      }
-    }
-
   // **************** General converters **************** //
   implicit object NullConverter extends Converter[js.Any] {
     override def toJs(obj: js.Any) = obj
@@ -301,4 +248,40 @@ object StandardConverters {
       }
     }
   }
+
+  // **************** Convertor generators **************** //
+  def fromModelField[V](modelField: ModelField[V, _]): Converter[V] = ???
+
+  def enumConverter[T](stableNameMapper: T => String, values: Seq[T]): Converter[T] = {
+    val valueToNumber: ImmutableBiMap[T, Int] =
+      CollectionUtils.toBiMapWithStableIntKeys(stableNameMapper = stableNameMapper, values = values)
+
+    new Converter[T] {
+      override def toJs(value: T) = Scala2Js.toJs(valueToNumber.get(value))
+      override def toScala(value: js.Any) = valueToNumber.inverse().get(Scala2Js.toScala[Int](value))
+    }
+  }
+
+  implicit def seqConverter[A: Converter]: Converter[Seq[A]] =
+    new Converter[Seq[A]] {
+      override def toJs(seq: Seq[A]) =
+        seq.toStream.map(Scala2Js.toJs[A]).toJSArray
+      override def toScala(value: js.Any) =
+        value.asInstanceOf[js.Array[js.Any]].toStream.map(Scala2Js.toScala[A]).toVector
+    }
+
+  implicit def optionConverter[V: Converter]: Converter[Option[V]] =
+    new Converter[Option[V]] {
+      override def toJs(option: Option[V]) = option match {
+        case Some(v) => Scala2Js.toJs(v)
+        case None    => null
+      }
+      override def toScala(value: js.Any) = {
+        if (value == null) {
+          None
+        } else {
+          Some(Scala2Js.toScala[V](value))
+        }
+      }
+    }
 }

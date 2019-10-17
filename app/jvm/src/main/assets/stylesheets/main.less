@@ -60,6 +60,11 @@ select:-moz-focusring { // Remove outline from select box in FF: http://stackove
     text-shadow: 0 0 0 #000;
 }
 
+// Disable Bootstrap progress bar animations
+.progress .progress-bar {
+  transition: none;
+}
+
 /****** copied from Bootstrap dataTables ******/
 table.table-bordered {
   thead th, thead td {
@@ -137,7 +142,7 @@ table.table-bordered {
     flex-grow: 1;
     flex-shrink: 1;
     flex-basis: auto;
-    
+
     padding: 20px 10px 0px 40px;
   }
 }
