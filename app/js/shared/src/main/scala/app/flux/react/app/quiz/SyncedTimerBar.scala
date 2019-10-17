@@ -65,7 +65,7 @@ final class SyncedTimerBar(
           () => {
             $.modState(state => state.copy(elapsedTime = state.timerState.elapsedTime())).runNow()
           },
-          /* timeout in millis */ 10
+          /* timeout in millis */ 1
         )
       )
 
