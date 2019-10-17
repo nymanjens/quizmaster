@@ -1,5 +1,7 @@
 package app.models.quiz
 
+import hydro.common.time.JavaTimeImplicits._
+
 import java.time.Duration
 import java.time.Instant
 
@@ -7,6 +9,7 @@ import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.QuizState.TimerState
+import hydro.common.time.Clock
 import hydro.models.Entity
 import hydro.models.UpdatableEntity
 import hydro.models.UpdatableEntity.LastUpdateTime
@@ -62,11 +65,30 @@ object QuizState {
   def tupled = (this.apply _).tupled
 
   case class TimerState(
-      lastSnapshotTime: Instant = Instant.EPOCH,
-      lastSnapshotElapsed: Duration = Duration.ZERO,
+      lastSnapshotInstant: Instant = Instant.EPOCH,
+      lastSnapshotElapsedTime: Duration = Duration.ZERO,
       timerRunning: Boolean = false,
-  )
+  ) {
+
+    def hasFinished(maxTime: Duration)(implicit clock: Clock): Boolean = {
+      elapsedTime() > maxTime
+    }
+
+    def elapsedTime()(implicit clock: Clock): Duration = {
+      if (timerRunning) {
+        lastSnapshotElapsedTime + (clock.nowInstant - lastSnapshotInstant)
+      } else {
+        lastSnapshotElapsedTime
+      }
+    }
+  }
   object TimerState {
     val nullInstance = TimerState()
+
+    def createStarted()(implicit clock: Clock): TimerState = TimerState(
+      lastSnapshotInstant = clock.nowInstant,
+      lastSnapshotElapsedTime = Duration.ZERO,
+      timerRunning = true,
+    )
   }
 }

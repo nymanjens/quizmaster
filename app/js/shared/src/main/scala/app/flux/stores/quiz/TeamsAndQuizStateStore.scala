@@ -5,6 +5,7 @@ import app.models.access.ModelFields
 import app.models.quiz.QuizState
 import app.models.quiz.Team
 import app.models.quiz.config.QuizConfig
+import app.models.quiz.QuizState.TimerState
 import app.models.user.User
 import hydro.common.time.Clock
 import hydro.common.SerializingTaskQueue
@@ -103,6 +104,7 @@ final class TeamsAndQuizStateStore(
                       roundIndex = newRoundIndex,
                       questionIndex = quizConfig.rounds(newRoundIndex).questions.size - 1,
                       showSolution = true,
+                      timerState = TimerState.createStarted(),
                     )))
               case Some(question) if !quizState.showSolution =>
                 // Go to previous question
@@ -111,6 +113,7 @@ final class TeamsAndQuizStateStore(
                     quizState.copy(
                       questionIndex = quizState.questionIndex - 1,
                       showSolution = true,
+                      timerState = TimerState.createStarted(),
                     )))
               case Some(question) if quizState.showSolution =>
                 // Hide solution
@@ -118,6 +121,7 @@ final class TeamsAndQuizStateStore(
                   EntityModification.createUpdateAllFields(
                     quizState.copy(
                       showSolution = false,
+                      timerState = TimerState.createStarted(),
                     )))
             }
         }
@@ -140,6 +144,7 @@ final class TeamsAndQuizStateStore(
               EntityModification.Add(
                 QuizState(
                   roundIndex = 0,
+                  timerState = TimerState.createStarted(),
                 )))
           case Some(quizState) =>
             quizState.question match {
@@ -150,6 +155,7 @@ final class TeamsAndQuizStateStore(
                     EntityModification.createUpdateAllFields(
                       QuizState(
                         roundIndex = quizState.roundIndex + 1,
+                        timerState = TimerState.createStarted(),
                       )))
                 } else {
                   // Go to first question
@@ -158,6 +164,7 @@ final class TeamsAndQuizStateStore(
                       quizState.copy(
                         questionIndex = 0,
                         showSolution = false,
+                        timerState = TimerState.createStarted(),
                       )))
                 }
               case Some(question) if !quizState.showSolution =>
@@ -166,6 +173,7 @@ final class TeamsAndQuizStateStore(
                   EntityModification.createUpdateAllFields(
                     quizState.copy(
                       showSolution = true,
+                      timerState = TimerState.createStarted(),
                     )))
               case Some(question) if quizState.showSolution =>
                 if (quizState.questionIndex == quizState.round.questions.size - 1) {
@@ -174,6 +182,7 @@ final class TeamsAndQuizStateStore(
                     EntityModification.createUpdateAllFields(
                       QuizState(
                         roundIndex = quizState.roundIndex + 1,
+                        timerState = TimerState.createStarted(),
                       )))
                 } else {
                   // Go to next question
@@ -182,6 +191,7 @@ final class TeamsAndQuizStateStore(
                       quizState.copy(
                         questionIndex = quizState.questionIndex + 1,
                         showSolution = false,
+                        timerState = TimerState.createStarted(),
                       )))
                 }
             }
@@ -191,14 +201,16 @@ final class TeamsAndQuizStateStore(
     }
   }
 
-  def doQuizStateUpdate(fieldMask: Seq[ModelField[_, QuizState]])(
-      update: QuizState => QuizState): Future[Unit] = updateStateQueue.schedule {
-    async {
-      val quizState = await(stateFuture).quizState
-      val newQuizState = update(quizState)
-      await(entityAccess.persistModifications(EntityModification.createUpdate(newQuizState, fieldMask)))
+  def doQuizStateUpdate(fieldMask: ModelField[_, QuizState]*)(update: QuizState => QuizState): Future[Unit] =
+    updateStateQueue.schedule {
+      async {
+        val quizState = await(stateFuture).quizState
+        val newQuizState = update(quizState)
+        await(
+          entityAccess.persistModifications(
+            EntityModification.createUpdate(newQuizState, fieldMask.toVector)))
+      }
     }
-  }
 }
 
 object TeamsAndQuizStateStore {
