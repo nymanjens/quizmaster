@@ -31,12 +31,15 @@ final class ObfuscatedAnswer(
 
     override def render(props: Props, state: State): VdomElement = logExceptions {
       <.div(
-        ^.className := "obfuscated-answer-wrapper",
-        ^^.ifThen(state.obfuscated) {
-          ^.className := "obfuscated"
-        },
+        ^.className := "maybe-obfuscated-answer-wrapper",
         "Answer: ",
-        props.answer,
+        <.span(
+          ^.className := "maybe-obfuscated-answer",
+          ^^.ifThen(state.obfuscated) {
+            ^.className := "obfuscated"
+          },
+          props.answer,
+        )
       )
     }
 

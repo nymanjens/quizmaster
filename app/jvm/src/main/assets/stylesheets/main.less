@@ -150,6 +150,7 @@ table.table-bordered {
 /****** Shared quiz-view / master-view ******/
 .quiz-view, .master-view {
   .quiz-progres-indicator {
+    font-size: 23px;
     text-align: center;
   }
 
@@ -161,11 +162,31 @@ table.table-bordered {
   }
   .question-wrapper {
     text-align: center;
+    .admin-only-data {
+      color: #DDD;
+    }
     .question {
       font-size: 60px;
     }
     .points-metadata {
       font-size: 25px;
+    }
+    .maybe-obfuscated-answer-wrapper {
+      padding-top: 25px;
+      font-size: 23px;
+      .maybe-obfuscated-answer {
+        color: black;
+        padding-left: 30px;
+        padding-right: 30px;
+        &.obfuscated {
+          background-color: black;
+        }
+      }
+    }
+    .answer {
+      padding-top: 25px;
+      font-size: 50px;
+      color: green;
     }
     .timer {
       padding-top: 25px;
