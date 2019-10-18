@@ -22,6 +22,7 @@ final class QuestionComponent(
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     syncedTimerBar: SyncedTimerBar,
+    obfuscatedAnswer: ObfuscatedAnswer,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -89,6 +90,7 @@ final class QuestionComponent(
 
     private def showSingleQuestion(question: Question.Single)(implicit props: Props): VdomElement = {
       val progressIndex = props.questionProgressIndex
+      val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
 
       def ifVisibleOrMaster(isVisible: Boolean)(vdomNode: VdomNode): VdomNode = {
         if (isVisible) {
@@ -104,7 +106,7 @@ final class QuestionComponent(
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
             ^.className := "question",
-            question.question
+            question.question,
           )
         },
         pointsMetadata(question),
@@ -116,9 +118,25 @@ final class QuestionComponent(
                 yield
                   <.li(
                     ^.key := choice,
-                    choice
+                    if (answerIsVisible && choice == question.answer) {
+                      <.b(choice)
+                    } else {
+                      choice
+                    },
                   )).toVdomArray
             )
+          }
+        },
+        <<.ifThen(question.choices.isEmpty || !answerIsVisible) {
+          ifVisibleOrMaster(answerIsVisible) {
+            if (answerIsVisible) {
+              <.div(
+                ^.className := "answer",
+                question.answer,
+              )
+            } else {
+              obfuscatedAnswer(question.answer)
+            }
           }
         },
         <<.ifThen(question.isBeingAnswered(props.questionProgressIndex)) {

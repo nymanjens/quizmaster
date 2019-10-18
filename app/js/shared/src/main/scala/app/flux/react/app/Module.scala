@@ -1,6 +1,7 @@
 package app.flux.react.app
 
 import app.flux.react.app.quiz.MasterView
+import app.flux.react.app.quiz.ObfuscatedAnswer
 import app.flux.react.app.quiz.QuestionComponent
 import app.flux.react.app.quiz.QuizProgressIndicator
 import app.flux.react.app.quiz.QuizView
@@ -41,6 +42,7 @@ final class Module(
   implicit lazy val layout: Layout = new Layout
 
   implicit lazy private val syncedTimerBar: SyncedTimerBar = new SyncedTimerBar()
+  implicit lazy private val obfuscatedAnswer: ObfuscatedAnswer = new ObfuscatedAnswer()
   implicit lazy private val quizProgressIndicator: QuizProgressIndicator = new QuizProgressIndicator()
   implicit lazy private val teamEditor: TeamEditor = new TeamEditor()
   implicit lazy private val teamsList: TeamsList = new TeamsList()
