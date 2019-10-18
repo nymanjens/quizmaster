@@ -16,11 +16,14 @@ object QuizConfig {
   )
 
   sealed trait Question {
+    def pointsToGain: Int
+    def pointsToGainOnWrongAnswer: Int
+
+    def onlyFirstGainsPoints: Boolean
+
     def progressStepsCount: Int
     final def maxProgressIndex: Int = progressStepsCount - 1
     def isBeingAnswered(questionProgressIndex: Int): Boolean
-    def pointsToGain: Int
-    def onlyFirstGainsPoints: Boolean
   }
 
   object Question {
@@ -32,6 +35,10 @@ object QuizConfig {
         maxTime: Option[Duration],
         override val onlyFirstGainsPoints: Boolean,
     ) extends Question {
+
+      override def pointsToGainOnWrongAnswer: Int = {
+        if (onlyFirstGainsPoints && choices.nonEmpty) -pointsToGain else 0
+      }
 
       /**
         * Steps:
@@ -69,9 +76,12 @@ object QuizConfig {
         textualChoices: Seq[String],
         override val pointsToGain: Int,
     ) extends Question {
+      override def pointsToGainOnWrongAnswer: Int = -pointsToGain
+
+      override def onlyFirstGainsPoints: Boolean = true
+
       override def progressStepsCount: Int = 3
       override def isBeingAnswered(questionProgressIndex: Int): Boolean = questionProgressIndex == 1
-      override def onlyFirstGainsPoints: Boolean = true
 
       def maxTime: Duration = Duration.ofSeconds(3)
     }

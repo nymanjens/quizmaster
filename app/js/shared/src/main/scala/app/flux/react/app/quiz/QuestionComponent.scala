@@ -158,6 +158,10 @@ final class QuestionComponent(
 
     private def pointsMetadata(question: Question): VdomElement = {
       val pointsString = if (question.pointsToGain == 1) "1 point" else s"${question.pointsToGain} points"
+      val pointsToLoseString =
+        if (question.pointsToGainOnWrongAnswer == -1) "1 point"
+        else s"${-question.pointsToGainOnWrongAnswer} points"
+
       <.div(
         ^.className := "points-metadata",
         if (question.onlyFirstGainsPoints) {
@@ -165,6 +169,9 @@ final class QuestionComponent(
         } else {
           s"All right answers gain $pointsString"
         },
+        <<.ifThen(question.pointsToGainOnWrongAnswer != 0) {
+          s". Wrong answer loses ${pointsToLoseString}"
+        }
       )
     }
   }
