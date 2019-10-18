@@ -62,7 +62,7 @@ final class QuizView(
               question = question,
               round = state.quizState.round,
               questionProgressIndex = quizState.questionProgressIndex,
-              showMasterData = true,
+              showMasterData = false,
             )
         },
       )

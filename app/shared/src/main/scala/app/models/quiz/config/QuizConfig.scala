@@ -50,6 +50,15 @@ object QuizConfig {
           questionProgressIndex == 1
         }
       }
+      def questionIsVisible(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex >= 1
+      }
+      def choicesAreVisible(questionProgressIndex: Int): Boolean = {
+        choices.isDefined && questionProgressIndex >= 2
+      }
+      def answerIsVisible(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex == maxProgressIndex
+      }
     }
 
     case class Double(

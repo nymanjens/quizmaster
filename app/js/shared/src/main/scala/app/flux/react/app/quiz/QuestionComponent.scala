@@ -13,6 +13,8 @@ import hydro.flux.react.uielements.PageHeader
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
+import japgolly.scalajs.react.vdom.VdomArray
+import japgolly.scalajs.react.vdom.VdomNode
 
 final class QuestionComponent(
     implicit pageHeader: PageHeader,
@@ -63,8 +65,9 @@ final class QuestionComponent(
         props.question match {
           case single: Question.Single =>
             props.questionProgressIndex match {
-              case 0         => showSingleQuestionStep0PreparatoryTitle(single)
-              case 1 | 2 | 3 => showSingleQuestion(single)
+              case 0 if !props.showMasterData => showSingleQuestionStep0PreparatoryTitle(single)
+              case 0 if props.showMasterData  => showSingleQuestion(single)
+              case 1 | 2 | 3                  => showSingleQuestion(single)
             }
 
           case double: Question.Double => showDoubleQuestion(double)
@@ -85,12 +88,39 @@ final class QuestionComponent(
     }
 
     private def showSingleQuestion(question: Question.Single)(implicit props: Props): VdomElement = {
+      val progressIndex = props.questionProgressIndex
+
+      def ifVisibleOrMaster(isVisible: Boolean)(vdomNode: VdomNode): VdomNode = {
+        if (isVisible) {
+          vdomNode
+        } else if (props.showMasterData) {
+          <.span(^.className := "admin-only-data", vdomNode)
+        } else {
+          VdomArray.empty()
+        }
+      }
+
       <.div(
-        <.div(
-          ^.className := "question",
-          question.question
-        ),
+        ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
+          <.div(
+            ^.className := "question",
+            question.question
+          )
+        },
         pointsMetadata(question),
+        <<.ifDefined(question.choices) { choices =>
+          ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
+            <.ul(
+              ^.className := "choices",
+              (for (choice <- choices)
+                yield
+                  <.li(
+                    ^.key := choice,
+                    choice
+                  )).toVdomArray
+            )
+          }
+        },
         <<.ifThen(question.isBeingAnswered(props.questionProgressIndex)) {
           <<.ifDefined(question.maxTime) { maxTime =>
             <.div(
