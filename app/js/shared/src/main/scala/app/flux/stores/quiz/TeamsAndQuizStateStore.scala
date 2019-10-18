@@ -8,7 +8,6 @@ import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState.TimerState
 import app.models.user.User
 import hydro.common.time.Clock
-import hydro.common.CollectionUtils
 import hydro.common.CollectionUtils.maybeGet
 import hydro.common.SerializingTaskQueue
 import hydro.flux.action.Dispatcher
@@ -21,9 +20,9 @@ import hydro.models.modification.EntityModification
 
 import scala.async.Async.async
 import scala.async.Async.await
+import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import scala.collection.immutable.Seq
 
 final class TeamsAndQuizStateStore(
     implicit entityAccess: JsEntityAccess,
@@ -88,49 +87,46 @@ final class TeamsAndQuizStateStore(
   }
 
   def goToPreviousStep(): Future[Unit] = updateStateQueue.schedule {
-    async {
-      val quizState = await(stateFuture).quizState
-      val modifications =
-        quizState.roundIndex match {
-          case -1 => Seq() // Do nothing
-          case _ =>
-            quizState.question match {
-              case None if quizState.roundIndex == 0 =>
-                Seq(EntityModification.createUpdateAllFields(QuizState.nullInstance))
-              case None =>
-                // Go to end of last round
-                val newRoundIndex = Math.min(quizState.roundIndex - 1, quizConfig.rounds.size - 1)
-                val newRound = quizConfig.rounds(newRoundIndex)
-                Seq(
-                  EntityModification.createUpdateAllFields(quizState.copy(
-                    roundIndex = newRoundIndex,
-                    questionIndex = newRound.questions.size - 1,
-                    questionProgressIndex = newRound.questions.lastOption.map(_.maxProgressIndex) getOrElse 0,
-                    timerState = TimerState.createStarted(),
-                  )))
-              case Some(question) if quizState.questionProgressIndex == 0 =>
-                // Go to previous question
-                val newQuestionIndex = quizState.questionIndex - 1
-                Seq(
-                  EntityModification.createUpdateAllFields(quizState.copy(
-                    questionIndex = newQuestionIndex,
-                    questionProgressIndex =
-                      maybeGet(quizState.round.questions, newQuestionIndex)
-                        .map(_.maxProgressIndex) getOrElse 0,
-                    timerState = TimerState.createStarted(),
-                  )))
-              case Some(question) if quizState.questionProgressIndex > 0 =>
-                // Decrement questionProgressIndex
-                Seq(
-                  EntityModification.createUpdateAllFields(
-                    quizState.copy(
-                      questionProgressIndex = quizState.questionProgressIndex - 1,
-                      timerState = TimerState.createStarted(),
-                    )))
-            }
-        }
-
-      await(entityAccess.persistModifications(modifications))
+    doQuizStateUpdateInternal(
+      ModelFields.QuizState.roundIndex,
+      ModelFields.QuizState.questionIndex,
+      ModelFields.QuizState.questionProgressIndex,
+      ModelFields.QuizState.timerState,
+    ) { quizState =>
+      quizState.roundIndex match {
+        case -1 => quizState // Do nothing
+        case _ =>
+          quizState.question match {
+            case None if quizState.roundIndex == 0 =>
+              QuizState.nullInstance
+            case None =>
+              // Go to end of last round
+              val newRoundIndex = Math.min(quizState.roundIndex - 1, quizConfig.rounds.size - 1)
+              val newRound = quizConfig.rounds(newRoundIndex)
+              quizState.copy(
+                roundIndex = newRoundIndex,
+                questionIndex = newRound.questions.size - 1,
+                questionProgressIndex = newRound.questions.lastOption.map(_.maxProgressIndex) getOrElse 0,
+                timerState = TimerState.createStarted(),
+              )
+            case Some(question) if quizState.questionProgressIndex == 0 =>
+              // Go to previous question
+              val newQuestionIndex = quizState.questionIndex - 1
+              quizState.copy(
+                questionIndex = newQuestionIndex,
+                questionProgressIndex =
+                  maybeGet(quizState.round.questions, newQuestionIndex)
+                    .map(_.maxProgressIndex) getOrElse 0,
+                timerState = TimerState.createStarted(),
+              )
+            case Some(question) if quizState.questionProgressIndex > 0 =>
+              // Decrement questionProgressIndex
+              quizState.copy(
+                questionProgressIndex = quizState.questionProgressIndex - 1,
+                timerState = TimerState.createStarted(),
+              )
+          }
+      }
     }
   }
 
@@ -141,80 +137,81 @@ final class TeamsAndQuizStateStore(
           .newQuery[QuizState]()
           .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId))
 
-      val modifications =
-        maybeQuizState match {
-          case None =>
-            Seq(
-              EntityModification.Add(
-                QuizState(
+      maybeQuizState match {
+        case None =>
+          await(
+            entityAccess.persistModifications(
+              Seq(
+                EntityModification.Add(QuizState(
                   roundIndex = 0,
                   timerState = TimerState.createStarted(),
-                )))
-          case Some(quizState) =>
-            quizState.question match {
-              case None =>
-                if (quizState.round.questions.isEmpty) {
-                  // Go to next round
-                  Seq(
-                    EntityModification.createUpdateAllFields(
-                      QuizState(
-                        roundIndex = quizState.roundIndex + 1,
-                        timerState = TimerState.createStarted(),
-                      )))
-                } else {
-                  // Go to first question
-                  Seq(
-                    EntityModification.createUpdateAllFields(
-                      quizState.copy(
-                        questionIndex = 0,
-                        questionProgressIndex = 0,
-                        timerState = TimerState.createStarted(),
-                      )))
-                }
-              case Some(question) if quizState.questionProgressIndex < question.maxProgressIndex =>
-                // Increment questionProgressIndex
-                Seq(
-                  EntityModification.createUpdateAllFields(
-                    quizState.copy(
-                      questionProgressIndex = quizState.questionProgressIndex + 1,
-                      timerState = TimerState.createStarted(),
-                    )))
-              case Some(question) if quizState.questionProgressIndex == question.maxProgressIndex =>
-                if (quizState.questionIndex == quizState.round.questions.size - 1) {
-                  // Go to next round
-                  Seq(
-                    EntityModification.createUpdateAllFields(
-                      QuizState(
-                        roundIndex = quizState.roundIndex + 1,
-                        questionProgressIndex = 0,
-                        timerState = TimerState.createStarted(),
-                      )))
-                } else {
-                  // Go to next question
-                  Seq(
-                    EntityModification.createUpdateAllFields(
-                      quizState.copy(
-                        questionIndex = quizState.questionIndex + 1,
-                        questionProgressIndex = 0,
-                        timerState = TimerState.createStarted(),
-                      )))
-                }
-            }
-        }
+                )))))
 
-      await(entityAccess.persistModifications(modifications))
+        case Some(_) =>
+          await(
+            doQuizStateUpdateInternal(
+              ModelFields.QuizState.roundIndex,
+              ModelFields.QuizState.questionIndex,
+              ModelFields.QuizState.questionProgressIndex,
+              ModelFields.QuizState.timerState,
+            ) { quizState =>
+              quizState.question match {
+                case None =>
+                  if (quizState.round.questions.isEmpty) {
+                    // Go to next round
+                    QuizState(
+                      roundIndex = quizState.roundIndex + 1,
+                      timerState = TimerState.createStarted(),
+                    )
+                  } else {
+                    // Go to first question
+                    quizState.copy(
+                      questionIndex = 0,
+                      questionProgressIndex = 0,
+                      timerState = TimerState.createStarted(),
+                    )
+                  }
+                case Some(question) if quizState.questionProgressIndex < question.maxProgressIndex =>
+                  // Increment questionProgressIndex
+                  quizState.copy(
+                    questionProgressIndex = quizState.questionProgressIndex + 1,
+                    timerState = TimerState.createStarted(),
+                  )
+                case Some(question) if quizState.questionProgressIndex == question.maxProgressIndex =>
+                  if (quizState.questionIndex == quizState.round.questions.size - 1) {
+                    // Go to next round
+                    QuizState(
+                      roundIndex = quizState.roundIndex + 1,
+                      questionProgressIndex = 0,
+                      timerState = TimerState.createStarted(),
+                    )
+                  } else {
+                    // Go to next question
+                    quizState.copy(
+                      questionIndex = quizState.questionIndex + 1,
+                      questionProgressIndex = 0,
+                      timerState = TimerState.createStarted(),
+                    )
+                  }
+              }
+            }
+          )
+      }
     }
   }
 
-  def doQuizStateUpdate(fieldMask: ModelField[_, QuizState]*)(update: QuizState => QuizState): Future[Unit] =
+  def doQuizStateUpdate(fieldMasks: ModelField[_, QuizState]*)(update: QuizState => QuizState): Future[Unit] =
     updateStateQueue.schedule {
-      async {
-        val quizState = await(stateFuture).quizState
-        val newQuizState = update(quizState)
-        await(
-          entityAccess.persistModifications(
-            EntityModification.createUpdate(newQuizState, fieldMask.toVector)))
-      }
+      doQuizStateUpdateInternal(fieldMasks: _*)(update)
+    }
+
+  private def doQuizStateUpdateInternal(fieldMasks: ModelField[_, QuizState]*)(
+      update: QuizState => QuizState): Future[Unit] =
+    async {
+      val quizState = await(stateFuture).quizState
+      val newQuizState = update(quizState)
+      await(
+        entityAccess.persistModifications(EntityModification.createUpdate(newQuizState, fieldMasks.toVector)))
     }
 }
 
