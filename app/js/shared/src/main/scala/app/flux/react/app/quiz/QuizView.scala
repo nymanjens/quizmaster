@@ -60,7 +60,7 @@ final class QuizView(
           case Some(question) =>
             questionComponent(
               question = question,
-              questionProgressIndex = if (quizState.showSolution) 1 else 0,
+              questionProgressIndex = quizState.questionProgressIndex,
               showMasterData = true,
             )
         },

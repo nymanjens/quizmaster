@@ -24,7 +24,7 @@ object CollectionUtils {
 
   def ifThenSeq[V](condition: Boolean, value: V): Seq[V] = if (condition) Seq(value) else Seq()
 
-  def maybeGet[E](seq: Seq[E], index: Int): Option[E] = {
+  def maybeGet[E](seq: scala.collection.Seq[E], index: Int): Option[E] = {
     if (seq.indices contains index) {
       Some(seq(index))
     } else {

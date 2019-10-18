@@ -16,7 +16,8 @@ object QuizConfig {
   )
 
   sealed trait Question {
-    def questionProgressSize: Int
+    def progressStepsCount: Int
+    final def maxProgressIndex: Int = progressStepsCount - 1
     def isBeingAnswered(questionProgressIndex: Int): Boolean
   }
 
@@ -29,7 +30,7 @@ object QuizConfig {
         maxTime: Option[Duration],
         onlyFirstGainsPoints: Boolean,
     ) extends Question {
-      override def questionProgressSize: Int = {
+      override def progressStepsCount: Int = {
         if (choices.isDefined) 3 else 2
       }
       override def isBeingAnswered(questionProgressIndex: Int): Boolean = {
@@ -49,7 +50,7 @@ object QuizConfig {
         textualChoices: Seq[String],
         pointsToGain: Int,
     ) extends Question {
-      override def questionProgressSize: Int = 3
+      override def progressStepsCount: Int = 3
       override def isBeingAnswered(questionProgressIndex: Int): Boolean = questionProgressIndex == 1
       def maxTime: Duration = Duration.ofSeconds(3)
     }

@@ -16,11 +16,15 @@ import hydro.models.UpdatableEntity.LastUpdateTime
 import hydro.models.modification.EntityType
 
 case class QuizState(
-    /** Number from 0 to `rounds.size - 1`. A value of -1 means that the quiz has not started yet. */
+    /**
+      * Number from -1 to `rounds.size`. A value of -1 means that the quiz has not started yet. `rounds.size` means
+      * that the quiz has finished.
+      */
     roundIndex: Int = -1,
-    /** Number from 0 to `questions.size - 1`. A value of -1 means that the round name should be shown. */
+    /** Number from -1 to `questions.size - 1`. A value of -1 means that the round name should be shown. */
     questionIndex: Int = -1,
-    showSolution: Boolean = false,
+    /** Number from 0 to `questions.progressStepsCount - 1`. */
+    questionProgressIndex: Int = 0,
     timerState: TimerState = TimerState.nullInstance,
     override val lastUpdateTime: LastUpdateTime = LastUpdateTime.neverUpdated,
 ) extends UpdatableEntity {

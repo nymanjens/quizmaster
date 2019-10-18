@@ -8,6 +8,8 @@ import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState.TimerState
 import app.models.user.User
 import hydro.common.time.Clock
+import hydro.common.CollectionUtils
+import hydro.common.CollectionUtils.maybeGet
 import hydro.common.SerializingTaskQueue
 import hydro.flux.action.Dispatcher
 import hydro.flux.stores.AsyncEntityDerivedStateStore
@@ -98,29 +100,31 @@ final class TeamsAndQuizStateStore(
               case None =>
                 // Go to end of last round
                 val newRoundIndex = Math.min(quizState.roundIndex - 1, quizConfig.rounds.size - 1)
+                val newRound = quizConfig.rounds(newRoundIndex)
                 Seq(
-                  EntityModification.createUpdateAllFields(
-                    quizState.copy(
-                      roundIndex = newRoundIndex,
-                      questionIndex = quizConfig.rounds(newRoundIndex).questions.size - 1,
-                      showSolution = true,
-                      timerState = TimerState.createStarted(),
-                    )))
-              case Some(question) if !quizState.showSolution =>
+                  EntityModification.createUpdateAllFields(quizState.copy(
+                    roundIndex = newRoundIndex,
+                    questionIndex = newRound.questions.size - 1,
+                    questionProgressIndex = newRound.questions.lastOption.map(_.maxProgressIndex) getOrElse 0,
+                    timerState = TimerState.createStarted(),
+                  )))
+              case Some(question) if quizState.questionProgressIndex == 0 =>
                 // Go to previous question
+                val newQuestionIndex = quizState.questionIndex - 1
+                Seq(
+                  EntityModification.createUpdateAllFields(quizState.copy(
+                    questionIndex = newQuestionIndex,
+                    questionProgressIndex =
+                      maybeGet(quizState.round.questions, newQuestionIndex)
+                        .map(_.maxProgressIndex) getOrElse 0,
+                    timerState = TimerState.createStarted(),
+                  )))
+              case Some(question) if quizState.questionProgressIndex > 0 =>
+                // Decrement questionProgressIndex
                 Seq(
                   EntityModification.createUpdateAllFields(
                     quizState.copy(
-                      questionIndex = quizState.questionIndex - 1,
-                      showSolution = true,
-                      timerState = TimerState.createStarted(),
-                    )))
-              case Some(question) if quizState.showSolution =>
-                // Hide solution
-                Seq(
-                  EntityModification.createUpdateAllFields(
-                    quizState.copy(
-                      showSolution = false,
+                      questionProgressIndex = quizState.questionProgressIndex - 1,
                       timerState = TimerState.createStarted(),
                     )))
             }
@@ -163,25 +167,26 @@ final class TeamsAndQuizStateStore(
                     EntityModification.createUpdateAllFields(
                       quizState.copy(
                         questionIndex = 0,
-                        showSolution = false,
+                        questionProgressIndex = 0,
                         timerState = TimerState.createStarted(),
                       )))
                 }
-              case Some(question) if !quizState.showSolution =>
-                // Go to solution
+              case Some(question) if quizState.questionProgressIndex < question.maxProgressIndex =>
+                // Increment questionProgressIndex
                 Seq(
                   EntityModification.createUpdateAllFields(
                     quizState.copy(
-                      showSolution = true,
+                      questionProgressIndex = quizState.questionProgressIndex + 1,
                       timerState = TimerState.createStarted(),
                     )))
-              case Some(question) if quizState.showSolution =>
+              case Some(question) if quizState.questionProgressIndex == question.maxProgressIndex =>
                 if (quizState.questionIndex == quizState.round.questions.size - 1) {
                   // Go to next round
                   Seq(
                     EntityModification.createUpdateAllFields(
                       QuizState(
                         roundIndex = quizState.roundIndex + 1,
+                        questionProgressIndex = 0,
                         timerState = TimerState.createStarted(),
                       )))
                 } else {
@@ -190,7 +195,7 @@ final class TeamsAndQuizStateStore(
                     EntityModification.createUpdateAllFields(
                       quizState.copy(
                         questionIndex = quizState.questionIndex + 1,
-                        showSolution = false,
+                        questionProgressIndex = 0,
                         timerState = TimerState.createStarted(),
                       )))
                 }

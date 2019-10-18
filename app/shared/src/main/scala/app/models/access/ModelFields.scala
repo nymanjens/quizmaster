@@ -43,8 +43,8 @@ object ModelFields {
     case object roundIndex extends ModelField[Int, E]("roundIndex", _.roundIndex, v => _.copy(roundIndex = v))
     case object questionIndex
         extends ModelField[Int, E]("questionIndex", _.questionIndex, v => _.copy(questionIndex = v))
-    case object showSolution
-        extends ModelField[Boolean, E]("showSolution", _.showSolution, v => _.copy(showSolution = v))
+    case object questionProgressIndex
+        extends ModelField[Int, E]("questionProgressIndex", _.questionProgressIndex, v => _.copy(questionProgressIndex = v))
     case object timerState extends ModelField[TimerState, E]("timerState", _.timerState, v => _.copy(timerState = v))
   }
 
@@ -61,7 +61,7 @@ object ModelFields {
         QuizState.id,
         QuizState.roundIndex,
         QuizState.questionIndex,
-        QuizState.showSolution,
+        QuizState.questionProgressIndex,
         QuizState.timerState,
       )
     )
