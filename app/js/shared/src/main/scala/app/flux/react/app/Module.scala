@@ -1,5 +1,6 @@
 package app.flux.react.app
 
+import app.flux.react.app.quiz.GamepadSetupView
 import app.flux.react.app.quiz.MasterView
 import app.flux.react.app.quiz.ObfuscatedAnswer
 import app.flux.react.app.quiz.QuestionComponent
@@ -9,6 +10,7 @@ import app.flux.react.app.quiz.SyncedTimerBar
 import app.flux.react.app.quiz.TeamEditor
 import app.flux.react.app.quiz.TeamsList
 import app.flux.stores._
+import app.flux.stores.quiz.TeamInputStore
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.user.User
@@ -28,6 +30,7 @@ final class Module(
     pendingModificationsStore: PendingModificationsStore,
     applicationIsOnlineStore: ApplicationIsOnlineStore,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
+    teamInputStore: TeamInputStore,
     dispatcher: Dispatcher,
     clock: Clock,
     quizConfig: QuizConfig,
@@ -50,4 +53,5 @@ final class Module(
 
   implicit lazy val quizView: QuizView = new QuizView()
   implicit lazy val masterView: MasterView = new MasterView()
+  implicit lazy val gamepadSetupView: GamepadSetupView = new GamepadSetupView()
 }

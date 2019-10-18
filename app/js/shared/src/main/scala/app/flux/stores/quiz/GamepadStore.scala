@@ -39,25 +39,35 @@ final class GamepadStore extends StateStore[State] {
   private def getCurrentStateFromControllers(): State = {
     val gamepads = dom.window.navigator.asInstanceOf[js.Dynamic].getGamepads().asInstanceOf[js.Array[Gamepad]]
     State(gamepads = for (gamepad <- gamepads.toVector) yield {
-      val arrowPressed: Option[Arrow] =
-        if (isPressed(gamepad, ButtonIndex.up)) Some(Arrow.Up)
-        else if (isPressed(gamepad, ButtonIndex.right)) Some(Arrow.Right)
-        else if (isPressed(gamepad, ButtonIndex.down)) Some(Arrow.Down)
-        else if (isPressed(gamepad, ButtonIndex.left)) Some(Arrow.Left)
-        else None
+      if (gamepad != null && gamepad.connected) {
+        val arrowPressed: Option[Arrow] =
+          if (isPressed(gamepad, ButtonIndex.up)) Some(Arrow.Up)
+          else if (isPressed(gamepad, ButtonIndex.right)) Some(Arrow.Right)
+          else if (isPressed(gamepad, ButtonIndex.down)) Some(Arrow.Down)
+          else if (isPressed(gamepad, ButtonIndex.left)) Some(Arrow.Left)
+          // Some gamepads that don't have an analog stick have the arrow keys mapped to analog with no arrow buttons.
+          // The following cases handle this.
+          else if (gamepad.axes(0) == -1) Some(Arrow.Left)
+          else if (gamepad.axes(0) == 1) Some(Arrow.Right)
+          else if (gamepad.axes(1) == -1) Some(Arrow.Up)
+          else if (gamepad.axes(1) == 1) Some(Arrow.Down)
+          else None
 
-      val otherButtonPressed = Seq(
-        ButtonIndex.buttonTop,
-        ButtonIndex.buttonRight,
-        ButtonIndex.buttonDown,
-        ButtonIndex.buttonLeft,
-      ).exists(buttonIndex => isPressed(gamepad, buttonIndex))
+        val otherButtonPressed = Seq(
+          ButtonIndex.buttonTop,
+          ButtonIndex.buttonRight,
+          ButtonIndex.buttonDown,
+          ButtonIndex.buttonLeft,
+        ).exists(buttonIndex => isPressed(gamepad, buttonIndex))
 
-      GamepadState(
-        connected = gamepad.connected,
-        arrowPressed = arrowPressed,
-        otherButtonPressed = otherButtonPressed,
-      )
+        GamepadState(
+          connected = gamepad.connected,
+          arrowPressed = arrowPressed,
+          otherButtonPressed = otherButtonPressed,
+        )
+      } else {
+        GamepadState.nullInstance
+      }
     })
   }
 
@@ -76,8 +86,15 @@ object GamepadStore {
     def nullInstance = State()
   }
 
-  case class GamepadState(connected: Boolean, arrowPressed: Option[Arrow], otherButtonPressed: Boolean) {
+  case class GamepadState(
+      connected: Boolean = false,
+      arrowPressed: Option[Arrow] = None,
+      otherButtonPressed: Boolean = false,
+  ) {
     def anyButtonPressed: Boolean = arrowPressed.isDefined || otherButtonPressed
+  }
+  object GamepadState {
+    val nullInstance = GamepadState()
   }
 
   sealed trait Arrow

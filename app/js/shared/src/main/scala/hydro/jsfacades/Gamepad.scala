@@ -10,6 +10,7 @@ trait Gamepad extends js.Object {
 
   def connected: Boolean = js.native
   def buttons: js.Array[GamepadButton] = js.native
+  def axes: js.Array[Double] = js.native
 }
 
 object Gamepad {

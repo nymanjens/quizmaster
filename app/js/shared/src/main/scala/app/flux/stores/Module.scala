@@ -2,6 +2,8 @@ package app.flux.stores
 
 import app.api.ScalaJsApi.GetInitialDataResponse
 import app.api.ScalaJsApiClient
+import app.flux.stores.quiz.GamepadStore
+import app.flux.stores.quiz.TeamInputStore
 import app.models.user.User
 import hydro.common.I18n
 import hydro.common.time.Clock
@@ -30,4 +32,6 @@ final class Module(
   implicit val pendingModificationsStore = new PendingModificationsStore
   implicit val applicationIsOnlineStore = new ApplicationIsOnlineStore
   implicit val teamsAndQuizStateStore = new TeamsAndQuizStateStore
+  implicit private val gamepadStore = new GamepadStore
+  implicit val teamInputStore = new TeamInputStore
 }

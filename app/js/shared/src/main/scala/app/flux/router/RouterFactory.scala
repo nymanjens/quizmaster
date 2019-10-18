@@ -59,6 +59,8 @@ private[router] final class RouterFactory(
 
           | staticRuleFromPage(AppPages.Master, reactAppModule.masterView.apply)
 
+          | staticRuleFromPage(AppPages.Gamepad, reactAppModule.gamepadSetupView.apply)
+
         // Fallback
         ).notFound(redirectToPage(StandardPages.Root)(Redirect.Replace))
           .onPostRender((_, _) =>
