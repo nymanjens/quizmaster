@@ -19,6 +19,8 @@ object QuizConfig {
     def progressStepsCount: Int
     final def maxProgressIndex: Int = progressStepsCount - 1
     def isBeingAnswered(questionProgressIndex: Int): Boolean
+    def pointsToGain: Int
+    def onlyFirstGainsPoints: Boolean
   }
 
   object Question {
@@ -26,18 +28,26 @@ object QuizConfig {
         question: String,
         answer: String,
         choices: Option[Seq[String]],
-        pointsToGain: Int,
+        override val pointsToGain: Int,
         maxTime: Option[Duration],
-        onlyFirstGainsPoints: Boolean,
+        override val onlyFirstGainsPoints: Boolean,
     ) extends Question {
+
+      /**
+        * Steps:
+        * 0- Show preparatory title: "Question 2"
+        * 1- Show question: "This is the question, do you know the answer?"
+        * 2- (if relevant) Show choices
+        * 3- Show answer
+        */
       override def progressStepsCount: Int = {
-        if (choices.isDefined) 3 else 2
+        if (choices.isDefined) 4 else 3
       }
       override def isBeingAnswered(questionProgressIndex: Int): Boolean = {
         if (choices.isDefined) {
-          questionProgressIndex == 1
+          questionProgressIndex == 2
         } else {
-          questionProgressIndex == 0
+          questionProgressIndex == 1
         }
       }
     }
@@ -48,10 +58,12 @@ object QuizConfig {
         textualQuestion: String,
         textualAnswer: String,
         textualChoices: Seq[String],
-        pointsToGain: Int,
+        override val pointsToGain: Int,
     ) extends Question {
       override def progressStepsCount: Int = 3
       override def isBeingAnswered(questionProgressIndex: Int): Boolean = questionProgressIndex == 1
+      override def onlyFirstGainsPoints: Boolean = true
+
       def maxTime: Duration = Duration.ofSeconds(3)
     }
   }

@@ -18,6 +18,7 @@ rounds:
       - !!app.models.quiz.config.ParsableQuizConfig$Question$Single
         question: Who was the country Columbia named after?
         answer: Christoffer Columbus
+        maxTimeSeconds: 8
 
   -
     name: TV
