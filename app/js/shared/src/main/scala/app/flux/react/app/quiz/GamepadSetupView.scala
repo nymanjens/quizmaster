@@ -53,8 +53,8 @@ final class GamepadSetupView(
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(router: RouterContext)
   protected case class State(
-      teamIdToGamepadState: Map[Long, GamepadState] = Map(),
       teams: Seq[Team] = Seq(),
+      teamIdToGamepadState: Map[Long, GamepadState] = Map(),
   )
 
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {

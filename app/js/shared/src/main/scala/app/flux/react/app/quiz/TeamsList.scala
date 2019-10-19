@@ -1,5 +1,8 @@
 package app.flux.react.app.quiz
 
+import hydro.flux.react.ReactVdomUtils.^^
+import app.flux.stores.quiz.GamepadStore.GamepadState
+import app.flux.stores.quiz.TeamInputStore
 import hydro.flux.react.ReactVdomUtils.<<
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
@@ -22,6 +25,7 @@ final class TeamsList(
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
+    teamInputStore: TeamInputStore,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -37,11 +41,15 @@ final class TeamsList(
         _.copy(
           teams = teamsAndQuizStateStore.stateOrEmpty.teams,
         ))
+      .withStateStoresDependency(
+        teamInputStore,
+        _.copy(teamIdToGamepadState = teamInputStore.state.teamIdToGamepadState))
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(showScoreEditButtons: Boolean)
   protected case class State(
       teams: Seq[Team] = Seq(),
+      teamIdToGamepadState: Map[Long, GamepadState] = Map(),
   )
 
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
@@ -54,7 +62,17 @@ final class TeamsList(
             ^.key := team.id,
             <.div(
               ^.className := "name",
-              team.name
+              team.name,
+              " ",
+              <<.ifDefined(state.teamIdToGamepadState.get(team.id)) { gamepadState =>
+                <<.ifThen(gamepadState.connected) {
+                  Bootstrap.FontAwesomeIcon("gamepad")(
+                    ^^.ifThen(gamepadState.anyButtonPressed) {
+                      ^.className := "pressed"
+                    },
+                  )
+                }
+              },
             ),
             <.div(
               ^.className := "score",
