@@ -2,6 +2,7 @@ package hydro.flux.react.uielements
 
 import app.models.user.User
 import app.AppVersion
+import app.flux.router.AppPages
 import hydro.common.CollectionUtils.ifThenSeq
 import hydro.common.I18n
 import hydro.common.JsLoggingUtils.LogExceptionsCallback
@@ -64,6 +65,16 @@ final class SbadminLayout(
               "marginRight" -> "15px",
             ),
             s"v${AppVersion.versionString}",
+          ),
+          <.li(
+            router.anchorWithHrefTo(AppPages.Gamepad)(
+              Bootstrap.FontAwesomeIcon("gamepad", fixedWidth = true),
+            ),
+          ),
+          <.li(
+            router.anchorWithHrefTo(AppPages.Quiz)(
+              Bootstrap.FontAwesomeIcon("question-circle", fixedWidth = true),
+            ),
           ),
         ),
       ),

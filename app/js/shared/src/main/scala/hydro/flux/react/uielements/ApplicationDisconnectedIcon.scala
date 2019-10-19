@@ -36,9 +36,7 @@ final class ApplicationDisconnectedIcon(
             Bootstrap.FontAwesomeIcon("chain-broken")(^.title := i18n("app.offline"))
           )
         case false =>
-          Bootstrap.NavbarBrand()(
-            Bootstrap.FontAwesomeIcon("chain")(^.title := i18n("app.online"))
-          )
+          <.span()
       }
     }
   }
