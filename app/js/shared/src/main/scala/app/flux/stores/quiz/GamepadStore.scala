@@ -1,11 +1,14 @@
 package app.flux.stores.quiz
 
+import japgolly.scalajs.react.vdom.html_<^._
 import app.flux.stores.quiz.GamepadStore.Arrow
 import app.flux.stores.quiz.GamepadStore.GamepadState
 import app.flux.stores.quiz.GamepadStore.State
+import hydro.flux.react.uielements.Bootstrap
 import hydro.flux.stores.StateStore
 import hydro.jsfacades.Gamepad
 import hydro.jsfacades.Gamepad.ButtonIndex
+import japgolly.scalajs.react.vdom.VdomElement
 import org.scalajs.dom
 
 import scala.collection.immutable.Seq
@@ -97,11 +100,11 @@ object GamepadStore {
     val nullInstance = GamepadState()
   }
 
-  sealed trait Arrow
+  sealed abstract class Arrow(val icon: VdomTag)
   object Arrow {
-    case object Up extends Arrow
-    case object Right extends Arrow
-    case object Down extends Arrow
-    case object Left extends Arrow
+    case object Up extends Arrow(Bootstrap.FontAwesomeIcon("chevron-circle-up"))
+    case object Right extends Arrow(Bootstrap.FontAwesomeIcon("chevron-circle-right"))
+    case object Down extends Arrow(Bootstrap.FontAwesomeIcon("chevron-circle-down"))
+    case object Left extends Arrow(Bootstrap.FontAwesomeIcon("chevron-circle-left"))
   }
 }
