@@ -29,11 +29,7 @@ object ModelFields {
     case object id extends IdModelField[E]
     case object name extends ModelField[String, E]("name", _.name, v => _.copy(name = v))
     case object score extends ModelField[Int, E]("score", _.score, v => _.copy(score = v))
-    case object createTimeMillisSinceEpoch
-        extends ModelField[Long, E](
-          "createTimeMillisSinceEpoch",
-          _.createTimeMillisSinceEpoch,
-          v => _.copy(createTimeMillisSinceEpoch = v))
+    case object index extends ModelField[Int, E]("index", _.index, v => _.copy(index = v))
   }
 
   object QuizState {
@@ -44,8 +40,12 @@ object ModelFields {
     case object questionIndex
         extends ModelField[Int, E]("questionIndex", _.questionIndex, v => _.copy(questionIndex = v))
     case object questionProgressIndex
-        extends ModelField[Int, E]("questionProgressIndex", _.questionProgressIndex, v => _.copy(questionProgressIndex = v))
-    case object timerState extends ModelField[TimerState, E]("timerState", _.timerState, v => _.copy(timerState = v))
+        extends ModelField[Int, E](
+          "questionProgressIndex",
+          _.questionProgressIndex,
+          v => _.copy(questionProgressIndex = v))
+    case object timerState
+        extends ModelField[TimerState, E]("timerState", _.timerState, v => _.copy(timerState = v))
   }
 
   // **************** Field numbers **************** //
@@ -57,7 +57,7 @@ object ModelFields {
         Team.id,
         Team.name,
         Team.score,
-        Team.createTimeMillisSinceEpoch,
+        Team.index,
         QuizState.id,
         QuizState.roundIndex,
         QuizState.questionIndex,

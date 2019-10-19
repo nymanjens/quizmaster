@@ -43,7 +43,7 @@ final class TeamsAndQuizStateStore(
       teams = await(
         entityAccess
           .newQuery[Team]()
-          .sort(DbQuery.Sorting.ascBy(ModelFields.Team.createTimeMillisSinceEpoch))
+          .sort(DbQuery.Sorting.ascBy(ModelFields.Team.index))
           .data()),
       quizState = await(
         entityAccess
@@ -62,13 +62,17 @@ final class TeamsAndQuizStateStore(
 
   // **************** Additional public API: Write methods **************** //
   def addEmptyTeam(): Future[Unit] = updateStateQueue.schedule {
-    entityAccess.persistModifications(
-      EntityModification.createAddWithRandomId(
-        Team(
-          name = "",
-          score = 0,
-          createTimeMillisSinceEpoch = clock.nowInstant.toEpochMilli,
-        )))
+    async {
+      val maxIndex = await(stateFuture).teams.map(_.index).max
+      await(
+        entityAccess.persistModifications(
+          EntityModification.createAddWithRandomId(
+            Team(
+              name = "",
+              score = 0,
+              index = maxIndex + 1,
+            ))))
+    }
   }
   def updateName(team: Team, newName: String): Future[Unit] = updateStateQueue.schedule {
     entityAccess.persistModifications(EntityModification.createUpdateAllFields(team.copy(name = newName)))

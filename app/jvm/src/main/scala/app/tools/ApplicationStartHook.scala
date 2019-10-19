@@ -41,14 +41,14 @@ final class ApplicationStartHook @Inject()(
         Team(
           name = "Team awesome",
           score = 0,
-          createTimeMillisSinceEpoch = 1,
+          index = 0,
         ),
       ),
       EntityModification.createAddWithRandomId(
         Team(
           name = "The team formerly known as team awesome",
           score = 2,
-          createTimeMillisSinceEpoch = 2,
+          index = 1,
         ),
       )
     )
