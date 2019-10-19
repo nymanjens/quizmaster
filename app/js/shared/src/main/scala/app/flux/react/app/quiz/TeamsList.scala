@@ -73,6 +73,8 @@ final class TeamsList(
                   )
                 }
               },
+              " ",
+              TeamIcon(team),
             ),
             <.div(
               ^.className := "score",
