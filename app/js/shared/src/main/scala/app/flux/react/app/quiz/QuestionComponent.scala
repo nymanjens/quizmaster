@@ -1,11 +1,14 @@
 package app.flux.react.app.quiz
 
+import app.flux.stores.quiz.GamepadStore.Arrow
 import hydro.flux.react.ReactVdomUtils.<<
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.QuizState.TimerState
 import app.models.quiz.config.QuizConfig.Round
+import app.models.quiz.QuizState
+import app.models.quiz.Team
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
@@ -46,7 +49,10 @@ final class QuestionComponent(
     ComponentConfig(backendConstructor = new Backend(_), initialState = State())
       .withStateStoresDependency(
         teamsAndQuizStateStore,
-        _.copy(timerState = teamsAndQuizStateStore.stateOrEmpty.quizState.timerState))
+        _.copy(
+          quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
+          teams = teamsAndQuizStateStore.stateOrEmpty.teams,
+        ))
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(
@@ -55,12 +61,16 @@ final class QuestionComponent(
       questionProgressIndex: Int,
       showMasterData: Boolean,
   )
-  protected case class State(timerState: TimerState = TimerState.nullInstance)
+  protected case class State(
+      quizState: QuizState = QuizState.nullInstance,
+      teams: Seq[Team] = Seq(),
+  )
 
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
 
     override def render(props: Props, state: State): VdomElement = logExceptions {
-      implicit val _: Props = props
+      implicit val _1: Props = props
+      implicit val _2: State = state
       <.div(
         ^.className := "question-wrapper",
         props.question match {
@@ -88,7 +98,12 @@ final class QuestionComponent(
       )
     }
 
-    private def showSingleQuestion(question: Question.Single)(implicit props: Props): VdomElement = {
+    private def showSingleQuestion(
+        question: Question.Single,
+    )(
+        implicit props: Props,
+        state: State,
+    ): VdomElement = {
       val progressIndex = props.questionProgressIndex
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
 
@@ -114,16 +129,35 @@ final class QuestionComponent(
           ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
             <.ul(
               ^.className := "choices",
-              (for (choice <- choices)
-                yield
+              (for ((choice, arrow) <- choices zip Arrow.all)
+                yield {
+                  val submissions =
+                    state.quizState.submissions.filter(_.maybeAnswerIndex == Some(arrow.answerIndex))
+                  val visibleSubmissions =
+                    if (question.onlyFirstGainsPoints || answerIsVisible) submissions else Seq()
+                  val isCorrectAnswer = choice == question.answer
                   <.li(
                     ^.key := choice,
-                    if (answerIsVisible && choice == question.answer) {
-                      <.b(choice)
+                    arrow.icon(
+                      ^.className := "choice-arrow",
+                    ),
+                    if (isCorrectAnswer && (answerIsVisible || visibleSubmissions.nonEmpty)) {
+                      <.span(^.className := "correct", choice)
+                    } else if (!isCorrectAnswer && visibleSubmissions.nonEmpty) {
+                      <.span(^.className := "incorrect", choice)
                     } else {
                       choice
                     },
-                  )).toVdomArray
+                    " ",
+                    <<.joinWithSpaces(
+                      for (submission <- visibleSubmissions)
+                        yield
+                          TeamIcon(state.teams.find(_.id == submission.teamId).get)(
+                            ^.key := submission.teamId,
+                          )
+                    )
+                  )
+                }).toVdomArray
             )
           }
         },

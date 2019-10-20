@@ -181,12 +181,22 @@ table.table-bordered {
       font-size: 25px;
     }
     .choices {
+      list-style: none;
       padding-top: 25px;
       font-size: 35px;
       display: inline-block;
       text-align: left;
-      b {
+      padding-left: 0;
+      .choice-arrow {
+        padding-right: 25px;
+      }
+      .correct {
         color: green;
+        font-weight: bold;
+      }
+      .incorrect {
+        color: red;
+        text-decoration: line-through;
       }
     }
     .maybe-obfuscated-answer-wrapper {
