@@ -28,6 +28,7 @@ object QuizConfig {
 
     /** Returns true if it would make sense to add a QuizState.Submission for this question for this progressIndex. */
     def submissionAreOpen(questionProgressIndex: Int): Boolean
+    def isMultipleChoice: Boolean
   }
 
   object Question {
@@ -66,6 +67,8 @@ object QuizConfig {
         rightProgressIndex && questionSupportsSubmissions
       }
 
+      override def isMultipleChoice: Boolean = choices.nonEmpty
+
       def questionIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 1
       }
@@ -99,6 +102,7 @@ object QuizConfig {
       override def maxTime: Option[Duration] = Some(Duration.ofSeconds(3))
 
       override def submissionAreOpen(questionProgressIndex: Int): Boolean = ???
+      override def isMultipleChoice: Boolean = true
     }
   }
 }

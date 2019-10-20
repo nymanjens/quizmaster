@@ -3,15 +3,13 @@ package app.flux.stores.quiz
 import app.flux.stores.quiz.GamepadStore.GamepadState
 import app.flux.stores.quiz.TeamInputStore.State
 import app.models.quiz.config.QuizConfig
-import app.models.quiz.QuizState
-import app.models.quiz.Team
+import app.models.quiz.QuizState.Submission
 import app.models.user.User
 import hydro.common.time.Clock
 import hydro.flux.action.Dispatcher
 import hydro.flux.stores.StateStore
 import hydro.models.access.JsEntityAccess
 
-import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
@@ -39,16 +37,47 @@ final class TeamInputStore(
   private object GamepadStoreListener extends StateStore.Listener {
     override def onStateUpdate(): Unit = {
       val TeamsAndQuizStateStore.State(teams, quizState) = teamsAndQuizStateStore.stateOrEmpty
-      setState(State(teamIdToGamepadState = (teams.map(_.id) zip gamepadStore.state.gamepads).toMap))
 
+      setState(
+        State(
+          teamIdToGamepadState = (teams.map(_.id) zip gamepadStore.state.gamepads).toMap
+            .withDefaultValue(GamepadState.nullInstance)))
 
-      // TODO: Update QuizState if button pressed on right moment
+      if (quizState.canSubmitResponse) {
+        val question = quizState.maybeQuestion.get
+
+        for (team <- teams) {
+          val gamepadState = _state.teamIdToGamepadState(team.id)
+          val teamHasAlreadyAnswered = quizState.submissions.exists(_.teamId == team.id)
+
+          if (!teamHasAlreadyAnswered) {
+            if (question.isMultipleChoice && gamepadState.arrowPressed.isDefined) {
+              teamsAndQuizStateStore.addSubmission(
+                Submission(
+                  teamId = team.id,
+                  answerIndex = Some(gamepadState.arrowPressed.get.answerIndex),
+                )
+              )
+            } else if (gamepadState.anyButtonPressed) {
+              teamsAndQuizStateStore.addSubmission(
+                Submission(
+                  teamId = team.id,
+                )
+              )
+            }
+          }
+        }
+
+        // TODO: Add and remove points
+      }
     }
   }
 }
 
 object TeamInputStore {
-  case class State(teamIdToGamepadState: Map[Long, GamepadState] = Map())
+  case class State(
+      teamIdToGamepadState: Map[Long, GamepadState] = Map().withDefaultValue(GamepadState.nullInstance),
+  )
   object State {
     def nullInstance = State()
   }

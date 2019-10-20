@@ -112,5 +112,5 @@ object QuizState {
     )
   }
 
-  case class Submission(teamId: Long, answerIndex: Option[Int])
+  case class Submission(teamId: Long, answerIndex: Option[Int] = None)
 }

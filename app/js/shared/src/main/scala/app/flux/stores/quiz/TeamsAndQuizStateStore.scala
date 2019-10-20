@@ -5,6 +5,7 @@ import app.models.access.ModelFields
 import app.models.quiz.QuizState
 import app.models.quiz.Team
 import app.models.quiz.config.QuizConfig
+import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.TimerState
 import app.models.user.User
 import hydro.common.time.Clock
@@ -215,6 +216,15 @@ final class TeamsAndQuizStateStore(
   def doQuizStateUpdate(fieldMasks: ModelField[_, QuizState]*)(update: QuizState => QuizState): Future[Unit] =
     updateStateQueue.schedule {
       doQuizStateUpdateInternal(fieldMasks: _*)(update)
+    }
+
+  def addSubmission(submission: Submission): Future[Unit] =
+    updateStateQueue.schedule {
+      doQuizStateUpdateInternal(ModelFields.QuizState.submissions) { quizState =>
+        quizState.copy(
+          submissions = quizState.submissions :+ submission,
+        )
+      }
     }
 
   private def doQuizStateUpdateInternal(fieldMasks: ModelField[_, QuizState]*)(
