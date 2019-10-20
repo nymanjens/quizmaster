@@ -81,7 +81,7 @@ final class TeamsAndQuizStateStore(
   def updateScore(team: Team, scoreDiff: Int): Future[Unit] = updateStateQueue.schedule {
     async {
       val oldScore = await(stateFuture).teams.find(_.id == team.id).get.score
-      val newScore = oldScore + scoreDiff
+      val newScore = Math.max(0, oldScore + scoreDiff)
       await(
         entityAccess.persistModifications(
           EntityModification.createUpdateAllFields(team.copy(score = newScore))))
@@ -183,6 +183,11 @@ final class TeamsAndQuizStateStore(
                     )
                   }
                 case Some(question) if quizState.questionProgressIndex < question.maxProgressIndex =>
+                  // Add and remove points
+                  if (quizState.questionProgressIndex == question.maxProgressIndex - 1) {
+                    Future(addOrRemovePoints(quizState))
+                  }
+
                   // Increment questionProgressIndex
                   quizState.copy(
                     questionProgressIndex = quizState.questionProgressIndex + 1,
@@ -235,6 +240,18 @@ final class TeamsAndQuizStateStore(
       await(
         entityAccess.persistModifications(EntityModification.createUpdate(newQuizState, fieldMasks.toVector)))
     }
+
+  private def addOrRemovePoints(quizState: QuizState): Unit = {
+    val question = quizState.maybeQuestion.get
+    if (question.isMultipleChoice) {
+      for (submission <- quizState.submissions) {
+        val correct = question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get)
+        val scoreDiff = if (correct) question.pointsToGain else question.pointsToGainOnWrongAnswer
+        val team = stateOrEmpty.teams.find(_.id == submission.teamId).get
+        updateScore(team, scoreDiff = scoreDiff)
+      }
+    }
+  }
 }
 
 object TeamsAndQuizStateStore {

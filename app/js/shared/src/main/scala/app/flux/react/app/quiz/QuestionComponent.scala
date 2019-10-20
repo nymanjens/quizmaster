@@ -79,7 +79,7 @@ final class QuestionComponent(
             props.questionProgressIndex match {
               case 0 if !props.showMasterData => showSingleQuestionStep0PreparatoryTitle(single)
               case 0 if props.showMasterData  => showSingleQuestion(single)
-              case 1 | 2 | 3                  => showSingleQuestion(single)
+              case 1 | 2 | 3 | 4              => showSingleQuestion(single)
             }
 
           case double: Question.Double => showDoubleQuestion(double)
