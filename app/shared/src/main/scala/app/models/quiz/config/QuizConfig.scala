@@ -24,6 +24,9 @@ object QuizConfig {
     def progressStepsCount: Int
     final def maxProgressIndex: Int = progressStepsCount - 1
     def isBeingAnswered(questionProgressIndex: Int): Boolean
+    def maxTime: Option[Duration]
+
+    def submissionAreOpen(questionProgressIndex: Int): Boolean
   }
 
   object Question {
@@ -32,7 +35,7 @@ object QuizConfig {
         answer: String,
         choices: Option[Seq[String]],
         override val pointsToGain: Int,
-        maxTime: Option[Duration],
+        override val maxTime: Option[Duration],
         override val onlyFirstGainsPoints: Boolean,
     ) extends Question {
 
@@ -57,6 +60,9 @@ object QuizConfig {
           questionProgressIndex == 1
         }
       }
+
+      override def submissionAreOpen(questionProgressIndex: Int): Boolean = ???
+
       def questionIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 1
       }
@@ -83,7 +89,9 @@ object QuizConfig {
       override def progressStepsCount: Int = 3
       override def isBeingAnswered(questionProgressIndex: Int): Boolean = questionProgressIndex == 1
 
-      def maxTime: Duration = Duration.ofSeconds(3)
+      override def maxTime: Option[Duration] = Some(Duration.ofSeconds(3))
+
+      override def submissionAreOpen(questionProgressIndex: Int): Boolean = ???
     }
   }
 }

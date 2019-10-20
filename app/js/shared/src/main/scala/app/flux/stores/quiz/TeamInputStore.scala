@@ -3,12 +3,15 @@ package app.flux.stores.quiz
 import app.flux.stores.quiz.GamepadStore.GamepadState
 import app.flux.stores.quiz.TeamInputStore.State
 import app.models.quiz.config.QuizConfig
+import app.models.quiz.QuizState
+import app.models.quiz.Team
 import app.models.user.User
 import hydro.common.time.Clock
 import hydro.flux.action.Dispatcher
 import hydro.flux.stores.StateStore
 import hydro.models.access.JsEntityAccess
 
+import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
@@ -35,8 +38,10 @@ final class TeamInputStore(
 
   private object GamepadStoreListener extends StateStore.Listener {
     override def onStateUpdate(): Unit = {
-      val teams = teamsAndQuizStateStore.stateOrEmpty.teams
+      val TeamsAndQuizStateStore.State(teams, quizState) = teamsAndQuizStateStore.stateOrEmpty
       setState(State(teamIdToGamepadState = (teams.map(_.id) zip gamepadStore.state.gamepads).toMap))
+
+
       // TODO: Update QuizState if button pressed on right moment
     }
   }

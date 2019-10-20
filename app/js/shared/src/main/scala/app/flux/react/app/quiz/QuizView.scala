@@ -54,7 +54,7 @@ final class QuizView(
       <.span(
         ^.className := "quiz-view",
         quizProgressIndicator(state.quizState),
-        quizState.question match {
+        quizState.maybeQuestion match {
           case None =>
             RoundComponent(quizState.round)
           case Some(question) =>

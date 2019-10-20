@@ -46,7 +46,7 @@ final class QuizProgressIndicator(
           case _ =>
             <.span(
               s"Round ${quizState.roundIndex + 1} of ${quizConfig.rounds.size} (${quizState.round.name}). ",
-              if (quizState.question.isDefined) {
+              if (quizState.maybeQuestion.isDefined) {
                 s"Question ${quizState.questionIndex + 1} of ${quizState.round.questions.size}"
               } else {
                 s"${quizState.round.questions.size} questions"

@@ -50,7 +50,7 @@ case class QuizState(
     }
   }
 
-  def question(implicit quizConfig: QuizConfig): Option[Question] = {
+  def maybeQuestion(implicit quizConfig: QuizConfig): Option[Question] = {
     if (questionIndex == -1) {
       None
     } else {
@@ -60,6 +60,21 @@ case class QuizState(
 
   def quizIsBeingSetUp: Boolean = roundIndex < 0
   def quizHasEnded(implicit quizConfig: QuizConfig): Boolean = roundIndex >= quizConfig.rounds.size
+
+  def canSubmitResponse(implicit quizConfig: QuizConfig, clock: Clock): Boolean = {
+    maybeQuestion match {
+      case None => false
+      case Some(question) =>
+        val beingAnswered = question.isBeingAnswered(questionProgressIndex)
+        val timerIsRunning = question.maxTime match {
+          case None          => true
+          case Some(maxTime) => timerState.timerRunning && !timerState.hasFinished(maxTime)
+        }
+        val submissionAreOpen = question.submissionAreOpen(questionProgressIndex)
+
+        beingAnswered && timerIsRunning && submissionAreOpen
+    }
+  }
 }
 
 object QuizState {

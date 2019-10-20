@@ -101,7 +101,7 @@ final class TeamsAndQuizStateStore(
       quizState.roundIndex match {
         case -1 => quizState // Do nothing
         case _ =>
-          quizState.question match {
+          quizState.maybeQuestion match {
             case None if quizState.roundIndex == 0 =>
               QuizState.nullInstance
             case None =>
@@ -163,7 +163,7 @@ final class TeamsAndQuizStateStore(
               ModelFields.QuizState.timerState,
               ModelFields.QuizState.submissions,
             ) { quizState =>
-              quizState.question match {
+              quizState.maybeQuestion match {
                 case None =>
                   if (quizState.round.questions.isEmpty) {
                     // Go to next round

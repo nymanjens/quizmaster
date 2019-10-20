@@ -63,7 +63,7 @@ final class MasterView(
           case quizState if quizState.quizIsBeingSetUp =>
             teamEditor()
           case quizState =>
-            quizState.question match {
+            quizState.maybeQuestion match {
               case None =>
                 RoundComponent(quizState.round)
               case Some(question) =>
