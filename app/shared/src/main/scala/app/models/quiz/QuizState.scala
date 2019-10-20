@@ -66,12 +66,12 @@ case class QuizState(
       case None => false
       case Some(question) =>
         val submissionAreOpen = question.submissionAreOpen(questionProgressIndex)
-        val timerIsRunning = question.maxTime match {
-          case None          => true
-          case Some(maxTime) => timerState.timerRunning && !timerState.hasFinished(maxTime)
-        }
+        val submissionIsHinderedByTimer =
+          if (question.shouldShowTimer(questionProgressIndex))
+            !timerState.timerRunning || timerState.hasFinished(question.maxTime.get)
+          else false
 
-        submissionAreOpen && timerIsRunning
+        submissionAreOpen && !submissionIsHinderedByTimer
     }
   }
 }

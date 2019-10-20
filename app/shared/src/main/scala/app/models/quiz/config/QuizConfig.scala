@@ -26,6 +26,7 @@ object QuizConfig {
     def shouldShowTimer(questionProgressIndex: Int): Boolean
     def maxTime: Option[Duration]
 
+    /** Returns true if it would make sense to add a QuizState.Submission for this question for this progressIndex. */
     def submissionAreOpen(questionProgressIndex: Int): Boolean
   }
 
@@ -57,7 +58,13 @@ object QuizConfig {
         maxTime.isDefined && questionProgressIndex == progressIndexForQuestionBeingAnswered
       }
 
-      override def submissionAreOpen(questionProgressIndex: Int): Boolean = ???
+      override def submissionAreOpen(questionProgressIndex: Int): Boolean = {
+        val rightProgressIndex = questionProgressIndex == progressIndexForQuestionBeingAnswered
+        //val questionSupportsSubmissions = choices.nonEmpty || onlyFirstGainsPoints
+        val questionSupportsSubmissions = true
+
+        rightProgressIndex && questionSupportsSubmissions
+      }
 
       def questionIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 1
