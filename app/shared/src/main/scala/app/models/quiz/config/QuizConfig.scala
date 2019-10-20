@@ -23,7 +23,7 @@ object QuizConfig {
 
     def progressStepsCount: Int
     final def maxProgressIndex: Int = progressStepsCount - 1
-    def isBeingAnswered(questionProgressIndex: Int): Boolean
+    def shouldShowTimer(questionProgressIndex: Int): Boolean
     def maxTime: Option[Duration]
 
     def submissionAreOpen(questionProgressIndex: Int): Boolean
@@ -53,12 +53,8 @@ object QuizConfig {
       override def progressStepsCount: Int = {
         if (choices.isDefined) 4 else 3
       }
-      override def isBeingAnswered(questionProgressIndex: Int): Boolean = {
-        if (choices.isDefined) {
-          questionProgressIndex == 2
-        } else {
-          questionProgressIndex == 1
-        }
+      override def shouldShowTimer(questionProgressIndex: Int): Boolean = {
+        maxTime.isDefined && questionProgressIndex == progressIndexForQuestionBeingAnswered
       }
 
       override def submissionAreOpen(questionProgressIndex: Int): Boolean = ???
@@ -71,6 +67,10 @@ object QuizConfig {
       }
       def answerIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex == maxProgressIndex
+      }
+
+      private def progressIndexForQuestionBeingAnswered: Int = {
+        if (choices.isDefined) 2 else 1
       }
     }
 
@@ -87,7 +87,7 @@ object QuizConfig {
       override def onlyFirstGainsPoints: Boolean = true
 
       override def progressStepsCount: Int = 3
-      override def isBeingAnswered(questionProgressIndex: Int): Boolean = questionProgressIndex == 1
+      override def shouldShowTimer(questionProgressIndex: Int): Boolean = questionProgressIndex == 2
 
       override def maxTime: Option[Duration] = Some(Duration.ofSeconds(3))
 

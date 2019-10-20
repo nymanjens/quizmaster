@@ -139,13 +139,11 @@ final class QuestionComponent(
             }
           }
         },
-        <<.ifThen(question.isBeingAnswered(props.questionProgressIndex)) {
-          <<.ifDefined(question.maxTime) { maxTime =>
-            <.div(
-              ^.className := "timer",
-              syncedTimerBar(maxTime = maxTime),
-            )
-          }
+        <<.ifThen(question.shouldShowTimer(props.questionProgressIndex)) {
+          <.div(
+            ^.className := "timer",
+            syncedTimerBar(maxTime = question.maxTime.get),
+          )
         }
       )
     }
