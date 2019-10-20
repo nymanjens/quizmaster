@@ -30,6 +30,7 @@ object QuizConfig {
     /** Returns true if it would make sense to add a QuizState.Submission for this question for this progressIndex. */
     def submissionAreOpen(questionProgressIndex: Int): Boolean
     def isMultipleChoice: Boolean
+
     /** If `isMultipleChoice` is true, this is a way to see if an answer is correct. */
     def isCorrectAnswerIndex(answerIndex: Int): Boolean
   }
@@ -54,9 +55,10 @@ object QuizConfig {
         * 1- Show question: "This is the question, do you know the answer?"
         * 2- (if relevant) Show choices
         * 3- Show answer
+        * 4- (if possible) Show answer and give points
         */
       override def progressStepsCount: Int = {
-        if (choices.isDefined) 4 else 3
+        if (choices.isDefined) 5 else 3
       }
       override def shouldShowTimer(questionProgressIndex: Int): Boolean = {
         maybeMaxTime.isDefined && questionProgressIndex == progressIndexForQuestionBeingAnswered
@@ -80,7 +82,11 @@ object QuizConfig {
         choices.isDefined && questionProgressIndex >= 2
       }
       def answerIsVisible(questionProgressIndex: Int): Boolean = {
-        questionProgressIndex == maxProgressIndex
+        if (choices.isDefined) {
+          questionProgressIndex >= maxProgressIndex - 1
+        } else {
+          questionProgressIndex == maxProgressIndex
+        }
       }
 
       private def progressIndexForQuestionBeingAnswered: Int = {
