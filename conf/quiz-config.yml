@@ -16,6 +16,15 @@ rounds:
         onlyFirstGainsPoints: true
 
       - !!app.models.quiz.config.ParsableQuizConfig$Question$Single
+        question: What is the capital of Belgium?
+        answer: Brussels
+        choices:
+          - Paris
+          - London
+          - Brussels
+          - Berlin
+
+      - !!app.models.quiz.config.ParsableQuizConfig$Question$Single
         question: Who was the country Columbia named after?
         answer: Christoffer Columbus
         maxTimeSeconds: 8
