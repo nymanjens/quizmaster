@@ -1,13 +1,14 @@
 package app.models.quiz
 
 import hydro.common.time.JavaTimeImplicits._
-
 import java.time.Duration
 import java.time.Instant
 
+import scala.collection.immutable.Seq
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.config.QuizConfig.Round
+import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.TimerState
 import hydro.common.time.Clock
 import hydro.models.Entity
@@ -26,6 +27,7 @@ case class QuizState(
     /** Number from 0 to `questions.progressStepsCount - 1`. */
     questionProgressIndex: Int = 0,
     timerState: TimerState = TimerState.nullInstance,
+    submissions: Seq[Submission] = Seq(),
     override val lastUpdateTime: LastUpdateTime = LastUpdateTime.neverUpdated,
 ) extends UpdatableEntity {
 
@@ -95,4 +97,6 @@ object QuizState {
       timerRunning = true,
     )
   }
+
+  case class Submission(teamId: Long, answerIndex: Option[Int])
 }

@@ -3,6 +3,7 @@ package app.models.access
 import java.time.Instant
 
 import app.models.quiz.QuizState
+import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.TimerState
 import app.models.quiz.Team
 import hydro.common.CollectionUtils
@@ -44,8 +45,8 @@ object ModelFields {
           "questionProgressIndex",
           _.questionProgressIndex,
           v => _.copy(questionProgressIndex = v))
-    case object timerState
-        extends ModelField[TimerState, E]("timerState", _.timerState, v => _.copy(timerState = v))
+    case object timerState        extends ModelField[TimerState, E]("timerState", _.timerState, v => _.copy(timerState = v))
+    case object submissions        extends ModelField[Seq[Submission], E]("submissions", _.submissions, v => _.copy(submissions = v))
   }
 
   // **************** Field numbers **************** //
@@ -63,6 +64,7 @@ object ModelFields {
         QuizState.questionIndex,
         QuizState.questionProgressIndex,
         QuizState.timerState,
+        QuizState.submissions,
       )
     )
   def toNumber(field: ModelField.any): Int = fieldToNumberMap.get(field)
