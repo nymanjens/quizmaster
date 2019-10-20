@@ -96,6 +96,7 @@ final class TeamsAndQuizStateStore(
       ModelFields.QuizState.questionIndex,
       ModelFields.QuizState.questionProgressIndex,
       ModelFields.QuizState.timerState,
+      ModelFields.QuizState.submissions,
     ) { quizState =>
       quizState.roundIndex match {
         case -1 => quizState // Do nothing
@@ -112,6 +113,7 @@ final class TeamsAndQuizStateStore(
                 questionIndex = newRound.questions.size - 1,
                 questionProgressIndex = newRound.questions.lastOption.map(_.maxProgressIndex) getOrElse 0,
                 timerState = TimerState.createStarted(),
+                submissions = Seq(),
               )
             case Some(question) if quizState.questionProgressIndex == 0 =>
               // Go to previous question
@@ -122,6 +124,7 @@ final class TeamsAndQuizStateStore(
                   maybeGet(quizState.round.questions, newQuestionIndex)
                     .map(_.maxProgressIndex) getOrElse 0,
                 timerState = TimerState.createStarted(),
+                submissions = Seq(),
               )
             case Some(question) if quizState.questionProgressIndex > 0 =>
               // Decrement questionProgressIndex
@@ -158,6 +161,7 @@ final class TeamsAndQuizStateStore(
               ModelFields.QuizState.questionIndex,
               ModelFields.QuizState.questionProgressIndex,
               ModelFields.QuizState.timerState,
+              ModelFields.QuizState.submissions,
             ) { quizState =>
               quizState.question match {
                 case None =>
@@ -166,6 +170,7 @@ final class TeamsAndQuizStateStore(
                     QuizState(
                       roundIndex = quizState.roundIndex + 1,
                       timerState = TimerState.createStarted(),
+                      submissions = Seq(),
                     )
                   } else {
                     // Go to first question
@@ -173,6 +178,7 @@ final class TeamsAndQuizStateStore(
                       questionIndex = 0,
                       questionProgressIndex = 0,
                       timerState = TimerState.createStarted(),
+                      submissions = Seq(),
                     )
                   }
                 case Some(question) if quizState.questionProgressIndex < question.maxProgressIndex =>
@@ -188,6 +194,7 @@ final class TeamsAndQuizStateStore(
                       roundIndex = quizState.roundIndex + 1,
                       questionProgressIndex = 0,
                       timerState = TimerState.createStarted(),
+                      submissions = Seq(),
                     )
                   } else {
                     // Go to next question
@@ -195,6 +202,7 @@ final class TeamsAndQuizStateStore(
                       questionIndex = quizState.questionIndex + 1,
                       questionProgressIndex = 0,
                       timerState = TimerState.createStarted(),
+                      submissions = Seq(),
                     )
                   }
               }
