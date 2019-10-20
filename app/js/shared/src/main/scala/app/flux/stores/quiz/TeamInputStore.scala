@@ -51,19 +51,24 @@ final class TeamInputStore(
           val teamHasAlreadyAnswered = quizState.submissions.exists(_.teamId == team.id)
 
           if (!teamHasAlreadyAnswered) {
-            if (question.isMultipleChoice && gamepadState.arrowPressed.isDefined) {
-              teamsAndQuizStateStore.addSubmission(
-                Submission(
-                  teamId = team.id,
-                  maybeAnswerIndex = Some(gamepadState.arrowPressed.get.answerIndex),
-                )
-              )
-            } else if (gamepadState.anyButtonPressed) {
-              teamsAndQuizStateStore.addSubmission(
-                Submission(
-                  teamId = team.id,
-                )
-              )
+            question.isMultipleChoice match {
+              case true =>
+                if (gamepadState.arrowPressed.isDefined) {
+                  teamsAndQuizStateStore.addSubmission(
+                    Submission(
+                      teamId = team.id,
+                      maybeAnswerIndex = Some(gamepadState.arrowPressed.get.answerIndex),
+                    )
+                  )
+                }
+              case false =>
+                if (gamepadState.anyButtonPressed) {
+                  teamsAndQuizStateStore.addSubmission(
+                    Submission(
+                      teamId = team.id,
+                    )
+                  )
+                }
             }
           }
         }
