@@ -16,6 +16,7 @@ object QuizConfig {
   )
 
   sealed trait Question {
+
     def pointsToGain: Int
     def pointsToGainOnWrongAnswer: Int
 
@@ -29,6 +30,8 @@ object QuizConfig {
     /** Returns true if it would make sense to add a QuizState.Submission for this question for this progressIndex. */
     def submissionAreOpen(questionProgressIndex: Int): Boolean
     def isMultipleChoice: Boolean
+    /** If `isMultipleChoice` is true, this is a way to see if an answer is correct. */
+    def isCorrectAnswerIndex(answerIndex: Int): Boolean
   }
 
   object Question {
@@ -68,6 +71,7 @@ object QuizConfig {
       }
 
       override def isMultipleChoice: Boolean = choices.nonEmpty
+      override def isCorrectAnswerIndex(answerIndex: Int): Boolean = choices.get.apply(answerIndex) == answer
 
       def questionIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 1
@@ -103,6 +107,8 @@ object QuizConfig {
 
       override def submissionAreOpen(questionProgressIndex: Int): Boolean = ???
       override def isMultipleChoice: Boolean = true
+      override def isCorrectAnswerIndex(answerIndex: Int): Boolean =
+        textualChoices.apply(answerIndex) == textualAnswer
     }
   }
 }

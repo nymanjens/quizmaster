@@ -54,12 +54,18 @@ final class TeamInputStore(
             question.isMultipleChoice match {
               case true =>
                 if (gamepadState.arrowPressed.isDefined) {
-                  teamsAndQuizStateStore.addSubmission(
-                    Submission(
-                      teamId = team.id,
-                      maybeAnswerIndex = Some(gamepadState.arrowPressed.get.answerIndex),
+                  val arrow = gamepadState.arrowPressed.get
+                  val alreadyAnsweredCorrectly = quizState.submissions.exists(submission =>
+                    question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
+                  val tooLate = alreadyAnsweredCorrectly && question.onlyFirstGainsPoints
+                  if (!tooLate) {
+                    teamsAndQuizStateStore.addSubmission(
+                      Submission(
+                        teamId = team.id,
+                        maybeAnswerIndex = Some(arrow.answerIndex),
+                      )
                     )
-                  )
+                  }
                 }
               case false =>
                 if (gamepadState.anyButtonPressed) {
@@ -72,8 +78,6 @@ final class TeamInputStore(
             }
           }
         }
-
-        // TODO: Add and remove points
       }
     }
   }
