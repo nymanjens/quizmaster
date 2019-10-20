@@ -8,6 +8,7 @@ import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.QuizState.TimerState
 import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.QuizState
+import app.models.quiz.QuizState.Submission
 import app.models.quiz.Team
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.flux.action.Dispatcher
@@ -106,6 +107,7 @@ final class QuestionComponent(
     ): VdomElement = {
       val progressIndex = props.questionProgressIndex
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
+      val showSubmissionsOnChoices = question.isMultipleChoice && (question.onlyFirstGainsPoints || answerIsVisible)
 
       def ifVisibleOrMaster(isVisible: Boolean)(vdomNode: VdomNode): VdomNode = {
         if (isVisible) {
@@ -131,10 +133,10 @@ final class QuestionComponent(
               ^.className := "choices",
               (for ((choice, arrow) <- choices zip Arrow.all)
                 yield {
-                  val submissions =
-                    state.quizState.submissions.filter(_.maybeAnswerIndex == Some(arrow.answerIndex))
                   val visibleSubmissions =
-                    if (question.onlyFirstGainsPoints || answerIsVisible) submissions else Seq()
+                    if (showSubmissionsOnChoices)
+                      state.quizState.submissions.filter(_.maybeAnswerIndex == Some(arrow.answerIndex))
+                    else Seq()
                   val isCorrectAnswer = choice == question.answer
                   <.li(
                     ^.key := choice,
@@ -149,17 +151,17 @@ final class QuestionComponent(
                       choice
                     },
                     " ",
-                    <<.joinWithSpaces(
-                      for (submission <- visibleSubmissions)
-                        yield
-                          TeamIcon(state.teams.find(_.id == submission.teamId).get)(
-                            ^.key := submission.teamId,
-                          )
-                    )
+                    showSubmissions(visibleSubmissions),
                   )
                 }).toVdomArray
             )
           }
+        },
+        <<.ifThen(!showSubmissionsOnChoices) {
+          <.div(
+            ^.className := "submissions-without-choices",
+            showSubmissions(state.quizState.submissions),
+          )
         },
         <<.ifThen(question.choices.isEmpty || !answerIsVisible) {
           ifVisibleOrMaster(answerIsVisible) {
@@ -204,6 +206,16 @@ final class QuestionComponent(
         <<.ifThen(question.pointsToGainOnWrongAnswer != 0) {
           s". Wrong answer loses ${pointsToLoseString}"
         }
+      )
+    }
+
+    private def showSubmissions(submissions: Seq[Submission])(implicit state: State) = {
+      <<.joinWithSpaces(
+        for (submission <- submissions)
+          yield
+            TeamIcon(state.teams.find(_.id == submission.teamId).get)(
+              ^.key := submission.teamId,
+            )
       )
     }
   }
