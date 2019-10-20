@@ -68,7 +68,7 @@ case class QuizState(
         val submissionAreOpen = question.submissionAreOpen(questionProgressIndex)
         val submissionIsHinderedByTimer =
           if (question.shouldShowTimer(questionProgressIndex))
-            !timerState.timerRunning || timerState.hasFinished(question.maxTime.get)
+            !timerState.timerRunning || timerState.hasFinished(question.maybeMaxTime.get)
           else false
 
         submissionAreOpen && !submissionIsHinderedByTimer
@@ -112,5 +112,5 @@ object QuizState {
     )
   }
 
-  case class Submission(teamId: Long, answerIndex: Option[Int] = None)
+  case class Submission(teamId: Long, maybeAnswerIndex: Option[Int] = None)
 }

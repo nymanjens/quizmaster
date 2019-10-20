@@ -24,7 +24,7 @@ object QuizConfig {
     def progressStepsCount: Int
     final def maxProgressIndex: Int = progressStepsCount - 1
     def shouldShowTimer(questionProgressIndex: Int): Boolean
-    def maxTime: Option[Duration]
+    def maybeMaxTime: Option[Duration]
 
     /** Returns true if it would make sense to add a QuizState.Submission for this question for this progressIndex. */
     def submissionAreOpen(questionProgressIndex: Int): Boolean
@@ -37,7 +37,7 @@ object QuizConfig {
         answer: String,
         choices: Option[Seq[String]],
         override val pointsToGain: Int,
-        override val maxTime: Option[Duration],
+        override val maybeMaxTime: Option[Duration],
         override val onlyFirstGainsPoints: Boolean,
     ) extends Question {
 
@@ -56,7 +56,7 @@ object QuizConfig {
         if (choices.isDefined) 4 else 3
       }
       override def shouldShowTimer(questionProgressIndex: Int): Boolean = {
-        maxTime.isDefined && questionProgressIndex == progressIndexForQuestionBeingAnswered
+        maybeMaxTime.isDefined && questionProgressIndex == progressIndexForQuestionBeingAnswered
       }
 
       override def submissionAreOpen(questionProgressIndex: Int): Boolean = {
@@ -99,7 +99,7 @@ object QuizConfig {
       override def progressStepsCount: Int = 3
       override def shouldShowTimer(questionProgressIndex: Int): Boolean = questionProgressIndex == 2
 
-      override def maxTime: Option[Duration] = Some(Duration.ofSeconds(3))
+      override def maybeMaxTime: Option[Duration] = Some(Duration.ofSeconds(3))
 
       override def submissionAreOpen(questionProgressIndex: Int): Boolean = ???
       override def isMultipleChoice: Boolean = true

@@ -55,7 +55,7 @@ final class TeamInputStore(
               teamsAndQuizStateStore.addSubmission(
                 Submission(
                   teamId = team.id,
-                  answerIndex = Some(gamepadState.arrowPressed.get.answerIndex),
+                  maybeAnswerIndex = Some(gamepadState.arrowPressed.get.answerIndex),
                 )
               )
             } else if (gamepadState.anyButtonPressed) {

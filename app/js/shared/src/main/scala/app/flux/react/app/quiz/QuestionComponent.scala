@@ -142,7 +142,7 @@ final class QuestionComponent(
         <<.ifThen(question.shouldShowTimer(props.questionProgressIndex)) {
           <.div(
             ^.className := "timer",
-            syncedTimerBar(maxTime = question.maxTime.get),
+            syncedTimerBar(maxTime = question.maybeMaxTime.get),
           )
         }
       )

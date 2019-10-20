@@ -51,7 +51,7 @@ object ParsableQuizConfig {
         answer = checkNotNull(answer),
         choices = if (choices == null) None else Some(choices.asScala.toVector),
         pointsToGain = pointsToGain,
-        maxTime = if (maxTimeSeconds == 0) None else Some(Duration.ofSeconds(maxTimeSeconds)),
+        maybeMaxTime = if (maxTimeSeconds == 0) None else Some(Duration.ofSeconds(maxTimeSeconds)),
         onlyFirstGainsPoints = onlyFirstGainsPoints,
       )
     }
