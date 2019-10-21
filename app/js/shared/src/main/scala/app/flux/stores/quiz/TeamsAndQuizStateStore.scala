@@ -80,11 +80,13 @@ final class TeamsAndQuizStateStore(
   }
   def updateScore(team: Team, scoreDiff: Int): Future[Unit] = updateStateQueue.schedule {
     async {
-      val oldScore = await(stateFuture).teams.find(_.id == team.id).get.score
-      val newScore = Math.max(0, oldScore + scoreDiff)
-      await(
-        entityAccess.persistModifications(
-          EntityModification.createUpdate(team.copy(score = newScore), Seq(ModelFields.Team.score))))
+      if (scoreDiff != 0) {
+        val oldScore = await(stateFuture).teams.find(_.id == team.id).get.score
+        val newScore = Math.max(0, oldScore + scoreDiff)
+        await(
+          entityAccess.persistModifications(
+            EntityModification.createUpdate(team.copy(score = newScore), Seq(ModelFields.Team.score))))
+      }
     }
   }
   def deleteTeam(team: Team): Future[Unit] = updateStateQueue.schedule {

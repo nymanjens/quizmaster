@@ -26,7 +26,7 @@ final class SoundEffectController(
   entityAccess.registerListener(JsEntityAccessListener)
 
   // **************** Public API ****************//
-  def playNewSubmission(): Unit = playSoundEffect(SoundEffect.NewSubmission)
+  def playNewSubmission(): Unit = playSoundEffect(SoundEffect.NewSubmission, skipPageCheck = true)
   def playTimerRunsOut(): Unit = playSoundEffect(SoundEffect.TimerRunsOut)
 
   // **************** Private helper methods ****************//
@@ -37,9 +37,13 @@ final class SoundEffectController(
 
   private def canPlaySoundEffectsOnThisPage: Boolean = currentPage == AppPages.Quiz
 
-  private def playSoundEffect(soundEffect: SoundEffect, unlessAlreadyPlaying: Boolean = false): Unit =
+  private def playSoundEffect(
+      soundEffect: SoundEffect,
+      unlessAlreadyPlaying: Boolean = false,
+      skipPageCheck: Boolean = false,
+  ): Unit =
     logExceptions {
-      if (canPlaySoundEffectsOnThisPage) {
+      if (skipPageCheck || canPlaySoundEffectsOnThisPage) {
         if (unlessAlreadyPlaying && (soundsPlaying contains soundEffect)) {
           // Skip
         } else {
