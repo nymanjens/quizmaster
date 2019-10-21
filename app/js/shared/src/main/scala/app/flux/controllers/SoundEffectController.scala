@@ -3,6 +3,8 @@ package app.flux.controllers
 import app.flux.router.AppPages
 import app.models.access.ModelFields
 import app.models.quiz.Team
+import hydro.common.JsLoggingUtils
+import hydro.common.JsLoggingUtils.logExceptions
 import hydro.flux.action.Action
 import hydro.flux.action.Dispatcher
 import hydro.flux.action.StandardActions
@@ -36,16 +38,20 @@ class SoundEffectController(
 
   private def canPlaySoundEffectsOnThisPage: Boolean = currentPage == AppPages.Quiz
 
-  private def playSoundEffect(soundEffect: SoundEffect, unlessAlreadyPlaying: Boolean = false): Unit = {
-    if (unlessAlreadyPlaying && (soundsPlaying contains soundEffect)) {
-      // Skip
-    } else {
-      // TODO: soundsPlaying.add(soundEffect)
-      val audio = new Audio(soundEffect.filepath)
-      audio.play()
-      // TODO: soundsPlaying.remove(soundEffect)
+  private def playSoundEffect(soundEffect: SoundEffect, unlessAlreadyPlaying: Boolean = false): Unit =
+    logExceptions {
+      if (canPlaySoundEffectsOnThisPage) {
+        if (unlessAlreadyPlaying && (soundsPlaying contains soundEffect)) {
+          // Skip
+        } else {
+          // TODO: soundsPlaying.add(soundEffect)
+          println(s"  Playing ${soundEffect.filepath}..")
+          val audio = new Audio(soundEffect.filepath)
+          audio.play()
+          // TODO: soundsPlaying.remove(soundEffect)
+        }
+      }
     }
-  }
 
   private object JsEntityAccessListener extends JsEntityAccess.Listener {
     override def modificationsAddedOrPendingStateChanged(modifications: Seq[EntityModification]): Unit = {
