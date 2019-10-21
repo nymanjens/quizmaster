@@ -63,9 +63,9 @@ private[router] final class RouterFactory(
 
         // Fallback
         ).notFound(redirectToPage(StandardPages.Root)(Redirect.Replace))
-          .onPostRender((_, _) =>
-            LogExceptionsCallback(
-              dispatcher.dispatch(StandardActions.SetPageLoadingState(isLoading = false))))
+          .onPostRender((_, currentPage) =>
+            LogExceptionsCallback(dispatcher.dispatch(
+              StandardActions.SetPageLoadingState(isLoading = false, currentPage = currentPage))))
           .onPostRender((_, page) =>
             LogExceptionsCallback(async {
               val title = await(page.title)

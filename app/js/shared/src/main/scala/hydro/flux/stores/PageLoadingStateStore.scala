@@ -15,7 +15,7 @@ final class PageLoadingStateStore(implicit dispatcher: Dispatcher) extends State
 
   // **************** Private dispatcher methods ****************//
   private def dispatcherListener: PartialFunction[Action, Unit] = {
-    case StandardActions.SetPageLoadingState(isLoading) =>
+    case StandardActions.SetPageLoadingState(isLoading, _) =>
       setState(State(isLoading = isLoading))
   }
 

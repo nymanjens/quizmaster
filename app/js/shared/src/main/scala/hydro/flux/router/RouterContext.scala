@@ -59,7 +59,7 @@ object RouterContext {
     }
 
     private def startRender(setAction: => Callback): Unit = {
-      dispatcher.dispatch(StandardActions.SetPageLoadingState(isLoading = true))
+      dispatcher.dispatch(StandardActions.SetPageLoadingState(isLoading = true, currentPage = currentPage))
       js.timers.setTimeout(0)(setAction.runNow())
     }
   }

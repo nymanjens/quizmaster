@@ -2,6 +2,7 @@ package app.flux
 
 import app.api.ScalaJsApi.GetInitialDataResponse
 import app.api.ScalaJsApiClient
+import app.flux.controllers.SoundEffectController
 import app.models.user.User.onlyUser
 import hydro.flux.action.Module
 import hydro.flux.router.Page
@@ -29,6 +30,9 @@ final class ClientAppModule(
   // Create and unpack Flux action module
   private val fluxActionModule = new Module
   implicit private val dispatcher = fluxActionModule.dispatcher
+
+  // Create controllers
+  implicit private val soundEffectController = new SoundEffectController()
 
   // Create and unpack Flux store module
   private val fluxStoresModule = new app.flux.stores.Module

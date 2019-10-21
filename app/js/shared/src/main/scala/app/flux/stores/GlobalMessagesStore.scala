@@ -58,7 +58,7 @@ final class GlobalMessagesStore(
         case None =>
       }
 
-    case StandardActions.SetPageLoadingState( /* isLoading = */ false) =>
+    case StandardActions.SetPageLoadingState( /* isLoading = */ false, /* currentPage = */ _) =>
       if (state.isDefined && state.get.age > java.time.Duration.ofSeconds(1)) {
         setState(None)
       }
