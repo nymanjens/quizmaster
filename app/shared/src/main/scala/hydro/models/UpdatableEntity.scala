@@ -69,6 +69,12 @@ object UpdatableEntity {
       case Some(t)                                => copy(timePerField = timePerField.filter(_._2 >= t))
     }
 
+    def mostRecentInstant: Instant =
+      max(
+        if (timePerField.nonEmpty) timePerField.values.max else Instant.MIN,
+        otherFieldsTime getOrElse Instant.MIN,
+      )
+
     /**
       * Returns an instance that merges the fields in `this` and `that`.
       *

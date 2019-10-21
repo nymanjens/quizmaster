@@ -84,7 +84,7 @@ final class TeamsAndQuizStateStore(
       val newScore = Math.max(0, oldScore + scoreDiff)
       await(
         entityAccess.persistModifications(
-          EntityModification.createUpdateAllFields(team.copy(score = newScore))))
+          EntityModification.createUpdate(team.copy(score = newScore), Seq(ModelFields.Team.score))))
     }
   }
   def deleteTeam(team: Team): Future[Unit] = updateStateQueue.schedule {
