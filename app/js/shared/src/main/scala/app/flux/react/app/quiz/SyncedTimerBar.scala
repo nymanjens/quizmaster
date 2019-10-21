@@ -2,6 +2,7 @@ package app.flux.react.app.quiz
 
 import java.time.Duration
 
+import app.flux.controllers.SoundEffectController
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.access.ModelFields
 import app.models.quiz.QuizState.TimerState
@@ -21,6 +22,7 @@ import scala.concurrent.Future
 final class SyncedTimerBar(
     implicit clock: Clock,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
+    soundEffectController: SoundEffectController,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -63,7 +65,13 @@ final class SyncedTimerBar(
       intervalHandle = Some(
         dom.window.setInterval(
           () => {
-            $.modState(state => state.copy(elapsedTime = state.timerState.elapsedTime())).runNow()
+            $.modState { state =>
+              val newElapsedTime = state.timerState.elapsedTime()
+              if (state.elapsedTime < props.maxTime && newElapsedTime >= props.maxTime) {
+                soundEffectController.playTimerRunsOut()
+              }
+              state.copy(elapsedTime = newElapsedTime)
+            }.runNow()
           },
           /* timeout in millis */ 10
         )

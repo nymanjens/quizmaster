@@ -3,7 +3,6 @@ package app.flux.controllers
 import app.flux.router.AppPages
 import app.models.access.ModelFields
 import app.models.quiz.Team
-import hydro.common.JsLoggingUtils
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.flux.action.Action
 import hydro.flux.action.Dispatcher
@@ -15,9 +14,8 @@ import hydro.models.modification.EntityModification
 
 import scala.collection.immutable.Seq
 import scala.collection.mutable
-import scala.scalajs.js
 
-class SoundEffectController(
+final class SoundEffectController(
     implicit dispatcher: Dispatcher,
     entityAccess: JsEntityAccess,
 ) {
@@ -28,7 +26,8 @@ class SoundEffectController(
   entityAccess.registerListener(JsEntityAccessListener)
 
   // **************** Public API ****************//
-  //
+  def playNewSubmission(): Unit = playSoundEffect(SoundEffect.NewSubmission)
+  def playTimerRunsOut(): Unit = playSoundEffect(SoundEffect.TimerRunsOut)
 
   // **************** Private helper methods ****************//
   private def dispatcherListener: PartialFunction[Action, Unit] = {
@@ -70,6 +69,8 @@ class SoundEffectController(
 
   private sealed abstract class SoundEffect(val filepath: String)
   private object SoundEffect {
+    case object NewSubmission extends SoundEffect("/assets/soundeffects/new_submission.mp3")
     case object ScoreIncreased extends SoundEffect("/assets/soundeffects/score_increased.mp3")
+    case object TimerRunsOut extends SoundEffect("/assets/soundeffects/timer_runs_out.mp3")
   }
 }

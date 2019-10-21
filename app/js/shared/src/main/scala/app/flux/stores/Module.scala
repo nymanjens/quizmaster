@@ -2,6 +2,7 @@ package app.flux.stores
 
 import app.api.ScalaJsApi.GetInitialDataResponse
 import app.api.ScalaJsApiClient
+import app.flux.controllers.SoundEffectController
 import app.flux.stores.quiz.GamepadStore
 import app.flux.stores.quiz.TeamInputStore
 import app.models.user.User
@@ -25,6 +26,7 @@ final class Module(
     hydroPushSocketClientFactory: HydroPushSocketClientFactory,
     getInitialDataResponse: GetInitialDataResponse,
     quizConfig: QuizConfig,
+    soundEffectController: SoundEffectController,
 ) {
 
   implicit val globalMessagesStore = new GlobalMessagesStore

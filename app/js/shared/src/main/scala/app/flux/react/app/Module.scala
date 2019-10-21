@@ -1,5 +1,6 @@
 package app.flux.react.app
 
+import app.flux.controllers.SoundEffectController
 import app.flux.react.app.quiz.GamepadSetupView
 import app.flux.react.app.quiz.MasterView
 import app.flux.react.app.quiz.ObfuscatedAnswer
@@ -34,6 +35,7 @@ final class Module(
     dispatcher: Dispatcher,
     clock: Clock,
     quizConfig: QuizConfig,
+    soundEffectController: SoundEffectController,
 ) {
 
   // Configuration of submodules

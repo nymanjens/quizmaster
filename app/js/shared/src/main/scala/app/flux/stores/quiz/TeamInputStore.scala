@@ -1,5 +1,6 @@
 package app.flux.stores.quiz
 
+import app.flux.controllers.SoundEffectController
 import app.flux.stores.quiz.GamepadStore.GamepadState
 import app.flux.stores.quiz.TeamInputStore.State
 import app.models.quiz.config.QuizConfig
@@ -21,6 +22,7 @@ final class TeamInputStore(
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     gamepadStore: GamepadStore,
+    soundEffectController: SoundEffectController,
 ) extends StateStore[State] {
   private var _state: State = State.nullInstance
   gamepadStore.register(GamepadStoreListener)
@@ -59,6 +61,7 @@ final class TeamInputStore(
                     question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
                   val tooLate = alreadyAnsweredCorrectly && question.onlyFirstGainsPoints
                   if (!tooLate) {
+                    soundEffectController.playNewSubmission()
                     teamsAndQuizStateStore.addSubmission(
                       Submission(
                         teamId = team.id,
@@ -69,6 +72,7 @@ final class TeamInputStore(
                 }
               case false =>
                 if (gamepadState.anyButtonPressed) {
+                  soundEffectController.playNewSubmission()
                   teamsAndQuizStateStore.addSubmission(
                     Submission(
                       teamId = team.id,
