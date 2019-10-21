@@ -44,11 +44,14 @@ class SoundEffectController(
         if (unlessAlreadyPlaying && (soundsPlaying contains soundEffect)) {
           // Skip
         } else {
-          // TODO: soundsPlaying.add(soundEffect)
-          println(s"  Playing ${soundEffect.filepath}..")
+          soundsPlaying.add(soundEffect)
           val audio = new Audio(soundEffect.filepath)
+          audio.addEventListener("ended", () => {
+            soundsPlaying.remove(soundEffect)
+          })
+
+          println(s"  Playing ${soundEffect.filepath}..")
           audio.play()
-          // TODO: soundsPlaying.remove(soundEffect)
         }
       }
     }
@@ -67,6 +70,6 @@ class SoundEffectController(
 
   private sealed abstract class SoundEffect(val filepath: String)
   private object SoundEffect {
-    case object ScoreIncreased extends SoundEffect("soundeffects/score_increased.mp3")
+    case object ScoreIncreased extends SoundEffect("/assets/soundeffects/score_increased.mp3")
   }
 }
