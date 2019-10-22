@@ -98,7 +98,7 @@ object Bootstrap {
   def FormInline(tag: VdomTag = <.form): VdomTag = tag(^.className := "form-inline")
 
   def ProgressBar(fraction: Double, variant: Variant, label: String = ""): VdomTag = {
-    val percentage = Math.round(fraction * 100).toInt
+    val percentage = fraction * 100
     <.div(
       ^.className := "progress",
       <.div(
