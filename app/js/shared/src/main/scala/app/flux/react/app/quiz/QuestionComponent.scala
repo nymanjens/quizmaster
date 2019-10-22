@@ -11,8 +11,10 @@ import app.models.quiz.QuizState
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.Team
 import hydro.common.JsLoggingUtils.logExceptions
+import hydro.common.time.Clock
 import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
+import hydro.flux.react.uielements.Bootstrap
 import hydro.flux.react.uielements.PageHeader
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
@@ -27,6 +29,7 @@ final class QuestionComponent(
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     syncedTimerBar: SyncedTimerBar,
     obfuscatedAnswer: ObfuscatedAnswer,
+    clock: Clock,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -108,6 +111,8 @@ final class QuestionComponent(
       val progressIndex = props.questionProgressIndex
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
       val showSubmissionsOnChoices = question.isMultipleChoice && (question.onlyFirstGainsPoints || answerIsVisible)
+      val showGamepadIconUnderChoices =
+        state.quizState.submissions.nonEmpty || (state.quizState.canSubmitResponse && question.onlyFirstGainsPoints)
 
       def ifVisibleOrMaster(isVisible: Boolean)(vdomNode: VdomNode): VdomNode = {
         if (isVisible) {
@@ -157,12 +162,16 @@ final class QuestionComponent(
             )
           }
         },
-        <<.ifThen(!showSubmissionsOnChoices) {
-          <.div(
-            ^.className := "submissions-without-choices",
+        <.div(
+          ^.className := "submissions-without-choices",
+          ifVisibleOrMaster(showGamepadIconUnderChoices) {
+            Bootstrap.FontAwesomeIcon("gamepad")
+          },
+          " ",
+          <<.ifThen(!showSubmissionsOnChoices) {
             showSubmissions(state.quizState.submissions),
-          )
-        },
+          }
+        ),
         <<.ifThen(question.choices.isEmpty || !answerIsVisible) {
           ifVisibleOrMaster(answerIsVisible) {
             if (answerIsVisible) {
