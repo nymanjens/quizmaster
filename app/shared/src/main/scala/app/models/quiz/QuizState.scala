@@ -47,7 +47,7 @@ case class QuizState(
     } else if (roundIndex < quizConfig.rounds.size) {
       quizConfig.rounds(roundIndex)
     } else {
-      Round(name = "End of the quiz!", questions = Seq())
+      Round(name = i18n("app.end-of-the-quiz"), questions = Seq())
     }
   }
 

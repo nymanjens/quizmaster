@@ -12,6 +12,7 @@ import app.models.quiz.QuizState.Submission
 import app.models.quiz.Team
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.time.Clock
+import hydro.common.I18n
 import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
 import hydro.flux.react.uielements.Bootstrap
@@ -24,6 +25,7 @@ import japgolly.scalajs.react.vdom.VdomNode
 
 final class QuestionComponent(
     implicit pageHeader: PageHeader,
+    i18n: I18n,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
@@ -96,7 +98,9 @@ final class QuestionComponent(
       <.div(
         <.div(
           ^.className := "question",
-          s"Question $questionNumber"
+          i18n("app.question"),
+          " ",
+          questionNumber
         ),
         pointsMetadata(question),
       )
@@ -200,20 +204,20 @@ final class QuestionComponent(
     }
 
     private def pointsMetadata(question: Question): VdomElement = {
-      val pointsString = if (question.pointsToGain == 1) "1 point" else s"${question.pointsToGain} points"
-      val pointsToLoseString =
-        if (question.pointsToGainOnWrongAnswer == -1) "1 point"
-        else s"${-question.pointsToGainOnWrongAnswer} points"
-
       <.div(
         ^.className := "points-metadata",
         if (question.onlyFirstGainsPoints) {
-          s"First right answer gains $pointsString"
+          if (question.pointsToGain == 1) i18n("app.first-right-answer-gains-1-point")
+          else i18n("app.first-right-answer-gains-n-points", question.pointsToGain)
         } else {
-          s"All right answers gain $pointsString"
+          if (question.pointsToGain == 1) i18n("app.all-right-answers-gain-1-point")
+          else i18n("app.all-right-answers-gain-n-points", question.pointsToGain)
         },
         <<.ifThen(question.pointsToGainOnWrongAnswer != 0) {
-          s". Wrong answer loses ${pointsToLoseString}"
+          ". " + (
+            if (question.pointsToGainOnWrongAnswer == -1) i18n("app.wrong-answer-loses-1-point")
+            else i18n("app.wrong-answer-loses-n-points", -question.pointsToGainOnWrongAnswer)
+          ) + "."
         }
       )
     }
