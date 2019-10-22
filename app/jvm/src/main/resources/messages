@@ -115,3 +115,8 @@ app.is-admin=Is admin?
 app.no-entries=No entries
 app.playlist=Playlist
 app.artists=Artists
+
+# Added for quizmaster
+app.master=Master
+app.quiz=Quiz
+app.gamepad-setup=Gamepad Setup
