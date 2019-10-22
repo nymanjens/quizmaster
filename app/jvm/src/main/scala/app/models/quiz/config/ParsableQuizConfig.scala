@@ -33,6 +33,7 @@ object ParsableQuizConfig {
     case class Single(
         question: String,
         answer: String,
+        image: String,
         choices: java.util.List[String],
         pointsToGain: Int,
         pointsToGainOnWrongAnswer: Int,
@@ -42,6 +43,7 @@ object ParsableQuizConfig {
       def this() = this(
         question = null,
         answer = null,
+        image = null,
         choices = null,
         pointsToGain = 1,
         pointsToGainOnWrongAnswer = 0,
@@ -51,6 +53,7 @@ object ParsableQuizConfig {
       override def parse: QuizConfig.Question = QuizConfig.Question.Single(
         question = checkNotNull(question),
         answer = checkNotNull(answer),
+        image = Option(image),
         choices = if (choices == null) None else Some(choices.asScala.toVector),
         pointsToGain = pointsToGain,
         pointsToGainOnWrongAnswer = pointsToGainOnWrongAnswer,

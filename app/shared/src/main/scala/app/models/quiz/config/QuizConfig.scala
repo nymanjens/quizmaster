@@ -39,6 +39,7 @@ object QuizConfig {
     case class Single(
         question: String,
         answer: String,
+        image: Option[String],
         choices: Option[Seq[String]],
         override val pointsToGain: Int,
         override val pointsToGainOnWrongAnswer: Int,
