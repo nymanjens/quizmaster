@@ -136,36 +136,47 @@ final class QuestionComponent(
           )
         },
         pointsMetadata(question),
-        <<.ifDefined(question.choices) { choices =>
-          ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
-            <.ul(
-              ^.className := "choices",
-              (for ((choice, arrow) <- choices zip Arrow.all)
-                yield {
-                  val visibleSubmissions =
-                    if (showSubmissionsOnChoices)
-                      state.quizState.submissions.filter(_.maybeAnswerIndex == Some(arrow.answerIndex))
-                    else Seq()
-                  val isCorrectAnswer = choice == question.answer
-                  <.li(
-                    ^.key := choice,
-                    arrow.icon(
-                      ^.className := "choice-arrow",
-                    ),
-                    if (isCorrectAnswer && (answerIsVisible || visibleSubmissions.nonEmpty)) {
-                      <.span(^.className := "correct", choice)
-                    } else if (!isCorrectAnswer && visibleSubmissions.nonEmpty) {
-                      <.span(^.className := "incorrect", choice)
-                    } else {
-                      choice
-                    },
-                    " ",
-                    showSubmissions(visibleSubmissions),
-                  )
-                }).toVdomArray
-            )
-          }
-        },
+        <.div(
+          ^.className := "image-and-choices-row",
+          <.div(
+            ^.className := "image-holder",
+            <<.ifDefined(question.image) { imageFilename =>
+              <.img(
+                ^.src := s"/quizimages/$imageFilename",
+              )
+            },
+          ),
+          <<.ifDefined(question.choices) { choices =>
+            ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
+              <.ul(
+                ^.className := "choices",
+                (for ((choice, arrow) <- choices zip Arrow.all)
+                  yield {
+                    val visibleSubmissions =
+                      if (showSubmissionsOnChoices)
+                        state.quizState.submissions.filter(_.maybeAnswerIndex == Some(arrow.answerIndex))
+                      else Seq()
+                    val isCorrectAnswer = choice == question.answer
+                    <.li(
+                      ^.key := choice,
+                      arrow.icon(
+                        ^.className := "choice-arrow",
+                      ),
+                      if (isCorrectAnswer && (answerIsVisible || visibleSubmissions.nonEmpty)) {
+                        <.span(^.className := "correct", choice)
+                      } else if (!isCorrectAnswer && visibleSubmissions.nonEmpty) {
+                        <.span(^.className := "incorrect", choice)
+                      } else {
+                        choice
+                      },
+                      " ",
+                      showSubmissions(visibleSubmissions),
+                    )
+                  }).toVdomArray
+              )
+            }
+          },
+        ),
         <.div(
           ^.className := "submissions-without-choices",
           ifVisibleOrMaster(showGamepadIconUnderChoices) {
