@@ -47,11 +47,12 @@ final class QuizProgressIndicator(
             <.span()
           case _ =>
             <.span(
-              s"Round ${quizState.roundIndex + 1} of ${quizConfig.rounds.size} (${quizState.round.name}). ",
+              i18n("app.round-i-of-n", quizState.roundIndex + 1, quizConfig.rounds.size),
+              s" (${quizState.round.name}). ",
               if (quizState.maybeQuestion.isDefined) {
-                s"Question ${quizState.questionIndex + 1} of ${quizState.round.questions.size}"
+                i18n("app.question-i-of-n", quizState.questionIndex + 1, quizState.round.questions.size)
               } else {
-                s"${quizState.round.questions.size} questions"
+                s"${quizState.round.questions.size} ${i18n("app.questions")}"
               }
             )
         }

@@ -122,3 +122,6 @@ app.quiz=Quiz
 app.gamepad-setup=Gamepad Setup
 app.welcome=Welcome!
 app.end-of-the-quiz=End of the quiz!
+app.round-i-of-n=Round {0} of {1}
+app.question-i-of-n=Question {0} of {1}
+app.questions=questions
