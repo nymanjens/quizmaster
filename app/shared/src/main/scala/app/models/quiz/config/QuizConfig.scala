@@ -44,6 +44,9 @@ object QuizConfig {
         override val maybeMaxTime: Option[Duration],
         override val onlyFirstGainsPoints: Boolean,
     ) extends Question {
+      if (choices.isDefined) {
+        require(choices.get.size == 4, s"There should be 4 choices, but got ${choices.get}")
+      }
 
       override def pointsToGainOnWrongAnswer: Int = {
         if (onlyFirstGainsPoints && choices.nonEmpty) -pointsToGain else 0
@@ -102,6 +105,8 @@ object QuizConfig {
         textualChoices: Seq[String],
         override val pointsToGain: Int,
     ) extends Question {
+      require(textualChoices.size == 4, s"Expected 4 choices, but got ${textualChoices}")
+
       override def pointsToGainOnWrongAnswer: Int = -pointsToGain
 
       override def onlyFirstGainsPoints: Boolean = true
