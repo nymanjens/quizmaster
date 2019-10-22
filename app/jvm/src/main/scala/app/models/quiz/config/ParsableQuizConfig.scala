@@ -35,6 +35,7 @@ object ParsableQuizConfig {
         answer: String,
         choices: java.util.List[String],
         pointsToGain: Int,
+        pointsToGainOnWrongAnswer: Int,
         maxTimeSeconds: Int,
         onlyFirstGainsPoints: Boolean,
     ) extends Question {
@@ -43,6 +44,7 @@ object ParsableQuizConfig {
         answer = null,
         choices = null,
         pointsToGain = 1,
+        pointsToGainOnWrongAnswer = 0,
         maxTimeSeconds = 0,
         onlyFirstGainsPoints = false,
       )
@@ -51,6 +53,7 @@ object ParsableQuizConfig {
         answer = checkNotNull(answer),
         choices = if (choices == null) None else Some(choices.asScala.toVector),
         pointsToGain = pointsToGain,
+        pointsToGainOnWrongAnswer = pointsToGainOnWrongAnswer,
         maybeMaxTime = if (maxTimeSeconds == 0) None else Some(Duration.ofSeconds(maxTimeSeconds)),
         onlyFirstGainsPoints = onlyFirstGainsPoints,
       )
