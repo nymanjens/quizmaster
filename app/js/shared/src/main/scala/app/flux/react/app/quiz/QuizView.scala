@@ -4,6 +4,7 @@ import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState
 import app.models.quiz.Team
+import hydro.common.I18n
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
@@ -15,6 +16,7 @@ import japgolly.scalajs.react.vdom.html_<^.<
 
 final class QuizView(
     implicit pageHeader: PageHeader,
+    i18n: I18n,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
     teamEditor: TeamEditor,

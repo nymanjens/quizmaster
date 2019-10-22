@@ -120,3 +120,5 @@ app.artists=Artists
 app.master=Master
 app.quiz=Quiz
 app.gamepad-setup=Gamepad Setup
+app.welcome=Welcome!
+app.end-of-the-quiz=End of the quiz!

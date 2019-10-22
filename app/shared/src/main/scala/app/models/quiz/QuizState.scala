@@ -11,6 +11,7 @@ import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.TimerState
 import hydro.common.time.Clock
+import hydro.common.I18n
 import hydro.models.Entity
 import hydro.models.UpdatableEntity
 import hydro.models.UpdatableEntity.LastUpdateTime
@@ -40,9 +41,9 @@ case class QuizState(
   override def withLastUpdateTime(time: LastUpdateTime): Entity = copy(lastUpdateTime = time)
 
   // **************** Additional public API **************** //
-  def round(implicit quizConfig: QuizConfig): Round = {
+  def round(implicit quizConfig: QuizConfig, i18n: I18n): Round = {
     if (roundIndex < 0) {
-      Round(name = "Welcome!", questions = Seq())
+      Round(name = i18n("app.welcome"), questions = Seq())
     } else if (roundIndex < quizConfig.rounds.size) {
       quizConfig.rounds(roundIndex)
     } else {

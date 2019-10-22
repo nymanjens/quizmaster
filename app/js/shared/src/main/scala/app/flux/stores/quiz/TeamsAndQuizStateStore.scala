@@ -10,6 +10,7 @@ import app.models.quiz.QuizState.TimerState
 import app.models.user.User
 import hydro.common.time.Clock
 import hydro.common.CollectionUtils.maybeGet
+import hydro.common.I18n
 import hydro.common.SerializingTaskQueue
 import hydro.flux.action.Dispatcher
 import hydro.flux.stores.AsyncEntityDerivedStateStore
@@ -27,6 +28,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 final class TeamsAndQuizStateStore(
     implicit entityAccess: JsEntityAccess,
+    i18n: I18n,
     user: User,
     dispatcher: Dispatcher,
     clock: Clock,

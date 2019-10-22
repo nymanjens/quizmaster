@@ -5,6 +5,7 @@ import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState
 import app.models.quiz.Team
 import app.models.quiz.config.QuizConfig.Question
+import hydro.common.I18n
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.JsLoggingUtils.LogExceptionsCallback
 import hydro.flux.action.Dispatcher
@@ -21,6 +22,7 @@ import japgolly.scalajs.react.vdom.html_<^.<
 
 final class MasterView(
     implicit pageHeader: PageHeader,
+    i18n: I18n,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
     teamEditor: TeamEditor,
