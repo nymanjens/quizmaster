@@ -97,13 +97,73 @@ final class TeamsAndQuizStateStore(
   }
 
   def goToPreviousStep(): Future[Unit] = updateStateQueue.schedule {
-    doQuizStateUpsertInternal(
+    StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
+      StateUpsertHelper.goToPreviousStepUpdate)
+  }
+
+  def goToNextStep(): Future[Unit] = updateStateQueue.schedule {
+    StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
+      StateUpsertHelper.goToNextStepUpdate)
+  }
+
+  def goToNextQuestion(): Future[Unit] = updateStateQueue.schedule {
+    StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
+      StateUpsertHelper.goToNextQuestionUpdate)
+  }
+
+  def doQuizStateUpdate(fieldMasks: ModelField[_, QuizState]*)(update: QuizState => QuizState): Future[Unit] =
+    updateStateQueue.schedule {
+      StateUpsertHelper.doQuizStateUpsert(fieldMasks.toVector)(update)
+    }
+
+  def addSubmission(submission: Submission): Future[Unit] =
+    updateStateQueue.schedule {
+      StateUpsertHelper.doQuizStateUpsert(Seq(ModelFields.QuizState.submissions)) { quizState =>
+        quizState.copy(
+          submissions = quizState.submissions :+ submission,
+        )
+      }
+    }
+
+  private object StateUpsertHelper {
+
+    val progressionRelatedFields: Seq[ModelField[_, QuizState]] = Seq(
       ModelFields.QuizState.roundIndex,
       ModelFields.QuizState.questionIndex,
       ModelFields.QuizState.questionProgressIndex,
       ModelFields.QuizState.timerState,
-      ModelFields.QuizState.submissions,
-    ) { quizState =>
+      ModelFields.QuizState.submissions
+    )
+
+    def doQuizStateUpsert(fieldMasks: Seq[ModelField[_, QuizState]])(
+        update: QuizState => QuizState): Future[Unit] =
+      async {
+        val quizState = await(stateFuture).quizState
+
+        // Optimization: Only fetch state via (non-cached) entityAccess if there is a reason
+        // to think it may have to be added
+        if (quizState == QuizState.nullInstance) {
+          val maybeQuizState = await(
+            entityAccess
+              .newQuery[QuizState]()
+              .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId))
+
+          maybeQuizState match {
+            case None =>
+              await(entityAccess.persistModifications(EntityModification.Add(update(QuizState.nullInstance))))
+            case Some(quizState2) =>
+              await(
+                entityAccess.persistModifications(
+                  EntityModification.createUpdate(update(quizState2), fieldMasks.toVector)))
+          }
+        } else {
+          await(
+            entityAccess.persistModifications(
+              EntityModification.createUpdate(update(quizState), fieldMasks.toVector)))
+        }
+      }
+
+    def goToPreviousStepUpdate(quizState: QuizState): QuizState = {
       quizState.roundIndex match {
         case -1 => quizState // Do nothing
         case _ =>
@@ -141,16 +201,8 @@ final class TeamsAndQuizStateStore(
           }
       }
     }
-  }
 
-  def goToNextStep(): Future[Unit] = updateStateQueue.schedule {
-    doQuizStateUpsertInternal(
-      ModelFields.QuizState.roundIndex,
-      ModelFields.QuizState.questionIndex,
-      ModelFields.QuizState.questionProgressIndex,
-      ModelFields.QuizState.timerState,
-      ModelFields.QuizState.submissions,
-    ) { quizState =>
+    def goToNextStepUpdate(quizState: QuizState): QuizState = {
       quizState.maybeQuestion match {
         case None =>
           if (quizState.round.questions.isEmpty) {
@@ -200,58 +252,55 @@ final class TeamsAndQuizStateStore(
           }
       }
     }
-  }
-
-  def doQuizStateUpdate(fieldMasks: ModelField[_, QuizState]*)(update: QuizState => QuizState): Future[Unit] =
-    updateStateQueue.schedule {
-      doQuizStateUpsertInternal(fieldMasks: _*)(update)
-    }
-
-  def addSubmission(submission: Submission): Future[Unit] =
-    updateStateQueue.schedule {
-      doQuizStateUpsertInternal(ModelFields.QuizState.submissions) { quizState =>
-        quizState.copy(
-          submissions = quizState.submissions :+ submission,
-        )
+    def goToNextQuestionUpdate(quizState: QuizState): QuizState = {
+      quizState.maybeQuestion match {
+        case None =>
+          if (quizState.round.questions.isEmpty) {
+            // Go to next round
+            QuizState(
+              roundIndex = quizState.roundIndex + 1,
+              timerState = TimerState.createStarted(),
+              submissions = Seq(),
+            )
+          } else {
+            // Go to first question
+            quizState.copy(
+              questionIndex = 0,
+              questionProgressIndex = 0,
+              timerState = TimerState.createStarted(),
+              submissions = Seq(),
+            )
+          }
+        case Some(question) =>
+          if (quizState.questionIndex == quizState.round.questions.size - 1) {
+            // Go to next round
+            QuizState(
+              roundIndex = quizState.roundIndex + 1,
+              questionProgressIndex = 0,
+              timerState = TimerState.createStarted(),
+              submissions = Seq(),
+            )
+          } else {
+            // Go to next question
+            quizState.copy(
+              questionIndex = quizState.questionIndex + 1,
+              questionProgressIndex = 0,
+              timerState = TimerState.createStarted(),
+              submissions = Seq(),
+            )
+          }
       }
     }
 
-  private def doQuizStateUpsertInternal(fieldMasks: ModelField[_, QuizState]*)(
-      update: QuizState => QuizState): Future[Unit] =
-    async {
-      val quizState = await(stateFuture).quizState
-
-      // Optimization: Only fetch state via (non-cached) entityAccess if there is a reason
-      // to think it may have to be added
-      if (quizState == QuizState.nullInstance) {
-        val maybeQuizState = await(
-          entityAccess
-            .newQuery[QuizState]()
-            .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId))
-
-        maybeQuizState match {
-          case None =>
-            await(entityAccess.persistModifications(EntityModification.Add(update(QuizState.nullInstance))))
-          case Some(quizState2) =>
-            await(
-              entityAccess.persistModifications(
-                EntityModification.createUpdate(update(quizState2), fieldMasks.toVector)))
+    private def addOrRemovePoints(quizState: QuizState): Unit = {
+      val question = quizState.maybeQuestion.get
+      if (question.isMultipleChoice) {
+        for (submission <- quizState.submissions) {
+          val correct = question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get)
+          val scoreDiff = if (correct) question.pointsToGain else question.pointsToGainOnWrongAnswer
+          val team = stateOrEmpty.teams.find(_.id == submission.teamId).get
+          updateScore(team, scoreDiff = scoreDiff)
         }
-      } else {
-        await(
-          entityAccess.persistModifications(
-            EntityModification.createUpdate(update(quizState), fieldMasks.toVector)))
-      }
-    }
-
-  private def addOrRemovePoints(quizState: QuizState): Unit = {
-    val question = quizState.maybeQuestion.get
-    if (question.isMultipleChoice) {
-      for (submission <- quizState.submissions) {
-        val correct = question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get)
-        val scoreDiff = if (correct) question.pointsToGain else question.pointsToGainOnWrongAnswer
-        val team = stateOrEmpty.teams.find(_.id == submission.teamId).get
-        updateScore(team, scoreDiff = scoreDiff)
       }
     }
   }
