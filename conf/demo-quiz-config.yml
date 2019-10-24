@@ -1,16 +1,11 @@
 !!app.models.quiz.config.ParsableQuizConfig
 rounds:
-  -
-    name: Geography
+  - name: Geography
     questions:
       - !!app.models.quiz.config.ParsableQuizConfig$Question$Single
         question: What is the capital of France?
         answer: Paris
-        choices:
-          - Paris
-          - London
-          - Brussels
-          - Berlin
+        choices: [Paris, London, Brussels, Berlin]
         pointsToGain: 2
         maxTimeSeconds: 8
         onlyFirstGainsPoints: true
@@ -18,32 +13,21 @@ rounds:
       - !!app.models.quiz.config.ParsableQuizConfig$Question$Single
         question: What is the capital of Belgium?
         answer: Brussels
-        choices:
-          - Paris
-          - London
-          - Brussels
-          - Berlin
+        choices: [Paris, London, Brussels, Berlin]
 
       - !!app.models.quiz.config.ParsableQuizConfig$Question$Single
         question: Who was the country Columbia named after?
         answer: Christoffer Columbus
         maxTimeSeconds: 8
 
-  -
-    name: TV
+  - name: TV
     questions:
       - !!app.models.quiz.config.ParsableQuizConfig$Question$Double
         verbalQuestion: How is the wizard called in Lord of the Rings?
         verbalAnswer: Gandalf
         textualQuestion: How is the wizard called in the Arthurian Myth?
         textualAnswer: Merlin
-        textualChoices:
-          - Yoda
-          - Gandalf
-          - Albus Dumbledore
-          - Merlin
-        pointsToGain: 2
+        textualChoices: [Yoda, Gandalf, Albus Dumbledore, Merlin]
 
-  -
-    name: Games
+  - name: Games
     questions: []
