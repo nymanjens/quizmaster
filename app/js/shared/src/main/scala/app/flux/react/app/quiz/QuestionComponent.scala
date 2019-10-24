@@ -17,11 +17,14 @@ import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
 import hydro.flux.react.uielements.Bootstrap
 import hydro.flux.react.uielements.PageHeader
+import hydro.flux.react.ReactVdomUtils.^^
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
 import japgolly.scalajs.react.vdom.VdomArray
 import japgolly.scalajs.react.vdom.VdomNode
+
+import scala.scalajs.js
 
 final class QuestionComponent(
     implicit pageHeader: PageHeader,
@@ -148,31 +151,37 @@ final class QuestionComponent(
           },
           <<.ifDefined(question.choices) { choices =>
             ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
-              <.ul(
-                ^.className := "choices",
-                (for ((choice, arrow) <- choices zip Arrow.all)
-                  yield {
-                    val visibleSubmissions =
-                      if (showSubmissionsOnChoices)
-                        state.quizState.submissions.filter(_.maybeAnswerIndex == Some(arrow.answerIndex))
-                      else Seq()
-                    val isCorrectAnswer = choice == question.answer
-                    <.li(
-                      ^.key := choice,
-                      arrow.icon(
-                        ^.className := "choice-arrow",
-                      ),
-                      if (isCorrectAnswer && (answerIsVisible || visibleSubmissions.nonEmpty)) {
-                        <.span(^.className := "correct", choice)
-                      } else if (!isCorrectAnswer && visibleSubmissions.nonEmpty) {
-                        <.span(^.className := "incorrect", choice)
-                      } else {
-                        choice
-                      },
-                      " ",
-                      showSubmissions(visibleSubmissions),
-                    )
-                  }).toVdomArray
+              <.div(
+                ^.className := "choices-holder",
+                ^^.ifDefined(question.image) { _ =>
+                  ^.style := js.Dictionary("textAlign" -> "left")
+                },
+                <.ul(
+                  ^.className := "choices",
+                  (for ((choice, arrow) <- choices zip Arrow.all)
+                    yield {
+                      val visibleSubmissions =
+                        if (showSubmissionsOnChoices)
+                          state.quizState.submissions.filter(_.maybeAnswerIndex == Some(arrow.answerIndex))
+                        else Seq()
+                      val isCorrectAnswer = choice == question.answer
+                      <.li(
+                        ^.key := choice,
+                        arrow.icon(
+                          ^.className := "choice-arrow",
+                        ),
+                        if (isCorrectAnswer && (answerIsVisible || visibleSubmissions.nonEmpty)) {
+                          <.span(^.className := "correct", choice)
+                        } else if (!isCorrectAnswer && visibleSubmissions.nonEmpty) {
+                          <.span(^.className := "incorrect", choice)
+                        } else {
+                          choice
+                        },
+                        " ",
+                        showSubmissions(visibleSubmissions),
+                      )
+                    }).toVdomArray
+                )
               )
             }
           },

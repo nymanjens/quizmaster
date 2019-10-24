@@ -197,26 +197,28 @@ table.table-bordered {
         }
       }
 
-      .choices {
+      .choices-holder {
         flex-grow: 1;
         flex-shrink: 0;
         flex-basis: auto;
 
-        list-style: none;
-        font-size: 35px;
-        display: inline-block;
-        text-align: left;
-        padding-left: 0;
-        .choice-arrow {
-          padding-right: 25px;
-        }
-        .correct {
-          color: green;
-          font-weight: bold;
-        }
-        .incorrect {
-          color: red;
-          text-decoration: line-through;
+        .choices {
+          list-style: none;
+          font-size: 35px;
+          display: inline-block;
+          text-align: left;
+          padding-left: 0;
+          .choice-arrow {
+            padding-right: 25px;
+          }
+          .correct {
+            color: green;
+            font-weight: bold;
+          }
+          .incorrect {
+            color: red;
+            text-decoration: line-through;
+          }
         }
       }
     }
