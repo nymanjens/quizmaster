@@ -115,15 +115,36 @@ object QuizConfig {
 
       override def onlyFirstGainsPoints: Boolean = true
 
-      override def progressStepsCount: Int = 3
-      override def shouldShowTimer(questionProgressIndex: Int): Boolean = questionProgressIndex == 2
+      /**
+        * Steps:
+        * 0- Show preparatory title: "Question 2"
+        * 1- Show question: "This is the question, do you know the answer?"
+        * 2- Show choices; when right answer is given, start the timer
+        * 3- Show answer
+        * 4- Show answer and give points
+        */
+      override def progressStepsCount: Int = 5
+      // Submissions should not be hindered by a timer
+      override def shouldShowTimer(questionProgressIndex: Int): Boolean = false
 
-      override def maybeMaxTime: Option[Duration] = Some(Duration.ofSeconds(3))
+      override def maybeMaxTime: Option[Duration] = Some(maxTime)
 
-      override def submissionAreOpen(questionProgressIndex: Int): Boolean = ???
+      override def submissionAreOpen(questionProgressIndex: Int): Boolean = questionProgressIndex == 2
       override def isMultipleChoice: Boolean = true
       override def isCorrectAnswerIndex(answerIndex: Int): Boolean =
         textualChoices.apply(answerIndex) == textualAnswer
+
+      def maxTime: Duration = Duration.ofSeconds(3)
+
+      def questionIsVisible(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex >= 1
+      }
+      def choicesAreVisible(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex >= 2
+      }
+      def answerIsVisible(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex >= maxProgressIndex - 1
+      }
     }
   }
 }

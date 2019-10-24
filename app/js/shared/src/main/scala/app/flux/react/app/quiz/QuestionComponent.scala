@@ -85,18 +85,20 @@ final class QuestionComponent(
         props.question match {
           case single: Question.Single =>
             props.questionProgressIndex match {
-              case 0 if !props.showMasterData => showSingleQuestionStep0PreparatoryTitle(single)
-              case 0 if props.showMasterData  => showSingleQuestion(single)
-              case 1 | 2 | 3 | 4              => showSingleQuestion(single)
+              case 0 if !props.showMasterData => showPreparatoryTitle(single)
+              case _                          => showSingleQuestion(single)
             }
 
-          case double: Question.Double => showDoubleQuestion(double)
+          case double: Question.Double =>
+            props.questionProgressIndex match {
+              case 0 if !props.showMasterData => showPreparatoryTitle(double)
+              case _                          => showDoubleQuestion(double)
+            }
         },
       )
     }
 
-    private def showSingleQuestionStep0PreparatoryTitle(question: Question.Single)(
-        implicit props: Props): VdomElement = {
+    private def showPreparatoryTitle(question: Question)(implicit props: Props): VdomElement = {
       val questionNumber = (props.round.questions indexOf question) + 1
       <.div(
         <.div(
@@ -147,7 +149,7 @@ final class QuestionComponent(
               <.img(
                 ^.src := s"/quizimages/$imageFilename",
               )
-            ),
+            )
           },
           <<.ifDefined(question.choices) { choices =>
             ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
@@ -193,7 +195,7 @@ final class QuestionComponent(
           },
           " ",
           <<.ifThen(!showSubmissionsOnChoices) {
-            showSubmissions(state.quizState.submissions),
+            showSubmissions(state.quizState.submissions)
           }
         ),
         <<.ifThen(question.choices.isEmpty || !answerIsVisible) {
@@ -217,9 +219,80 @@ final class QuestionComponent(
       )
     }
 
-    private def showDoubleQuestion(question: Question.Double)(implicit props: Props): VdomElement = {
+    private def showDoubleQuestion(
+        question: Question.Double,
+    )(
+        implicit props: Props,
+        state: State,
+    ): VdomElement = {
+      val progressIndex = props.questionProgressIndex
+      val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
+      val showGamepadIconUnderChoices = state.quizState.canSubmitResponse
+      val correctSubmissionWasEntered = state.quizState.submissions.exists(submission =>
+        question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
+
+      def ifVisibleOrMaster(isVisible: Boolean)(vdomNode: VdomNode): VdomNode = {
+        if (isVisible) {
+          vdomNode
+        } else if (props.showMasterData) {
+          <.span(^.className := "admin-only-data", vdomNode)
+        } else {
+          VdomArray.empty()
+        }
+      }
+
       <.div(
-        ^.className := "question",
+        ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
+          <.div(
+            ^.className := "question",
+            question.textualQuestion,
+          )
+        },
+        pointsMetadata(question),
+        <.div(
+          ^.className := "image-and-choices-row",
+          ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
+            <.div(
+              ^.className := "choices-holder",
+              <.ul(
+                ^.className := "choices",
+                (for ((choice, arrow) <- question.textualChoices zip Arrow.all)
+                  yield {
+                    val submissions =
+                      state.quizState.submissions.filter(_.maybeAnswerIndex == Some(arrow.answerIndex))
+                    val isCorrectAnswer = choice == question.textualAnswer
+                    <.li(
+                      ^.key := choice,
+                      arrow.icon(
+                        ^.className := "choice-arrow",
+                      ),
+                      if (isCorrectAnswer && (answerIsVisible || submissions.nonEmpty || props.showMasterData)) {
+                        <.span(^.className := "correct", choice)
+                      } else if (!isCorrectAnswer && submissions.nonEmpty) {
+                        <.span(^.className := "incorrect", choice)
+                      } else {
+                        choice
+                      },
+                      " ",
+                      showSubmissions(submissions),
+                    )
+                  }).toVdomArray
+              )
+            )
+          },
+        ),
+        <.div(
+          ^.className := "submissions-without-choices",
+          ifVisibleOrMaster(showGamepadIconUnderChoices) {
+            Bootstrap.FontAwesomeIcon("gamepad")
+          }
+        ),
+        <<.ifThen(correctSubmissionWasEntered) {
+          <.div(
+            ^.className := "timer",
+            syncedTimerBar(maxTime = question.maxTime),
+          )
+        }
       )
     }
 
