@@ -97,7 +97,7 @@ final class TeamsAndQuizStateStore(
   }
 
   def goToPreviousStep(): Future[Unit] = updateStateQueue.schedule {
-    doQuizStateUpdateInternal(
+    doQuizStateUpsertInternal(
       ModelFields.QuizState.roundIndex,
       ModelFields.QuizState.questionIndex,
       ModelFields.QuizState.questionProgressIndex,
@@ -144,106 +144,104 @@ final class TeamsAndQuizStateStore(
   }
 
   def goToNextStep(): Future[Unit] = updateStateQueue.schedule {
-    async {
-      val maybeQuizState = await(
-        entityAccess
-          .newQuery[QuizState]()
-          .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId))
-
-      maybeQuizState match {
+    doQuizStateUpsertInternal(
+      ModelFields.QuizState.roundIndex,
+      ModelFields.QuizState.questionIndex,
+      ModelFields.QuizState.questionProgressIndex,
+      ModelFields.QuizState.timerState,
+      ModelFields.QuizState.submissions,
+    ) { quizState =>
+      quizState.maybeQuestion match {
         case None =>
-          await(
-            entityAccess.persistModifications(
-              Seq(
-                EntityModification.Add(QuizState(
-                  roundIndex = 0,
-                  timerState = TimerState.createStarted(),
-                )))))
+          if (quizState.round.questions.isEmpty) {
+            // Go to next round
+            QuizState(
+              roundIndex = quizState.roundIndex + 1,
+              timerState = TimerState.createStarted(),
+              submissions = Seq(),
+            )
+          } else {
+            // Go to first question
+            quizState.copy(
+              questionIndex = 0,
+              questionProgressIndex = 0,
+              timerState = TimerState.createStarted(),
+              submissions = Seq(),
+            )
+          }
+        case Some(question) if quizState.questionProgressIndex < question.maxProgressIndex =>
+          // Add and remove points
+          if (quizState.questionProgressIndex == question.maxProgressIndex - 1) {
+            Future(addOrRemovePoints(quizState))
+          }
 
-        case Some(_) =>
-          await(
-            doQuizStateUpdateInternal(
-              ModelFields.QuizState.roundIndex,
-              ModelFields.QuizState.questionIndex,
-              ModelFields.QuizState.questionProgressIndex,
-              ModelFields.QuizState.timerState,
-              ModelFields.QuizState.submissions,
-            ) { quizState =>
-              quizState.maybeQuestion match {
-                case None =>
-                  if (quizState.round.questions.isEmpty) {
-                    // Go to next round
-                    QuizState(
-                      roundIndex = quizState.roundIndex + 1,
-                      timerState = TimerState.createStarted(),
-                      submissions = Seq(),
-                    )
-                  } else {
-                    // Go to first question
-                    quizState.copy(
-                      questionIndex = 0,
-                      questionProgressIndex = 0,
-                      timerState = TimerState.createStarted(),
-                      submissions = Seq(),
-                    )
-                  }
-                case Some(question) if quizState.questionProgressIndex < question.maxProgressIndex =>
-                  // Add and remove points
-                  if (quizState.questionProgressIndex == question.maxProgressIndex - 1) {
-                    Future(addOrRemovePoints(quizState))
-                  }
-
-                  // Increment questionProgressIndex
-                  quizState.copy(
-                    questionProgressIndex = quizState.questionProgressIndex + 1,
-                    timerState = TimerState.createStarted(),
-                  )
-                case Some(question) if quizState.questionProgressIndex == question.maxProgressIndex =>
-                  if (quizState.questionIndex == quizState.round.questions.size - 1) {
-                    // Go to next round
-                    QuizState(
-                      roundIndex = quizState.roundIndex + 1,
-                      questionProgressIndex = 0,
-                      timerState = TimerState.createStarted(),
-                      submissions = Seq(),
-                    )
-                  } else {
-                    // Go to next question
-                    quizState.copy(
-                      questionIndex = quizState.questionIndex + 1,
-                      questionProgressIndex = 0,
-                      timerState = TimerState.createStarted(),
-                      submissions = Seq(),
-                    )
-                  }
-              }
-            }
+          // Increment questionProgressIndex
+          quizState.copy(
+            questionProgressIndex = quizState.questionProgressIndex + 1,
+            timerState = TimerState.createStarted(),
           )
+        case Some(question) if quizState.questionProgressIndex == question.maxProgressIndex =>
+          if (quizState.questionIndex == quizState.round.questions.size - 1) {
+            // Go to next round
+            QuizState(
+              roundIndex = quizState.roundIndex + 1,
+              questionProgressIndex = 0,
+              timerState = TimerState.createStarted(),
+              submissions = Seq(),
+            )
+          } else {
+            // Go to next question
+            quizState.copy(
+              questionIndex = quizState.questionIndex + 1,
+              questionProgressIndex = 0,
+              timerState = TimerState.createStarted(),
+              submissions = Seq(),
+            )
+          }
       }
     }
   }
 
   def doQuizStateUpdate(fieldMasks: ModelField[_, QuizState]*)(update: QuizState => QuizState): Future[Unit] =
     updateStateQueue.schedule {
-      doQuizStateUpdateInternal(fieldMasks: _*)(update)
+      doQuizStateUpsertInternal(fieldMasks: _*)(update)
     }
 
   def addSubmission(submission: Submission): Future[Unit] =
     updateStateQueue.schedule {
-      doQuizStateUpdateInternal(ModelFields.QuizState.submissions) { quizState =>
+      doQuizStateUpsertInternal(ModelFields.QuizState.submissions) { quizState =>
         quizState.copy(
           submissions = quizState.submissions :+ submission,
         )
       }
     }
 
-  private def doQuizStateUpdateInternal(fieldMasks: ModelField[_, QuizState]*)(
+  private def doQuizStateUpsertInternal(fieldMasks: ModelField[_, QuizState]*)(
       update: QuizState => QuizState): Future[Unit] =
     async {
       val quizState = await(stateFuture).quizState
-      val newQuizState = update(quizState)
-      await(
-        entityAccess.persistModifications(EntityModification.createUpdate(newQuizState, fieldMasks.toVector)))
+
+      // Optimization: Only fetch state via (non-cached) entityAccess if there is a reason
+      // to think it may have to be added
+      if (quizState == QuizState.nullInstance) {
+        val maybeQuizState = await(
+          entityAccess
+            .newQuery[QuizState]()
+            .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId))
+
+        maybeQuizState match {
+          case None =>
+            await(entityAccess.persistModifications(EntityModification.Add(update(QuizState.nullInstance))))
+          case Some(quizState2) =>
+            await(
+              entityAccess.persistModifications(
+                EntityModification.createUpdate(update(quizState2), fieldMasks.toVector)))
+        }
+      } else {
+        await(
+          entityAccess.persistModifications(
+            EntityModification.createUpdate(update(quizState), fieldMasks.toVector)))
+      }
     }
 
   private def addOrRemovePoints(quizState: QuizState): Unit = {
