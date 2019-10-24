@@ -106,6 +106,10 @@ final class TeamsAndQuizStateStore(
       StateUpsertHelper.goToNextStepUpdate)
   }
 
+  /**
+    * Go to the start of the current question if it's not already there or the start of the previous question
+    * otherwise
+    */
   def goToPreviousQuestion(): Future[Unit] = updateStateQueue.schedule {
     StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
       StateUpsertHelper.goToPreviousQuestionUpdate)
@@ -116,6 +120,10 @@ final class TeamsAndQuizStateStore(
       StateUpsertHelper.goToNextQuestionUpdate)
   }
 
+  /**
+    * Go to the start of the current round if it's not already there or the start of the previous round
+    * otherwise
+    */
   def goToPreviousRound(): Future[Unit] = updateStateQueue.schedule {
     StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
       StateUpsertHelper.goToPreviousRoundUpdate)
@@ -185,7 +193,7 @@ final class TeamsAndQuizStateStore(
             case None if quizState.roundIndex == 0 =>
               QuizState.nullInstance
             case None =>
-              // Go to end of last round
+              // Go to the end of the previous round
               val newRoundIndex = Math.min(quizState.roundIndex - 1, quizConfig.rounds.size - 1)
               val newRound = quizConfig.rounds(newRoundIndex)
               quizState.copy(
@@ -196,7 +204,7 @@ final class TeamsAndQuizStateStore(
                 submissions = Seq(),
               )
             case Some(question) if quizState.questionProgressIndex == 0 =>
-              // Go to previous question
+              // Go to the end of the previous question
               val newQuestionIndex = quizState.questionIndex - 1
               quizState.copy(
                 questionIndex = newQuestionIndex,
@@ -237,7 +245,40 @@ final class TeamsAndQuizStateStore(
     }
 
     def goToPreviousQuestionUpdate(quizState: QuizState): QuizState = {
-      quizState
+      quizState.roundIndex match {
+        case -1 => quizState // Do nothing
+        case _ =>
+          quizState.maybeQuestion match {
+            case None if quizState.roundIndex == 0 =>
+              QuizState.nullInstance
+            case None =>
+              // Go to the start of the last question of the previous round
+              val newRoundIndex = Math.min(quizState.roundIndex - 1, quizConfig.rounds.size - 1)
+              val newRound = quizConfig.rounds(newRoundIndex)
+              quizState.copy(
+                roundIndex = newRoundIndex,
+                questionIndex = newRound.questions.size - 1,
+                questionProgressIndex = 0,
+                timerState = TimerState.createStarted(),
+                submissions = Seq(),
+              )
+            case Some(question) if quizState.questionProgressIndex == 0 =>
+              // Go to the start of the previous question
+              val newQuestionIndex = quizState.questionIndex - 1
+              quizState.copy(
+                questionIndex = newQuestionIndex,
+                questionProgressIndex = 0,
+                timerState = TimerState.createStarted(),
+                submissions = Seq(),
+              )
+            case Some(question) if quizState.questionProgressIndex > 0 =>
+              // Go to the start of the question
+              quizState.copy(
+                questionProgressIndex = 0,
+                timerState = TimerState.createStarted(),
+              )
+          }
+      }
     }
 
     def goToNextQuestionUpdate(quizState: QuizState): QuizState = {
@@ -272,7 +313,32 @@ final class TeamsAndQuizStateStore(
     }
 
     def goToPreviousRoundUpdate(quizState: QuizState): QuizState = {
-      quizState
+      quizState.roundIndex match {
+        case -1 => quizState // Do nothing
+        case _ =>
+          quizState.maybeQuestion match {
+            case None if quizState.roundIndex == 0 =>
+              QuizState.nullInstance
+            case None =>
+              // Go to the start of the previous round
+              val newRoundIndex = Math.min(quizState.roundIndex - 1, quizConfig.rounds.size - 1)
+              quizState.copy(
+                roundIndex = newRoundIndex,
+                questionIndex = -1,
+                questionProgressIndex = 0,
+                timerState = TimerState.createStarted(),
+                submissions = Seq(),
+              )
+            case Some(question) =>
+              // Go to the start of the current round
+              quizState.copy(
+                questionIndex = -1,
+                questionProgressIndex = 0,
+                timerState = TimerState.createStarted(),
+                submissions = Seq(),
+              )
+          }
+      }
     }
 
     def goToNextRoundUpdate(quizState: QuizState): QuizState = {
