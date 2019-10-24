@@ -106,9 +106,23 @@ final class TeamsAndQuizStateStore(
       StateUpsertHelper.goToNextStepUpdate)
   }
 
+  def goToPreviousQuestion(): Future[Unit] = updateStateQueue.schedule {
+    StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
+      StateUpsertHelper.goToPreviousQuestionUpdate)
+  }
+
   def goToNextQuestion(): Future[Unit] = updateStateQueue.schedule {
     StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
       StateUpsertHelper.goToNextQuestionUpdate)
+  }
+
+  def goToPreviousRound(): Future[Unit] = updateStateQueue.schedule {
+    StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
+      StateUpsertHelper.goToPreviousRoundUpdate)
+  }
+  def goToNextRound(): Future[Unit] = updateStateQueue.schedule {
+    StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
+      StateUpsertHelper.goToNextRoundUpdate)
   }
 
   def doQuizStateUpdate(fieldMasks: ModelField[_, QuizState]*)(update: QuizState => QuizState): Future[Unit] =
@@ -205,22 +219,7 @@ final class TeamsAndQuizStateStore(
     def goToNextStepUpdate(quizState: QuizState): QuizState = {
       quizState.maybeQuestion match {
         case None =>
-          if (quizState.round.questions.isEmpty) {
-            // Go to next round
-            QuizState(
-              roundIndex = quizState.roundIndex + 1,
-              timerState = TimerState.createStarted(),
-              submissions = Seq(),
-            )
-          } else {
-            // Go to first question
-            quizState.copy(
-              questionIndex = 0,
-              questionProgressIndex = 0,
-              timerState = TimerState.createStarted(),
-              submissions = Seq(),
-            )
-          }
+          goToNextQuestionUpdate(quizState)
         case Some(question) if quizState.questionProgressIndex < question.maxProgressIndex =>
           // Add and remove points
           if (quizState.questionProgressIndex == question.maxProgressIndex - 1) {
@@ -233,35 +232,20 @@ final class TeamsAndQuizStateStore(
             timerState = TimerState.createStarted(),
           )
         case Some(question) if quizState.questionProgressIndex == question.maxProgressIndex =>
-          if (quizState.questionIndex == quizState.round.questions.size - 1) {
-            // Go to next round
-            QuizState(
-              roundIndex = quizState.roundIndex + 1,
-              questionProgressIndex = 0,
-              timerState = TimerState.createStarted(),
-              submissions = Seq(),
-            )
-          } else {
-            // Go to next question
-            quizState.copy(
-              questionIndex = quizState.questionIndex + 1,
-              questionProgressIndex = 0,
-              timerState = TimerState.createStarted(),
-              submissions = Seq(),
-            )
-          }
+          goToNextQuestionUpdate(quizState)
       }
     }
+
+    def goToPreviousQuestionUpdate(quizState: QuizState): QuizState = {
+      quizState
+    }
+
     def goToNextQuestionUpdate(quizState: QuizState): QuizState = {
       quizState.maybeQuestion match {
         case None =>
           if (quizState.round.questions.isEmpty) {
             // Go to next round
-            QuizState(
-              roundIndex = quizState.roundIndex + 1,
-              timerState = TimerState.createStarted(),
-              submissions = Seq(),
-            )
+            goToNextRoundUpdate(quizState)
           } else {
             // Go to first question
             quizState.copy(
@@ -274,12 +258,7 @@ final class TeamsAndQuizStateStore(
         case Some(question) =>
           if (quizState.questionIndex == quizState.round.questions.size - 1) {
             // Go to next round
-            QuizState(
-              roundIndex = quizState.roundIndex + 1,
-              questionProgressIndex = 0,
-              timerState = TimerState.createStarted(),
-              submissions = Seq(),
-            )
+            goToNextRoundUpdate(quizState)
           } else {
             // Go to next question
             quizState.copy(
@@ -290,6 +269,19 @@ final class TeamsAndQuizStateStore(
             )
           }
       }
+    }
+
+    def goToPreviousRoundUpdate(quizState: QuizState): QuizState = {
+      quizState
+    }
+
+    def goToNextRoundUpdate(quizState: QuizState): QuizState = {
+      QuizState(
+        roundIndex = quizState.roundIndex + 1,
+        questionProgressIndex = 0,
+        timerState = TimerState.createStarted(),
+        submissions = Seq(),
+      )
     }
 
     private def addOrRemovePoints(quizState: QuizState): Unit = {
