@@ -1,11 +1,9 @@
 package app.flux.react.app.quiz
 
 import app.flux.stores.quiz.GamepadStore.Arrow
-import hydro.flux.react.ReactVdomUtils.<<
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
-import app.models.quiz.QuizState.TimerState
 import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.Submission
@@ -15,6 +13,7 @@ import hydro.common.time.Clock
 import hydro.common.I18n
 import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
+import hydro.flux.react.ReactVdomUtils.<<
 import hydro.flux.react.uielements.Bootstrap
 import hydro.flux.react.uielements.PageHeader
 import hydro.flux.react.ReactVdomUtils.^^
@@ -123,16 +122,6 @@ final class QuestionComponent(
       val showGamepadIconUnderChoices =
         state.quizState.submissions.nonEmpty || (state.quizState.canSubmitResponse && question.onlyFirstGainsPoints)
 
-      def ifVisibleOrMaster(isVisible: Boolean)(vdomNode: VdomNode): VdomNode = {
-        if (isVisible) {
-          vdomNode
-        } else if (props.showMasterData) {
-          <.span(^.className := "admin-only-data", vdomNode)
-        } else {
-          VdomArray.empty()
-        }
-      }
-
       <.div(
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
@@ -206,7 +195,7 @@ final class QuestionComponent(
                 question.answer,
               )
             } else {
-              obfuscatedAnswer(question.answer)
+              <.div(obfuscatedAnswer(question.answer))
             }
           }
         },
@@ -230,16 +219,6 @@ final class QuestionComponent(
       val showGamepadIconUnderChoices = state.quizState.canSubmitResponse
       val correctSubmissionWasEntered = state.quizState.submissions.exists(submission =>
         question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
-
-      def ifVisibleOrMaster(isVisible: Boolean)(vdomNode: VdomNode): VdomNode = {
-        if (isVisible) {
-          vdomNode
-        } else if (props.showMasterData) {
-          <.span(^.className := "admin-only-data", vdomNode)
-        } else {
-          VdomArray.empty()
-        }
-      }
 
       <.div(
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
@@ -294,6 +273,16 @@ final class QuestionComponent(
           )
         }
       )
+    }
+
+    private def ifVisibleOrMaster(isVisible: Boolean)(vdomTag: VdomTag)(implicit props: Props): VdomNode = {
+      if (isVisible) {
+        vdomTag
+      } else if (props.showMasterData) {
+        vdomTag(^.className := "admin-only-data")
+      } else {
+        VdomArray.empty()
+      }
     }
 
     private def pointsMetadata(question: Question): VdomElement = {
