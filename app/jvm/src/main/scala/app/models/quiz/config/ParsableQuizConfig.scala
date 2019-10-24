@@ -9,9 +9,16 @@ case class ParsableQuizConfig(
     rounds: java.util.List[ParsableQuizConfig.Round],
 ) {
   def this() = this(null)
-  def parse: QuizConfig = QuizConfig(
-    rounds = rounds.asScala.toVector.map(_.parse),
-  )
+  def parse: QuizConfig = {
+    try {
+      QuizConfig(
+        rounds = rounds.asScala.toVector.map(_.parse),
+      )
+    } catch {
+      case throwable: Throwable =>
+        throw new RuntimeException(s"Failed to parse QuizConfig", throwable)
+    }
+  }
 }
 
 object ParsableQuizConfig {
@@ -20,10 +27,17 @@ object ParsableQuizConfig {
       questions: java.util.List[ParsableQuizConfig.Question],
   ) {
     def this() = this(null, null)
-    def parse: QuizConfig.Round = QuizConfig.Round(
-      name = checkNotNull(name),
-      questions = questions.asScala.toVector.map(_.parse),
-    )
+    def parse: QuizConfig.Round = {
+      try {
+        QuizConfig.Round(
+          name = checkNotNull(name),
+          questions = questions.asScala.toVector.map(_.parse),
+        )
+      } catch {
+        case throwable: Throwable =>
+          throw new RuntimeException(s"Failed to parse Round $name", throwable)
+      }
+    }
   }
 
   trait Question {
@@ -50,16 +64,23 @@ object ParsableQuizConfig {
         maxTimeSeconds = 0,
         onlyFirstGainsPoints = false,
       )
-      override def parse: QuizConfig.Question = QuizConfig.Question.Single(
-        question = checkNotNull(question),
-        answer = checkNotNull(answer),
-        image = Option(image),
-        choices = if (choices == null) None else Some(choices.asScala.toVector),
-        pointsToGain = pointsToGain,
-        pointsToGainOnWrongAnswer = pointsToGainOnWrongAnswer,
-        maybeMaxTime = if (maxTimeSeconds == 0) None else Some(Duration.ofSeconds(maxTimeSeconds)),
-        onlyFirstGainsPoints = onlyFirstGainsPoints,
-      )
+      override def parse: QuizConfig.Question = {
+        try {
+          QuizConfig.Question.Single(
+            question = checkNotNull(question),
+            answer = checkNotNull(answer),
+            image = Option(image),
+            choices = if (choices == null) None else Some(choices.asScala.toVector),
+            pointsToGain = pointsToGain,
+            pointsToGainOnWrongAnswer = pointsToGainOnWrongAnswer,
+            maybeMaxTime = if (maxTimeSeconds == 0) None else Some(Duration.ofSeconds(maxTimeSeconds)),
+            onlyFirstGainsPoints = onlyFirstGainsPoints,
+          )
+        } catch {
+          case throwable: Throwable =>
+            throw new RuntimeException(s"Failed to parse Question.Single $question", throwable)
+        }
+      }
     }
     case class Double(
         verbalQuestion: String,
@@ -77,14 +98,21 @@ object ParsableQuizConfig {
         textualChoices = null,
         pointsToGain = 1,
       )
-      override def parse: QuizConfig.Question = QuizConfig.Question.Double(
-        verbalQuestion = checkNotNull(verbalQuestion),
-        verbalAnswer = checkNotNull(verbalAnswer),
-        textualQuestion = checkNotNull(textualQuestion),
-        textualAnswer = checkNotNull(textualAnswer),
-        textualChoices = checkNotNull(textualChoices.asScala.toVector),
-        pointsToGain = pointsToGain,
-      )
+      override def parse: QuizConfig.Question = {
+        try {
+          QuizConfig.Question.Double(
+            verbalQuestion = checkNotNull(verbalQuestion),
+            verbalAnswer = checkNotNull(verbalAnswer),
+            textualQuestion = checkNotNull(textualQuestion),
+            textualAnswer = checkNotNull(textualAnswer),
+            textualChoices = checkNotNull(textualChoices.asScala.toVector),
+            pointsToGain = pointsToGain,
+          )
+        } catch {
+          case throwable: Throwable =>
+            throw new RuntimeException(s"Failed to parse Question.Double $verbalQuestion", throwable)
+        }
+      }
     }
   }
 }
