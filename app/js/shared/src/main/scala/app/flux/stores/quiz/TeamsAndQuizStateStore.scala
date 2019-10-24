@@ -78,9 +78,11 @@ final class TeamsAndQuizStateStore(
             ))))
     }
   }
+
   def updateName(team: Team, newName: String): Future[Unit] = updateStateQueue.schedule {
     entityAccess.persistModifications(EntityModification.createUpdateAllFields(team.copy(name = newName)))
   }
+
   def updateScore(team: Team, scoreDiff: Int): Future[Unit] = updateStateQueue.schedule {
     async {
       if (scoreDiff != 0) {
@@ -92,6 +94,12 @@ final class TeamsAndQuizStateStore(
       }
     }
   }
+
+  def updateScore(teamIndex: Int, scoreDiff: Int): Future[Unit] = async {
+    val team = await(stateFuture).teams(teamIndex)
+    await(updateScore(team, scoreDiff))
+  }
+
   def deleteTeam(team: Team): Future[Unit] = updateStateQueue.schedule {
     entityAccess.persistModifications(EntityModification.createRemove(team))
   }

@@ -64,8 +64,24 @@ final class Layout(
         })
       }
 
-      bind("ctrl+left", () => teamsAndQuizStateStore.goToPreviousStep())
-      bind("ctrl+right", () => teamsAndQuizStateStore.goToNextStep())
+      // Quiz navigation
+      bind("left", () => teamsAndQuizStateStore.goToPreviousStep())
+      bind("right", () => teamsAndQuizStateStore.goToNextStep())
+      bind("ctrl+left", () => teamsAndQuizStateStore.goToPreviousQuestion())
+      bind("ctrl+right", () => teamsAndQuizStateStore.goToNextQuestion())
+      bind("ctrl+shift+left", () => teamsAndQuizStateStore.goToPreviousRound())
+      bind("ctrl+shift+right", () => teamsAndQuizStateStore.goToNextRound())
+
+      // Give points
+      for (teamIndex <- 0 to 4) {
+        bindGlobal(
+          s"ctrl+${teamIndex + 1}",
+          () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = +1))
+        bindGlobal(
+          s"ctrl+shift+${teamIndex + 1}",
+          () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = -1))
+      }
+
       Callback.empty
     }
   }
