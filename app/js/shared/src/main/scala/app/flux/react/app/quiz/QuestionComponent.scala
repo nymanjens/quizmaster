@@ -138,14 +138,14 @@ final class QuestionComponent(
         pointsMetadata(question),
         <.div(
           ^.className := "image-and-choices-row",
-          <.div(
-            ^.className := "image-holder",
-            <<.ifDefined(question.image) { imageFilename =>
+          <<.ifDefined(question.image) { imageFilename =>
+            <.div(
+              ^.className := "image-holder",
               <.img(
                 ^.src := s"/quizimages/$imageFilename",
               )
-            },
-          ),
+            ),
+          },
           <<.ifDefined(question.choices) { choices =>
             ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
               <.ul(
