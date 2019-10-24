@@ -48,6 +48,9 @@ object QuizConfig {
     ) extends Question {
       if (choices.isDefined) {
         require(choices.get.size == 4, s"There should be 4 choices, but got ${choices.get}")
+        require(
+          choices.get contains answer,
+          s"The answer should be one of the choices: <<$answer>> not in <<${choices.get}>>")
       }
 
       /**
@@ -103,6 +106,9 @@ object QuizConfig {
         textualChoices: Seq[String],
     ) extends Question {
       require(textualChoices.size == 4, s"Expected 4 choices, but got ${textualChoices}")
+      require(
+        textualChoices contains textualAnswer,
+        s"The answer should be one of the choices: <<$textualAnswer>> not in <<${textualChoices}>>")
 
       override def pointsToGain: Int = 1
       override def pointsToGainOnWrongAnswer: Int = -1
