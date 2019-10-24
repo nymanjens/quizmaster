@@ -101,11 +101,11 @@ object QuizConfig {
         textualQuestion: String,
         textualAnswer: String,
         textualChoices: Seq[String],
-        override val pointsToGain: Int,
     ) extends Question {
       require(textualChoices.size == 4, s"Expected 4 choices, but got ${textualChoices}")
 
-      override def pointsToGainOnWrongAnswer: Int = -pointsToGain
+      override def pointsToGain: Int = 1
+      override def pointsToGainOnWrongAnswer: Int = -1
 
       override def onlyFirstGainsPoints: Boolean = true
 

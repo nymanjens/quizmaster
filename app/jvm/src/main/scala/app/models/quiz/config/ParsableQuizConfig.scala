@@ -88,7 +88,6 @@ object ParsableQuizConfig {
         textualQuestion: String,
         textualAnswer: String,
         textualChoices: java.util.List[String],
-        pointsToGain: Int,
     ) extends Question {
       def this() = this(
         verbalQuestion = null,
@@ -96,7 +95,6 @@ object ParsableQuizConfig {
         textualQuestion = null,
         textualAnswer = null,
         textualChoices = null,
-        pointsToGain = 1,
       )
       override def parse: QuizConfig.Question = {
         try {
@@ -106,7 +104,6 @@ object ParsableQuizConfig {
             textualQuestion = checkNotNull(textualQuestion),
             textualAnswer = checkNotNull(textualAnswer),
             textualChoices = checkNotNull(textualChoices.asScala.toVector),
-            pointsToGain = pointsToGain,
           )
         } catch {
           case throwable: Throwable =>
