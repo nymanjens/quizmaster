@@ -8,6 +8,7 @@ import hydro.common.JsLoggingUtils.logExceptions
 import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
 import hydro.flux.react.ReactVdomUtils.<<
+import hydro.flux.react.uielements.Bootstrap
 import hydro.flux.react.uielements.PageHeader
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
@@ -53,7 +54,18 @@ final class QuizProgressIndicator(
                 i18n("app.question-i-of-n", quizState.questionIndex + 1, quizState.round.questions.size)
               } else {
                 s"${quizState.round.questions.size} ${i18n("app.questions")}"
-              }
+              },
+              ". ",
+              <<.ifDefined(quizState.maybeQuestion) { question =>
+                {
+                  for (i <- 0 to question.progressStepsCount - 1) yield {
+                    Bootstrap.FontAwesomeIcon("circle")(
+                      ^.key := i,
+                      ^.className := (if (i <= quizState.questionProgressIndex) "seen" else "unseen"),
+                    )
+                  }
+                }.toVdomArray
+              },
             )
         }
       )
