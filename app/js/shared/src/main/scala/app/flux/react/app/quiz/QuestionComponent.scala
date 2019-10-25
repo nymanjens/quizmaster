@@ -216,7 +216,6 @@ final class QuestionComponent(
     ): VdomElement = {
       val progressIndex = props.questionProgressIndex
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
-      val showGamepadIconUnderChoices = state.quizState.canSubmitResponse
       val correctSubmissionWasEntered = state.quizState.submissions.exists(submission =>
         question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
 
@@ -283,11 +282,11 @@ final class QuestionComponent(
         ),
         <.div(
           ^.className := "submissions-without-choices",
-          ifVisibleOrMaster(showGamepadIconUnderChoices) {
+          ifVisibleOrMaster(state.quizState.canSubmitResponse) {
             Bootstrap.FontAwesomeIcon("gamepad")
           }
         ),
-        <<.ifThen(correctSubmissionWasEntered) {
+        <<.ifThen(state.quizState.canSubmitResponse && correctSubmissionWasEntered) {
           <.div(
             ^.className := "timer",
             syncedTimerBar(maxTime = question.maxTime),
