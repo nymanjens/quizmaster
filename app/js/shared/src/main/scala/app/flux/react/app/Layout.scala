@@ -74,12 +74,8 @@ final class Layout(
 
       // Give points
       for (teamIndex <- 0 to 4) {
-        bindGlobal(
-          s"ctrl+${teamIndex + 1}",
-          () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = +1))
-        bindGlobal(
-          s"ctrl+shift+${teamIndex + 1}",
-          () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = -1))
+        bind(s"${teamIndex + 1}", () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = +1))
+        bind(s"shift+${teamIndex + 1}", () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = -1))
       }
 
       Callback.empty
