@@ -221,11 +221,32 @@ final class QuestionComponent(
         question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
 
       <.div(
-        ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
+        ifVisibleOrMaster(false) {
           <.div(
-            ^.className := "question",
-            question.textualQuestion,
-          )
+            <.div(
+              ^.className := "verbal-question",
+              question.verbalQuestion,
+            ),
+            <.div(
+              ^.className := "verbal-answer",
+              question.verbalAnswer,
+            ),
+          ),
+        },
+        if (props.showMasterData) {
+          ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
+            <.div(
+              ^.className := "textual-question",
+              question.textualQuestion,
+            )
+          }
+        } else {
+          <<.ifThen(question.questionIsVisible(progressIndex)) {
+            <.div(
+              ^.className := "question",
+              question.textualQuestion,
+            )
+          }
         },
         pointsMetadata(question),
         <.div(
