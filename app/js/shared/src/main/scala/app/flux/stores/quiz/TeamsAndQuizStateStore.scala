@@ -146,12 +146,22 @@ final class TeamsAndQuizStateStore(
       StateUpsertHelper.doQuizStateUpsert(fieldMasks.toVector)(update)
     }
 
-  def addSubmission(submission: Submission): Future[Unit] =
+  def addSubmission(submission: Submission, resetTimer: Boolean = false): Future[Unit] =
     updateStateQueue.schedule {
-      StateUpsertHelper.doQuizStateUpsert(Seq(ModelFields.QuizState.submissions)) { quizState =>
-        quizState.copy(
-          submissions = quizState.submissions :+ submission,
-        )
+      if (resetTimer) {
+        StateUpsertHelper.doQuizStateUpsert(
+          Seq(ModelFields.QuizState.timerState, ModelFields.QuizState.submissions)) { quizState =>
+          quizState.copy(
+            timerState = TimerState.createStarted(),
+            submissions = quizState.submissions :+ submission,
+          )
+        }
+      } else {
+        StateUpsertHelper.doQuizStateUpsert(Seq(ModelFields.QuizState.submissions)) { quizState =>
+          quizState.copy(
+            submissions = quizState.submissions :+ submission,
+          )
+        }
       }
     }
 

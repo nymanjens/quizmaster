@@ -5,6 +5,7 @@ import app.flux.stores.quiz.GamepadStore.GamepadState
 import app.flux.stores.quiz.TeamInputStore.State
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState.Submission
+import app.models.quiz.config.QuizConfig.Question
 import app.models.user.User
 import hydro.common.time.Clock
 import hydro.flux.action.Dispatcher
@@ -66,7 +67,8 @@ final class TeamInputStore(
                       Submission(
                         teamId = team.id,
                         maybeAnswerIndex = Some(arrow.answerIndex),
-                      )
+                      ),
+                      resetTimer = question.isInstanceOf[Question.Double],
                     )
                   }
                 }
