@@ -62,7 +62,12 @@ final class TeamInputStore(
                     question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
                   val tooLate = alreadyAnsweredCorrectly && question.onlyFirstGainsPoints
                   if (!tooLate) {
-                    soundEffectController.playNewSubmission()
+                    val submissionIsCorrect = question.isCorrectAnswerIndex(arrow.answerIndex)
+                    if (question.onlyFirstGainsPoints) {
+                      soundEffectController.playRevealingSubmission(correct = submissionIsCorrect)
+                    } else {
+                      soundEffectController.playNewSubmission()
+                    }
                     teamsAndQuizStateStore.addSubmission(
                       Submission(
                         teamId = team.id,

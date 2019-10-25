@@ -27,6 +27,13 @@ final class SoundEffectController(
 
   // **************** Public API ****************//
   def playNewSubmission(): Unit = playSoundEffect(SoundEffect.NewSubmission, skipPageCheck = true)
+  def playRevealingSubmission(correct: Boolean): Unit = {
+    if (correct) {
+      playSoundEffect(SoundEffect.CorrectSubmission, skipPageCheck = true)
+    } else {
+      playSoundEffect(SoundEffect.IncorrectSubmission, skipPageCheck = true)
+    }
+  }
   def playTimerRunsOut(): Unit = playSoundEffect(SoundEffect.TimerRunsOut)
 
   // **************** Private helper methods ****************//
@@ -74,6 +81,8 @@ final class SoundEffectController(
   private sealed abstract class SoundEffect(val filepath: String)
   private object SoundEffect {
     case object NewSubmission extends SoundEffect("/assets/soundeffects/new_submission.mp3")
+    case object CorrectSubmission extends SoundEffect("/assets/soundeffects/correct_submission.mp3")
+    case object IncorrectSubmission extends SoundEffect("/assets/soundeffects/incorrect_submission.mp3")
     case object ScoreIncreased extends SoundEffect("/assets/soundeffects/score_increased.mp3")
     case object TimerRunsOut extends SoundEffect("/assets/soundeffects/timer_runs_out.mp3")
   }
