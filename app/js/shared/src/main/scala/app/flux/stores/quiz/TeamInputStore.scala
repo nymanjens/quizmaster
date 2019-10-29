@@ -1,6 +1,7 @@
 package app.flux.stores.quiz
 
 import app.flux.controllers.SoundEffectController
+import app.flux.router.AppPages
 import app.flux.stores.quiz.GamepadStore.GamepadState
 import app.flux.stores.quiz.TeamInputStore.State
 import app.models.quiz.config.QuizConfig
@@ -8,7 +9,10 @@ import app.models.quiz.QuizState.Submission
 import app.models.quiz.config.QuizConfig.Question
 import app.models.user.User
 import hydro.common.time.Clock
+import hydro.flux.action.Action
 import hydro.flux.action.Dispatcher
+import hydro.flux.action.StandardActions
+import hydro.flux.router.Page
 import hydro.flux.stores.StateStore
 import hydro.models.access.JsEntityAccess
 
@@ -25,10 +29,19 @@ final class TeamInputStore(
     gamepadStore: GamepadStore,
     soundEffectController: SoundEffectController,
 ) extends StateStore[State] {
+
+  private var currentPage: Page = _
   private var _state: State = State.nullInstance
+
   gamepadStore.register(GamepadStoreListener)
+  dispatcher.registerPartialSync(dispatcherListener)
 
   override def state: State = _state
+
+  private def dispatcherListener: PartialFunction[Action, Unit] = {
+    case StandardActions.SetPageLoadingState( /* isLoading = */ _, currentPage) =>
+      this.currentPage = currentPage
+  }
 
   private def setState(newState: State): Unit = {
     if (newState != _state) {
@@ -36,6 +49,8 @@ final class TeamInputStore(
       Future(invokeStateUpdateListeners())
     }
   }
+
+  private def onRelevantPageForSubmissions: Boolean = currentPage == AppPages.Quiz
 
   private object GamepadStoreListener extends StateStore.Listener {
     override def onStateUpdate(): Unit = {
@@ -46,7 +61,7 @@ final class TeamInputStore(
           teamIdToGamepadState = (teams.map(_.id) zip gamepadStore.state.gamepads).toMap
             .withDefaultValue(GamepadState.nullInstance)))
 
-      if (quizState.canSubmitResponse) {
+      if (onRelevantPageForSubmissions && quizState.canSubmitResponse) {
         val question = quizState.maybeQuestion.get
 
         for (team <- teams) {
