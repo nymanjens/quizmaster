@@ -121,6 +121,7 @@ final class QuestionComponent(
       val showSubmissionsOnChoices = question.isMultipleChoice && (question.onlyFirstGainsPoints || answerIsVisible)
       val showGamepadIconUnderChoices =
         state.quizState.submissions.nonEmpty || (state.quizState.canSubmitResponse && question.onlyFirstGainsPoints)
+      val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
 
       <.div(
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
@@ -132,7 +133,7 @@ final class QuestionComponent(
         pointsMetadata(question),
         <.div(
           ^.className := "image-and-choices-row",
-          <<.ifDefined(question.image) { imageFilename =>
+          <<.ifDefined(maybeImage) { imageFilename =>
             <.div(
               ^.className := "image-holder",
               <.img(
@@ -144,7 +145,7 @@ final class QuestionComponent(
             ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
               <.div(
                 ^.className := "choices-holder",
-                ^^.ifDefined(question.image) { _ =>
+                ^^.ifDefined(maybeImage) { _ =>
                   ^.style := js.Dictionary("textAlign" -> "left")
                 },
                 <.ul(
