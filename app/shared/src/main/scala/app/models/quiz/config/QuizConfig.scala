@@ -40,7 +40,7 @@ object QuizConfig {
         question: String,
         choices: Option[Seq[String]],
         answer: String,
-        detailedAnswer: Option[String],
+        answerDetail: Option[String],
         answerImage: Option[String],
         image: Option[String],
         audio: Option[String],
