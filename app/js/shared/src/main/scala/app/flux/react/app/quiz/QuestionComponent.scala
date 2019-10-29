@@ -213,6 +213,11 @@ final class QuestionComponent(
             ^.className := "timer",
             syncedTimerBar(maxTime = question.maybeMaxTime.get),
           )
+        },
+        <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && !props.showMasterData) {
+          <<.ifDefined(question.audio) { audio =>
+            audioPlayer(audio, playing = state.quizState.timerState.timerRunning)
+          }
         }
       )
     }
@@ -342,5 +347,9 @@ final class QuestionComponent(
             )
       )
     }
+  }
+
+  private def audioPlayer(audio: String, playing: Boolean): VdomNode = {
+    ???
   }
 }

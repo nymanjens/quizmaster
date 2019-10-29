@@ -1,5 +1,6 @@
 package app.controllers
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
 import app.api.ScalaJsApiServerFactory
@@ -27,9 +28,15 @@ final class Application @Inject()(
     with I18nSupport {
 
   def quizImage(file: String): Action[AnyContent] = {
+    externalAssetsController.at(rootPath = configPath.resolve("images").toString, file)
+  }
+
+  def quizAudio(file: String): Action[AnyContent] = {
+    externalAssetsController.at(rootPath = configPath.resolve("audio").toString, file)
+  }
+
+  lazy val configPath: Path = {
     val configLocation = playConfiguration.get[String]("app.quiz.configYamlFilePath")
-    val rootPath =
-      Paths.get(ResourceFiles.canonicalizePath(configLocation)).getParent.resolve("images").toString
-    externalAssetsController.at(rootPath = rootPath, file)
+    Paths.get(ResourceFiles.canonicalizePath(configLocation)).getParent
   }
 }
