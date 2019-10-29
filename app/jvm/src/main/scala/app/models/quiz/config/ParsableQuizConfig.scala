@@ -46,9 +46,12 @@ object ParsableQuizConfig {
   object Question {
     case class Single(
         question: String,
-        answer: String,
-        image: String,
         choices: java.util.List[String],
+        answer: String,
+        detailedAnswer: String,
+        answerImage: String,
+        image: String,
+        audio: String,
         pointsToGain: Int,
         pointsToGainOnWrongAnswer: Int,
         maxTimeSeconds: Int,
@@ -56,9 +59,12 @@ object ParsableQuizConfig {
     ) extends Question {
       def this() = this(
         question = null,
-        answer = null,
-        image = null,
         choices = null,
+        answer = null,
+        detailedAnswer = null,
+        answerImage = null,
+        image = null,
+        audio = null,
         pointsToGain = 1,
         pointsToGainOnWrongAnswer = 0,
         maxTimeSeconds = 0,
@@ -68,9 +74,12 @@ object ParsableQuizConfig {
         try {
           QuizConfig.Question.Single(
             question = checkNotNull(question),
-            answer = checkNotNull(answer),
-            image = Option(image),
             choices = if (choices == null) None else Some(choices.asScala.toVector),
+            answer = checkNotNull(answer),
+            detailedAnswer = Option(detailedAnswer),
+            answerImage = Option(answerImage),
+            image = Option(image),
+            audio = Option(audio),
             pointsToGain = pointsToGain,
             pointsToGainOnWrongAnswer = pointsToGainOnWrongAnswer,
             maybeMaxTime = if (maxTimeSeconds == 0) None else Some(Duration.ofSeconds(maxTimeSeconds)),
