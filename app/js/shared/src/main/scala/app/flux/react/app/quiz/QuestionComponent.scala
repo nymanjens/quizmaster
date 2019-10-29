@@ -192,8 +192,16 @@ final class QuestionComponent(
           ifVisibleOrMaster(answerIsVisible) {
             if (answerIsVisible) {
               <.div(
-                ^.className := "answer",
-                question.answer,
+                <.div(
+                  ^.className := "answer",
+                  question.answer,
+                ),
+                <<.ifDefined(question.answerDetail) { answerDetail =>
+                  <.div(
+                    ^.className := "answer-detail",
+                    question.answerDetail,
+                  )
+                },
               )
             } else {
               <.div(obfuscatedAnswer(question.answer))
