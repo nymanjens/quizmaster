@@ -89,6 +89,7 @@ final class TeamInputStore(
                         maybeAnswerIndex = Some(arrow.answerIndex),
                       ),
                       resetTimer = question.isInstanceOf[Question.Double],
+                      pauseTimer = question.onlyFirstGainsPoints,
                     )
                   }
                 }
@@ -98,7 +99,8 @@ final class TeamInputStore(
                   teamsAndQuizStateStore.addSubmission(
                     Submission(
                       teamId = team.id,
-                    )
+                    ),
+                    pauseTimer = question.onlyFirstGainsPoints,
                   )
                 }
             }
