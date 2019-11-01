@@ -153,9 +153,6 @@ final class TeamsAndQuizStateStore(
   ): Future[Unit] =
     updateStateQueue.schedule {
       if (resetTimer || pauseTimer) {
-        if (pauseTimer) {
-          println("!!!!!!!!!!!!! pause")
-        }
         StateUpsertHelper.doQuizStateUpsert(
           Seq(ModelFields.QuizState.timerState, ModelFields.QuizState.submissions)) { quizState =>
           quizState.copy(
