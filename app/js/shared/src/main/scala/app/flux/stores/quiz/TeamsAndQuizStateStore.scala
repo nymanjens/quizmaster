@@ -141,6 +141,12 @@ final class TeamsAndQuizStateStore(
       StateUpsertHelper.goToNextRoundUpdate)
   }
 
+  def resetCurrentQuestion(): Future[Unit] = updateStateQueue.schedule {
+    StateUpsertHelper.doQuizStateUpsert(
+      Seq(ModelFields.QuizState.timerState, ModelFields.QuizState.submissions))(
+      _.copy(timerState = TimerState.createStarted(), submissions = Seq()))
+  }
+
   def doQuizStateUpdate(fieldMasks: ModelField[_, QuizState]*)(update: QuizState => QuizState): Future[Unit] =
     updateStateQueue.schedule {
       StateUpsertHelper.doQuizStateUpsert(fieldMasks.toVector)(update)
