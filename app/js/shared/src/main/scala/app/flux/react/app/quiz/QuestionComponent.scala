@@ -215,8 +215,8 @@ final class QuestionComponent(
           )
         },
         <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && !props.showMasterData) {
-          <<.ifDefined(question.audio) { audio =>
-            audioPlayer(audio, playing = state.quizState.timerState.timerRunning)
+          <<.ifDefined(question.audio) { audioRelativePath =>
+            audioPlayer(audioRelativePath, playing = state.quizState.timerState.timerRunning)
           }
         }
       )
@@ -349,7 +349,7 @@ final class QuestionComponent(
     }
   }
 
-  private def audioPlayer(audio: String, playing: Boolean): VdomNode = {
-    ???
+  private def audioPlayer(audioRelativePath: String, playing: Boolean): VdomNode = {
+    RawMusicPlayer(src = "/quizaudio/" + audioRelativePath, playing = playing)
   }
 }
