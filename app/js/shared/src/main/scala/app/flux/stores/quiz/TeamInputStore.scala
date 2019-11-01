@@ -89,7 +89,7 @@ final class TeamInputStore(
                         maybeAnswerIndex = Some(arrow.answerIndex),
                       ),
                       resetTimer = question.isInstanceOf[Question.Double],
-                      pauseTimer = question.onlyFirstGainsPoints,
+                      pauseTimer = question.onlyFirstGainsPoints && submissionIsCorrect,
                     )
                   }
                 }
