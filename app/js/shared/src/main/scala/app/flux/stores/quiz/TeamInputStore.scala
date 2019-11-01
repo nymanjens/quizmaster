@@ -4,6 +4,7 @@ import app.flux.controllers.SoundEffectController
 import app.flux.router.AppPages
 import app.flux.stores.quiz.GamepadStore.GamepadState
 import app.flux.stores.quiz.TeamInputStore.State
+import app.models.access.ModelFields
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.config.QuizConfig.Question
@@ -17,8 +18,12 @@ import hydro.flux.action.Dispatcher
 import hydro.flux.action.StandardActions
 import hydro.flux.router.Page
 import hydro.flux.stores.StateStore
+import hydro.models.access.DbQuery
+import hydro.models.access.DbQueryImplicits._
 import hydro.models.access.JsEntityAccess
 
+import scala.async.Async.async
+import scala.async.Async.await
 import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -64,16 +69,24 @@ final class TeamInputStore(
   private object GamepadStoreListener extends StateStore.Listener {
     override def onStateUpdate(): Unit =
       updateStateQueue.schedule {
-        val TeamsAndQuizStateStore.State(teams, quizState) = teamsAndQuizStateStore.stateOrEmpty
+        async {
+          // Re-fetching so that it is sure to have the latest value
+          val teams = await(
+            entityAccess
+              .newQuery[Team]()
+              .sort(DbQuery.Sorting.ascBy(ModelFields.Team.index))
+              .data())
+          val quizState = await(entityAccess
+            .newQuery[QuizState]()
+            .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId)) getOrElse QuizState.nullInstance
 
-        setState(
-          State(teamIdToGamepadState = (teams.map(_.id) zip gamepadStore.state.gamepads).toMap
-            .withDefaultValue(GamepadState.nullInstance)))
+          setState(
+            State(teamIdToGamepadState = (teams.map(_.id) zip gamepadStore.state.gamepads).toMap
+              .withDefaultValue(GamepadState.nullInstance)))
 
-        if (onRelevantPageForSubmissions && quizState.canSubmitResponse) {
-          maybeAddSubmissions(teams, quizState)
-        } else {
-          Future.successful((): Unit)
+          if (onRelevantPageForSubmissions && quizState.canSubmitResponse) {
+            await(maybeAddSubmissions(teams, quizState))
+          }
         }
       }
 
