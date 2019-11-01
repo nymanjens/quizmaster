@@ -164,7 +164,7 @@ final class TeamsAndQuizStateStore(
                   lastSnapshotElapsedTime = quizState.timerState.elapsedTime(),
                   timerRunning = false,
                 )
-              else ???,
+              else throw new AssertionError("Impossible to reach"),
             submissions = quizState.submissions :+ submission,
           )
         }
