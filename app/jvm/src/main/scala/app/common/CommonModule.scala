@@ -13,6 +13,7 @@ final class CommonModule extends AbstractModule {
   override def configure() = {
     bindSingleton(classOf[PlayI18n], classOf[PlayI18n.Impl])
     bind(classOf[I18n]).to(classOf[PlayI18n])
+    bind(classOf[QuizAssets]).asEagerSingleton()
   }
 
   @Provides
@@ -22,6 +23,6 @@ final class CommonModule extends AbstractModule {
 
   private def bindSingleton[T](interface: Class[T], implementation: Class[_ <: T]): Unit = {
     bind(interface).to(implementation)
-    bind(implementation).asEagerSingleton
+    bind(implementation).asEagerSingleton()
   }
 }

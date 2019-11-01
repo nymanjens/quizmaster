@@ -6,8 +6,10 @@ import java.nio.file.Paths
 import java.time.format.DateTimeFormatter
 import java.time.LocalDateTime
 
+import akka.stream.scaladsl.StreamConverters
 import app.api.ScalaJsApi.HydroPushSocketPacket.EntityModificationsWithToken
 import app.api.ScalaJsApiServerFactory
+import app.common.QuizAssets
 import app.models.access.JvmEntityAccess
 import app.models.quiz.QuizState
 import com.google.inject.Inject
@@ -33,6 +35,7 @@ final class Application @Inject()(
     env: play.api.Environment,
     executionContext: ExecutionContext,
     externalAssetsController: controllers.ExternalAssets,
+    quizAssets: QuizAssets,
 ) extends AbstractController(components)
     with I18nSupport {
 
@@ -63,15 +66,24 @@ final class Application @Inject()(
   })
 
   def quizImage(file: String): Action[AnyContent] = {
-    externalAssetsController.at(rootPath = configPath.resolve("images").toString, file)
+    serveAsset(quizAssets.quizImage(file))
   }
 
   def quizAudio(file: String): Action[AnyContent] = {
-    externalAssetsController.at(rootPath = configPath.resolve("audio").toString, file)
+    serveAsset(quizAssets.quizAudio(file))
   }
 
-  lazy val configPath: Path = {
-    val configLocation = playConfiguration.get[String]("app.quiz.configYamlFilePath")
-    Paths.get(ResourceFiles.canonicalizePath(configLocation)).getParent
+  def serveAsset(assetPath: Path): Action[AnyContent] = Action { implicit request =>
+    val connection = assetPath.toFile.toURI.toURL.openConnection()
+    val stream = connection.getInputStream
+    val source = StreamConverters.fromInputStream(() => stream)
+    RangeResult
+      .ofSource(
+        entityLength = stream.available(), // TODO: This may not be entirely accurate
+        source = source,
+        rangeHeader = request.headers.get(RANGE),
+        fileName = None,
+        contentType = None // TODO: Set content type
+      )
   }
 }
