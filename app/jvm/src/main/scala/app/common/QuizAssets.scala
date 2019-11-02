@@ -5,6 +5,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 import app.models.quiz.config.QuizConfig
+import app.models.quiz.config.QuizConfig.Image
 import app.models.quiz.config.QuizConfig.Question
 import com.google.inject._
 import hydro.common.ResourceFiles
@@ -34,8 +35,8 @@ final class QuizAssets @Inject()(
   }
 
   private def validateThatAssetsExist(quizConfig: QuizConfig): Unit = {
-    def validateImage(maybeImage: Option[String]): Unit = {
-      if (maybeImage.isDefined) assertExists(quizImage(maybeImage.get))
+    def validateImage(maybeImage: Option[Image]): Unit = {
+      if (maybeImage.isDefined) assertExists(quizImage(maybeImage.get.src))
     }
     def validateAudio(maybeAudio: Option[String]): Unit = {
       if (maybeAudio.isDefined) assertExists(quizAudio(maybeAudio.get))
@@ -49,7 +50,7 @@ final class QuizAssets @Inject()(
         case single: Question.Single =>
           validateImage(single.image)
           validateImage(single.answerImage)
-          validateAudio(single.audio)
+          validateAudio(single.audioSrc)
         case double: Question.Double =>
       }
     }

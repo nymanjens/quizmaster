@@ -41,9 +41,10 @@ object QuizConfig {
         choices: Option[Seq[String]],
         answer: String,
         answerDetail: Option[String],
-        answerImage: Option[String],
-        image: Option[String],
-        audio: Option[String],
+        answerImage: Option[Image],
+        image: Option[Image],
+        // Relative path in audio directory
+        audioSrc: Option[String],
         override val pointsToGain: Int,
         override val pointsToGainOnWrongAnswer: Int,
         override val maybeMaxTime: Option[Duration],
@@ -149,5 +150,13 @@ object QuizConfig {
         questionProgressIndex >= maxProgressIndex - 1
       }
     }
+  }
+
+  case class Image(
+      // Relative path in image directory
+      src: String,
+      size: String,
+  ) {
+    require(Seq("large", "small") contains size)
   }
 }

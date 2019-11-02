@@ -133,11 +133,12 @@ final class QuestionComponent(
         pointsMetadata(question),
         <.div(
           ^.className := "image-and-choices-row",
-          <<.ifDefined(maybeImage) { imageFilename =>
+          <<.ifDefined(maybeImage) { image =>
             <.div(
               ^.className := "image-holder",
               <.img(
-                ^.src := s"/quizimages/$imageFilename",
+                ^.src := s"/quizimages/${image.src}",
+                ^.className := image.size,
               )
             )
           },
@@ -215,7 +216,7 @@ final class QuestionComponent(
           )
         },
         <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && !props.showMasterData) {
-          <<.ifDefined(question.audio) { audioRelativePath =>
+          <<.ifDefined(question.audioSrc) { audioRelativePath =>
             audioPlayer(audioRelativePath, playing = state.quizState.timerState.timerRunning)
           }
         }

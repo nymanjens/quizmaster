@@ -49,9 +49,9 @@ object ParsableQuizConfig {
         choices: java.util.List[String],
         answer: String,
         answerDetail: String,
-        answerImage: String,
-        image: String,
-        audio: String,
+        answerImage: Image,
+        image: Image,
+        audioSrc: String,
         pointsToGain: Int,
         pointsToGainOnWrongAnswer: Int,
         maxTimeSeconds: Int,
@@ -64,7 +64,7 @@ object ParsableQuizConfig {
         answerDetail = null,
         answerImage = null,
         image = null,
-        audio = null,
+        audioSrc = null,
         pointsToGain = 1,
         pointsToGainOnWrongAnswer = 0,
         maxTimeSeconds = 0,
@@ -77,9 +77,9 @@ object ParsableQuizConfig {
             choices = if (choices == null) None else Some(choices.asScala.toVector),
             answer = checkNotNull(answer),
             answerDetail = Option(answerDetail),
-            answerImage = Option(answerImage),
-            image = Option(image),
-            audio = Option(audio),
+            answerImage = Option(answerImage).map(_.parse),
+            image = Option(image).map(_.parse),
+            audioSrc = Option(audioSrc),
             pointsToGain = pointsToGain,
             pointsToGainOnWrongAnswer = pointsToGainOnWrongAnswer,
             maybeMaxTime = if (maxTimeSeconds == 0) None else Some(Duration.ofSeconds(maxTimeSeconds)),
@@ -119,6 +119,20 @@ object ParsableQuizConfig {
             throw new RuntimeException(s"Failed to parse Question.Double $verbalQuestion", throwable)
         }
       }
+    }
+  }
+
+  case class Image(src: String, size: String) {
+    def this() = this(
+      src = null,
+      size = "large",
+    )
+
+    def parse: QuizConfig.Image = {
+      QuizConfig.Image(
+        src = checkNotNull(src),
+        size = checkNotNull(size),
+      )
     }
   }
 }
