@@ -193,20 +193,20 @@ final class QuestionComponent(
           ifVisibleOrMaster(answerIsVisible) {
             if (answerIsVisible) {
               <.div(
-                <.div(
-                  ^.className := "answer",
-                  question.answer,
-                ),
-                <<.ifDefined(question.answerDetail) { answerDetail =>
-                  <.div(
-                    ^.className := "answer-detail",
-                    question.answerDetail,
-                  )
-                },
+                ^.className := "answer",
+                question.answer,
               )
             } else {
               <.div(obfuscatedAnswer(question.answer))
             }
+          }
+        },
+        <<.ifThen(answerIsVisible) {
+          <<.ifDefined(question.answerDetail) { answerDetail =>
+            <.div(
+              ^.className := "answer-detail",
+              question.answerDetail,
+            )
           }
         },
         <<.ifThen(question.shouldShowTimer(props.questionProgressIndex)) {
