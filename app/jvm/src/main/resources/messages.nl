@@ -130,6 +130,7 @@ app.questions=vragen
 app.question=Vraag
 app.first-right-answer-gains-n-points=Eerste correcte antwoord verdient {0} punten
 app.first-right-answer-gains-1-point=Eerste correcte antwoord verdient 1 punt
+app.first-answer-gains-n-points-others-m=Eerste correcte antwoord verdient {0} punten, andere correcte antwoorden verdienen {1} punt
 app.all-right-answers-gain-n-points=Alle correcte antwoorden verdienen {0} punten
 app.all-right-answers-gain-1-point=Alle correcte antwoorden verdienen 1 punt
 app.wrong-answer-loses-n-points=Fout antwoord verliest {0} punten

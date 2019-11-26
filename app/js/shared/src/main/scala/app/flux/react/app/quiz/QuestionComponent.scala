@@ -326,6 +326,8 @@ final class QuestionComponent(
         if (question.onlyFirstGainsPoints) {
           if (question.pointsToGain == 1) i18n("app.first-right-answer-gains-1-point")
           else i18n("app.first-right-answer-gains-n-points", question.pointsToGain)
+        } else if(question.pointsToGainOnFirstAnswer != question.pointsToGain) {
+          i18n("app.first-answer-gains-n-points-others-m", question.pointsToGainOnFirstAnswer, question.pointsToGain)
         } else {
           if (question.pointsToGain == 1) i18n("app.all-right-answers-gain-1-point")
           else i18n("app.all-right-answers-gain-n-points", question.pointsToGain)

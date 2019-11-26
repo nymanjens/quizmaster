@@ -128,6 +128,7 @@ app.questions=questions
 app.question=Question
 app.first-right-answer-gains-n-points=First right answer gains {0} points
 app.first-right-answer-gains-1-point=First right answer gains 1 point
+app.first-answer-gains-n-points-others-m=First right answer gains {0} points, other right answers gain {1} point
 app.all-right-answers-gain-n-points=All right answers gain {0} points
 app.all-right-answers-gain-1-point=All right answers gain 1 point
 app.wrong-answer-loses-n-points=Wrong answer loses {0} points
