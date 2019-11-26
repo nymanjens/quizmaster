@@ -18,6 +18,7 @@ object QuizConfig {
   sealed trait Question {
 
     def pointsToGain: Int
+    def pointsToGainOnFirstAnswer: Int
     def pointsToGainOnWrongAnswer: Int
 
     def onlyFirstGainsPoints: Boolean
@@ -46,6 +47,7 @@ object QuizConfig {
         // Relative path in audio directory
         audioSrc: Option[String],
         override val pointsToGain: Int,
+        override val pointsToGainOnFirstAnswer: Int,
         override val pointsToGainOnWrongAnswer: Int,
         override val maybeMaxTime: Option[Duration],
         override val onlyFirstGainsPoints: Boolean,
@@ -115,6 +117,7 @@ object QuizConfig {
         s"The answer should be one of the choices: <<$textualAnswer>> not in <<${textualChoices}>>")
 
       override def pointsToGain: Int = 1
+      override def pointsToGainOnFirstAnswer: Int = pointsToGain
       override def pointsToGainOnWrongAnswer: Int = -1
 
       override def onlyFirstGainsPoints: Boolean = true
