@@ -207,14 +207,19 @@ table.table-bordered {
 
         padding-right: 50x;
         width: 500px;
+        &.small {
+          max-width: 1000px;
+        }
+        &.large {
+          max-width: 1480px;
+        }
         img {
+          max-width: 100%;
           &.small {
             max-height: 330px;
-            max-width: 1000px;
           }
           &.large {
             max-height: 540px;
-            max-width: 1480px;
           }
         }
       }
