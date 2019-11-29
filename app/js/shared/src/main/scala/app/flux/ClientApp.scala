@@ -1,15 +1,20 @@
 package app.flux
 
+import app.models.quiz.config.QuizConfig
+import app.models.quiz.config.QuizConfig.Question
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.JsLoggingUtils.logFailure
 import hydro.common.MobileUtils
+import hydro.jsfacades.Audio
 import org.scalajs.dom
 import org.scalajs.dom.console
 
 import scala.async.Async.async
 import scala.async.Async.await
+import scala.collection.mutable
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js
+import scala.scalajs.js.annotation.JSGlobal
 
 object ClientApp {
 
@@ -30,6 +35,8 @@ object ClientApp {
 
     logExceptions {
       implicit val globalModule = new ClientAppModule()
+
+      preloadResources(initialDataResponse.quizConfig)
 
       // tell React to render the router in the document body
       globalModule.router().renderIntoDOM(dom.document.getElementById("root"))
@@ -85,5 +92,37 @@ object ClientApp {
 
       video.play()
     }
+  }
+
+  private val preloadedImages: mutable.Buffer[HtmlImage] = mutable.Buffer()
+  private val preloadedAudios: mutable.Buffer[Audio] = mutable.Buffer()
+
+  private def preloadResources(quizConfig: QuizConfig): Unit = {
+
+    for {
+      round <- quizConfig.rounds
+      question <- round.questions
+    } {
+      question match {
+        case single: Question.Single =>
+          for (image <- Seq() ++ single.image ++ single.answerImage) {
+            val htmlImage = new HtmlImage()
+            htmlImage.asInstanceOf[js.Dynamic].src = s"/quizimages/${image.src}"
+            preloadedImages.append(htmlImage)
+          }
+
+          for (audioSrc <- single.audioSrc) {
+            val audio = new Audio(s"/quizaudio/$audioSrc")
+            preloadedAudios.append(audio)
+          }
+        case _ =>
+      }
+    }
+  }
+
+  @js.native
+  @JSGlobal(name = "Image")
+  class HtmlImage extends js.Object {
+    // var src: js.Any = js.native // Doesn't compile for unknown reason
   }
 }
