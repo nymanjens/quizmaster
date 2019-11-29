@@ -389,9 +389,21 @@ final class TeamsAndQuizStateStore(
     private def addOrRemovePoints(quizState: QuizState): Unit = {
       val question = quizState.maybeQuestion.get
       if (question.isMultipleChoice) {
+        var firstCorrectAnswerSeen = false
         for (submission <- quizState.submissions) {
           val correct = question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get)
-          val scoreDiff = if (correct) question.pointsToGain else question.pointsToGainOnWrongAnswer
+          val scoreDiff = {
+            if (correct) {
+              if (firstCorrectAnswerSeen) {
+                question.pointsToGain
+              } else {
+                firstCorrectAnswerSeen = true
+                question.pointsToGainOnFirstAnswer
+              }
+            } else {
+              question.pointsToGainOnWrongAnswer
+            }
+          }
           val team = stateOrEmpty.teams.find(_.id == submission.teamId).get
           updateScore(team, scoreDiff = scoreDiff)
         }
