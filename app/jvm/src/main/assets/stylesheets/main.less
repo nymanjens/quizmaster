@@ -228,7 +228,11 @@ table.table-bordered {
         flex-grow: 1;
         flex-shrink: 0;
         flex-basis: auto;
-        max-width: 70%;
+
+        &.including-image {
+          text-align: left;
+          max-width: 70%;
+        }
 
         .choices {
           list-style: none;

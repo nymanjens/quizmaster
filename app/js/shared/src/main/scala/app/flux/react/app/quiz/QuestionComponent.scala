@@ -148,7 +148,7 @@ final class QuestionComponent(
               <.div(
                 ^.className := "choices-holder",
                 ^^.ifDefined(maybeImage) { _ =>
-                  ^.style := js.Dictionary("textAlign" -> "left")
+                  ^.className := "including-image"
                 },
                 <.ul(
                   ^.className := "choices",
