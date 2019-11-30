@@ -101,7 +101,7 @@ final class TeamInputStore(
       val gamepadState = _state.teamIdToGamepadState(team.id)
       def teamHasSubmission(thisTeam: Team): Boolean =
         quizState.submissions.exists(_.teamId == thisTeam.id)
-      def allTeamsHaveSubmission = allTeams.forall(teamHasSubmission)
+      def allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
 
       if (teamHasSubmission(team)) {
         Future.successful((): Unit)
@@ -128,7 +128,7 @@ final class TeamInputStore(
                 ),
                 resetTimer = question.isInstanceOf[Question.Double],
                 pauseTimer =
-                  if (question.onlyFirstGainsPoints) submissionIsCorrect else allTeamsHaveSubmission,
+                  if (question.onlyFirstGainsPoints) submissionIsCorrect else allOtherTeamsHaveSubmission,
               )
             }
           } else {
@@ -141,7 +141,7 @@ final class TeamInputStore(
               Submission(
                 teamId = team.id,
               ),
-              pauseTimer = if (question.onlyFirstGainsPoints) true else allTeamsHaveSubmission,
+              pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
             )
           } else {
             Future.successful((): Unit)
