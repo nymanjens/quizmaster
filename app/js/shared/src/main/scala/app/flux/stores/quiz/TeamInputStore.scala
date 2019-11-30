@@ -134,7 +134,7 @@ final class TeamInputStore(
           } else {
             Future.successful((): Unit)
           }
-        } else {
+        } else { // Not multiple choice
           if (gamepadState.anyButtonPressed) {
             soundEffectController.playNewSubmission()
             teamsAndQuizStateStore.addSubmission(
