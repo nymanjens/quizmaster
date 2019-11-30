@@ -92,58 +92,60 @@ final class TeamInputStore(
 
     private def maybeAddSubmissions(teams: Seq[Team], quizState: QuizState): Future[Seq[Unit]] = {
       Future.sequence(
-        for (team <- teams) yield maybeAddSubmission(team, quizState)
+        for (team <- teams) yield maybeAddSubmission(team, quizState, teams)
       )
     }
 
-    private def maybeAddSubmission(team: Team, quizState: QuizState): Future[Unit] = {
+    private def maybeAddSubmission(team: Team, quizState: QuizState, allTeams: Seq[Team]): Future[Unit] = {
       val question = quizState.maybeQuestion.get
       val gamepadState = _state.teamIdToGamepadState(team.id)
-      val teamHasAlreadyAnswered = quizState.submissions.exists(_.teamId == team.id)
+      def teamHasSubmission(thisTeam: Team): Boolean =
+        quizState.submissions.exists(_.teamId == thisTeam.id)
+      def allTeamsHaveSubmission = allTeams.forall(teamHasSubmission)
 
-      if (teamHasAlreadyAnswered) {
+      if (teamHasSubmission(team)) {
         Future.successful((): Unit)
       } else {
-        question.isMultipleChoice match {
-          case true =>
-            if (gamepadState.arrowPressed.isDefined) {
-              val arrow = gamepadState.arrowPressed.get
-              val alreadyAnsweredCorrectly = quizState.submissions.exists(submission =>
-                question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
-              val tooLate = alreadyAnsweredCorrectly && question.onlyFirstGainsPoints
-              if (tooLate) {
-                Future.successful((): Unit)
-              } else {
-                val submissionIsCorrect = question.isCorrectAnswerIndex(arrow.answerIndex)
-                if (question.onlyFirstGainsPoints) {
-                  soundEffectController.playRevealingSubmission(correct = submissionIsCorrect)
-                } else {
-                  soundEffectController.playNewSubmission()
-                }
-                teamsAndQuizStateStore.addSubmission(
-                  Submission(
-                    teamId = team.id,
-                    maybeAnswerIndex = Some(arrow.answerIndex),
-                  ),
-                  resetTimer = question.isInstanceOf[Question.Double],
-                  pauseTimer = question.onlyFirstGainsPoints && submissionIsCorrect,
-                )
-              }
-            } else {
+        if (question.isMultipleChoice) {
+          if (gamepadState.arrowPressed.isDefined) {
+            val arrow = gamepadState.arrowPressed.get
+            val alreadyAnsweredCorrectly = quizState.submissions.exists(submission =>
+              question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
+            val tooLate = alreadyAnsweredCorrectly && question.onlyFirstGainsPoints
+            if (tooLate) {
               Future.successful((): Unit)
-            }
-          case false =>
-            if (gamepadState.anyButtonPressed) {
-              soundEffectController.playNewSubmission()
+            } else {
+              val submissionIsCorrect = question.isCorrectAnswerIndex(arrow.answerIndex)
+              if (question.onlyFirstGainsPoints) {
+                soundEffectController.playRevealingSubmission(correct = submissionIsCorrect)
+              } else {
+                soundEffectController.playNewSubmission()
+              }
               teamsAndQuizStateStore.addSubmission(
                 Submission(
                   teamId = team.id,
+                  maybeAnswerIndex = Some(arrow.answerIndex),
                 ),
-                pauseTimer = question.onlyFirstGainsPoints,
+                resetTimer = question.isInstanceOf[Question.Double],
+                pauseTimer =
+                  if (question.onlyFirstGainsPoints) submissionIsCorrect else allTeamsHaveSubmission,
               )
-            } else {
-              Future.successful((): Unit)
             }
+          } else {
+            Future.successful((): Unit)
+          }
+        } else {
+          if (gamepadState.anyButtonPressed) {
+            soundEffectController.playNewSubmission()
+            teamsAndQuizStateStore.addSubmission(
+              Submission(
+                teamId = team.id,
+              ),
+              pauseTimer = if (question.onlyFirstGainsPoints) true else allTeamsHaveSubmission,
+            )
+          } else {
+            Future.successful((): Unit)
+          }
         }
       }
     }
