@@ -83,7 +83,7 @@ object ParsableQuizConfig {
             image = Option(image).map(_.parse),
             audioSrc = Option(audioSrc),
             pointsToGain = pointsToGain,
-            pointsToGainOnFirstAnswer = Some(pointsToGainOnFirstAnswer).map(_.toInt) getOrElse pointsToGain,
+            pointsToGainOnFirstAnswer = Option(pointsToGainOnFirstAnswer).map(_.toInt) getOrElse pointsToGain,
             pointsToGainOnWrongAnswer = pointsToGainOnWrongAnswer,
             maybeMaxTime = if (maxTimeSeconds == 0) None else Some(Duration.ofSeconds(maxTimeSeconds)),
             onlyFirstGainsPoints = onlyFirstGainsPoints,
