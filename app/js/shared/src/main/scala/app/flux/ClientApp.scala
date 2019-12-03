@@ -8,6 +8,7 @@ import hydro.common.MobileUtils
 import hydro.jsfacades.Audio
 import org.scalajs.dom
 import org.scalajs.dom.console
+import org.scalajs.dom.raw.Event
 
 import scala.async.Async.async
 import scala.async.Async.await
@@ -129,7 +130,7 @@ object ClientApp {
 
   private def setUpGamepad(): Unit = {
     // This is probably superfluous, but on Mac OS X this may cause the controller API to be enabled.
-    dom.window.addEventListener("gamepadconnected", event => {
+    dom.window.addEventListener("gamepadconnected", (event: Event) => {
       println("  A gamepad was connected!")
     })
   }
