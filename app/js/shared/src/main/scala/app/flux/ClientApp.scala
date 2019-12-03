@@ -37,6 +37,7 @@ object ClientApp {
       implicit val globalModule = new ClientAppModule()
 
       preloadResources(initialDataResponse.quizConfig)
+      setUpGamepad()
 
       // tell React to render the router in the document body
       globalModule.router().renderIntoDOM(dom.document.getElementById("root"))
@@ -124,5 +125,12 @@ object ClientApp {
   @JSGlobal(name = "Image")
   class HtmlImage extends js.Object {
     // var src: js.Any = js.native // Doesn't compile for unknown reason
+  }
+
+  private def setUpGamepad(): Unit = {
+    // This is probably superfluous, but on Mac OS X this may cause the controller API to be enabled.
+    dom.window.addEventListener("gamepadconnected", event => {
+      println("  A gamepad was connected!")
+    })
   }
 }
