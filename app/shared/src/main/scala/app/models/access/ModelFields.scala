@@ -45,8 +45,12 @@ object ModelFields {
           "questionProgressIndex",
           _.questionProgressIndex,
           v => _.copy(questionProgressIndex = v))
-    case object timerState        extends ModelField[TimerState, E]("timerState", _.timerState, v => _.copy(timerState = v))
-    case object submissions        extends ModelField[Seq[Submission], E]("submissions", _.submissions, v => _.copy(submissions = v))
+    case object timerState
+        extends ModelField[TimerState, E]("timerState", _.timerState, v => _.copy(timerState = v))
+    case object submissions
+        extends ModelField[Seq[Submission], E]("submissions", _.submissions, v => _.copy(submissions = v))
+    case object imageIsEnlarged
+        extends ModelField[Boolean, E]("imageIsEnlarged", _.imageIsEnlarged, v => _.copy(imageIsEnlarged = v))
   }
 
   // **************** Field numbers **************** //
@@ -65,6 +69,7 @@ object ModelFields {
         QuizState.questionProgressIndex,
         QuizState.timerState,
         QuizState.submissions,
+        QuizState.imageIsEnlarged,
       )
     )
   def toNumber(field: ModelField.any): Int = fieldToNumberMap.get(field)

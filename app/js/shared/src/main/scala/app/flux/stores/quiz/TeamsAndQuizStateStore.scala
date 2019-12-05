@@ -147,6 +147,12 @@ final class TeamsAndQuizStateStore(
       _.copy(timerState = TimerState.createStarted(), submissions = Seq()))
   }
 
+  def toggleImageIsEnlarged(): Future[Unit] = updateStateQueue.schedule {
+    StateUpsertHelper.doQuizStateUpsert(Seq(ModelFields.QuizState.imageIsEnlarged)) { oldState =>
+      oldState.copy(imageIsEnlarged = !oldState.imageIsEnlarged)
+    }
+  }
+
   def doQuizStateUpdate(fieldMasks: ModelField[_, QuizState]*)(update: QuizState => QuizState): Future[Unit] =
     updateStateQueue.schedule {
       StateUpsertHelper.doQuizStateUpsert(fieldMasks.toVector)(update)
@@ -190,6 +196,7 @@ final class TeamsAndQuizStateStore(
       ModelFields.QuizState.questionIndex,
       ModelFields.QuizState.questionProgressIndex,
       ModelFields.QuizState.timerState,
+      ModelFields.QuizState.imageIsEnlarged,
       ModelFields.QuizState.submissions
     )
 
@@ -238,6 +245,7 @@ final class TeamsAndQuizStateStore(
                 questionProgressIndex = newRound.questions.lastOption.map(_.maxProgressIndex) getOrElse 0,
                 timerState = TimerState.createStarted(),
                 submissions = Seq(),
+                imageIsEnlarged = false,
               )
             case Some(question) if quizState.questionProgressIndex == 0 =>
               // Go to the end of the previous question
@@ -249,12 +257,14 @@ final class TeamsAndQuizStateStore(
                     .map(_.maxProgressIndex) getOrElse 0,
                 timerState = TimerState.createStarted(),
                 submissions = Seq(),
+                imageIsEnlarged = false,
               )
             case Some(question) if quizState.questionProgressIndex > 0 =>
               // Decrement questionProgressIndex
               quizState.copy(
                 questionProgressIndex = quizState.questionProgressIndex - 1,
                 timerState = TimerState.createStarted(),
+                imageIsEnlarged = false,
               )
           }
       }
@@ -274,6 +284,7 @@ final class TeamsAndQuizStateStore(
           quizState.copy(
             questionProgressIndex = quizState.questionProgressIndex + 1,
             timerState = TimerState.createStarted(),
+            imageIsEnlarged = false,
           )
         case Some(question) if quizState.questionProgressIndex == question.maxProgressIndex =>
           goToNextQuestionUpdate(quizState)
@@ -297,6 +308,7 @@ final class TeamsAndQuizStateStore(
                 questionProgressIndex = 0,
                 timerState = TimerState.createStarted(),
                 submissions = Seq(),
+                imageIsEnlarged = false,
               )
             case Some(question) if quizState.questionProgressIndex == 0 =>
               // Go to the start of the previous question
@@ -306,12 +318,14 @@ final class TeamsAndQuizStateStore(
                 questionProgressIndex = 0,
                 timerState = TimerState.createStarted(),
                 submissions = Seq(),
+                imageIsEnlarged = false,
               )
             case Some(question) if quizState.questionProgressIndex > 0 =>
               // Go to the start of the question
               quizState.copy(
                 questionProgressIndex = 0,
                 timerState = TimerState.createStarted(),
+                imageIsEnlarged = false,
               )
           }
       }
@@ -330,6 +344,7 @@ final class TeamsAndQuizStateStore(
               questionProgressIndex = 0,
               timerState = TimerState.createStarted(),
               submissions = Seq(),
+              imageIsEnlarged = false,
             )
           }
         case Some(question) =>
@@ -343,6 +358,7 @@ final class TeamsAndQuizStateStore(
               questionProgressIndex = 0,
               timerState = TimerState.createStarted(),
               submissions = Seq(),
+              imageIsEnlarged = false,
             )
           }
       }
@@ -364,6 +380,7 @@ final class TeamsAndQuizStateStore(
                 questionProgressIndex = 0,
                 timerState = TimerState.createStarted(),
                 submissions = Seq(),
+                imageIsEnlarged = false,
               )
             case Some(question) =>
               // Go to the start of the current round
@@ -372,6 +389,7 @@ final class TeamsAndQuizStateStore(
                 questionProgressIndex = 0,
                 timerState = TimerState.createStarted(),
                 submissions = Seq(),
+                imageIsEnlarged = false,
               )
           }
       }
@@ -383,6 +401,7 @@ final class TeamsAndQuizStateStore(
         questionProgressIndex = 0,
         timerState = TimerState.createStarted(),
         submissions = Seq(),
+        imageIsEnlarged = false,
       )
     }
 

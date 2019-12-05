@@ -140,7 +140,14 @@ final class QuestionComponent(
               <.img(
                 ^.src := s"/quizimages/${image.src}",
                 ^.className := image.size,
-              )
+                ^^.ifThen(state.quizState.imageIsEnlarged) {
+                  if (props.showMasterData) {
+                    ^.className := "indicate-enlarged"
+                  } else {
+                    ^.className := "enlarged"
+                  }
+                },
+              ),
             )
           },
           <<.ifDefined(question.choices) { choices =>

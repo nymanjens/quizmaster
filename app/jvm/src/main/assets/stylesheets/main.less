@@ -216,11 +216,29 @@ table.table-bordered {
         }
         img {
           max-width: 100%;
-          &.small {
-            max-height: 330px;
+
+          &.enlarged {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            height: 880px;
+            object-fit: contain;
+            background-color: white;
+            border: 5px double;
           }
-          &.large {
-            max-height: 540px;
+          &:not(.enlarged) {
+            &.indicate-enlarged {
+              border: 5px double;
+            }
+
+            &.small {
+              max-height: 330px;
+            }
+            &.large {
+              max-height: 540px;
+            }
           }
         }
       }
