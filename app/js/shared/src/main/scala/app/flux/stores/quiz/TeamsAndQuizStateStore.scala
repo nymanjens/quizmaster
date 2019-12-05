@@ -147,6 +147,12 @@ final class TeamsAndQuizStateStore(
       _.copy(timerState = TimerState.createStarted(), submissions = Seq()))
   }
 
+  def toggleImageIsEnlarged(): Future[Unit] = updateStateQueue.schedule {
+    StateUpsertHelper.doQuizStateUpsert(Seq(ModelFields.QuizState.imageIsEnlarged)) { oldState =>
+      oldState.copy(imageIsEnlarged = !oldState.imageIsEnlarged)
+    }
+  }
+
   def doQuizStateUpdate(fieldMasks: ModelField[_, QuizState]*)(update: QuizState => QuizState): Future[Unit] =
     updateStateQueue.schedule {
       StateUpsertHelper.doQuizStateUpsert(fieldMasks.toVector)(update)

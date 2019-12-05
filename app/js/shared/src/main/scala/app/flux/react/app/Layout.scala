@@ -72,6 +72,7 @@ final class Layout(
       bind("ctrl+shift+left", () => teamsAndQuizStateStore.goToPreviousRound())
       bind("ctrl+shift+right", () => teamsAndQuizStateStore.goToNextRound())
       bind("alt+shift+r", () => teamsAndQuizStateStore.resetCurrentQuestion())
+      bind("alt+enter", () => teamsAndQuizStateStore.toggleImageIsEnlarged())
 
       // Give points
       for (teamIndex <- 0 to 4) {
