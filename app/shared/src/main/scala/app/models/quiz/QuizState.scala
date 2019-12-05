@@ -29,6 +29,7 @@ case class QuizState(
     questionProgressIndex: Int = 0,
     timerState: TimerState = TimerState.nullInstance,
     submissions: Seq[Submission] = Seq(),
+    imageIsEnlarged: Boolean = false,
     override val lastUpdateTime: LastUpdateTime = LastUpdateTime.neverUpdated,
 ) extends UpdatableEntity {
 
