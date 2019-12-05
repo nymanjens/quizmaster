@@ -23,6 +23,26 @@ final class GamepadStore extends StateStore[State] {
 
   override def state: State = _state
 
+  def rumble(gamepadIndex: Int): Unit = {
+    val gamepads = getGamepads()
+    if (gamepads.indices contains gamepadIndex) {
+      val gamepad = gamepads(gamepadIndex)
+      if (gamepad != null && gamepad.connected) {
+        val vibrationActuator = gamepad.vibrationActuator
+        if (!js.isUndefined(vibrationActuator)) {
+          vibrationActuator.playEffect(
+            "dual-rumble",
+            js.Dictionary(
+              "startDelay" -> 0,
+              "duration" -> 700,
+              "weakMagnitude" -> 1.0,
+              "strongMagnitude" -> 1.0,
+            ))
+        }
+      }
+    }
+  }
+
   private def setState(newState: State): Unit = {
     if (newState != _state) {
       _state = newState
@@ -39,9 +59,12 @@ final class GamepadStore extends StateStore[State] {
     )
   }
 
+  private def getGamepads(): Seq[Gamepad] = {
+    dom.window.navigator.asInstanceOf[js.Dynamic].getGamepads().asInstanceOf[js.Array[Gamepad]].toVector
+  }
+
   private def getCurrentStateFromControllers(): State = {
-    val gamepads = dom.window.navigator.asInstanceOf[js.Dynamic].getGamepads().asInstanceOf[js.Array[Gamepad]]
-    State(gamepads = for (gamepad <- gamepads.toVector) yield {
+    State(gamepads = for (gamepad <- getGamepads()) yield {
       if (gamepad != null && gamepad.connected) {
         val arrowPressed: Option[Arrow] =
           if (isPressed(gamepad, ButtonIndex.up)) Some(Arrow.Up)

@@ -121,6 +121,11 @@ final class TeamInputStore(
               } else {
                 soundEffectController.playNewSubmission()
               }
+
+              if (question.isInstanceOf[Question.Double]) {
+                gamepadStore.rumble(gamepadIndex = allTeams.indexOf(team))
+              }
+
               teamsAndQuizStateStore.addSubmission(
                 Submission(
                   teamId = team.id,
