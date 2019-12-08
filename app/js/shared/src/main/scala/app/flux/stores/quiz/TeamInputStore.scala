@@ -109,20 +109,21 @@ final class TeamInputStore(
         if (question.isMultipleChoice) {
           if (gamepadState.arrowPressed.isDefined) {
             val arrow = gamepadState.arrowPressed.get
+            val submissionIsCorrect = question.isCorrectAnswerIndex(arrow.answerIndex)
             val alreadyAnsweredCorrectly = quizState.submissions.exists(submission =>
               question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
             val tooLate = alreadyAnsweredCorrectly && question.onlyFirstGainsPoints
+
             if (tooLate) {
               Future.successful((): Unit)
             } else {
-              val submissionIsCorrect = question.isCorrectAnswerIndex(arrow.answerIndex)
               if (question.onlyFirstGainsPoints) {
                 soundEffectController.playRevealingSubmission(correct = submissionIsCorrect)
               } else {
                 soundEffectController.playNewSubmission()
               }
 
-              if (question.isInstanceOf[Question.Double]) {
+              if (submissionIsCorrect && question.isInstanceOf[Question.Double]) {
                 gamepadStore.rumble(gamepadIndex = allTeams.indexOf(team))
               }
 
