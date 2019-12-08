@@ -162,8 +162,17 @@ final class TeamsAndQuizStateStore(
       submission: Submission,
       resetTimer: Boolean = false,
       pauseTimer: Boolean = false,
+      removeEarlierSubmissionBySameTeam: Boolean = false,
   ): Future[Unit] =
     updateStateQueue.schedule {
+      def newSubmissions(oldSubmissions: Seq[Submission]): Seq[Submission] = {
+          val filteredOldSubmissions = if (removeEarlierSubmissionBySameTeam) {
+            oldSubmissions.filter(_.teamId != submission.teamId)
+          } else {
+            oldSubmissions
+          }
+        filteredOldSubmissions :+ submission
+      }
       if (resetTimer || pauseTimer) {
         StateUpsertHelper.doQuizStateUpsert(
           Seq(ModelFields.QuizState.timerState, ModelFields.QuizState.submissions)) { quizState =>
@@ -177,13 +186,13 @@ final class TeamsAndQuizStateStore(
                   timerRunning = false,
                 )
               else throw new AssertionError("Impossible to reach"),
-            submissions = quizState.submissions :+ submission,
+            submissions = newSubmissions(quizState.submissions),
           )
         }
       } else {
         StateUpsertHelper.doQuizStateUpsert(Seq(ModelFields.QuizState.submissions)) { quizState =>
           quizState.copy(
-            submissions = quizState.submissions :+ submission,
+            submissions = newSubmissions(quizState.submissions),
           )
         }
       }

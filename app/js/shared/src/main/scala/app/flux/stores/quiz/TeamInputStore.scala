@@ -103,18 +103,19 @@ final class TeamInputStore(
         quizState.submissions.exists(_.teamId == thisTeam.id)
       def allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
 
-      if (teamHasSubmission(team)) {
-        Future.successful((): Unit)
-      } else {
+      {
         if (question.isMultipleChoice) {
           if (gamepadState.arrowPressed.isDefined) {
             val arrow = gamepadState.arrowPressed.get
             val submissionIsCorrect = question.isCorrectAnswerIndex(arrow.answerIndex)
-            val alreadyAnsweredCorrectly = quizState.submissions.exists(submission =>
-              question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
-            val tooLate = alreadyAnsweredCorrectly && question.onlyFirstGainsPoints
+            val tooLate = {
+              val alreadyAnsweredCorrectly = quizState.submissions.exists(submission =>
+                question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
+              alreadyAnsweredCorrectly && question.onlyFirstGainsPoints
+            }
+            val blockedByEarlierSubmission = teamHasSubmission(team) && question.onlyFirstGainsPoints
 
-            if (tooLate) {
+            if (tooLate || blockedByEarlierSubmission) {
               Future.successful((): Unit)
             } else {
               if (question.onlyFirstGainsPoints) {
@@ -135,13 +136,14 @@ final class TeamInputStore(
                 resetTimer = question.isInstanceOf[Question.Double],
                 pauseTimer =
                   if (question.onlyFirstGainsPoints) submissionIsCorrect else allOtherTeamsHaveSubmission,
+                removeEarlierSubmissionBySameTeam = true,
               )
             }
           } else {
             Future.successful((): Unit)
           }
         } else { // Not multiple choice
-          if (gamepadState.anyButtonPressed) {
+          if (gamepadState.anyButtonPressed && !teamHasSubmission(team)) {
             soundEffectController.playNewSubmission()
             teamsAndQuizStateStore.addSubmission(
               Submission(
