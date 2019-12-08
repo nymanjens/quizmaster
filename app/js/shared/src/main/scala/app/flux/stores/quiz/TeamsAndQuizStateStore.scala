@@ -162,16 +162,29 @@ final class TeamsAndQuizStateStore(
       submission: Submission,
       resetTimer: Boolean = false,
       pauseTimer: Boolean = false,
-      removeEarlierSubmissionBySameTeam: Boolean = false,
+      allowMoreThanOneSubmissionPerTeam: Boolean,
+      removeEarlierDifferentSubmissionBySameTeam: Boolean = false,
   ): Future[Unit] =
     updateStateQueue.schedule {
       def newSubmissions(oldSubmissions: Seq[Submission]): Seq[Submission] = {
-          val filteredOldSubmissions = if (removeEarlierSubmissionBySameTeam) {
-            oldSubmissions.filter(_.teamId != submission.teamId)
+        val filteredOldSubmissions = {
+          if (removeEarlierDifferentSubmissionBySameTeam) {
+            def differentSubmissionBySameTeam(s: Submission): Boolean = {
+              s.teamId == submission.teamId && s.maybeAnswerIndex != submission.maybeAnswerIndex
+            }
+            oldSubmissions.filterNot(differentSubmissionBySameTeam)
           } else {
             oldSubmissions
           }
-        filteredOldSubmissions :+ submission
+        }
+
+        val submissionAlreadyExists = filteredOldSubmissions.exists(_.teamId == submission.teamId)
+
+        if (submissionAlreadyExists && !allowMoreThanOneSubmissionPerTeam) {
+          filteredOldSubmissions
+        } else {
+          filteredOldSubmissions :+ submission
+        }
       }
       if (resetTimer || pauseTimer) {
         StateUpsertHelper.doQuizStateUpsert(

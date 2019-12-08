@@ -113,9 +113,8 @@ final class TeamInputStore(
                 question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
               alreadyAnsweredCorrectly && question.onlyFirstGainsPoints
             }
-            val blockedByEarlierSubmission = teamHasSubmission(team) && question.onlyFirstGainsPoints
 
-            if (tooLate || blockedByEarlierSubmission) {
+            if (tooLate) {
               Future.successful((): Unit)
             } else {
               if (question.onlyFirstGainsPoints) {
@@ -136,20 +135,23 @@ final class TeamInputStore(
                 resetTimer = question.isInstanceOf[Question.Double],
                 pauseTimer =
                   if (question.onlyFirstGainsPoints) submissionIsCorrect else allOtherTeamsHaveSubmission,
-                removeEarlierSubmissionBySameTeam = true,
+                allowMoreThanOneSubmissionPerTeam = false,
+                removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
               )
             }
           } else {
             Future.successful((): Unit)
           }
         } else { // Not multiple choice
-          if (gamepadState.anyButtonPressed && !teamHasSubmission(team)) {
+          if (gamepadState.anyButtonPressed) {
             soundEffectController.playNewSubmission()
             teamsAndQuizStateStore.addSubmission(
               Submission(
                 teamId = team.id,
               ),
               pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
+              //allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
+              allowMoreThanOneSubmissionPerTeam = false,
             )
           } else {
             Future.successful((): Unit)
