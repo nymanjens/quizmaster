@@ -29,12 +29,12 @@ final class GamepadStore extends StateStore[State] {
       val gamepad = gamepads(gamepadIndex)
       if (gamepad != null && gamepad.connected) {
         val vibrationActuator = gamepad.vibrationActuator
-        if (!js.isUndefined(vibrationActuator)) {
+        if (vibrationActuator != null && !js.isUndefined(vibrationActuator)) {
           vibrationActuator.playEffect(
             "dual-rumble",
             js.Dictionary(
               "startDelay" -> 0,
-              "duration" -> 700,
+              "duration" -> 400,
               "weakMagnitude" -> 1.0,
               "strongMagnitude" -> 1.0,
             ))
