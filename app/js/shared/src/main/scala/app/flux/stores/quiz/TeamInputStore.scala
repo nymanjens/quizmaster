@@ -97,13 +97,14 @@ final class TeamInputStore(
           .newQuery[QuizState]()
           .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId)) getOrElse QuizState.nullInstance
 
-      val question = quizState.maybeQuestion.get
-      val gamepadState = _state.teamIdToGamepadState(team.id)
-      def teamHasSubmission(thisTeam: Team): Boolean =
-        quizState.submissions.exists(_.teamId == thisTeam.id)
-      def allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
-
       if (onRelevantPageForSubmissions && quizState.canSubmitResponse) {
+
+        val question = quizState.maybeQuestion.get
+        val gamepadState = _state.teamIdToGamepadState(team.id)
+        def teamHasSubmission(thisTeam: Team): Boolean =
+          quizState.submissions.exists(_.teamId == thisTeam.id)
+        def allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
+
         if (question.isMultipleChoice) {
           if (gamepadState.arrowPressed.isDefined) {
             val arrow = gamepadState.arrowPressed.get
