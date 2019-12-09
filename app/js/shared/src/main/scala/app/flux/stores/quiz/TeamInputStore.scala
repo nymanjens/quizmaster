@@ -27,6 +27,7 @@ import scala.async.Async.await
 import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.util.Random
 
 final class TeamInputStore(
     implicit entityAccess: JsEntityAccess,
@@ -86,8 +87,12 @@ final class TeamInputStore(
       }
 
     private def maybeAddSubmissions(teams: Seq[Team]): Future[Unit] = {
+      // Randomly shuffle the order in which we handle the teams so it's not always the same team that
+      // gets the advantage.
+      val randomTeams = Random.shuffle(teams)
+
       var resultFuture: Future[Unit] = Future.successful((): Unit)
-      for (team <- teams) {
+      for (team <- randomTeams) {
         resultFuture = resultFuture.flatMap(_ => maybeAddSubmission(team, teams))
       }
       resultFuture
