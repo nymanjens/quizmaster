@@ -85,10 +85,12 @@ final class TeamInputStore(
         }
       }
 
-    private def maybeAddSubmissions(teams: Seq[Team]): Future[Seq[Unit]] = {
-      Future.sequence(
-        for (team <- teams) yield maybeAddSubmission(team, teams)
-      )
+    private def maybeAddSubmissions(teams: Seq[Team]): Future[Unit] = {
+      var resultFuture: Future[Unit] = Future.successful((): Unit)
+      for (team <- teams) {
+        resultFuture = resultFuture.flatMap(_ => maybeAddSubmission(team, teams))
+      }
+      resultFuture
     }
 
     private def maybeAddSubmission(team: Team, allTeams: Seq[Team]): Future[Unit] = async {
