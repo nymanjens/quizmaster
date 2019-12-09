@@ -47,7 +47,7 @@ final class ScalaJsApiServerFactory @Inject()(
     }
 
     override def persistEntityModifications(modifications: Seq[EntityModification]): Unit = {
-      entityAccess.persistEntityModificationsAsync(modifications) // Don't wait for it to finish
+      entityAccess.persistEntityModifications(modifications)
     }
 
     override def executeDataQuery(dbQuery: PicklableDbQuery) = {
