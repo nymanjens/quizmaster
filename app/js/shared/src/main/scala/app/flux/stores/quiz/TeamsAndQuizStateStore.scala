@@ -105,13 +105,15 @@ final class TeamsAndQuizStateStore(
   }
 
   def goToPreviousStep(): Future[Unit] = updateStateQueue.schedule {
-    StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
-      StateUpsertHelper.goToPreviousStepUpdate)
+    StateUpsertHelper
+      .doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(StateUpsertHelper.goToPreviousStepUpdate)
+      .map(_ => (): Unit)
   }
 
   def goToNextStep(): Future[Unit] = updateStateQueue.schedule {
-    StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
-      StateUpsertHelper.goToNextStepUpdate)
+    StateUpsertHelper
+      .doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(StateUpsertHelper.goToNextStepUpdate)
+      .map(_ => (): Unit)
   }
 
   /**
@@ -119,13 +121,16 @@ final class TeamsAndQuizStateStore(
     * otherwise
     */
   def goToPreviousQuestion(): Future[Unit] = updateStateQueue.schedule {
-    StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
-      StateUpsertHelper.goToPreviousQuestionUpdate)
+    StateUpsertHelper
+      .doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
+        StateUpsertHelper.goToPreviousQuestionUpdate)
+      .map(_ => (): Unit)
   }
 
   def goToNextQuestion(): Future[Unit] = updateStateQueue.schedule {
-    StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
-      StateUpsertHelper.goToNextQuestionUpdate)
+    StateUpsertHelper
+      .doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(StateUpsertHelper.goToNextQuestionUpdate)
+      .map(_ => (): Unit)
   }
 
   /**
@@ -133,62 +138,76 @@ final class TeamsAndQuizStateStore(
     * otherwise
     */
   def goToPreviousRound(): Future[Unit] = updateStateQueue.schedule {
-    StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
-      StateUpsertHelper.goToPreviousRoundUpdate)
+    StateUpsertHelper
+      .doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
+        StateUpsertHelper.goToPreviousRoundUpdate)
+      .map(_ => (): Unit)
   }
   def goToNextRound(): Future[Unit] = updateStateQueue.schedule {
-    StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(
-      StateUpsertHelper.goToNextRoundUpdate)
+    StateUpsertHelper
+      .doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields)(StateUpsertHelper.goToNextRoundUpdate)
+      .map(_ => (): Unit)
   }
 
   def resetCurrentQuestion(): Future[Unit] = updateStateQueue.schedule {
-    StateUpsertHelper.doQuizStateUpsert(
-      Seq(ModelFields.QuizState.timerState, ModelFields.QuizState.submissions))(
-      _.copy(timerState = TimerState.createStarted(), submissions = Seq()))
+    StateUpsertHelper
+      .doQuizStateUpsert(Seq(ModelFields.QuizState.timerState, ModelFields.QuizState.submissions))(
+        _.copy(timerState = TimerState.createStarted(), submissions = Seq()))
+      .map(_ => (): Unit)
   }
 
   def toggleImageIsEnlarged(): Future[Unit] = updateStateQueue.schedule {
-    StateUpsertHelper.doQuizStateUpsert(Seq(ModelFields.QuizState.imageIsEnlarged)) { oldState =>
-      oldState.copy(imageIsEnlarged = !oldState.imageIsEnlarged)
-    }
+    StateUpsertHelper
+      .doQuizStateUpsert(Seq(ModelFields.QuizState.imageIsEnlarged)) { oldState =>
+        oldState.copy(imageIsEnlarged = !oldState.imageIsEnlarged)
+      }
+      .map(_ => (): Unit)
   }
 
   def doQuizStateUpdate(fieldMasks: ModelField[_, QuizState]*)(update: QuizState => QuizState): Future[Unit] =
     updateStateQueue.schedule {
-      StateUpsertHelper.doQuizStateUpsert(fieldMasks.toVector)(update)
+      StateUpsertHelper
+        .doQuizStateUpsert(fieldMasks.toVector)(update)
+        .map(_ => (): Unit)
     }
 
+  /** Returns true if something changed. */
   def addSubmission(
       submission: Submission,
       resetTimer: Boolean = false,
       pauseTimer: Boolean = false,
       allowMoreThanOneSubmissionPerTeam: Boolean,
       removeEarlierDifferentSubmissionBySameTeam: Boolean = false,
-  ): Future[Unit] =
+  ): Future[Boolean] =
     updateStateQueue.schedule {
-      def newSubmissions(oldSubmissions: Seq[Submission]): Seq[Submission] = {
-        val filteredOldSubmissions = {
-          if (removeEarlierDifferentSubmissionBySameTeam) {
-            def differentSubmissionBySameTeam(s: Submission): Boolean = {
-              s.teamId == submission.teamId && s.maybeAnswerIndex != submission.maybeAnswerIndex
+      StateUpsertHelper.doQuizStateUpsert(
+        Seq(ModelFields.QuizState.timerState, ModelFields.QuizState.submissions)) { quizState =>
+        val oldSubmissions = quizState.submissions
+        val newSubmissions = {
+          val filteredOldSubmissions = {
+            if (removeEarlierDifferentSubmissionBySameTeam) {
+              def differentSubmissionBySameTeam(s: Submission): Boolean = {
+                s.teamId == submission.teamId && s.maybeAnswerIndex != submission.maybeAnswerIndex
+              }
+              oldSubmissions.filterNot(differentSubmissionBySameTeam)
+            } else {
+              oldSubmissions
             }
-            oldSubmissions.filterNot(differentSubmissionBySameTeam)
+          }
+
+          val submissionAlreadyExists = filteredOldSubmissions.exists(_.teamId == submission.teamId)
+
+          if (submissionAlreadyExists && !allowMoreThanOneSubmissionPerTeam) {
+            filteredOldSubmissions
           } else {
-            oldSubmissions
+            filteredOldSubmissions :+ submission
           }
         }
 
-        val submissionAlreadyExists = filteredOldSubmissions.exists(_.teamId == submission.teamId)
-
-        if (submissionAlreadyExists && !allowMoreThanOneSubmissionPerTeam) {
-          filteredOldSubmissions
+        if (oldSubmissions == newSubmissions) {
+          // Don't change timerState if there were no submissions, the return value is always true (incorrectly)
+          quizState
         } else {
-          filteredOldSubmissions :+ submission
-        }
-      }
-      if (resetTimer || pauseTimer) {
-        StateUpsertHelper.doQuizStateUpsert(
-          Seq(ModelFields.QuizState.timerState, ModelFields.QuizState.submissions)) { quizState =>
           quizState.copy(
             timerState =
               if (resetTimer) TimerState.createStarted()
@@ -198,14 +217,8 @@ final class TeamsAndQuizStateStore(
                   lastSnapshotElapsedTime = quizState.timerState.elapsedTime(),
                   timerRunning = false,
                 )
-              else throw new AssertionError("Impossible to reach"),
-            submissions = newSubmissions(quizState.submissions),
-          )
-        }
-      } else {
-        StateUpsertHelper.doQuizStateUpsert(Seq(ModelFields.QuizState.submissions)) { quizState =>
-          quizState.copy(
-            submissions = newSubmissions(quizState.submissions),
+              else quizState.timerState,
+            submissions = newSubmissions,
           )
         }
       }
@@ -222,8 +235,9 @@ final class TeamsAndQuizStateStore(
       ModelFields.QuizState.submissions
     )
 
+    /** Returns true if something changed. */
     def doQuizStateUpsert(fieldMasks: Seq[ModelField[_, QuizState]])(
-        update: QuizState => QuizState): Future[Unit] =
+        update: QuizState => QuizState): Future[Boolean] =
       async {
         val quizState = await(stateFuture).quizState
 
@@ -238,15 +252,29 @@ final class TeamsAndQuizStateStore(
           maybeQuizState match {
             case None =>
               await(entityAccess.persistModifications(EntityModification.Add(update(QuizState.nullInstance))))
+              true
             case Some(quizState2) =>
-              await(
-                entityAccess.persistModifications(
-                  EntityModification.createUpdate(update(quizState2), fieldMasks.toVector)))
+              val updatedState = update(quizState2)
+              if (quizState2 == updatedState) {
+                false
+              } else {
+                await(
+                  entityAccess.persistModifications(
+                    EntityModification.createUpdate(updatedState, fieldMasks.toVector)))
+                true
+              }
           }
         } else {
-          await(
-            entityAccess.persistModifications(
-              EntityModification.createUpdate(update(quizState), fieldMasks.toVector)))
+          val updatedState = update(quizState)
+
+          if (quizState == updatedState) {
+            false
+          } else {
+            await(
+              entityAccess.persistModifications(
+                EntityModification.createUpdate(updatedState, fieldMasks.toVector)))
+            true
+          }
         }
       }
 

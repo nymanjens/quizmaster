@@ -116,42 +116,51 @@ final class TeamInputStore(
           if (tooLate) {
             Future.successful((): Unit)
           } else {
-            if (question.onlyFirstGainsPoints) {
-              soundEffectController.playRevealingSubmission(correct = submissionIsCorrect)
-            } else {
-              soundEffectController.playNewSubmission()
-            }
-
             if (submissionIsCorrect && question.isInstanceOf[Question.Double]) {
               gamepadStore.rumble(gamepadIndex = allTeams.indexOf(team))
             }
 
-            teamsAndQuizStateStore.addSubmission(
-              Submission(
-                teamId = team.id,
-                maybeAnswerIndex = Some(arrow.answerIndex),
-              ),
-              resetTimer = question.isInstanceOf[Question.Double],
-              pauseTimer =
-                if (question.onlyFirstGainsPoints) submissionIsCorrect else allOtherTeamsHaveSubmission,
-              allowMoreThanOneSubmissionPerTeam = false,
-              removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
-            )
+            teamsAndQuizStateStore
+              .addSubmission(
+                Submission(
+                  teamId = team.id,
+                  maybeAnswerIndex = Some(arrow.answerIndex),
+                ),
+                resetTimer = question.isInstanceOf[Question.Double],
+                pauseTimer =
+                  if (question.onlyFirstGainsPoints) submissionIsCorrect else allOtherTeamsHaveSubmission,
+                allowMoreThanOneSubmissionPerTeam = false,
+                removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
+              )
+              .map { somethingChanged =>
+                if (somethingChanged) {
+                  if (question.onlyFirstGainsPoints) {
+                    soundEffectController.playRevealingSubmission(correct = submissionIsCorrect)
+                  } else {
+                    soundEffectController.playNewSubmission()
+                  }
+                }
+              }
           }
         } else {
           Future.successful((): Unit)
         }
       } else { // Not multiple choice
         if (gamepadState.anyButtonPressed) {
-          soundEffectController.playNewSubmission()
-          teamsAndQuizStateStore.addSubmission(
-            Submission(
-              teamId = team.id,
-            ),
-            pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
-            //allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
-            allowMoreThanOneSubmissionPerTeam = false,
-          )
+          teamsAndQuizStateStore
+            .addSubmission(
+              Submission(
+                teamId = team.id,
+              ),
+              pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
+              //allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
+              allowMoreThanOneSubmissionPerTeam = false,
+            )
+            .map { somethingChanged =>
+              if (somethingChanged) {
+                soundEffectController.playNewSubmission()
+              }
+            }
         } else {
           Future.successful((): Unit)
         }
