@@ -89,12 +89,6 @@ final class HybridRemoteDatabaseProxy(futureLocalDatabase: FutureLocalDatabase)(
         val serverUpdated = apiClient.persistEntityModifications(modifications)
 
         // Apply changes to local database, but don't wait for it
-        futureLocalDatabase.scheduleUpdateAtEnd(localDatabase =>
-          async {
-            await(entitySyncLogic.handleEntityModificationUpdate(modifications, localDatabase))
-            await(localDatabase.addPendingModifications(modifications))
-            await(localDatabase.save())
-        })
         PersistEntityModificationsResponse(
           queryReflectsModificationsFuture = serverUpdated,
           completelyDoneFuture = serverUpdated)
