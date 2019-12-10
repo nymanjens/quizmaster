@@ -62,20 +62,24 @@ final class GamepadSetupView(
     override def render(props: Props, state: State): VdomElement = logExceptions {
       implicit val router = props.router
 
-      Bootstrap.Row(
-        HalfPanel(title = <.span("Gamepads")) {
-          <.span(
-            Table(
-              tableClasses = Seq("table-gamepads"),
-              tableHeaders = Seq(
-                <.th("Team"),
-                <.th("Gamepad input"),
+      if (state.teams.isEmpty) {
+        <.span("There are no teams yet, please add some and come back to this page then")
+      } else {
+        Bootstrap.Row(
+          HalfPanel(title = <.span("Gamepads")) {
+            <.span(
+              Table(
+                tableClasses = Seq("table-gamepads"),
+                tableHeaders = Seq(
+                  <.th("Team"),
+                  <.th("Gamepad input"),
+                ),
+                tableRowDatas = tableRowDatas(state)
               ),
-              tableRowDatas = tableRowDatas(state)
-            ),
-          )
-        }
-      )
+            )
+          }
+        )
+      }
     }
 
     private def tableRowDatas(implicit state: State): Seq[Table.TableRowData] = {
