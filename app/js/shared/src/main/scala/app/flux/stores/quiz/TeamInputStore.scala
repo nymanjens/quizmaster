@@ -131,10 +131,7 @@ final class TeamInputStore(
 
               val somethingChanged = await(
                 teamsAndQuizStateStore.addSubmission(
-                  Submission.createNow(
-                    teamId = team.id,
-                    maybeAnswerIndex = Some(arrow.answerIndex),
-                  ),
+                  Submission.createNow(teamId = team.id, answerIndex = arrow.answerIndex),
                   resetTimer = question.isInstanceOf[Question.Double],
                   pauseTimer =
                     if (question.onlyFirstGainsPoints) submissionIsCorrect else allOtherTeamsHaveSubmission,
@@ -153,16 +150,27 @@ final class TeamInputStore(
           }
         } else { // Not multiple choice
           if (gamepadState.anyButtonPressed) {
-            val somethingChanged = await(
-              teamsAndQuizStateStore.addSubmission(
-                Submission.createNow(teamId = team.id),
-                pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
-                //allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
-                allowMoreThanOneSubmissionPerTeam = false,
-              ))
+            val blockedBecauseSecondSubmissionTooClose = {
+              if (question.onlyFirstGainsPoints) {
+//                val blockedBecauseAdjacentSubmission = ???
+//                val blockedBecauseLastSubmissionTooRecent = ???
+                false
+              } else {
+                false
+              }
+            }
 
-            if (somethingChanged) {
-              soundEffectController.playNewSubmission()
+            if (!blockedBecauseSecondSubmissionTooClose) {
+              val somethingChanged = await(
+                teamsAndQuizStateStore.addSubmission(
+                  Submission.createNow(teamId = team.id),
+                  pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
+                  allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
+                ))
+
+              if (somethingChanged) {
+                soundEffectController.playNewSubmission()
+              }
             }
           }
         }
