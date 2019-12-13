@@ -132,7 +132,7 @@ final class TeamInputStore(
               val somethingChanged = await(
                 teamsAndQuizStateStore
                   .addSubmission(
-                    Submission(
+                    Submission.createNow(
                       teamId = team.id,
                       maybeAnswerIndex = Some(arrow.answerIndex),
                     ),
@@ -157,9 +157,7 @@ final class TeamInputStore(
             val somethingChanged = await(
               teamsAndQuizStateStore
                 .addSubmission(
-                  Submission(
-                    teamId = team.id,
-                  ),
+                  Submission.createNow(teamId = team.id),
                   pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
                   //allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
                   allowMoreThanOneSubmissionPerTeam = false,
