@@ -130,18 +130,17 @@ final class TeamInputStore(
               }
 
               val somethingChanged = await(
-                teamsAndQuizStateStore
-                  .addSubmission(
-                    Submission.createNow(
-                      teamId = team.id,
-                      maybeAnswerIndex = Some(arrow.answerIndex),
-                    ),
-                    resetTimer = question.isInstanceOf[Question.Double],
-                    pauseTimer =
-                      if (question.onlyFirstGainsPoints) submissionIsCorrect else allOtherTeamsHaveSubmission,
-                    allowMoreThanOneSubmissionPerTeam = false,
-                    removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
-                  ))
+                teamsAndQuizStateStore.addSubmission(
+                  Submission.createNow(
+                    teamId = team.id,
+                    maybeAnswerIndex = Some(arrow.answerIndex),
+                  ),
+                  resetTimer = question.isInstanceOf[Question.Double],
+                  pauseTimer =
+                    if (question.onlyFirstGainsPoints) submissionIsCorrect else allOtherTeamsHaveSubmission,
+                  allowMoreThanOneSubmissionPerTeam = false,
+                  removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
+                ))
 
               if (somethingChanged) {
                 if (question.onlyFirstGainsPoints) {
@@ -155,13 +154,12 @@ final class TeamInputStore(
         } else { // Not multiple choice
           if (gamepadState.anyButtonPressed) {
             val somethingChanged = await(
-              teamsAndQuizStateStore
-                .addSubmission(
-                  Submission.createNow(teamId = team.id),
-                  pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
-                  //allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
-                  allowMoreThanOneSubmissionPerTeam = false,
-                ))
+              teamsAndQuizStateStore.addSubmission(
+                Submission.createNow(teamId = team.id),
+                pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
+                //allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
+                allowMoreThanOneSubmissionPerTeam = false,
+              ))
 
             if (somethingChanged) {
               soundEffectController.playNewSubmission()
