@@ -1,5 +1,8 @@
 package app.flux.stores.quiz
 
+import hydro.common.time.JavaTimeImplicits._
+import java.time.Duration
+
 import app.flux.controllers.SoundEffectController
 import app.flux.router.AppPages
 import app.flux.stores.quiz.GamepadStore.GamepadState
@@ -152,15 +155,23 @@ final class TeamInputStore(
           if (gamepadState.anyButtonPressed) {
             val blockedBecauseSecondSubmissionTooClose = {
               if (question.onlyFirstGainsPoints) {
-//                val blockedBecauseAdjacentSubmission = ???
-//                val blockedBecauseLastSubmissionTooRecent = ???
-                false
+                val blockedBecauseAdjacentSubmission =
+                  quizState.submissions.lastOption.exists(_.teamId == team.id)
+                val blockedBecauseLastSubmissionTooRecent =
+                  quizState.submissions.exists { submission =>
+                    val isRecent = submission.createTime > (clock.nowInstant - Duration.ofSeconds(3))
+                    submission.teamId == team.id && isRecent
+                  }
+
+                blockedBecauseAdjacentSubmission || blockedBecauseLastSubmissionTooRecent
               } else {
                 false
               }
             }
 
-            if (!blockedBecauseSecondSubmissionTooClose) {
+            if (blockedBecauseSecondSubmissionTooClose) {
+              // Don't add
+            } else {
               val somethingChanged = await(
                 teamsAndQuizStateStore.addSubmission(
                   Submission.createNow(teamId = team.id),
