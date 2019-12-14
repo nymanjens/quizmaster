@@ -67,10 +67,10 @@ final class Layout(
       // Quiz navigation
       bind("left", () => teamsAndQuizStateStore.goToPreviousStep())
       bind("right", () => teamsAndQuizStateStore.goToNextStep())
-      bind("ctrl+left", () => teamsAndQuizStateStore.goToPreviousQuestion())
-      bind("ctrl+right", () => teamsAndQuizStateStore.goToNextQuestion())
-      bind("ctrl+shift+left", () => teamsAndQuizStateStore.goToPreviousRound())
-      bind("ctrl+shift+right", () => teamsAndQuizStateStore.goToNextRound())
+      bind("alt+left", () => teamsAndQuizStateStore.goToPreviousQuestion())
+      bind("alt+right", () => teamsAndQuizStateStore.goToNextQuestion())
+      bind("alt+shift+left", () => teamsAndQuizStateStore.goToPreviousRound())
+      bind("alt+shift+right", () => teamsAndQuizStateStore.goToNextRound())
       bind("alt+shift+r", () => teamsAndQuizStateStore.resetCurrentQuestion())
       bind("alt+enter", () => teamsAndQuizStateStore.toggleImageIsEnlarged())
 
