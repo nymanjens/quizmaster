@@ -97,12 +97,20 @@ object Bootstrap {
   def FormGroup: VdomTag = <.div(^.className := "form-group")
   def FormInline(tag: VdomTag = <.form): VdomTag = tag(^.className := "form-inline")
 
-  def ProgressBar(fraction: Double, variant: Variant, label: String = ""): VdomTag = {
+  def ProgressBar(
+      fraction: Double,
+      variant: Variant,
+      striped: Boolean = false,
+      label: String = "",
+  ): VdomTag = {
     val percentage = fraction * 100
     <.div(
       ^.className := "progress",
       <.div(
         ^.className := s"progress-bar progress-bar-${variant.name}",
+        ^^.ifThen(striped) {
+          ^.className := s"progress-bar-striped"
+        },
         ^.aria.valueNow := percentage,
         ^.aria.valueMin := 0,
         ^.aria.valueMax := 100,

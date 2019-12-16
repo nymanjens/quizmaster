@@ -56,7 +56,15 @@ final class SyncedTimerBar(
       val timeRemainingFraction = timeRemaining / props.maxTime
       Bootstrap.ProgressBar(
         fraction = timeRemainingFraction,
-        variant = if (timeRemainingFraction < 0.1) Variant.danger else Variant.info)
+        variant = {
+          if (state.timerState.timerRunning) {
+            if (timeRemainingFraction < 0.1) Variant.danger else Variant.default
+          } else {
+            Variant.success
+          }
+        },
+        striped = !state.timerState.timerRunning,
+      )
     }
 
     override def didMount(props: Props, state: State): Callback = {
