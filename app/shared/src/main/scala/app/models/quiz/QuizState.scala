@@ -70,9 +70,7 @@ case class QuizState(
         val submissionAreOpen = question.submissionAreOpen(questionProgressIndex)
         val submissionIsHinderedByTimer =
           if (question.shouldShowTimer(questionProgressIndex))
-            // !timerState.timerRunning || // Note: Allowing submissions even when paused to allow submissions while
-            // another team is answering
-            timerState.hasFinished(question.maybeMaxTime.get)
+            !timerState.timerRunning || timerState.hasFinished(question.maybeMaxTime.get)
           else false
 
         submissionAreOpen && !submissionIsHinderedByTimer
