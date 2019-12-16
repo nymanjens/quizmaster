@@ -26,10 +26,8 @@ final class ApplicationStartHook @Inject()(
     processFlags()
 
     // Populate the database with dummy data
-    if (app.mode == Mode.Test || app.mode == Mode.Dev) {
-      if (AppConfigHelper.loadDummyData) {
-        loadDummyData()
-      }
+    if (AppConfigHelper.loadDummyData) {
+      loadDummyData()
     }
   }
 
