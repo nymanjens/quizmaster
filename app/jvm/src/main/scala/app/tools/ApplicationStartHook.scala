@@ -39,18 +39,32 @@ final class ApplicationStartHook @Inject()(
     entityAccess.persistEntityModifications(
       EntityModification.createAddWithRandomId(
         Team(
-          name = "Team awesome",
+          name = "Team 1",
           score = 0,
           index = 0,
         ),
       ),
       EntityModification.createAddWithRandomId(
         Team(
-          name = "The team formerly known as team awesome",
-          score = 2,
+          name = "Team 2",
+          score = 0,
           index = 1,
         ),
-      )
+      ),
+      EntityModification.createAddWithRandomId(
+        Team(
+          name = "Team 3",
+          score = 0,
+          index = 2,
+        ),
+      ),
+      EntityModification.createAddWithRandomId(
+        Team(
+          name = "Team 4",
+          score = 0,
+          index = 3,
+        ),
+      ),
     )
   }
 
