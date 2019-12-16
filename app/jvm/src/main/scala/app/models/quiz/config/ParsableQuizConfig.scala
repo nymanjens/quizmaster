@@ -55,7 +55,7 @@ object ParsableQuizConfig {
         pointsToGain: Int,
         pointsToGainOnFirstAnswer: java.lang.Integer,
         pointsToGainOnWrongAnswer: Int,
-        maxTimeSeconds: Int,
+        maxTimeSeconds: java.lang.Integer,
         onlyFirstGainsPoints: Boolean,
     ) extends Question {
       def this() = this(
@@ -69,11 +69,12 @@ object ParsableQuizConfig {
         pointsToGain = 1,
         pointsToGainOnFirstAnswer = null,
         pointsToGainOnWrongAnswer = 0,
-        maxTimeSeconds = 0,
+        maxTimeSeconds = null,
         onlyFirstGainsPoints = false,
       )
       override def parse: QuizConfig.Question = {
         try {
+          require(maxTimeSeconds != null, "maxTimeSeconds is not set")
           QuizConfig.Question.Single(
             question = checkNotNull(question),
             choices = if (choices == null) None else Some(choices.asScala.toVector),
@@ -85,7 +86,7 @@ object ParsableQuizConfig {
             pointsToGain = pointsToGain,
             pointsToGainOnFirstAnswer = Option(pointsToGainOnFirstAnswer).map(_.toInt) getOrElse pointsToGain,
             pointsToGainOnWrongAnswer = pointsToGainOnWrongAnswer,
-            maybeMaxTime = if (maxTimeSeconds == 0) None else Some(Duration.ofSeconds(maxTimeSeconds)),
+            maxTime = Duration.ofSeconds(maxTimeSeconds.toInt),
             onlyFirstGainsPoints = onlyFirstGainsPoints,
           )
         } catch {

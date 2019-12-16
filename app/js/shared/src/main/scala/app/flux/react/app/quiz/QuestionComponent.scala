@@ -220,7 +220,7 @@ final class QuestionComponent(
         <<.ifThen(question.shouldShowTimer(props.questionProgressIndex)) {
           <.div(
             ^.className := "timer",
-            syncedTimerBar(maxTime = question.maybeMaxTime.get),
+            syncedTimerBar(maxTime = question.maxTime),
           )
         },
         <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && !props.showMasterData) {
