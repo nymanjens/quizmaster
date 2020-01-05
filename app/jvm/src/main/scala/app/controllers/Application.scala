@@ -1,9 +1,11 @@
 package app.controllers
 
+import hydro.common.time.JavaTimeImplicits._
 import org.reactivestreams.Subscriber
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.format.DateTimeFormatter
+import java.time.Duration
 import java.time.LocalDateTime
 
 import akka.stream.scaladsl.StreamConverters
@@ -12,6 +14,8 @@ import app.api.ScalaJsApiServerFactory
 import app.common.QuizAssets
 import app.models.access.JvmEntityAccess
 import app.models.quiz.QuizState
+import app.models.quiz.config.QuizConfig
+import app.models.quiz.config.QuizConfig.Question
 import com.google.inject.Inject
 import hydro.common.time.Clock
 import hydro.common.ResourceFiles
@@ -36,6 +40,7 @@ final class Application @Inject()(
     executionContext: ExecutionContext,
     externalAssetsController: controllers.ExternalAssets,
     quizAssets: QuizAssets,
+    quizConfig: QuizConfig,
 ) extends AbstractController(components)
     with I18nSupport {
 
@@ -85,5 +90,51 @@ final class Application @Inject()(
         fileName = None,
         contentType = None // TODO: Set content type
       )
+  }
+
+  def roundsInfo = Action { implicit request =>
+    def round1(double: Double): String = "%,.1f".format(double)
+    def indent(width: Int, any: Any): String = s"%${width}s".format(any)
+
+    def questionsInfo(prefix: String, questions: Iterable[Question]): String = {
+      val minutes = {
+        val maybeZeroMinutes = questions
+          .map(_ match {
+            case q: Question.Double => Duration.ofMinutes(1)
+            case q: Question.Single => q.maxTime
+          })
+          .sum
+          .toMinutes
+          .toDouble
+        if (maybeZeroMinutes == 0) 1 else maybeZeroMinutes
+      }
+
+      val maxPoints = questions.map(_.pointsToGainOnFirstAnswer).sum
+      val avgPoints4PerfectTeams = questions.map { q =>
+        if (q.onlyFirstGainsPoints) {
+          q.pointsToGainOnFirstAnswer / 4.0
+        } else {
+          (q.pointsToGainOnFirstAnswer + 3 * q.pointsToGain) / 4.0
+        }
+      }.sum
+
+      s"${indent(30, prefix)}: " +
+        s"${indent(3, questions.size)} questions; ${indent(3, minutes.round)} min;    " +
+        s"points: {max: ${indent(2, maxPoints)} (${indent(3, round1(maxPoints / minutes))} per min), " +
+        s"avg4PerfectTeams: ${indent(4, round1(avgPoints4PerfectTeams))} (${indent(3, round1(avgPoints4PerfectTeams / minutes))} per min)}\n"
+    }
+
+    var result = ""
+    result += "Rounds info:\n"
+    result += "\n"
+
+    for (round <- quizConfig.rounds) {
+      result += questionsInfo(s"${round.name}", round.questions)
+    }
+
+    result += "\n"
+    result += questionsInfo("Total", quizConfig.rounds.flatMap(_.questions))
+    result += "\n"
+    Ok(result)
   }
 }

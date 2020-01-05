@@ -45,7 +45,19 @@ object JavaTimeImplicits {
   }
   implicit class LocalDateWrapper(thisDate: LocalDate) extends BaseWrapper[LocalDate](thisDate)
 
-  implicit object DurationOrdering extends Ordering[Duration] {
+//  implicit object DurationOrdering extends Ordering[Duration] {
+//    override def compare(x: Duration, y: Duration): Int = x compareTo y
+//  }
+  implicit object DurationNumeric extends Numeric[Duration] {
+    override def plus(x: Duration, y: Duration): Duration = x plus y
+    override def minus(x: Duration, y: Duration): Duration = x minus y
+    override def times(x: Duration, y: Duration): Duration = ???
+    override def negate(x: Duration): Duration = x.negated()
+    override def fromInt(x: Int): Duration = Duration.ofMillis(x)
+    override def toInt(x: Duration): Int = ???
+    override def toLong(x: Duration): Long = ???
+    override def toFloat(x: Duration): Float = ???
+    override def toDouble(x: Duration): Double = ???
     override def compare(x: Duration, y: Duration): Int = x compareTo y
   }
 }
