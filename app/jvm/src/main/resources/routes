@@ -16,7 +16,7 @@ GET  /websocket/hydropush/:updateToken/  hydro.controllers.InternalApi.hydroPush
 # External API
 GET  /externalapi/healthcheck/         hydro.controllers.StandardActions.healthCheck
 
-GET  /externalapi/rounds-info/         app.controllers.Application.roundsInfo
+GET  /rounds/:secret/                  app.controllers.Application.roundsInfo(secret)
 
 # Map static resources from the /public folder to the /assets URL path
 GET  /assets/*file                     controllers.Assets.versioned(path="/public", file: Asset)

@@ -92,7 +92,9 @@ final class Application @Inject()(
       )
   }
 
-  def roundsInfo = Action { implicit request =>
+  def roundsInfo(secret: String) = Action { implicit request =>
+    require(secret == playConfiguration.get[String]("app.quiz.secret"))
+
     def round1(double: Double): String = "%,.1f".format(double)
     def indent(width: Int, any: Any): String = s"%${width}s".format(any)
 
