@@ -137,6 +137,26 @@ final class Application @Inject()(
     result += "\n"
     result += questionsInfo("Total", quizConfig.rounds.flatMap(_.questions))
     result += "\n"
+    result += "\n"
+    result += "Details\n"
+    result += "\n"
+    for (round <- quizConfig.rounds) {
+      result += s"- ${round.name}\n"
+      for (q <- round.questions) {
+        val (textualQuestion, textualAnswer) =
+          q match {
+            case question: Question.Single => (question.question, question.answer)
+            case question: Question.Double => (question.textualQuestion, question.textualAnswer)
+          }
+        result += s"    - toGain: ${indent(2, q.pointsToGain)};  " +
+          s"first: ${indent(2, q.pointsToGainOnFirstAnswer)};   " +
+          s"onlyFirst: ${indent(5, q.onlyFirstGainsPoints)};   " +
+          s"${indent(3, q.maxTime.toMillis / 100)} sec;   " +
+          s"${indent(80, textualQuestion)};    " +
+          s"${indent(40, textualAnswer)}\n"
+      }
+    }
+    result += "\n"
     Ok(result)
   }
 }
