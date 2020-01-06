@@ -105,7 +105,7 @@ final class Application @Inject()(
           .map(_ match {
             case q: Question.Single =>
               if (q.maxTime > infiniteDurationThreshold) Duration.ofMinutes(1) else q.maxTime
-            case _: Question.Double => Duration.ofMinutes(1)
+            case _: Question.Double => Duration.ofSeconds(20)
           })
           .sum
           .toMinutes
