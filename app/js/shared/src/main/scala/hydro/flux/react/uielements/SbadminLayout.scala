@@ -67,6 +67,12 @@ final class SbadminLayout(
             s"v${AppVersion.versionString}",
           ),
           <.li(
+            <.a(
+              ^.href := "/externalapi/rounds-info/",
+              Bootstrap.FontAwesomeIcon("info-circle", fixedWidth = true),
+            ),
+          ),
+          <.li(
             router.anchorWithHrefTo(AppPages.Gamepad)(
               Bootstrap.FontAwesomeIcon("gamepad", fixedWidth = true),
             ),
