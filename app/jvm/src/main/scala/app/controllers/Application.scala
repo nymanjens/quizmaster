@@ -95,6 +95,7 @@ final class Application @Inject()(
   def roundsInfo(secret: String) = Action { implicit request =>
     require(secret == playConfiguration.get[String]("app.quiz.secret"))
 
+    val infiniteDurationThreshold = Duration.ofMinutes(900)
     def round1(double: Double): String = "%,.1f".format(double)
     def indent(width: Int, any: Any): String = s"%${width}s".format(any)
 
@@ -102,7 +103,7 @@ final class Application @Inject()(
       val minutes = {
         val maybeZeroMinutes = questions
           .map(_ match {
-            case q: Question.Single => if (q.maxTime > Duration.ofMinutes(900)) Duration.ZERO else q.maxTime
+            case q: Question.Single => if (q.maxTime > infiniteDurationThreshold) Duration.ZERO else q.maxTime
             case _: Question.Double => Duration.ofMinutes(1)
           })
           .sum
@@ -148,10 +149,13 @@ final class Application @Inject()(
             case question: Question.Single => (question.question, question.answer)
             case question: Question.Double => (question.textualQuestion, question.textualAnswer)
           }
+        val maxTime =
+          if (q.maxTime > infiniteDurationThreshold) "inf" else round1(q.maxTime.getSeconds / 60.0)
+
         result += s"    - toGain: ${indent(2, q.pointsToGain)};  " +
           s"first: ${indent(2, q.pointsToGainOnFirstAnswer)};   " +
           s"onlyFirst: ${indent(5, q.onlyFirstGainsPoints)};" +
-          s"${indent(6, round1(q.maxTime.getSeconds / 60.0))} min;" +
+          s"${indent(6, maxTime)} min;" +
           s"${indent(100, textualQuestion)};" +
           s"${indent(40, textualAnswer)}\n"
       }
