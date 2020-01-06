@@ -68,7 +68,10 @@ final class SbadminLayout(
           ),
           <.li(
             <.a(
-              ^.href := "/externalapi/rounds-info/",
+              ^.onClick --> LogExceptionsCallback {
+                val masterSecret = dom.window.prompt(i18n("app.enter-master-secret"))
+                dom.window.location.href = s"/rounds/$masterSecret/"
+              },
               Bootstrap.FontAwesomeIcon("info-circle", fixedWidth = true),
             ),
           ),
