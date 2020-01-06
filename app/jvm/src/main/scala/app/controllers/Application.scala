@@ -155,9 +155,9 @@ final class Application @Inject()(
 
         result += s"    - toGain: ${indent(2, q.pointsToGain)};  " +
           s"first: ${indent(2, q.pointsToGainOnFirstAnswer)};   " +
-          s"onlyFirst: ${indent(5, q.onlyFirstGainsPoints)};" +
-          s"${indent(6, maxTime)} min;" +
-          s"${indent(100, textualQuestion)};" +
+          s"onlyFirst: ${indent(5, q.onlyFirstGainsPoints)}; " +
+          s"${indent(5, maxTime)} min; " +
+          s"${indent(100, textualQuestion)}; " +
           s"${indent(40, textualAnswer)}\n"
       }
 
