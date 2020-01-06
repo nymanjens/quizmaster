@@ -99,7 +99,7 @@ final class Application @Inject()(
     def round1(double: Double): String = "%,.1f".format(double)
     def indent(width: Int, any: Any): String = s"%${width}s".format(any)
 
-    def questionsInfo(prefix: String, questions: Iterable[Question]): String = {
+    def questionsInfo(questions: Iterable[Question]): String = {
       val minutes = {
         val maybeZeroMinutes = questions
           .map(_ match {
@@ -122,10 +122,9 @@ final class Application @Inject()(
         }
       }.sum
 
-      s"${indent(30, prefix)}: " +
-        s"${indent(3, questions.size)} questions; ${indent(3, minutes.round)} min;    " +
+      s"${indent(3, questions.size)} questions; ${indent(3, minutes.round)} min;    " +
         s"points: {max: ${indent(2, maxPoints)} (${indent(3, round1(maxPoints / minutes))} per min), " +
-        s"avg4PerfectTeams: ${indent(4, round1(avgPoints4PerfectTeams))} (${indent(3, round1(avgPoints4PerfectTeams / minutes))} per min)}\n"
+        s"avg4PerfectTeams: ${indent(4, round1(avgPoints4PerfectTeams))} (${indent(3, round1(avgPoints4PerfectTeams / minutes))} per min)}"
     }
 
     var result = ""
@@ -133,17 +132,18 @@ final class Application @Inject()(
     result += "\n"
 
     for (round <- quizConfig.rounds) {
-      result += questionsInfo(s"${round.name}", round.questions)
+      result += s"${indent(30, round.name)}: ${questionsInfo(round.questions)}\n"
     }
 
     result += "\n"
-    result += questionsInfo("Total", quizConfig.rounds.flatMap(_.questions))
+    result += s"${indent(30, "Total")}: ${questionsInfo(quizConfig.rounds.flatMap(_.questions))}\n"
     result += "\n"
     result += "\n"
     result += "Details\n"
     result += "\n"
     for (round <- quizConfig.rounds) {
       result += s"- ${round.name}\n"
+
       for (q <- round.questions) {
         val (textualQuestion, textualAnswer) =
           q match {
@@ -160,6 +160,9 @@ final class Application @Inject()(
           s"${indent(100, textualQuestion)};" +
           s"${indent(40, textualAnswer)}\n"
       }
+
+      result += s"     ${questionsInfo(round.questions)}\n"
+      result += "\n"
     }
     result += "\n"
     Ok(result)
