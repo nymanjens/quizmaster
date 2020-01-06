@@ -40,7 +40,7 @@ final class Layout(
           ^.id := "content-wrapper",
           <.div(
             ^.id := "left-content-wrapper",
-            teamsList(showScoreEditButtons = router.currentPage == AppPages.Master),
+            teamsList(showScoreEditButtons = router.currentPage.isInstanceOf[AppPages.Master]),
           ),
           <.div(
             ^.id := "right-content-wrapper",

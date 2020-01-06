@@ -57,7 +57,9 @@ private[router] final class RouterFactory(
 
           | staticRuleFromPage(AppPages.Quiz, reactAppModule.quizView.apply)
 
-          | staticRuleFromPage(AppPages.Master, reactAppModule.masterView.apply)
+          | dynamicRuleFromPage(_ / string(".+").caseClass[AppPages.Master]) { (page, ctl) =>
+            reactAppModule.masterView(page.masterSecret, ctl)
+          }
 
           | staticRuleFromPage(AppPages.Gamepad, reactAppModule.gamepadSetupView.apply)
 

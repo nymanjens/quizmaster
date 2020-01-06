@@ -1,5 +1,6 @@
 package app.flux.react.app.quiz
 
+import app.api.ScalaJsApi.GetInitialDataResponse
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState
@@ -29,10 +30,12 @@ final class MasterView(
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     quizProgressIndicator: QuizProgressIndicator,
     questionComponent: QuestionComponent,
+    getInitialDataResponse: GetInitialDataResponse,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
-  def apply(router: RouterContext): VdomElement = {
+  def apply(masterSecret: String, router: RouterContext): VdomElement = {
+    require(getInitialDataResponse.masterSecret == masterSecret)
     component(Props(router))
   }
 
