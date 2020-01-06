@@ -21,6 +21,7 @@ final class ScalaJsApiServerFactory @Inject()(
     entityAccess: JvmEntityAccess,
     i18n: PlayI18n,
     quizConfig: QuizConfig,
+    playConfiguration: play.api.Configuration,
 ) {
 
   def create()(implicit user: User): ScalaJsApi = new ScalaJsApi() {
@@ -30,6 +31,7 @@ final class ScalaJsApiServerFactory @Inject()(
         i18nMessages = i18n.allI18nMessages,
         nextUpdateToken = toUpdateToken(clock.nowInstant),
         quizConfig = quizConfig,
+        masterSecret = playConfiguration.get[String]("app.quiz.master-secret"),
       )
 
     override def getAllEntities(types: Seq[EntityType.any]) = {

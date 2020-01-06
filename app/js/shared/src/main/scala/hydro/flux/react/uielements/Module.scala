@@ -1,5 +1,6 @@
 package hydro.flux.react.uielements
 
+import app.api.ScalaJsApi.GetInitialDataResponse
 import app.flux.stores._
 import app.models.user.User
 import hydro.common.I18n
@@ -21,6 +22,7 @@ final class Module(
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     dispatcher: Dispatcher,
     clock: Clock,
+    getInitialDataResponse: GetInitialDataResponse,
 ) {
 
   implicit lazy val pageHeader = new PageHeader

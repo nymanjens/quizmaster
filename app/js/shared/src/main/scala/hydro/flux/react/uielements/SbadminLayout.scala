@@ -2,6 +2,7 @@ package hydro.flux.react.uielements
 
 import app.models.user.User
 import app.AppVersion
+import app.api.ScalaJsApi.GetInitialDataResponse
 import app.flux.router.AppPages
 import hydro.common.CollectionUtils.ifThenSeq
 import hydro.common.I18n
@@ -30,6 +31,7 @@ final class SbadminLayout(
     i18n: I18n,
     jsEntityAccess: JsEntityAccess,
     dispatcher: Dispatcher,
+    getInitialDataResponse: GetInitialDataResponse,
 ) {
 
   // **************** API ****************//
@@ -70,7 +72,13 @@ final class SbadminLayout(
             <.a(
               ^.onClick --> LogExceptionsCallback {
                 val masterSecret = dom.window.prompt(i18n("app.enter-master-secret"))
-                dom.window.location.href = s"/rounds/$masterSecret/"
+                if (masterSecret == null) {
+                  // Canceled, do nothing
+                } else if (masterSecret != getInitialDataResponse.masterSecret) {
+                  dom.window.alert("Wrong password")
+                } else {
+                  dom.window.location.href = s"/rounds/$masterSecret/"
+                }
               },
               Bootstrap.FontAwesomeIcon("info-circle", fixedWidth = true),
             ),

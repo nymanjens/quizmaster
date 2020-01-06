@@ -1,5 +1,6 @@
 package app.flux.react.app
 
+import app.api.ScalaJsApi.GetInitialDataResponse
 import app.flux.controllers.SoundEffectController
 import app.flux.react.app.quiz.GamepadSetupView
 import app.flux.react.app.quiz.MasterView
@@ -36,6 +37,7 @@ final class Module(
     clock: Clock,
     quizConfig: QuizConfig,
     soundEffectController: SoundEffectController,
+    getInitialDataResponse: GetInitialDataResponse,
 ) {
 
   // Configuration of submodules
