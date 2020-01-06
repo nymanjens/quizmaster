@@ -103,7 +103,8 @@ final class Application @Inject()(
       val minutes = {
         val maybeZeroMinutes = questions
           .map(_ match {
-            case q: Question.Single => if (q.maxTime > infiniteDurationThreshold) Duration.ZERO else q.maxTime
+            case q: Question.Single =>
+              if (q.maxTime > infiniteDurationThreshold) Duration.ofMinutes(1) else q.maxTime
             case _: Question.Double => Duration.ofMinutes(1)
           })
           .sum
