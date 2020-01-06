@@ -69,15 +69,27 @@ final class SbadminLayout(
             s"v${AppVersion.versionString}",
           ),
           <.li(
+            router.anchorWithHrefTo(AppPages.Quiz)(
+              Bootstrap.FontAwesomeIcon("question-circle", fixedWidth = true),
+            ),
+          ),
+          <.li(
             <.a(
               ^.onClick --> LogExceptionsCallback {
-                val masterSecret = dom.window.prompt(i18n("app.enter-master-secret"))
-                if (masterSecret == null) {
-                  // Canceled, do nothing
-                } else if (masterSecret != getInitialDataResponse.masterSecret) {
-                  dom.window.alert("Wrong password")
-                } else {
-                  dom.window.location.href = s"/rounds/$masterSecret/"
+                promptMasterSecret match {
+                  case None               =>
+                  case Some(masterSecret) => router.setPage(AppPages.Master(masterSecret))
+                }
+              },
+              Bootstrap.FontAwesomeIcon("gears", fixedWidth = true),
+            ),
+          ),
+          <.li(
+            <.a(
+              ^.onClick --> LogExceptionsCallback {
+                promptMasterSecret match {
+                  case None               =>
+                  case Some(masterSecret) => dom.window.location.href = s"/rounds/$masterSecret/"
                 }
               },
               Bootstrap.FontAwesomeIcon("info-circle", fixedWidth = true),
@@ -86,11 +98,6 @@ final class SbadminLayout(
           <.li(
             router.anchorWithHrefTo(AppPages.Gamepad)(
               Bootstrap.FontAwesomeIcon("gamepad", fixedWidth = true),
-            ),
-          ),
-          <.li(
-            router.anchorWithHrefTo(AppPages.Quiz)(
-              Bootstrap.FontAwesomeIcon("question-circle", fixedWidth = true),
             ),
           ),
         ),
@@ -115,6 +122,19 @@ final class SbadminLayout(
   }
 
   // **************** Private helper methods ****************//
+  private def promptMasterSecret(): Option[String] = {
+    val userInput = dom.window.prompt(i18n("app.enter-master-secret"))
+    if (userInput == null) {
+      // Canceled
+      None
+    } else if (userInput != getInitialDataResponse.masterSecret) {
+      dom.window.alert("Wrong password")
+      None
+    } else {
+      Some(userInput)
+    }
+  }
+
   private def navbarCollapsed: Boolean = {
     // Based on Start Bootstrap code in assets/startbootstrap-sb-admin-2/dist/js/sb-admin-2.js
     val width = if (dom.window.innerWidth > 0) dom.window.innerWidth else dom.window.screen.width
