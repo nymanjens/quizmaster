@@ -2,5 +2,5 @@ package app
 
 /** Version string that gets incremented on every deploy. */
 object AppVersion {
-  val versionString: String = "1.30"
+  val versionString: String = "1.31"
 }
