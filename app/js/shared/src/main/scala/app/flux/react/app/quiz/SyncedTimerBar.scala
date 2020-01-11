@@ -77,6 +77,7 @@ final class SyncedTimerBar(
               val newElapsedTime = state.timerState.elapsedTime()
               if (state.elapsedTime < props.maxTime && newElapsedTime >= props.maxTime) {
                 soundEffectController.playTimerRunsOut()
+                togglePaused(timerRunningValue = Some(false))
               }
               state.copy(elapsedTime = newElapsedTime)
             }.runNow()
@@ -102,14 +103,14 @@ final class SyncedTimerBar(
       bind("space", () => togglePaused())
     }
 
-    private def togglePaused(): Future[Unit] = {
+    private def togglePaused(timerRunningValue: Option[Boolean] = None): Future[Unit] = {
       teamsAndQuizStateStore.doQuizStateUpdate(ModelFields.QuizState.timerState) { state =>
         val timerState = state.timerState
         state.copy(
           timerState = TimerState(
             lastSnapshotInstant = clock.nowInstant,
             lastSnapshotElapsedTime = timerState.elapsedTime(),
-            timerRunning = !timerState.timerRunning,
+            timerRunning = timerRunningValue getOrElse (!timerState.timerRunning),
           ))
       }
     }
