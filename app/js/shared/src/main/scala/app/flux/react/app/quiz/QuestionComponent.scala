@@ -225,7 +225,9 @@ final class QuestionComponent(
         },
         <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && !props.showMasterData) {
           <<.ifDefined(question.audioSrc) { audioRelativePath =>
-            audioPlayer(audioRelativePath, playing = state.quizState.timerState.timerRunning)
+            val timerState = state.quizState.timerState
+            val timerIsRunning = timerState.timerRunning && !timerState.hasFinished(question.maxTime)
+            audioPlayer(audioRelativePath, playing = timerIsRunning)
           }
         }
       )
