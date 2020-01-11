@@ -123,8 +123,8 @@ final class Application @Inject()(
       }.sum
 
       s"${indent(3, questions.size)} questions; ${indent(3, minutes.round)} min;    " +
-        s"points: {max: ${indent(2, maxPoints)} (${indent(3, round1(maxPoints / minutes))} per min), " +
-        s"avg4PerfectTeams: ${indent(4, round1(avgPoints4PerfectTeams))} (${indent(3, round1(avgPoints4PerfectTeams / minutes))} per min)}"
+        s"points: {max: ${indent(3, maxPoints)} (${indent(3, round1(maxPoints / minutes))} per min), " +
+        s"avg4PerfectTeams: ${indent(5, round1(avgPoints4PerfectTeams))} (${indent(3, round1(avgPoints4PerfectTeams / minutes))} per min)}"
     }
 
     var result = ""
