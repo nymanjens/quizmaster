@@ -97,10 +97,17 @@ final class Application @Inject()(
 
     val infiniteDurationThreshold = Duration.ofMinutes(900)
     def round1(double: Double): String = "%,.1f".format(double)
-    def indent(width: Int, any: Any): String = s"%${width}s".format(any)
+    def indent(width: Int, any: Any): String = {
+      val string = any.toString
+      if (width > 5 && string.length > width) { // If string is too long
+        string.substring(0, width - 2) + ".."
+      } else {
+        s"%${width}s".format(string)
+      }
+    }
 
-    def questionsInfo(questions: Iterable[Question]): String = {
-      val minutes = {
+    def questionsInfo(questions: Iterable[Question], expectedTime: Option[Duration]): String = {
+      val maxMinutes = {
         val maybeZeroMinutes = questions
           .map(_ match {
             case q: Question.Single =>
@@ -112,6 +119,7 @@ final class Application @Inject()(
           .toDouble
         if (maybeZeroMinutes == 0) 1 else maybeZeroMinutes
       }
+      val expectedMinutes = expectedTime.map(_.toMinutes.toDouble) getOrElse maxMinutes
 
       val maxPoints = questions.map(_.pointsToGainOnFirstAnswer).sum
       val avgPoints4PerfectTeams = questions.map { q =>
@@ -122,9 +130,20 @@ final class Application @Inject()(
         }
       }.sum
 
-      s"${indent(3, questions.size)} questions; ${indent(3, minutes.round)} min;    " +
-        s"points: {max: ${indent(3, maxPoints)} (${indent(3, round1(maxPoints / minutes))} per min), " +
-        s"avg4PerfectTeams: ${indent(5, round1(avgPoints4PerfectTeams))} (${indent(3, round1(avgPoints4PerfectTeams / minutes))} per min)}"
+      s"${indent(3, questions.size)} questions; " +
+        s"Time: {expected: ${indent(3, expectedMinutes.round)} min, max ${indent(3, maxMinutes.round)} min};    " +
+        s"points: {max: ${indent(3, maxPoints)} (${indent(3, round1(maxPoints / expectedMinutes))} per min), " +
+        s"avg4PerfectTeams: ${indent(5, round1(avgPoints4PerfectTeams))} (${indent(3, round1(avgPoints4PerfectTeams / expectedMinutes))} per min)}"
+    }
+
+    def sumExpectedTimeOrNone(rounds: Seq[QuizConfig.Round]): Option[Duration] = {
+      val expectedTimes = rounds.map(_.expectedTime)
+
+      if (expectedTimes contains None) {
+        None
+      } else {
+        Some(expectedTimes.map(_.get).sum)
+      }
     }
 
     var result = ""
@@ -132,11 +151,11 @@ final class Application @Inject()(
     result += "\n"
 
     for (round <- quizConfig.rounds) {
-      result += s"${indent(30, round.name)}: ${questionsInfo(round.questions)}\n"
+      result += s"${indent(30, round.name)}: ${questionsInfo(round.questions, round.expectedTime)}\n"
     }
 
     result += "\n"
-    result += s"${indent(30, "Total")}: ${questionsInfo(quizConfig.rounds.flatMap(_.questions))}\n"
+    result += s"${indent(30, "Total")}: ${questionsInfo(quizConfig.rounds.flatMap(_.questions), expectedTime = sumExpectedTimeOrNone(quizConfig.rounds))}\n"
     result += "\n"
     result += "\n"
     result += "Details\n"
@@ -157,11 +176,11 @@ final class Application @Inject()(
           s"first: ${indent(2, q.pointsToGainOnFirstAnswer)};   " +
           s"onlyFirst: ${indent(5, q.onlyFirstGainsPoints)}; " +
           s"${indent(5, maxTime)} min; " +
-          s"${indent(100, textualQuestion)}; " +
+          s"${indent(50, textualQuestion)}; " +
           s"${indent(40, textualAnswer)}\n"
       }
 
-      result += s"     ${questionsInfo(round.questions)}\n"
+      result += s"     ${questionsInfo(round.questions, round.expectedTime)}\n"
       result += "\n"
     }
     result += "\n"

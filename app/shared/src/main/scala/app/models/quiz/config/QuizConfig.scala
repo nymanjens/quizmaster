@@ -13,6 +13,7 @@ object QuizConfig {
   case class Round(
       name: String,
       questions: Seq[Question],
+      expectedTime: Option[Duration] = None,
   )
 
   sealed trait Question {

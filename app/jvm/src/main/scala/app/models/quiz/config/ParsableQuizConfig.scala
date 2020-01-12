@@ -25,13 +25,16 @@ object ParsableQuizConfig {
   case class Round(
       name: String,
       questions: java.util.List[ParsableQuizConfig.Question],
+      expectedTimeMinutes: Int,
   ) {
-    def this() = this(null, null)
+    def this() = this(null, null, expectedTimeMinutes = -1)
     def parse: QuizConfig.Round = {
       try {
         QuizConfig.Round(
           name = checkNotNull(name),
           questions = questions.asScala.toVector.map(_.parse),
+          expectedTime =
+            if (expectedTimeMinutes == -1) None else Some(Duration.ofMinutes(expectedTimeMinutes)),
         )
       } catch {
         case throwable: Throwable =>
