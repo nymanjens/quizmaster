@@ -136,3 +136,4 @@ app.all-right-answers-gain-1-point=Alle correcte antwoorden verdienen 1 punt
 app.wrong-answer-loses-n-points=Fout antwoord verliest {0} punten
 app.wrong-answer-loses-1-point=Fout antwoord verliest 1 punt
 app.enter-master-secret=Voer het master secret in
+app.expected-minutes=Verwachte duur: {0} minuten

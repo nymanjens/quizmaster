@@ -134,3 +134,4 @@ app.all-right-answers-gain-1-point=All right answers gain 1 point
 app.wrong-answer-loses-n-points=Wrong answer loses {0} points
 app.wrong-answer-loses-1-point=Wrong answer loses 1 point
 app.enter-master-secret=Enter master secret
+app.expected-minutes=Expected duration: {0} minutes

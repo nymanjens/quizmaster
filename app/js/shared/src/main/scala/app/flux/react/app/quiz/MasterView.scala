@@ -70,7 +70,7 @@ final class MasterView(
           case quizState =>
             quizState.maybeQuestion match {
               case None =>
-                RoundComponent(quizState.round)
+                RoundComponent(quizState.round, showMasterData = true)
               case Some(question) =>
                 questionComponent(
                   question = question,
