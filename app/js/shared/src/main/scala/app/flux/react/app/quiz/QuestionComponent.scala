@@ -142,21 +142,23 @@ final class QuestionComponent(
         <.div(
           ^.className := "image-and-choices-row",
           <<.ifDefined(maybeImage) { image =>
-            <.div(
-              ^.className := "image-holder",
-              ^.className := image.size,
-              <.img(
-                ^.src := s"/quizimages/${image.src}",
+            ifVisibleOrMaster(progressIndex > 0) {
+              <.div(
+                ^.className := "image-holder",
                 ^.className := image.size,
-                ^^.ifThen(state.quizState.imageIsEnlarged) {
-                  if (props.showMasterData) {
-                    ^.className := "indicate-enlarged"
-                  } else {
-                    ^.className := "enlarged"
-                  }
-                },
-              ),
-            )
+                <.img(
+                  ^.src := s"/quizimages/${image.src}",
+                  ^.className := image.size,
+                  ^^.ifThen(state.quizState.imageIsEnlarged) {
+                    if (props.showMasterData) {
+                      ^.className := "indicate-enlarged"
+                    } else {
+                      ^.className := "enlarged"
+                    }
+                  },
+                ),
+              )
+            }
           },
           <<.ifDefined(question.choices) { choices =>
             ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
