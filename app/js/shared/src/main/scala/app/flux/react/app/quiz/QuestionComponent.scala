@@ -347,10 +347,15 @@ final class QuestionComponent(
           if (question.pointsToGain == 1) i18n("app.first-right-answer-gains-1-point")
           else i18n("app.first-right-answer-gains-n-points", question.pointsToGain)
         } else if (question.pointsToGainOnFirstAnswer != question.pointsToGain) {
-          i18n(
-            "app.first-answer-gains-n-points-others-m",
-            question.pointsToGainOnFirstAnswer,
-            question.pointsToGain)
+          val gainN = {
+            if (question.pointsToGainOnFirstAnswer == 1) i18n("app.first-right-answer-gains-1-point")
+            else i18n("app.first-right-answer-gains-n-points", question.pointsToGainOnFirstAnswer)
+          }
+          val gainM = {
+            if (question.pointsToGain == 1) i18n("app.others-gain-1-point")
+            else i18n("app.others-gain-m-points", question.pointsToGain)
+          }
+          s"$gainN, $gainM"
         } else {
           if (question.pointsToGain == 1) i18n("app.all-right-answers-gain-1-point")
           else i18n("app.all-right-answers-gain-n-points", question.pointsToGain)
