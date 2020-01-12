@@ -120,7 +120,7 @@ object QuizConfig {
         s"The answer should be one of the choices: <<$textualAnswer>> not in <<${textualChoices}>>")
 
       override def pointsToGainOnFirstAnswer: Int = pointsToGain
-      override def pointsToGainOnWrongAnswer: Int = -pointsToGain / 2
+      override def pointsToGainOnWrongAnswer: Int = 0
 
       override def onlyFirstGainsPoints: Boolean = true
 
