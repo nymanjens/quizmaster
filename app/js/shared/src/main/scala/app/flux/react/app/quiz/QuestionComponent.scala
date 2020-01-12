@@ -131,6 +131,14 @@ final class QuestionComponent(
           )
         },
         pointsMetadata(question),
+        <<.ifDefined(question.masterNotes) { masterNotes =>
+          ifVisibleOrMaster(false) {
+            <.div(
+              ^.className := "master-notes",
+              masterNotes,
+            )
+          }
+        },
         <.div(
           ^.className := "image-and-choices-row",
           <<.ifDefined(maybeImage) { image =>
@@ -213,7 +221,7 @@ final class QuestionComponent(
           <<.ifDefined(question.answerDetail) { answerDetail =>
             <.div(
               ^.className := "answer-detail",
-              question.answerDetail,
+              answerDetail,
             )
           }
         },
@@ -255,7 +263,7 @@ final class QuestionComponent(
               ^.className := "verbal-answer",
               question.verbalAnswer,
             ),
-          ),
+          )
         },
         if (props.showMasterData) {
           ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
