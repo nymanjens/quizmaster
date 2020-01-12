@@ -129,11 +129,15 @@ final class Application @Inject()(
           (q.pointsToGainOnFirstAnswer + 3 * q.pointsToGain) / 4.0
         }
       }.sum
+      val showMax = avgPoints4PerfectTeams.round != maxPoints
+      val maxString =
+        s", max: ${indent(3, maxPoints)} (${indent(3, round1(maxPoints / expectedMinutes))} per min)"
 
       s"${indent(3, questions.size)} questions; " +
         s"Time: {expected: ${indent(3, expectedMinutes.round)} min, max ${indent(3, maxMinutes.round)} min};    " +
-        s"points: {max: ${indent(3, maxPoints)} (${indent(3, round1(maxPoints / expectedMinutes))} per min), " +
-        s"avg4PerfectTeams: ${indent(5, round1(avgPoints4PerfectTeams))} (${indent(3, round1(avgPoints4PerfectTeams / expectedMinutes))} per min)}"
+        s"points: {avg4PerfectTeams: ${indent(5, round1(avgPoints4PerfectTeams))} (${indent(3, round1(avgPoints4PerfectTeams / expectedMinutes))} per min)" +
+        (if (showMax) maxString else "") +
+        "}"
     }
 
     def sumExpectedTimeOrNone(rounds: Seq[QuizConfig.Round]): Option[Duration] = {
