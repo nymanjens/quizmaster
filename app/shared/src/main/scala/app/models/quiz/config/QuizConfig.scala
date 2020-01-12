@@ -44,6 +44,7 @@ object QuizConfig {
         answer: String,
         answerDetail: Option[String],
         answerImage: Option[Image],
+        masterNotes: Option[String],
         image: Option[Image],
         // Relative path in audio directory
         audioSrc: Option[String],
@@ -141,7 +142,6 @@ object QuizConfig {
       override def isMultipleChoice: Boolean = true
       override def isCorrectAnswerIndex(answerIndex: Int): Boolean =
         textualChoices.apply(answerIndex) == textualAnswer
-
 
       def questionIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 1
