@@ -1,5 +1,6 @@
 package app.flux.controllers
 
+import scala.concurrent.duration._
 import app.flux.router.AppPages
 import app.models.access.ModelFields
 import app.models.quiz.Team
@@ -14,6 +15,7 @@ import hydro.models.modification.EntityModification
 
 import scala.collection.immutable.Seq
 import scala.collection.mutable
+import scala.scalajs.js
 
 final class SoundEffectController(
     implicit dispatcher: Dispatcher,
@@ -46,18 +48,21 @@ final class SoundEffectController(
 
   private def playSoundEffect(
       soundEffect: SoundEffect,
-      unlessAlreadyPlaying: Boolean = false,
+      minTimeBetweenPlays: Option[FiniteDuration] = None,
       skipPageCheck: Boolean = false,
   ): Unit =
     logExceptions {
       if (skipPageCheck || canPlaySoundEffectsOnThisPage) {
-        if (unlessAlreadyPlaying && (soundsPlaying contains soundEffect)) {
+        if (minTimeBetweenPlays.isDefined && (soundsPlaying contains soundEffect)) {
           // Skip
         } else {
           soundsPlaying.add(soundEffect)
           val audio = new Audio(soundEffect.filepath)
           audio.addEventListener("ended", () => {
-            soundsPlaying.remove(soundEffect)
+            val timeoutTime = minTimeBetweenPlays getOrElse (0.seconds)
+            js.timers.setTimeout(timeoutTime)(logExceptions {
+              soundsPlaying.remove(soundEffect)
+            })
           })
 
           println(s"  Playing ${soundEffect.filepath}..")
@@ -72,7 +77,7 @@ final class SoundEffectController(
         case EntityModification.Update(team: Team) =>
           if (Some(team.lastUpdateTime.mostRecentInstant) ==
                 team.lastUpdateTime.timePerField.get(ModelFields.Team.score)) {
-            playSoundEffect(SoundEffect.ScoreIncreased, unlessAlreadyPlaying = true)
+            playSoundEffect(SoundEffect.ScoreIncreased, minTimeBetweenPlays = Some(2.seconds))
           }
       }
     }
