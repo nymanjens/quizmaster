@@ -87,7 +87,7 @@ final class TeamsAndQuizStateStore(
     async {
       if (scoreDiff != 0) {
         val oldScore = await(stateFuture).teams.find(_.id == team.id).get.score
-        val newScore = Math.max(0, oldScore + scoreDiff)
+        val newScore = oldScore + scoreDiff
         await(
           entityAccess.persistModifications(
             EntityModification.createUpdate(team.copy(score = newScore), Seq(ModelFields.Team.score))))
