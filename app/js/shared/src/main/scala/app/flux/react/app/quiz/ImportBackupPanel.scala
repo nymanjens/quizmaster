@@ -51,7 +51,10 @@ final class ImportBackupPanel(
       implicit val _: State = state
       <.span(
         Bootstrap.Row(
-          HalfPanel(title = <.span("Import backup (see console output)")) {
+          HalfPanel(
+            title = <.span("Import backup (see console output)"),
+            panelClasses = Seq("import-backup-panel"),
+          ) {
             <.form(
               <.input(
                 ^.tpe := "text",
@@ -74,7 +77,7 @@ final class ImportBackupPanel(
     }
 
     private def importBackupButton()(implicit state: State): VdomNode = {
-      Bootstrap.Button(Variant.info, tpe = "submit")(
+      Bootstrap.Button(Variant.info, Size.sm, tpe = "submit")(
         Bootstrap.Glyphicon("import"),
         ^.onClick ==> { (e: ReactEventFromInput) =>
           e.preventDefault()
