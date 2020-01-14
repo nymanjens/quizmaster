@@ -2,16 +2,23 @@ package app.tools
 
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 import app.models.access.JvmEntityAccess
+import app.models.access.ModelFields
 import app.models.quiz.Team
+import app.models.quiz.export.ExportImport
+import app.models.quiz.export.ExportImport.FullState
+import app.models.quiz.QuizState
+import app.models.user.User.onlyUser
 import com.google.inject.Inject
 import hydro.common.ResourceFiles
 import hydro.common.time.Clock
-import play.api.Application
-import play.api.Mode
-import app.models.user.User.onlyUser
+import hydro.models.access.DbQuery
+import hydro.models.access.DbQueryImplicits._
 import hydro.models.modification.EntityModification
+import play.api.Application
 
 import scala.collection.JavaConverters._
 
@@ -29,6 +36,8 @@ final class ApplicationStartHook @Inject()(
     if (AppConfigHelper.loadDummyData) {
       loadDummyData()
     }
+
+    startExportingChanges()
   }
 
   private def processFlags(): Unit = {}
@@ -64,6 +73,34 @@ final class ApplicationStartHook @Inject()(
         ),
       ),
     )
+  }
+
+  private def startExportingChanges(): Unit = {
+    var lastExportedString = ""
+
+    val task = new Runnable {
+      def run(): Unit = {
+        val fullState = FullState(
+          teams = entityAccess
+            .newQuerySync[Team]()
+            .sort(DbQuery.Sorting.ascBy(ModelFields.Team.index))
+            .data(),
+          quizState = entityAccess
+            .newQuerySync[QuizState]()
+            .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId) getOrElse QuizState.nullInstance,
+        )
+        val newExportedString = ExportImport.exportToString(fullState)
+
+        if (lastExportedString != newExportedString) {
+          println("Periodic backup, so you don't lose any data (to paste in master setup page):")
+          println(newExportedString)
+        }
+        lastExportedString = newExportedString
+      }
+    }
+
+    new ScheduledThreadPoolExecutor( /* corePoolSize = */ 1)
+      .scheduleAtFixedRate(task, /* initialDelay = */ 1, /* period = */ 10, TimeUnit.SECONDS)
   }
 
   private def assertExists(path: Path): Path = {
