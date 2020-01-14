@@ -3,6 +3,7 @@ package app.flux.react.app
 import app.api.ScalaJsApi.GetInitialDataResponse
 import app.flux.controllers.SoundEffectController
 import app.flux.react.app.quiz.GamepadSetupView
+import app.flux.react.app.quiz.ImportBackupPanel
 import app.flux.react.app.quiz.MasterView
 import app.flux.react.app.quiz.ObfuscatedAnswer
 import app.flux.react.app.quiz.QuestionComponent
@@ -51,6 +52,7 @@ final class Module(
   implicit lazy private val syncedTimerBar: SyncedTimerBar = new SyncedTimerBar()
   implicit lazy private val obfuscatedAnswer: ObfuscatedAnswer = new ObfuscatedAnswer()
   implicit lazy private val quizProgressIndicator: QuizProgressIndicator = new QuizProgressIndicator()
+  implicit lazy private val importBackupPanel: ImportBackupPanel = new ImportBackupPanel()
   implicit lazy private val teamEditor: TeamEditor = new TeamEditor()
   implicit lazy private val teamsList: TeamsList = new TeamsList()
   implicit lazy private val question: QuestionComponent = new QuestionComponent()

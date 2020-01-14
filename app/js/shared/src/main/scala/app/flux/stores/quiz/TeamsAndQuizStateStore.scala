@@ -7,6 +7,8 @@ import app.models.quiz.Team
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.TimerState
+import app.models.quiz.export.ExportImport
+import app.models.quiz.export.ExportImport.FullState
 import app.models.user.User
 import hydro.common.time.Clock
 import hydro.common.CollectionUtils.maybeGet
@@ -19,6 +21,7 @@ import hydro.models.access.DbQueryImplicits._
 import hydro.models.access.JsEntityAccess
 import hydro.models.access.ModelField
 import hydro.models.modification.EntityModification
+import japgolly.scalajs.react.CallbackTo
 
 import scala.async.Async.async
 import scala.async.Async.await
@@ -64,6 +67,13 @@ final class TeamsAndQuizStateStore(
   def stateOrEmpty: State = state getOrElse State.nullInstance
 
   // **************** Additional public API: Write methods **************** //
+  def replaceAllEntitiesByImportString(importString: String): Future[Unit] = {
+    val FullState(teams, quizState) = ExportImport.importFromString(importString)
+
+    println(s"teams = ${teams}, quizState = ${quizState}")
+    Future.successful((): Unit)
+  }
+
   def addEmptyTeam(): Future[Unit] = updateStateQueue.schedule {
     async {
       val teams = await(stateFuture).teams
