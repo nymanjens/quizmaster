@@ -68,10 +68,20 @@ final class TeamsAndQuizStateStore(
 
   // **************** Additional public API: Write methods **************** //
   def replaceAllEntitiesByImportString(importString: String): Future[Unit] = {
-    val FullState(teams, quizState) = ExportImport.importFromString(importString)
+    val FullState(teamsToImport, quizStateToImport) = ExportImport.importFromString(importString)
+    println(s"  Importing: teams = ${teamsToImport}, quizState = ${quizStateToImport}")
 
-    println(s"teams = ${teams}, quizState = ${quizState}")
-    Future.successful((): Unit)
+    updateStateQueue.schedule {
+      async {
+        val deleteExistingTeams = await(stateFuture).teams.map(team => EntityModification.createRemove(team))
+        val importTeams = teamsToImport.map(team => EntityModification.createAddWithRandomId(team))
+        val addOrUpdateQuizState = Seq(
+          EntityModification.Add(quizStateToImport),
+          EntityModification.createUpdateAllFields(quizStateToImport),
+        )
+        await(entityAccess.persistModifications(deleteExistingTeams ++ importTeams ++ addOrUpdateQuizState))
+      }
+    }
   }
 
   def addEmptyTeam(): Future[Unit] = updateStateQueue.schedule {
