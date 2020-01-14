@@ -17,9 +17,9 @@ object ExportImport {
   }
 
   def importFromString(string: String): FullState = {
-    val exportRegex: Regex = """<~<(-?\d+)<~<(-?\d+)<~<(\s+)>~>""".r
+    val exportRegex: Regex = """<~<(-?\d+)<~<(-?\d+)<~<(.+)>~>""".r
 
-    string match {
+    string.trim match {
       case exportRegex(roundIndex, questionIndex, teamsString) =>
         FullState(
           teams = importTeams(teamsString),
@@ -36,9 +36,9 @@ object ExportImport {
   }
 
   private def importTeams(teamsString: String): Seq[Team] = {
-    val exportRegex: Regex = """_~_(\w+)_~_(-?\d+)""".r
+    val exportRegex: Regex = """_~_(.+?)_~_(-?\d+)""".r
 
-    for ((teamString, index) <- teamsString.split("~=~").toVector.zipWithIndex)
+    for ((teamString, index) <- teamsString.split("=~=").toVector.zipWithIndex)
       yield
         teamString match {
           case exportRegex(name, score) =>
