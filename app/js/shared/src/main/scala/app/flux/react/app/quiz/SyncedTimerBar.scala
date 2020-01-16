@@ -54,16 +54,23 @@ final class SyncedTimerBar(
     override def render(props: Props, state: State): VdomElement = logExceptions {
       val timeRemaining = Seq(props.maxTime - state.elapsedTime, Duration.ZERO).max
       val timeRemainingFraction = timeRemaining / props.maxTime
-      Bootstrap.ProgressBar(
-        fraction = timeRemainingFraction,
-        variant = {
-          if (state.timerState.timerRunning) {
-            if (timeRemainingFraction < 0.1) Variant.danger else Variant.default
-          } else {
-            Variant.success
-          }
-        },
-        striped = !state.timerState.timerRunning,
+
+      <.div(
+        <.div(
+          ^.className := "time-left-label",
+          s"${formatDuration(timeRemaining)} / ${formatDuration(props.maxTime)}"
+        ),
+        Bootstrap.ProgressBar(
+          fraction = timeRemainingFraction,
+          variant = {
+            if (state.timerState.timerRunning) {
+              if (timeRemainingFraction < 0.1) Variant.danger else Variant.default
+            } else {
+              Variant.success
+            }
+          },
+          striped = !state.timerState.timerRunning,
+        )
       )
     }
 
@@ -113,6 +120,11 @@ final class SyncedTimerBar(
             timerRunning = timerRunningValue getOrElse (!timerState.timerRunning),
           ))
       }
+    }
+
+    private def formatDuration(duration: Duration): String = {
+      val seconds = duration.getSeconds();
+      "%d:%02d".format(seconds / 60, seconds % 60)
     }
   }
 }
