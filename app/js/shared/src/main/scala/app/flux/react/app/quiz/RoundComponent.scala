@@ -17,11 +17,17 @@ object RoundComponent {
       <<.ifThen(showMasterData) {
         <<.ifDefined(round.expectedTime) { expectedTime =>
           <.div(
-            ^.className := "round-expected-duration",
+            ^.className := "round-metadata",
             i18n("app.expected-minutes", expectedTime.toMinutes)
           )
         }
-      }
+      },
+      <<.ifThen(showMasterData) {
+        <.div(
+          ^.className := "round-metadata",
+          s"${i18n("app.max-points-to-gain")}: ${round.questions.map(_.pointsToGainOnFirstAnswer).sum}",
+        )
+      },
     )
   }
 }
