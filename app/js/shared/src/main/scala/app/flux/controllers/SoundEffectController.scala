@@ -77,7 +77,7 @@ final class SoundEffectController(
         case EntityModification.Update(team: Team) =>
           if (Some(team.lastUpdateTime.mostRecentInstant) ==
                 team.lastUpdateTime.timePerField.get(ModelFields.Team.score)) {
-            playSoundEffect(SoundEffect.ScoreIncreased, minTimeBetweenPlays = Some(2.seconds))
+            playSoundEffect(SoundEffect.ScoreIncreased)
           }
       }
     }
