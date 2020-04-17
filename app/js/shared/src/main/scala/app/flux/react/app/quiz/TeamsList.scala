@@ -57,6 +57,9 @@ final class TeamsList(
     override def render(props: Props, state: State): VdomElement = logExceptions {
       <.ul(
         ^.className := "teams-list",
+        ^^.ifThen(state.teams.size > 5) {
+          ^.className := "teams-list-small"
+        },
         (for (team <- state.teams) yield {
           <.li(
             ^.key := team.id,
