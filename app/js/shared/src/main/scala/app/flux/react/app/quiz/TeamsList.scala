@@ -54,56 +54,58 @@ final class TeamsList(
 
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
 
-    override def render(props: Props, state: State): VdomElement = logExceptions {
-      <.ul(
-        ^.className := "teams-list",
-        ^^.ifThen(state.teams.size > 5) {
-          ^.className := "teams-list-small"
-        },
-        (for (team <- state.teams) yield {
-          <.li(
-            ^.key := team.id,
-            <.div(
-              ^.className := "name",
-              team.name,
-              " ",
-              <<.ifDefined(state.teamIdToGamepadState.get(team.id)) { gamepadState =>
-                <<.ifThen(gamepadState.connected) {
-                  Bootstrap.FontAwesomeIcon("gamepad")(
-                    ^^.ifThen(gamepadState.anyButtonPressed) {
-                      ^.className := "pressed"
-                    },
-                  )
-                }
-              },
-              " ",
-              TeamIcon(team),
-            ),
-            <.div(
-              ^.className := "score",
-              <<.ifThen(props.showScoreEditButtons) {
-                Bootstrap
-                  .Button()(
-                    ^.onClick --> LogExceptionsCallback(
-                      teamsAndQuizStateStore.updateScore(team, scoreDiff = -1)).void,
-                    Bootstrap.Glyphicon("minus"),
-                  )
-              },
-              " ",
-              team.score,
-              " ",
-              <<.ifThen(props.showScoreEditButtons) {
-                Bootstrap
-                  .Button()(
-                    ^.onClick --> LogExceptionsCallback(
-                      teamsAndQuizStateStore.updateScore(team, scoreDiff = +1)).void,
-                    Bootstrap.Glyphicon("plus"),
-                  )
-              },
-            ),
-          )
-        }).toVdomArray
-      )
+    override def render(props: Props, state: State): VdomNode = logExceptions {
+      <<.ifThen(state.teams.nonEmpty) {
+        <.ul(
+          ^.className := "teams-list",
+          ^^.ifThen(state.teams.size > 5) {
+            ^.className := "teams-list-small"
+          },
+          (for (team <- state.teams) yield {
+            <.li(
+              ^.key := team.id,
+              <.div(
+                ^.className := "name",
+                team.name,
+                " ",
+                <<.ifDefined(state.teamIdToGamepadState.get(team.id)) { gamepadState =>
+                  <<.ifThen(gamepadState.connected) {
+                    Bootstrap.FontAwesomeIcon("gamepad")(
+                      ^^.ifThen(gamepadState.anyButtonPressed) {
+                        ^.className := "pressed"
+                      },
+                    )
+                  }
+                },
+                " ",
+                TeamIcon(team),
+              ),
+              <.div(
+                ^.className := "score",
+                <<.ifThen(props.showScoreEditButtons) {
+                  Bootstrap
+                    .Button()(
+                      ^.onClick --> LogExceptionsCallback(
+                        teamsAndQuizStateStore.updateScore(team, scoreDiff = -1)).void,
+                      Bootstrap.Glyphicon("minus"),
+                    )
+                },
+                " ",
+                team.score,
+                " ",
+                <<.ifThen(props.showScoreEditButtons) {
+                  Bootstrap
+                    .Button()(
+                      ^.onClick --> LogExceptionsCallback(
+                        teamsAndQuizStateStore.updateScore(team, scoreDiff = +1)).void,
+                      Bootstrap.Glyphicon("plus"),
+                    )
+                },
+              ),
+            )
+          }).toVdomArray
+        )
+      }
     }
   }
 }
