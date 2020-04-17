@@ -75,9 +75,9 @@ final class Layout(
       bind("alt+enter", () => teamsAndQuizStateStore.toggleImageIsEnlarged())
 
       // Give points
-      for (teamIndex <- 0 to 4) {
-        bind(s"${teamIndex + 1}", () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = +1))
-        bind(s"shift+${teamIndex + 1}", () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = -1))
+      for ((teamIndex, shortkey) <- (0 to 10) zip ((1 to 9) :+ 0)) {
+        bind(s"$shortkey", () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = +1))
+        bind(s"shift+$shortkey", () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = -1))
       }
 
       Callback.empty
