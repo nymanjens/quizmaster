@@ -6,6 +6,7 @@ import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.QuizState
+import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.Team
 import hydro.common.JsLoggingUtils.logExceptions
@@ -169,7 +170,7 @@ final class QuestionComponent(
                 },
                 <.ul(
                   ^.className := "choices",
-                  (for ((choice, arrow) <- choices zip Arrow.all)
+                  (for ((choice, arrow, character) <- (choices, Arrow.all, Seq("A", "B", "C", "D")).zipped)
                     yield {
                       val visibleSubmissions =
                         if (showSubmissionsOnChoices)
@@ -178,9 +179,13 @@ final class QuestionComponent(
                       val isCorrectAnswer = choice == question.answer
                       <.li(
                         ^.key := choice,
-                        arrow.icon(
-                          ^.className := "choice-arrow",
-                        ),
+                        state.quizState.generalQuizSettings.answerBulletType match {
+                          case AnswerBulletType.Arrows =>
+                            arrow.icon(
+                              ^.className := "choice-arrow",
+                            )
+                          case AnswerBulletType.Characters => s"$character/ "
+                        },
                         if (isCorrectAnswer && (answerIsVisible || visibleSubmissions.nonEmpty)) {
                           <.span(^.className := "correct", choice)
                         } else if (!isCorrectAnswer && visibleSubmissions.nonEmpty) {
