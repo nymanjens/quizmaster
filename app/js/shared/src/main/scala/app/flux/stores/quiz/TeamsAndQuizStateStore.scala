@@ -9,6 +9,7 @@ import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.TimerState
 import app.models.quiz.export.ExportImport
 import app.models.quiz.export.ExportImport.FullState
+import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.user.User
 import hydro.common.time.Clock
 import hydro.common.CollectionUtils.maybeGet
@@ -180,6 +181,23 @@ final class TeamsAndQuizStateStore(
     StateUpsertHelper
       .doQuizStateUpsert(Seq(ModelFields.QuizState.imageIsEnlarged)) { oldState =>
         oldState.copy(imageIsEnlarged = !oldState.imageIsEnlarged)
+      }
+      .map(_ => (): Unit)
+  }
+
+  def setShowAnswers(showAnswers: Boolean): Future[Unit] = updateStateQueue.schedule {
+    StateUpsertHelper
+      .doQuizStateUpsert(Seq(ModelFields.QuizState.generalQuizSettings)) { oldState =>
+        oldState.copy(generalQuizSettings = oldState.generalQuizSettings.copy(showAnswers = showAnswers))
+      }
+      .map(_ => (): Unit)
+  }
+
+  def setAnswerBulletType(answerBulletType: AnswerBulletType): Future[Unit] = updateStateQueue.schedule {
+    StateUpsertHelper
+      .doQuizStateUpsert(Seq(ModelFields.QuizState.generalQuizSettings)) { oldState =>
+        oldState.copy(
+          generalQuizSettings = oldState.generalQuizSettings.copy(answerBulletType = answerBulletType))
       }
       .map(_ => (): Unit)
   }
@@ -466,7 +484,7 @@ final class TeamsAndQuizStateStore(
     }
 
     def goToNextRoundUpdate(quizState: QuizState): QuizState = {
-      QuizState(
+      quizState.copy(
         roundIndex = quizState.roundIndex + 1,
         questionProgressIndex = 0,
         timerState = TimerState.createStarted(),
