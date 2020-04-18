@@ -1,6 +1,8 @@
 package app.models.quiz.export
 
 import app.models.quiz.QuizState
+import app.models.quiz.QuizState.GeneralQuizSettings
+import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.Team
 
 import scala.collection.immutable.Seq
@@ -12,20 +14,29 @@ object ExportImport {
     s"<~<" +
       s"${fullState.quizState.roundIndex}<~<" +
       s"${fullState.quizState.questionIndex}<~<" +
+      s"${fullState.quizState.generalQuizSettings.showAnswers}<~<" +
+      s"${fullState.quizState.generalQuizSettings.answerBulletType}<~<" +
       exportTeams(fullState.teams) +
       s">~>"
   }
 
   def importFromString(string: String): FullState = {
-    val exportRegex: Regex = """<~<(-?\d+)<~<(-?\d+)<~<(.+)>~>""".r
+    val exportRegex: Regex = """<~<(-?\d+)<~<(-?\d+)<~<(\w+)<~<(\w+)<~<(.+)>~>""".r
 
     string.trim match {
-      case exportRegex(roundIndex, questionIndex, teamsString) =>
+      case exportRegex(roundIndex, questionIndex, showAnswers, answerBulletType, teamsString) =>
         FullState(
           teams = importTeams(teamsString),
           quizState = QuizState(
             roundIndex = roundIndex.toInt,
             questionIndex = questionIndex.toInt,
+            generalQuizSettings = GeneralQuizSettings(
+              showAnswers = showAnswers.toBoolean,
+              answerBulletType = answerBulletType match {
+                case "Arrows"     => AnswerBulletType.Arrows
+                case "Characters" => AnswerBulletType.Characters
+              }
+            )
           )
         )
     }
