@@ -128,15 +128,19 @@ final class SbadminLayout(
 
   // **************** Private helper methods ****************//
   private def promptMasterSecret(): Option[String] = {
-    val userInput = dom.window.prompt(i18n("app.enter-master-secret"))
-    if (userInput == null) {
-      // Canceled
-      None
-    } else if (userInput != getInitialDataResponse.masterSecret) {
-      dom.window.alert("Wrong password")
-      None
+    if (getInitialDataResponse.masterSecret == "*") {
+      Some(getInitialDataResponse.masterSecret)
     } else {
-      Some(userInput)
+      val userInput = dom.window.prompt(i18n("app.enter-master-secret"))
+      if (userInput == null) {
+        // Canceled
+        None
+      } else if (userInput != getInitialDataResponse.masterSecret) {
+        dom.window.alert("Wrong password")
+        None
+      } else {
+        Some(userInput)
+      }
     }
   }
 
