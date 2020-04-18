@@ -317,6 +317,8 @@ final class TeamsAndQuizStateStore(
       }
 
     def goToPreviousStepUpdate(quizState: QuizState): QuizState = {
+      implicit val implicitOldQuizState = quizState
+
       quizState.roundIndex match {
         case -1 => quizState // Do nothing
         case _ =>
@@ -359,6 +361,8 @@ final class TeamsAndQuizStateStore(
     }
 
     def goToNextStepUpdate(quizState: QuizState): QuizState = {
+      implicit val implicitOldQuizState = quizState
+
       quizState.maybeQuestion match {
         case None =>
           goToNextQuestionUpdate(quizState)

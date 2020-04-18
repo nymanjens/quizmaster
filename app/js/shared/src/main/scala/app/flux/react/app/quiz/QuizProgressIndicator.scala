@@ -45,7 +45,7 @@ final class QuizProgressIndicator(
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
 
     override def render(props: Props, state: State): VdomElement = logExceptions {
-      val quizState = props.quizState
+      implicit val quizState = props.quizState
       <.div(
         ^.className := "quiz-progres-indicator",
         quizState match {

@@ -1,8 +1,9 @@
 package app.models.quiz.config
 
 import app.models.quiz.config.QuizConfig.Round
-
 import java.time.Duration
+
+import app.models.quiz.QuizState
 
 case class QuizConfig(
     rounds: Seq[Round],
@@ -24,8 +25,16 @@ object QuizConfig {
 
     def onlyFirstGainsPoints: Boolean
 
-    def progressStepsCount: Int
-    final def maxProgressIndex: Int = progressStepsCount - 1
+    def progressStepsCount(includeAnswers: Boolean): Int
+    final def progressStepsCount(implicit quizState: QuizState): Int = {
+      progressStepsCount(includeAnswers = quizState.generalQuizSettings.showAnswers)
+    }
+    final def maxProgressIndex(includeAnswers: Boolean): Int = {
+      progressStepsCount(includeAnswers = includeAnswers) - 1
+    }
+    final def maxProgressIndex(implicit quizState: QuizState): Int = {
+      maxProgressIndex(includeAnswers = quizState.generalQuizSettings.showAnswers)
+    }
     def shouldShowTimer(questionProgressIndex: Int): Boolean
     def maxTime: Duration
 
@@ -69,8 +78,12 @@ object QuizConfig {
         * 3- Show answer
         * 4- (if possible) Show answer and give points
         */
-      override def progressStepsCount: Int = {
-        if (choices.isDefined) 5 else 3
+      override def progressStepsCount(includeAnswers: Boolean): Int = {
+        if (includeAnswers) {
+          if (choices.isDefined) 5 else 3
+        } else {
+          if (choices.isDefined) 3 else 2
+        }
       }
       override def shouldShowTimer(questionProgressIndex: Int): Boolean = {
         questionProgressIndex == progressIndexForQuestionBeingAnswered
@@ -95,9 +108,9 @@ object QuizConfig {
       }
       def answerIsVisible(questionProgressIndex: Int): Boolean = {
         if (choices.isDefined) {
-          questionProgressIndex >= maxProgressIndex - 1
+          questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
         } else {
-          questionProgressIndex == maxProgressIndex
+          questionProgressIndex == maxProgressIndex(includeAnswers = true)
         }
       }
 
@@ -132,7 +145,9 @@ object QuizConfig {
         * 3- Show answer
         * 4- Show answer and give points
         */
-      override def progressStepsCount: Int = 5
+      override def progressStepsCount(includeAnswers: Boolean): Int = {
+        if (includeAnswers) 5 else 3
+      }
       // Submissions should not be hindered by a timer
       override def shouldShowTimer(questionProgressIndex: Int): Boolean = false
 
@@ -150,7 +165,7 @@ object QuizConfig {
         questionProgressIndex >= 2
       }
       def answerIsVisible(questionProgressIndex: Int): Boolean = {
-        questionProgressIndex >= maxProgressIndex - 1
+        questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
       }
     }
   }
