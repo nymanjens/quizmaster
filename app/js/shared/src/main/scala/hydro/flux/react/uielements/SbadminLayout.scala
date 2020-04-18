@@ -10,6 +10,7 @@ import hydro.common.JsLoggingUtils.LogExceptionsCallback
 import hydro.flux.action.Dispatcher
 import hydro.flux.action.StandardActions
 import hydro.flux.react.ReactVdomUtils.^^
+import hydro.flux.router.Page
 import hydro.flux.router.RouterContext
 import hydro.flux.router.StandardPages
 import hydro.models.access.JsEntityAccess
@@ -68,22 +69,8 @@ final class SbadminLayout(
             ),
             s"v${AppVersion.versionString}",
           ),
-          <.li(
-            router.anchorWithHrefTo(AppPages.Quiz)(
-              Bootstrap.FontAwesomeIcon("question-circle", fixedWidth = true),
-            ),
-          ),
-          <.li(
-            <.a(
-              ^.onClick --> LogExceptionsCallback {
-                promptMasterSecret match {
-                  case None               =>
-                  case Some(masterSecret) => router.setPage(AppPages.Master(masterSecret))
-                }
-              },
-              Bootstrap.FontAwesomeIcon("key", fixedWidth = true),
-            ),
-          ),
+          <.li(linkToPage(AppPages.Quiz)),
+          <.li(linkToMasterSecretProtectedPage(AppPages.Master.apply)),
           <.li(
             <.a(
               ^.onClick --> LogExceptionsCallback {
@@ -95,22 +82,8 @@ final class SbadminLayout(
               Bootstrap.FontAwesomeIcon("bar-chart-o", fixedWidth = true),
             ),
           ),
-          <.li(
-            router.anchorWithHrefTo(AppPages.Gamepad)(
-              Bootstrap.FontAwesomeIcon("gamepad", fixedWidth = true),
-            ),
-          ),
-          <.li(
-            <.a(
-              ^.onClick --> LogExceptionsCallback {
-                promptMasterSecret match {
-                  case None               =>
-                  case Some(masterSecret) => router.setPage(AppPages.QuizSettings(masterSecret))
-                }
-              },
-              Bootstrap.FontAwesomeIcon("cog", fixedWidth = true),
-            ),
-          ),
+          <.li(linkToPage(AppPages.Gamepad)),
+          <.li(linkToMasterSecretProtectedPage(AppPages.QuizSettings.apply)),
         ),
       ),
       // Page Content
@@ -133,6 +106,30 @@ final class SbadminLayout(
   }
 
   // **************** Private helper methods ****************//
+  private def linkToPage(page: Page)(implicit router: RouterContext): VdomElement = {
+    router.anchorWithHrefTo(page)(
+      <.i(^.className := page.iconClass),
+    )
+  }
+  private def linkToMasterSecretProtectedPage(pageFromSecret: String => Page)(
+      implicit router: RouterContext): VdomElement = {
+    if (getInitialDataResponse.masterSecret == "*") {
+      // If the master secret is a wildcard, return a regular link so that ctrl-click works
+      linkToPage(pageFromSecret(getInitialDataResponse.masterSecret))
+    } else {
+      val arbitraryPageInstance = pageFromSecret("---")
+      <.a(
+        ^.onClick --> LogExceptionsCallback {
+          promptMasterSecret match {
+            case None               =>
+            case Some(masterSecret) => router.setPage(pageFromSecret(masterSecret))
+          }
+        },
+        <.i(^.className := arbitraryPageInstance.iconClass),
+      )
+    }
+  }
+
   private def promptMasterSecret(): Option[String] = {
     if (getInitialDataResponse.masterSecret == "*") {
       Some(getInitialDataResponse.masterSecret)
