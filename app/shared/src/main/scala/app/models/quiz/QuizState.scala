@@ -8,6 +8,8 @@ import scala.collection.immutable.Seq
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.config.QuizConfig.Round
+import app.models.quiz.QuizState.GeneralQuizSettings
+import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.TimerState
 import hydro.common.time.Clock
@@ -30,6 +32,7 @@ case class QuizState(
     timerState: TimerState = TimerState.nullInstance,
     submissions: Seq[Submission] = Seq(),
     imageIsEnlarged: Boolean = false,
+    generalQuizSettings: GeneralQuizSettings = GeneralQuizSettings.nullInstance,
     override val lastUpdateTime: LastUpdateTime = LastUpdateTime.neverUpdated,
 ) extends UpdatableEntity {
 
@@ -122,6 +125,20 @@ object QuizState {
         maybeAnswerIndex = if (answerIndex == -1) None else Some(answerIndex),
         createTime = clock.nowInstant,
       )
+    }
+  }
+
+  case class GeneralQuizSettings(
+      showAnswers: Boolean = true,
+      answerBulletType: AnswerBulletType = AnswerBulletType.Arrows,
+  )
+  object GeneralQuizSettings {
+    val nullInstance = GeneralQuizSettings()
+
+    sealed trait AnswerBulletType
+    object AnswerBulletType {
+      case object Arrows extends AnswerBulletType
+      case object Characters extends AnswerBulletType
     }
   }
 }

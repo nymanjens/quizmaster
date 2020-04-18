@@ -1,5 +1,6 @@
 package hydro.models.access
 
+import app.models.quiz.QuizState.GeneralQuizSettings
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.TimerState
 import hydro.common.GuavaReplacement.ImmutableBiMap
@@ -45,6 +46,7 @@ object ModelField {
     implicit case object OrderTokenType extends FieldType[OrderToken]
     implicit case object TimerStateType extends FieldType[TimerState]
     implicit case object SubmissionSeqType extends FieldType[Seq[Submission]]
+    implicit case object GeneralQuizSettingsType extends FieldType[GeneralQuizSettings]
   }
 
   abstract class IdModelField[E <: Entity]

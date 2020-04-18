@@ -3,6 +3,7 @@ package app.models.access
 import java.time.Instant
 
 import app.models.quiz.QuizState
+import app.models.quiz.QuizState.GeneralQuizSettings
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.TimerState
 import app.models.quiz.Team
@@ -51,6 +52,11 @@ object ModelFields {
         extends ModelField[Seq[Submission], E]("submissions", _.submissions, v => _.copy(submissions = v))
     case object imageIsEnlarged
         extends ModelField[Boolean, E]("imageIsEnlarged", _.imageIsEnlarged, v => _.copy(imageIsEnlarged = v))
+    case object generalQuizSettings
+        extends ModelField[GeneralQuizSettings, E](
+          "generalQuizSettings",
+          _.generalQuizSettings,
+          v => _.copy(generalQuizSettings = v))
   }
 
   // **************** Field numbers **************** //
@@ -70,6 +76,7 @@ object ModelFields {
         QuizState.timerState,
         QuizState.submissions,
         QuizState.imageIsEnlarged,
+        QuizState.generalQuizSettings,
       )
     )
   def toNumber(field: ModelField.any): Int = fieldToNumberMap.get(field)
