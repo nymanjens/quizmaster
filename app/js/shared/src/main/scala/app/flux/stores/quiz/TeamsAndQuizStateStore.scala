@@ -486,6 +486,7 @@ final class TeamsAndQuizStateStore(
     def goToNextRoundUpdate(quizState: QuizState): QuizState = {
       quizState.copy(
         roundIndex = quizState.roundIndex + 1,
+        questionIndex = -1,
         questionProgressIndex = 0,
         timerState = TimerState.createStarted(),
         submissions = Seq(),
