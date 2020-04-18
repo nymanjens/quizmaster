@@ -9,6 +9,7 @@ import japgolly.scalajs.react.vdom.html_<^.<
 final class QuizSettingsPanels(
     implicit teamEditor: TeamEditor,
     importBackupPanel: ImportBackupPanel,
+    generalQuizSettings: GeneralQuizSettings,
 ) extends HydroReactComponent.Stateless {
 
   // **************** API ****************//
@@ -26,6 +27,7 @@ final class QuizSettingsPanels(
 
     override def render(props: Props, state: State): VdomElement = logExceptions {
       <.div(
+        generalQuizSettings(),
         importBackupPanel(),
         teamEditor(),
       )

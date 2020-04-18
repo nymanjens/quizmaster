@@ -3,6 +3,7 @@ package app.flux.react.app
 import app.api.ScalaJsApi.GetInitialDataResponse
 import app.flux.controllers.SoundEffectController
 import app.flux.react.app.quiz.GamepadSetupView
+import app.flux.react.app.quiz.GeneralQuizSettings
 import app.flux.react.app.quiz.QuizSettingsView
 import app.flux.react.app.quiz.ImportBackupPanel
 import app.flux.react.app.quiz.MasterView
@@ -45,23 +46,23 @@ final class Module(
 
   // Configuration of submodules
   private val hydroUielementsModule = new hydro.flux.react.uielements.Module
-  implicit private lazy val pageHeader = hydroUielementsModule.pageHeader
-  implicit private lazy val sbadminMenu = hydroUielementsModule.sbadminMenu
-  implicit private lazy val sbadminLayout = hydroUielementsModule.sbadminLayout
+  implicit private val pageHeader = hydroUielementsModule.pageHeader
+  implicit private val sbadminMenu = hydroUielementsModule.sbadminMenu
+  implicit private val sbadminLayout = hydroUielementsModule.sbadminLayout
 
-  implicit lazy val layout: Layout = new Layout
+  implicit private val syncedTimerBar: SyncedTimerBar = new SyncedTimerBar()
+  implicit private val obfuscatedAnswer: ObfuscatedAnswer = new ObfuscatedAnswer()
+  implicit private val quizProgressIndicator: QuizProgressIndicator = new QuizProgressIndicator()
+  implicit private val importBackupPanel: ImportBackupPanel = new ImportBackupPanel()
+  implicit private val teamEditor: TeamEditor = new TeamEditor()
+  implicit private val teamsList: TeamsList = new TeamsList()
+  implicit private val generalQuizSettings: GeneralQuizSettings = new GeneralQuizSettings()
+  implicit private val question: QuestionComponent = new QuestionComponent()
+  implicit private val quizSettingsPanels: QuizSettingsPanels = new QuizSettingsPanels()
 
-  implicit lazy private val syncedTimerBar: SyncedTimerBar = new SyncedTimerBar()
-  implicit lazy private val obfuscatedAnswer: ObfuscatedAnswer = new ObfuscatedAnswer()
-  implicit lazy private val quizProgressIndicator: QuizProgressIndicator = new QuizProgressIndicator()
-  implicit lazy private val importBackupPanel: ImportBackupPanel = new ImportBackupPanel()
-  implicit lazy private val teamEditor: TeamEditor = new TeamEditor()
-  implicit lazy private val teamsList: TeamsList = new TeamsList()
-  implicit lazy private val question: QuestionComponent = new QuestionComponent()
-
-  implicit lazy val quizView: QuizView = new QuizView()
-  implicit lazy val masterView: MasterView = new MasterView()
-  implicit lazy val gamepadSetupView: GamepadSetupView = new GamepadSetupView()
-  implicit lazy val quizSettingsView: QuizSettingsView = new QuizSettingsView()
-  implicit lazy val quizSettingsPanels: QuizSettingsPanels = new QuizSettingsPanels()
+  implicit val layout: Layout = new Layout
+  implicit val quizView: QuizView = new QuizView()
+  implicit val masterView: MasterView = new MasterView()
+  implicit val gamepadSetupView: GamepadSetupView = new GamepadSetupView()
+  implicit val quizSettingsView: QuizSettingsView = new QuizSettingsView()
 }
