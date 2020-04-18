@@ -57,7 +57,10 @@ final class QuizSettingsView(
     override def render(props: Props, state: State): VdomElement = logExceptions {
       implicit val router = props.router
 
-      <.div("Hello World!")
+      <.span(
+        pageHeader(router.currentPage),
+        "Hello World!",
+      )
     }
   }
 }
