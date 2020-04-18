@@ -27,6 +27,7 @@ final class QuizSettingsPanels(
 
     override def render(props: Props, state: State): VdomElement = logExceptions {
       <.div(
+        ^.className := "quiz-settings-panels",
         generalQuizSettings(),
         importBackupPanel(),
         teamEditor(),

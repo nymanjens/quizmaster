@@ -9,6 +9,7 @@ import hydro.common.JsLoggingUtils.logExceptions
 import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
 import hydro.flux.react.uielements.Bootstrap
+import hydro.flux.react.uielements.Bootstrap
 import hydro.flux.react.uielements.HalfPanel
 import hydro.flux.react.uielements.PageHeader
 import japgolly.scalajs.react._
@@ -44,11 +45,29 @@ final class GeneralQuizSettings(
 
     override def render(props: Props, state: State): VdomElement = logExceptions {
       <.span(
+        ^.className := "general-quiz-settings",
         Bootstrap.Row(
           HalfPanel(
             title = <.span("General quiz settings"),
           ) {
-            "Test"
+            <.span(
+              <.div(
+                ^.className := "single-quiz-setting",
+                "Show answers: ",
+                Bootstrap.ButtonGroup(
+                  Bootstrap.Button()("No"),
+                  Bootstrap.Button()("Yes"),
+                ),
+              ),
+              <.div(
+                ^.className := "single-quiz-setting",
+                "Answer bullet type: ",
+                Bootstrap.ButtonGroup(
+                  Bootstrap.Button()("Arrows"),
+                  Bootstrap.Button()("Characters"),
+                ),
+              )
+            )
           }
         )
       )
