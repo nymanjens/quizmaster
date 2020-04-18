@@ -23,8 +23,12 @@ final class QuizProgressIndicator(
 ) extends HydroReactComponent {
 
   // **************** API ****************//
-  def apply(quizState: QuizState): VdomElement = {
-    component(Props(quizState = quizState))
+  def apply(quizState: QuizState, showMasterData: Boolean): VdomElement = {
+    component(
+      Props(
+        quizState = quizState,
+        showMasterData = showMasterData,
+      ))
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//
@@ -32,7 +36,10 @@ final class QuizProgressIndicator(
     ComponentConfig(backendConstructor = new Backend(_), initialState = State())
 
   // **************** Implementation of HydroReactComponent types ****************//
-  protected case class Props(quizState: QuizState)
+  protected case class Props(
+      quizState: QuizState,
+      showMasterData: Boolean,
+  )
   protected case class State()
 
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
@@ -56,15 +63,17 @@ final class QuizProgressIndicator(
                 s"${quizState.round.questions.size} ${i18n("app.questions")}"
               },
               ". ",
-              <<.ifDefined(quizState.maybeQuestion) { question =>
-                {
-                  for (i <- 0 to question.progressStepsCount - 1) yield {
-                    Bootstrap.FontAwesomeIcon("circle")(
-                      ^.key := i,
-                      ^.className := (if (i <= quizState.questionProgressIndex) "seen" else "unseen"),
-                    )
-                  }
-                }.toVdomArray
+              <<.ifThen(props.showMasterData) {
+                <<.ifDefined(quizState.maybeQuestion) { question =>
+                  {
+                    for (i <- 0 to question.progressStepsCount - 1) yield {
+                      Bootstrap.FontAwesomeIcon("circle")(
+                        ^.key := i,
+                        ^.className := (if (i <= quizState.questionProgressIndex) "seen" else "unseen"),
+                      )
+                    }
+                  }.toVdomArray
+                }
               },
             )
         }

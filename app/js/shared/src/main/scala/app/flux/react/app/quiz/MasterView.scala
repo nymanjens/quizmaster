@@ -63,7 +63,7 @@ final class MasterView(
       <.span(
         ^.className := "master-view",
         quizNavigationButtons(state.quizState),
-        quizProgressIndicator(state.quizState),
+        quizProgressIndicator(state.quizState, showMasterData = true),
         state.quizState match {
           case quizState if quizState.quizIsBeingSetUp =>
             quizSettingsPanels()

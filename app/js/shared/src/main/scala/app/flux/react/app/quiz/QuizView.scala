@@ -55,7 +55,7 @@ final class QuizView(
 
       <.span(
         ^.className := "quiz-view",
-        quizProgressIndicator(state.quizState),
+        quizProgressIndicator(state.quizState, showMasterData = false),
         quizState.maybeQuestion match {
           case None =>
             RoundComponent(quizState.round)
