@@ -43,7 +43,6 @@ abstract class JvmEntityAccessBase(implicit clock: Clock) extends EntityAccess {
 
   def queryExecutor[E <: Entity: EntityType]: DbQueryExecutor.Sync[E] = inMemoryEntityDatabase.queryExecutor
 
-
   def entityModificationPublisher: Publisher[EntityModificationsWithToken] = entityModificationPublisher_
 
   // **************** Setters ****************//

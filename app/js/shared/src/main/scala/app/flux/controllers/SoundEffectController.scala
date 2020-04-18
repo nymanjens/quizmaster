@@ -58,12 +58,15 @@ final class SoundEffectController(
         } else {
           soundsPlaying.add(soundEffect)
           val audio = new Audio(soundEffect.filepath)
-          audio.addEventListener("ended", () => {
-            val timeoutTime = minTimeBetweenPlays getOrElse (0.seconds)
-            js.timers.setTimeout(timeoutTime)(logExceptions {
-              soundsPlaying.remove(soundEffect)
-            })
-          })
+          audio.addEventListener(
+            "ended",
+            () => {
+              val timeoutTime = minTimeBetweenPlays getOrElse (0.seconds)
+              js.timers.setTimeout(timeoutTime)(logExceptions {
+                soundsPlaying.remove(soundEffect)
+              })
+            }
+          )
 
           println(s"  Playing ${soundEffect.filepath}..")
           audio.play()
