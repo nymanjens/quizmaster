@@ -9,6 +9,7 @@ import app.flux.react.app.quiz.MasterView
 import app.flux.react.app.quiz.ObfuscatedAnswer
 import app.flux.react.app.quiz.QuestionComponent
 import app.flux.react.app.quiz.QuizProgressIndicator
+import app.flux.react.app.quiz.QuizSettingsPanels
 import app.flux.react.app.quiz.QuizView
 import app.flux.react.app.quiz.SyncedTimerBar
 import app.flux.react.app.quiz.TeamEditor
@@ -62,4 +63,5 @@ final class Module(
   implicit lazy val masterView: MasterView = new MasterView()
   implicit lazy val gamepadSetupView: GamepadSetupView = new GamepadSetupView()
   implicit lazy val quizSettingsView: QuizSettingsView = new QuizSettingsView()
+  implicit lazy val quizSettingsPanels: QuizSettingsPanels = new QuizSettingsPanels()
 }

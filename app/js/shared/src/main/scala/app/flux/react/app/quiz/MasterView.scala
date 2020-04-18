@@ -26,8 +26,7 @@ final class MasterView(
     i18n: I18n,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
-    importBackupPanel: ImportBackupPanel,
-    teamEditor: TeamEditor,
+    quizSettingsPanels: QuizSettingsPanels,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     quizProgressIndicator: QuizProgressIndicator,
     questionComponent: QuestionComponent,
@@ -67,10 +66,7 @@ final class MasterView(
         quizProgressIndicator(state.quizState),
         state.quizState match {
           case quizState if quizState.quizIsBeingSetUp =>
-            <.div(
-              importBackupPanel(),
-              teamEditor(),
-            )
+            quizSettingsPanels()
           case quizState =>
             quizState.maybeQuestion match {
               case None =>

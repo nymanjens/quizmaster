@@ -33,7 +33,8 @@ final class QuizSettingsView(
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     i18n: I18n,
     getInitialDataResponse: GetInitialDataResponse,
-) extends HydroReactComponent {
+    quizSettingsPanels: QuizSettingsPanels,
+) extends HydroReactComponent.Stateless {
 
   // **************** API ****************//
   def apply(masterSecret: String, router: RouterContext): VdomElement = {
@@ -42,18 +43,10 @@ final class QuizSettingsView(
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//
-  override protected val config = ComponentConfig(backendConstructor = new Backend(_), initialState = State())
-    .withStateStoresDependency(
-      teamsAndQuizStateStore,
-      _.copy(
-        teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-      ))
+  override protected val statelessConfig = StatelessComponentConfig(backendConstructor = new Backend(_))
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(router: RouterContext)
-  protected case class State(
-      teams: Seq[Team] = Seq(),
-  )
 
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
 
@@ -62,7 +55,7 @@ final class QuizSettingsView(
 
       <.span(
         pageHeader(router.currentPage),
-        "Hello World!",
+        quizSettingsPanels(),
       )
     }
   }
