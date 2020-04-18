@@ -3,6 +3,7 @@ package app.flux.react.app
 import app.api.ScalaJsApi.GetInitialDataResponse
 import app.flux.controllers.SoundEffectController
 import app.flux.react.app.quiz.GamepadSetupView
+import app.flux.react.app.quiz.QuizSettingsView
 import app.flux.react.app.quiz.ImportBackupPanel
 import app.flux.react.app.quiz.MasterView
 import app.flux.react.app.quiz.ObfuscatedAnswer
@@ -60,4 +61,5 @@ final class Module(
   implicit lazy val quizView: QuizView = new QuizView()
   implicit lazy val masterView: MasterView = new MasterView()
   implicit lazy val gamepadSetupView: GamepadSetupView = new GamepadSetupView()
+  implicit lazy val quizSettingsView: QuizSettingsView = new QuizSettingsView()
 }
