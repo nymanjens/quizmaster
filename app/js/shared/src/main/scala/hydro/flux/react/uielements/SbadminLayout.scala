@@ -81,7 +81,7 @@ final class SbadminLayout(
                   case Some(masterSecret) => router.setPage(AppPages.Master(masterSecret))
                 }
               },
-              Bootstrap.FontAwesomeIcon("gears", fixedWidth = true),
+              Bootstrap.FontAwesomeIcon("key", fixedWidth = true),
             ),
           ),
           <.li(
@@ -92,12 +92,17 @@ final class SbadminLayout(
                   case Some(masterSecret) => dom.window.location.href = s"/rounds/$masterSecret/"
                 }
               },
-              Bootstrap.FontAwesomeIcon("info-circle", fixedWidth = true),
+              Bootstrap.FontAwesomeIcon("bar-chart-o", fixedWidth = true),
             ),
           ),
           <.li(
             router.anchorWithHrefTo(AppPages.Gamepad)(
               Bootstrap.FontAwesomeIcon("gamepad", fixedWidth = true),
+            ),
+          ),
+          <.li(
+            router.anchorWithHrefTo(AppPages.QuizSettings)(
+              Bootstrap.FontAwesomeIcon("cog", fixedWidth = true),
             ),
           ),
         ),
