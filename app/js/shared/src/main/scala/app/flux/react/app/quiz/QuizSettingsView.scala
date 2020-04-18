@@ -1,5 +1,6 @@
 package app.flux.react.app.quiz
 
+import app.api.ScalaJsApi.GetInitialDataResponse
 import app.flux.stores.quiz.GamepadStore.Arrow
 import app.flux.stores.quiz.GamepadStore.GamepadState
 import app.flux.stores.quiz.TeamInputStore
@@ -31,10 +32,12 @@ final class QuizSettingsView(
     teamInputStore: TeamInputStore,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     i18n: I18n,
+    getInitialDataResponse: GetInitialDataResponse,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
-  def apply(router: RouterContext): VdomElement = {
+  def apply(masterSecret: String, router: RouterContext): VdomElement = {
+    require(getInitialDataResponse.masterSecret == masterSecret)
     component(Props(router))
   }
 

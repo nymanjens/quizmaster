@@ -101,7 +101,13 @@ final class SbadminLayout(
             ),
           ),
           <.li(
-            router.anchorWithHrefTo(AppPages.QuizSettings)(
+            <.a(
+              ^.onClick --> LogExceptionsCallback {
+                promptMasterSecret match {
+                  case None               =>
+                  case Some(masterSecret) => router.setPage(AppPages.QuizSettings(masterSecret))
+                }
+              },
               Bootstrap.FontAwesomeIcon("cog", fixedWidth = true),
             ),
           ),

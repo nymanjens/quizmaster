@@ -63,7 +63,9 @@ private[router] final class RouterFactory(
 
           | staticRuleFromPage(AppPages.Gamepad, reactAppModule.gamepadSetupView.apply)
 
-          | staticRuleFromPage(AppPages.QuizSettings, reactAppModule.quizSettingsView.apply)
+          | dynamicRuleFromPage(_ / string(".+").caseClass[AppPages.QuizSettings]) { (page, ctl) =>
+          reactAppModule.quizSettingsView(page.masterSecret, ctl)
+        }
 
         // Fallback
         ).notFound(redirectToPage(StandardPages.Root)(Redirect.Replace))
