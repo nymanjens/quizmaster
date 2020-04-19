@@ -128,6 +128,7 @@ final class QuestionComponent(
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
             ^.className := "question",
+            s"[Q${state.quizState.questionIndex + 1}] ",
             question.question,
           )
         },
@@ -276,6 +277,7 @@ final class QuestionComponent(
           ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
             <.div(
               ^.className := "textual-question",
+              s"[Q${state.quizState.questionIndex + 1}] ",
               question.textualQuestion,
             )
           }
