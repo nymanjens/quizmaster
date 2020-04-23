@@ -13,26 +13,19 @@ This is a web-app to run locally while conducting a quiz (in real life) with abo
 - Run following commands to get the app running:
 
     ```
-    # refresh application secret
-    sbt playUpdateSecret
-
     # Build application
     sbt dist
 
-    # Deploy files
-    cd /somewhere/you/want/the/files
-    unzip .../target/universal/quizmaster-1.0-SNAPSHOT.zip
-    mv quizmaster-1.0-SNAPSHOT/* .
-    rm -d quizmaster-1.0-SNAPSHOT/
-
-    # Create database tables
-    bin/server -DdropAndCreateNewDb
-    rm RUNNING_PID
+    # Unzip target/universal/quizmaster-1.0-SNAPSHOT.zip to another folder
+    cd path/to/unzipped/snapshot/zip
 
     # Run application
     bin/server
     ```
 
 ## Configuration
-- `conf/quiz.yml`:<br>
+- `conf/application.conf`:<br>
+  Set the language and some server settings here.
+
+- `conf/quiz-config.yml`:<br>
   Add your questions and answers here.
