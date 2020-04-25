@@ -6,6 +6,9 @@ rounds:
         question: What is the capital of France?
         answer: Paris
         choices: [Paris, London, Brussels, Berlin]
+        image: {src: geography/france.png, size: small}
+        answerImage: {src: geography/france-answer.png, size: large}
+        answerDetail: Image released under Creative Commons by Destination2 (www.destination2.co.uk)
         pointsToGain: 2
         maxTimeSeconds: 8
         onlyFirstGainsPoints: true
@@ -21,14 +24,11 @@ rounds:
         answer: Christoffer Columbus
         maxTimeSeconds: 8
 
-  - name: TV
+  - name: Music round
     questions:
-      - !!app.models.quiz.config.ParsableQuizConfig$Question$Double
-        verbalQuestion: How is the wizard called in Lord of the Rings?
-        verbalAnswer: Gandalf
-        textualQuestion: How is the wizard called in the Arthurian Myth?
-        textualAnswer: Merlin
-        textualChoices: [Yoda, Gandalf, Albus Dumbledore, Merlin]
-
-  - name: Games
-    questions: []
+      - !!app.models.quiz.config.ParsableQuizConfig$Question$Single
+        question: After which season is this track named?
+        answer: Summer
+        answerDetail: Royalty Free Music from Bensound
+        audioSrc: music_round/bensound-summer.mp3
+        maxTimeSeconds: 15
