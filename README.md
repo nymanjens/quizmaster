@@ -9,19 +9,9 @@ This is a web-app to run locally while conducting a quiz (in real life) with abo
 
 ## Installation
 
-- Clone this repository or download the files
-- Run following commands to get the app running:
-
-    ```
-    # Build application
-    sbt dist
-
-    # Unzip target/universal/quizmaster-1.0-SNAPSHOT.zip to another folder
-    cd path/to/unzipped/snapshot/zip
-
-    # Run application
-    bin/server
-    ```
+- Download the [latest release](releases)
+- Unpack the archive and open a terminal in the unpacked folder
+- Run `bin/server` (UNIX) or `bin/server.bat` (Windows)
 
 ## Configuration
 - `conf/application.conf`:<br>
