@@ -9,7 +9,7 @@ This is a web-app to run locally while conducting a quiz (in real life) with abo
 
 ## Installation
 
-- Download the [latest release](releases)
+- Download the [latest release](https://github.com/nymanjens/quizmaster/releases)
 - Unpack the archive and open a terminal in the unpacked folder
 - Run `bin/server` (UNIX) or `bin/server.bat` (Windows)
 
