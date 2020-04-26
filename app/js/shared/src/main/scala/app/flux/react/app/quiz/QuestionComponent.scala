@@ -58,25 +58,38 @@ final class QuestionComponent(
   // **************** Implementation of HydroReactComponent methods ****************//
   override protected val config =
     ComponentConfig(backendConstructor = new Backend(_), initialState = State())
-      .withStateStoresDependency(
-        teamsAndQuizStateStore,
-        state => {
-          makeSoundForAddedSubmissions(
-            oldQuizState = state.quizState,
-            newQuizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
-          )
-          state.copy(
-            quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
-            teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-          )
-        }
-      )
+      .withStateStoresDependencyFromProps(props =>
+        StateStoresDependency(
+          teamsAndQuizStateStore,
+          state => {
+            makeSoundForAddedSubmissions(
+              oldQuizState = state.quizState,
+              newQuizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
+              question = props.question,
+            )
+            state.copy(
+              quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
+              teams = teamsAndQuizStateStore.stateOrEmpty.teams,
+            )
+          }
+      ))
 
   // **************** Private helper methods ****************//
-  private def makeSoundForAddedSubmissions(oldQuizState: QuizState, newQuizState: QuizState): Unit = {
+  private def makeSoundForAddedSubmissions(
+      oldQuizState: QuizState,
+      newQuizState: QuizState,
+      question: Question,
+  ): Unit = {
     val newSubmissions = newQuizState.submissions.filterNot(oldQuizState.submissions.toSet)
     if (newSubmissions.nonEmpty) {
-      soundEffectController.playNewSubmission()
+
+      if (question.onlyFirstGainsPoints && newSubmissions.exists(_.maybeAnswerIndex.isDefined)) {
+        // An answer was given that will be immediately visible, so the sound can indicate its correctness
+        val atLeastOneSubmissionIsCorrect = false // TODO
+        soundEffectController.playRevealingSubmission(correct = atLeastOneSubmissionIsCorrect)
+      } else {
+        soundEffectController.playNewSubmission()
+      }
     }
   }
 
