@@ -81,7 +81,7 @@ final class QuestionComponent(
       question: Question,
   ): Unit = {
     val newSubmissions = newQuizState.submissions.filterNot(oldQuizState.submissions.toSet)
-    if (newSubmissions.nonEmpty) {
+    if (oldQuizState != QuizState.nullInstance && newSubmissions.nonEmpty) {
       if (question.onlyFirstGainsPoints && newSubmissions.exists(_.maybeAnswerIndex.isDefined)) {
         // An answer was given that will be immediately visible, so the sound can indicate its correctness
         val atLeastOneSubmissionIsCorrect =
