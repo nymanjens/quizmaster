@@ -1,5 +1,6 @@
 package app.flux.react.app.quiz
 
+import app.flux.controllers.SoundEffectController
 import app.flux.stores.quiz.GamepadStore.Arrow
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
@@ -35,6 +36,7 @@ final class QuestionComponent(
     syncedTimerBar: SyncedTimerBar,
     obfuscatedAnswer: ObfuscatedAnswer,
     clock: Clock,
+    soundEffectController: SoundEffectController,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -58,10 +60,25 @@ final class QuestionComponent(
     ComponentConfig(backendConstructor = new Backend(_), initialState = State())
       .withStateStoresDependency(
         teamsAndQuizStateStore,
-        _.copy(
-          quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
-          teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-        ))
+        state => {
+          makeSoundForAddedSubmissions(
+            oldQuizState = state.quizState,
+            newQuizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
+          )
+          state.copy(
+            quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
+            teams = teamsAndQuizStateStore.stateOrEmpty.teams,
+          )
+        }
+      )
+
+  // **************** Private helper methods ****************//
+  private def makeSoundForAddedSubmissions(oldQuizState: QuizState, newQuizState: QuizState): Unit = {
+    val newSubmissions = newQuizState.submissions.filterNot(oldQuizState.submissions.toSet)
+    if (newSubmissions.nonEmpty) {
+      soundEffectController.playNewSubmission()
+    }
+  }
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(
@@ -385,9 +402,9 @@ final class QuestionComponent(
             )
       )
     }
-  }
 
-  private def audioPlayer(audioRelativePath: String, playing: Boolean): VdomNode = {
-    RawMusicPlayer(src = "/quizaudio/" + audioRelativePath, playing = playing)
+    private def audioPlayer(audioRelativePath: String, playing: Boolean): VdomNode = {
+      RawMusicPlayer(src = "/quizaudio/" + audioRelativePath, playing = playing)
+    }
   }
 }
