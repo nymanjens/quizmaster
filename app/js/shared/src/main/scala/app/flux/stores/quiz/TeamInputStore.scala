@@ -3,7 +3,6 @@ package app.flux.stores.quiz
 import hydro.common.time.JavaTimeImplicits._
 import java.time.Duration
 
-import app.flux.controllers.SoundEffectController
 import app.flux.router.AppPages
 import app.flux.stores.quiz.GamepadStore.GamepadState
 import app.flux.stores.quiz.TeamInputStore.State
@@ -40,7 +39,6 @@ final class TeamInputStore(
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     gamepadStore: GamepadStore,
-    soundEffectController: SoundEffectController,
 ) extends StateStore[State] {
 
   private var currentPage: Page = _
@@ -132,7 +130,7 @@ final class TeamInputStore(
                 gamepadStore.rumble(gamepadIndex = allTeams.indexOf(team))
               }
 
-              val somethingChanged = await(
+              await(
                 teamsAndQuizStateStore.addSubmission(
                   Submission.createNow(teamId = team.id, answerIndex = arrow.answerIndex),
                   resetTimer = question.isInstanceOf[Question.Double],
@@ -141,14 +139,6 @@ final class TeamInputStore(
                   allowMoreThanOneSubmissionPerTeam = false,
                   removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
                 ))
-
-              if (somethingChanged) {
-                if (question.onlyFirstGainsPoints) {
-                  soundEffectController.playRevealingSubmission(correct = submissionIsCorrect)
-                } else {
-                  soundEffectController.playNewSubmission()
-                }
-              }
             }
           }
         } else { // Not multiple choice
@@ -172,16 +162,12 @@ final class TeamInputStore(
             if (blockedBecauseSecondSubmissionTooClose) {
               // Don't add
             } else {
-              val somethingChanged = await(
+              await(
                 teamsAndQuizStateStore.addSubmission(
                   Submission.createNow(teamId = team.id),
                   pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
                   allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
                 ))
-
-              if (somethingChanged) {
-                soundEffectController.playNewSubmission()
-              }
             }
           }
         }
