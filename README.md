@@ -33,7 +33,7 @@ This quiz can be played in different ways, which will inform the quiz settings (
     - To choose from multiple-choice questions (in the quiz settings, choose "Answer bullet type" = Arrows). Note that these are automatically scored.
     - To stop the timer and give an answer
     - To indicate that a team has written down the answer on a paper so the quizmaster can continue to the answer when every team has done so
-- Via an external form, e.g. Google Docs (in the quiz settings, choose "Answer bullet type" = Characters)
+- Via an external form, e.g. Google Forms (in the quiz settings, choose "Answer bullet type" = Characters)
     - Go trough the round(s) first with "Show answers" = No (in the quiz settings)
     - When everyone has submitted their answer, go back and repeate with "Show answers" = Yes
 
