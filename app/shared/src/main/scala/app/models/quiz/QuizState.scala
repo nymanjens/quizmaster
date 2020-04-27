@@ -85,11 +85,34 @@ case class QuizState(
     }
   }
   def canSubmitResponse(team: Team)(implicit quizConfig: QuizConfig, clock: Clock): Boolean = {
-    def blockedByEarlierSubmissionOfSameTeam = {
-      false
-    }
+    maybeQuestion match {
+      case None => false
+      case Some(question) =>
+        def earlierTeamSubmission: Option[Submission] = submissions.find(_.teamId == team.id)
+        def blockedByEarlierSubmissionOfSameTeam = {
+          if (question.isMultipleChoice) {
+            if (question.onlyFirstGainsPoints) {
+              // team cannot change their minds because they already know their previous answer was wrong
+              earlierTeamSubmission.isDefined
+            } else {
+              // allow teams to change their minds while the timer is running
+              false
+            }
+          } else { // Not multiple choice
+            if (question.onlyFirstGainsPoints) {
+              // Allow multiple guesses while the timer is running
+              // TODO: Move blockedBecauseSecondSubmissionTooClose to canSubmitResponse
+              false
+            } else {
+              // allow teams to change their minds while the timer is running if they filled in a free-text answer
+              // TODO: return true if the previous submission was a button press
+              false
+            }
+          }
+        }
 
-    canAnyTeamSubmitResponse && !blockedByEarlierSubmissionOfSameTeam
+        canAnyTeamSubmitResponse && !blockedByEarlierSubmissionOfSameTeam
+    }
   }
 }
 
