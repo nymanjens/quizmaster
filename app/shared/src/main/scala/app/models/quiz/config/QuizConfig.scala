@@ -4,6 +4,7 @@ import app.models.quiz.config.QuizConfig.Round
 import java.time.Duration
 
 import app.models.quiz.QuizState
+import app.models.quiz.QuizState.Submission.SubmissionValue
 
 case class QuizConfig(
     rounds: Seq[Round],
@@ -42,8 +43,12 @@ object QuizConfig {
     def submissionAreOpen(questionProgressIndex: Int): Boolean
     def isMultipleChoice: Boolean
 
-    /** If `isMultipleChoice` is true, this is a way to see if an answer is correct. */
-    def isCorrectAnswerIndex(answerIndex: Int): Boolean
+    /**
+      * Returns true if the given submission is correct according to configured answer.
+      *
+      * Always returns false if the given value is not scorable.
+      */
+    def isCorrectAnswer(submissionValue: SubmissionValue): Boolean
   }
 
   object Question {
@@ -98,7 +103,17 @@ object QuizConfig {
       }
 
       override def isMultipleChoice: Boolean = choices.nonEmpty
-      override def isCorrectAnswerIndex(answerIndex: Int): Boolean = choices.get.apply(answerIndex) == answer
+      override def isCorrectAnswer(submissionValue: SubmissionValue): Boolean = {
+        submissionValue match {
+          case SubmissionValue.PressedTheOneButton               => false
+          case SubmissionValue.MultipleChoiceAnswer(answerIndex) => choices.get.apply(answerIndex) == answer
+          case SubmissionValue.FreeTextAnswer(freeTextAnswer) =>
+            def normalizeTextForComparison(s: String): String = {
+              s.replace(" ", "").replace(".", "").replace("-", "").toLowerCase
+            }
+            normalizeTextForComparison(answer) == normalizeTextForComparison(freeTextAnswer)
+        }
+      }
 
       def questionIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 1
@@ -155,8 +170,12 @@ object QuizConfig {
 
       override def submissionAreOpen(questionProgressIndex: Int): Boolean = questionProgressIndex == 2
       override def isMultipleChoice: Boolean = true
-      override def isCorrectAnswerIndex(answerIndex: Int): Boolean =
-        textualChoices.apply(answerIndex) == textualAnswer
+      override def isCorrectAnswer(submissionValue: SubmissionValue): Boolean = {
+        submissionValue match {
+          case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
+            textualChoices.apply(answerIndex) == textualAnswer
+        }
+      }
 
       def questionIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 1

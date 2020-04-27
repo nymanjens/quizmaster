@@ -9,6 +9,7 @@ import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.QuizState.Submission
+import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.Team
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.time.Clock
@@ -82,10 +83,9 @@ final class QuestionComponent(
   ): Unit = {
     val newSubmissions = newQuizState.submissions.filterNot(oldQuizState.submissions.toSet)
     if (oldQuizState != QuizState.nullInstance && newSubmissions.nonEmpty) {
-      if (question.onlyFirstGainsPoints && newSubmissions.exists(_.maybeAnswerIndex.isDefined)) {
+      if (question.onlyFirstGainsPoints && newSubmissions.exists(_.value.isScorable)) {
         // An answer was given that will be immediately visible, so the sound can indicate its correctness
-        val atLeastOneSubmissionIsCorrect =
-          newSubmissions.flatMap(_.maybeAnswerIndex).exists(question.isCorrectAnswerIndex)
+        val atLeastOneSubmissionIsCorrect = newSubmissions.exists(s => question.isCorrectAnswer(s.value))
         soundEffectController.playRevealingSubmission(correct = atLeastOneSubmissionIsCorrect)
       } else {
         soundEffectController.playNewSubmission()
@@ -205,7 +205,7 @@ final class QuestionComponent(
                     yield {
                       val visibleSubmissions =
                         if (showSubmissionsOnChoices)
-                          state.quizState.submissions.filter(_.maybeAnswerIndex == Some(arrow.answerIndex))
+                          state.quizState.submissions.filter(s => question.isCorrectAnswer(s.value))
                         else Seq()
                       val isCorrectAnswer = choice == question.answer
                       <.li(
@@ -287,8 +287,8 @@ final class QuestionComponent(
     ): VdomElement = {
       val progressIndex = props.questionProgressIndex
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
-      val correctSubmissionWasEntered = state.quizState.submissions.exists(submission =>
-        question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
+      val correctSubmissionWasEntered =
+        state.quizState.submissions.exists(s => question.isCorrectAnswer(s.value))
 
       <.div(
         ifVisibleOrMaster(false) {
@@ -330,7 +330,7 @@ final class QuestionComponent(
                 (for ((choice, arrow) <- question.textualChoices zip Arrow.all)
                   yield {
                     val submissions =
-                      state.quizState.submissions.filter(_.maybeAnswerIndex == Some(arrow.answerIndex))
+                      state.quizState.submissions.filter(s => question.isCorrectAnswer(s.value))
                     val isCorrectAnswer = choice == question.textualAnswer
                     <.li(
                       ^.key := choice,

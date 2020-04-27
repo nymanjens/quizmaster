@@ -225,7 +225,7 @@ final class TeamsAndQuizStateStore(
           val filteredOldSubmissions = {
             if (removeEarlierDifferentSubmissionBySameTeam) {
               def differentSubmissionBySameTeam(s: Submission): Boolean = {
-                s.teamId == submission.teamId && s.maybeAnswerIndex != submission.maybeAnswerIndex
+                s.teamId == submission.teamId && s.value != submission.value
               }
               oldSubmissions.filterNot(differentSubmissionBySameTeam)
             } else {
@@ -500,11 +500,11 @@ final class TeamsAndQuizStateStore(
 
     private def addOrRemovePoints(quizState: QuizState): Unit = {
       val question = quizState.maybeQuestion.get
-      if (question.isMultipleChoice) {
-        var firstCorrectAnswerSeen = false
-        for (submission <- quizState.submissions) {
-          val correct = question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get)
-          val scoreDiff = {
+      var firstCorrectAnswerSeen = false
+      for (submission <- quizState.submissions) {
+        val scoreDiff = {
+          if (submission.value.isScorable) {
+            val correct = question.isCorrectAnswer(submission.value)
             if (correct) {
               if (firstCorrectAnswerSeen) {
                 question.pointsToGain
@@ -515,10 +515,12 @@ final class TeamsAndQuizStateStore(
             } else {
               question.pointsToGainOnWrongAnswer
             }
+          } else {
+            0
           }
-          val team = stateOrEmpty.teams.find(_.id == submission.teamId).get
-          updateScore(team, scoreDiff = scoreDiff)
         }
+        val team = stateOrEmpty.teams.find(_.id == submission.teamId).get
+        updateScore(team, scoreDiff = scoreDiff)
       }
     }
   }

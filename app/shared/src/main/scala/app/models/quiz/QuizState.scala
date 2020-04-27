@@ -11,6 +11,7 @@ import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.QuizState.GeneralQuizSettings
 import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.QuizState.Submission
+import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.QuizState.TimerState
 import hydro.common.time.Clock
 import hydro.common.I18n
@@ -117,14 +118,23 @@ object QuizState {
     )
   }
 
-  case class Submission(teamId: Long, maybeAnswerIndex: Option[Int] = None, createTime: Instant)
+  case class Submission(teamId: Long, value: SubmissionValue, createTime: Instant)
   object Submission {
     def createNow(teamId: Long, answerIndex: Int = -1)(implicit clock: Clock): Submission = {
       Submission(
         teamId = teamId,
-        maybeAnswerIndex = if (answerIndex == -1) None else Some(answerIndex),
+        value =
+          if (answerIndex == -1) SubmissionValue.PressedTheOneButton
+          else SubmissionValue.MultipleChoiceAnswer(answerIndex),
         createTime = clock.nowInstant,
       )
+    }
+
+    sealed abstract class SubmissionValue(val isScorable: Boolean)
+    object SubmissionValue {
+      case object PressedTheOneButton extends SubmissionValue(isScorable = false)
+      case class MultipleChoiceAnswer(answerIndex: Int) extends SubmissionValue(isScorable = true)
+      case class FreeTextAnswer(answerIndex: String) extends SubmissionValue(isScorable = true)
     }
   }
 

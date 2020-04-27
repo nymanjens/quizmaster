@@ -11,6 +11,7 @@ import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.QuizState
+import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.Team
 import app.models.user.User
 import hydro.common.time.Clock
@@ -116,10 +117,11 @@ final class TeamInputStore(
         if (question.isMultipleChoice) {
           if (gamepadState.arrowPressed.isDefined) {
             val arrow = gamepadState.arrowPressed.get
-            val submissionIsCorrect = question.isCorrectAnswerIndex(arrow.answerIndex)
+            val submissionIsCorrect =
+              question.isCorrectAnswer(SubmissionValue.MultipleChoiceAnswer(arrow.answerIndex))
             val tooLate = {
-              val alreadyAnsweredCorrectly = quizState.submissions.exists(submission =>
-                question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
+              val alreadyAnsweredCorrectly =
+                quizState.submissions.exists(s => question.isCorrectAnswer(s.value))
               alreadyAnsweredCorrectly && question.onlyFirstGainsPoints
             }
 
