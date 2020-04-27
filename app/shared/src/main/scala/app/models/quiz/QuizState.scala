@@ -118,15 +118,14 @@ object QuizState {
     )
   }
 
-  case class Submission(teamId: Long, value: SubmissionValue, createTime: Instant)
+  case class Submission(teamId: Long, value: SubmissionValue)
   object Submission {
-    def createNow(teamId: Long, answerIndex: Int = -1)(implicit clock: Clock): Submission = {
+    def createNow(teamId: Long, answerIndex: Int = -1): Submission = {
       Submission(
         teamId = teamId,
         value =
           if (answerIndex == -1) SubmissionValue.PressedTheOneButton
           else SubmissionValue.MultipleChoiceAnswer(answerIndex),
-        createTime = clock.nowInstant,
       )
     }
 
