@@ -134,25 +134,16 @@ final class TeamInputStore(
             val arrow = gamepadState.arrowPressed.get
             val submissionIsCorrect =
               question.isCorrectAnswer(SubmissionValue.MultipleChoiceAnswer(arrow.answerIndex))
-            val tooLate = {
-              val alreadyAnsweredCorrectly =
-                quizState.submissions.exists(s => question.isCorrectAnswer(s.value))
-              alreadyAnsweredCorrectly && question.onlyFirstGainsPoints
-            }
 
-            if (tooLate) {
-              // do nothing
-            } else {
-              await(
-                teamsAndQuizStateStore.addSubmission(
-                  Submission(teamId = team.id, SubmissionValue.MultipleChoiceAnswer(arrow.answerIndex)),
-                  resetTimer = question.isInstanceOf[Question.Double],
-                  pauseTimer =
-                    if (question.onlyFirstGainsPoints) submissionIsCorrect else allOtherTeamsHaveSubmission,
-                  allowMoreThanOneSubmissionPerTeam = false,
-                  removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
-                ))
-            }
+            await(
+              teamsAndQuizStateStore.addSubmission(
+                Submission(teamId = team.id, SubmissionValue.MultipleChoiceAnswer(arrow.answerIndex)),
+                resetTimer = question.isInstanceOf[Question.Double],
+                pauseTimer =
+                  if (question.onlyFirstGainsPoints) submissionIsCorrect else allOtherTeamsHaveSubmission,
+                allowMoreThanOneSubmissionPerTeam = false,
+                removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
+              ))
           }
         } else { // Not multiple choice
           if (gamepadState.anyButtonPressed) {

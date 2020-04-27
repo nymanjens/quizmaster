@@ -72,12 +72,16 @@ case class QuizState(
       case None => false
       case Some(question) =>
         val submissionAreOpen = question.submissionAreOpen(questionProgressIndex)
-        val submissionIsHinderedByTimer =
+        val hinderedByTimer =
           if (question.shouldShowTimer(questionProgressIndex))
             !timerState.timerRunning || timerState.hasFinished(question.maxTime)
           else false
+        val earlierSubmissionFinishedTheQuestion = {
+          val alreadyAnsweredCorrectly = submissions.exists(s => question.isCorrectAnswer(s.value))
+          question.onlyFirstGainsPoints && alreadyAnsweredCorrectly
+        }
 
-        submissionAreOpen && !submissionIsHinderedByTimer
+        submissionAreOpen && !hinderedByTimer && !earlierSubmissionFinishedTheQuestion
     }
   }
 }
