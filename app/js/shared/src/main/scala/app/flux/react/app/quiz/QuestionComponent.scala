@@ -374,7 +374,7 @@ final class QuestionComponent(
             Bootstrap.FontAwesomeIcon("gamepad")
           }
         ),
-        <<.ifThen(state.quizState.canAnyTeamSubmitResponse && correctSubmissionWasEntered) {
+        <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && correctSubmissionWasEntered) {
           <.div(
             ^.className := "timer",
             syncedTimerBar(maxTime = question.maxTime),
