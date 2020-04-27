@@ -160,13 +160,8 @@ final class TeamInputStore(
               if (question.onlyFirstGainsPoints) {
                 val blockedBecauseAdjacentSubmission =
                   quizState.submissions.lastOption.exists(_.teamId == team.id)
-                val blockedBecauseLastSubmissionTooRecent =
-                  quizState.submissions.exists { submission =>
-                    val isRecent = submission.createTime > (clock.nowInstant - Duration.ofSeconds(3))
-                    submission.teamId == team.id && isRecent
-                  }
 
-                blockedBecauseAdjacentSubmission || blockedBecauseLastSubmissionTooRecent
+                blockedBecauseAdjacentSubmission
               } else {
                 false
               }
