@@ -219,7 +219,8 @@ final class QuestionComponent(
                     yield {
                       val visibleSubmissions =
                         if (showSubmissionsOnChoices)
-                          state.quizState.submissions.filter(s => question.isCorrectAnswer(s.value))
+                          state.quizState.submissions.filter(
+                            _.value == SubmissionValue.MultipleChoiceAnswer(arrow.answerIndex))
                         else Seq()
                       val isCorrectAnswer = choice == question.answer
                       <.li(
@@ -344,7 +345,8 @@ final class QuestionComponent(
                 (for ((choice, arrow) <- question.textualChoices zip Arrow.all)
                   yield {
                     val submissions =
-                      state.quizState.submissions.filter(s => question.isCorrectAnswer(s.value))
+                      state.quizState.submissions.filter(
+                        _.value == SubmissionValue.MultipleChoiceAnswer(arrow.answerIndex))
                     val isCorrectAnswer = choice == question.textualAnswer
                     <.li(
                       ^.key := choice,
