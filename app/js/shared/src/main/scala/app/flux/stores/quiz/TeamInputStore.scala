@@ -145,7 +145,7 @@ final class TeamInputStore(
             } else {
               await(
                 teamsAndQuizStateStore.addSubmission(
-                  Submission.createNow(teamId = team.id, answerIndex = arrow.answerIndex),
+                  Submission(teamId = team.id, SubmissionValue.MultipleChoiceAnswer(arrow.answerIndex)),
                   resetTimer = question.isInstanceOf[Question.Double],
                   pauseTimer =
                     if (question.onlyFirstGainsPoints) submissionIsCorrect else allOtherTeamsHaveSubmission,
@@ -172,7 +172,7 @@ final class TeamInputStore(
             } else {
               await(
                 teamsAndQuizStateStore.addSubmission(
-                  Submission.createNow(teamId = team.id),
+                  Submission(teamId = team.id, SubmissionValue.PressedTheOneButton),
                   pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
                   allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
                 ))

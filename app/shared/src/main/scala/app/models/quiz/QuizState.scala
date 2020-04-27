@@ -120,15 +120,6 @@ object QuizState {
 
   case class Submission(teamId: Long, value: SubmissionValue)
   object Submission {
-    def createNow(teamId: Long, answerIndex: Int = -1): Submission = {
-      Submission(
-        teamId = teamId,
-        value =
-          if (answerIndex == -1) SubmissionValue.PressedTheOneButton
-          else SubmissionValue.MultipleChoiceAnswer(answerIndex),
-      )
-    }
-
     sealed abstract class SubmissionValue(val isScorable: Boolean)
     object SubmissionValue {
       case object PressedTheOneButton extends SubmissionValue(isScorable = false)
