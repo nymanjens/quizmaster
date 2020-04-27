@@ -1,7 +1,12 @@
 package app.flux.react.app.quiz
 
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.async.Async.async
+import scala.async.Async.await
 import app.flux.controllers.SoundEffectController
+import app.flux.stores.quiz.GamepadStore
 import app.flux.stores.quiz.GamepadStore.Arrow
+import app.flux.stores.quiz.TeamInputStore
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
@@ -38,6 +43,7 @@ final class QuestionComponent(
     obfuscatedAnswer: ObfuscatedAnswer,
     clock: Clock,
     soundEffectController: SoundEffectController,
+    teamInputStore: TeamInputStore,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -63,7 +69,7 @@ final class QuestionComponent(
         StateStoresDependency(
           teamsAndQuizStateStore,
           state => {
-            makeSoundForAddedSubmissions(
+            makeSoundAndAlertForAddedSubmissions(
               oldQuizState = state.quizState,
               newQuizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
               question = props.question,
@@ -76,7 +82,7 @@ final class QuestionComponent(
       ))
 
   // **************** Private helper methods ****************//
-  private def makeSoundForAddedSubmissions(
+  private def makeSoundAndAlertForAddedSubmissions(
       oldQuizState: QuizState,
       newQuizState: QuizState,
       question: Question,
@@ -89,6 +95,14 @@ final class QuestionComponent(
         soundEffectController.playRevealingSubmission(correct = atLeastOneSubmissionIsCorrect)
       } else {
         soundEffectController.playNewSubmission()
+      }
+
+      if (question.isInstanceOf[Question.Double]) {
+        for (submission <- newSubmissions) {
+          if (question.isCorrectAnswer(submission.value)) {
+            teamInputStore.alertTeam(submission.teamId)
+          }
+        }
       }
     }
   }

@@ -53,8 +53,23 @@ final class TeamInputStore(
   gamepadStore.register(GamepadStoreListener)
   dispatcher.registerPartialSync(dispatcherListener)
 
+  // **************** Implementation of StateStore methods **************** //
   override def state: State = _state
 
+  // **************** Additional public API **************** //
+  def alertTeam(teamId: Long): Unit = async {
+    val allTeams = await(
+      entityAccess
+        .newQuery[Team]()
+        .sort(DbQuery.Sorting.ascBy(ModelFields.Team.index))
+        .data())
+
+    for (team <- allTeams.find(_.id == teamId)) {
+      gamepadStore.rumble(gamepadIndex = allTeams.indexOf(team))
+    }
+  }
+
+  // **************** Private helper methods and objects **************** //
   private def dispatcherListener: PartialFunction[Action, Unit] = {
     case StandardActions.SetPageLoadingState( /* isLoading = */ _, currentPage) =>
       this.currentPage = currentPage
@@ -128,10 +143,6 @@ final class TeamInputStore(
             if (tooLate) {
               // do nothing
             } else {
-              if (submissionIsCorrect && question.isInstanceOf[Question.Double]) {
-                gamepadStore.rumble(gamepadIndex = allTeams.indexOf(team))
-              }
-
               await(
                 teamsAndQuizStateStore.addSubmission(
                   Submission.createNow(teamId = team.id, answerIndex = arrow.answerIndex),
