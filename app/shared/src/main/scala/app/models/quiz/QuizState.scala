@@ -67,7 +67,7 @@ case class QuizState(
   def quizIsBeingSetUp: Boolean = roundIndex < 0
   def quizHasEnded(implicit quizConfig: QuizConfig): Boolean = roundIndex >= quizConfig.rounds.size
 
-  def canSubmitResponse(implicit quizConfig: QuizConfig, clock: Clock): Boolean = {
+  def canAnyTeamSubmitResponse(implicit quizConfig: QuizConfig, clock: Clock): Boolean = {
     maybeQuestion match {
       case None => false
       case Some(question) =>
@@ -83,6 +83,9 @@ case class QuizState(
 
         submissionAreOpen && !hinderedByTimer && !earlierSubmissionFinishedTheQuestion
     }
+  }
+  def canSubmitResponse(team: Team)(implicit quizConfig: QuizConfig, clock: Clock): Boolean = {
+    canAnyTeamSubmitResponse
   }
 }
 

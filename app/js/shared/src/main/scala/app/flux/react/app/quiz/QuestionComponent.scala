@@ -165,7 +165,7 @@ final class QuestionComponent(
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
       val showSubmissionsOnChoices = question.isMultipleChoice && (question.onlyFirstGainsPoints || answerIsVisible)
       val showGamepadIconUnderChoices =
-        state.quizState.submissions.nonEmpty || (state.quizState.canSubmitResponse && question.onlyFirstGainsPoints)
+        state.quizState.submissions.nonEmpty || (state.quizState.canAnyTeamSubmitResponse && question.onlyFirstGainsPoints)
       val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
 
       <.div(
@@ -370,11 +370,11 @@ final class QuestionComponent(
         ),
         <.div(
           ^.className := "submissions-without-choices",
-          ifVisibleOrMaster(state.quizState.canSubmitResponse) {
+          ifVisibleOrMaster(state.quizState.canAnyTeamSubmitResponse) {
             Bootstrap.FontAwesomeIcon("gamepad")
           }
         ),
-        <<.ifThen(state.quizState.canSubmitResponse && correctSubmissionWasEntered) {
+        <<.ifThen(state.quizState.canAnyTeamSubmitResponse && correctSubmissionWasEntered) {
           <.div(
             ^.className := "timer",
             syncedTimerBar(maxTime = question.maxTime),

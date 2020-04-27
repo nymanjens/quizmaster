@@ -121,7 +121,7 @@ final class TeamInputStore(
           .newQuery[QuizState]()
           .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId)) getOrElse QuizState.nullInstance
 
-      if (onRelevantPageForSubmissions && quizState.canSubmitResponse) {
+      if (onRelevantPageForSubmissions && quizState.canSubmitResponse(team)) {
 
         val question = quizState.maybeQuestion.get
         val gamepadState = _state.teamIdToGamepadState(team.id)
