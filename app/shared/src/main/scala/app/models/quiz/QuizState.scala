@@ -76,7 +76,7 @@ case class QuizState(
           if (question.shouldShowTimer(questionProgressIndex))
             !timerState.timerRunning || timerState.hasFinished(question.maxTime)
           else false
-        val earlierSubmissionFinishedTheQuestion = {
+        def earlierSubmissionFinishedTheQuestion = {
           val alreadyAnsweredCorrectly = submissions.exists(s => question.isCorrectAnswer(s.value))
           question.onlyFirstGainsPoints && alreadyAnsweredCorrectly
         }
@@ -85,7 +85,11 @@ case class QuizState(
     }
   }
   def canSubmitResponse(team: Team)(implicit quizConfig: QuizConfig, clock: Clock): Boolean = {
-    canAnyTeamSubmitResponse
+    def blockedByEarlierSubmissionOfSameTeam = {
+      false
+    }
+
+    canAnyTeamSubmitResponse && !blockedByEarlierSubmissionOfSameTeam
   }
 }
 
