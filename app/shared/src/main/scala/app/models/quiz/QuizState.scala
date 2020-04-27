@@ -92,10 +92,10 @@ case class QuizState(
         def blockedByEarlierSubmissionOfSameTeam = {
           if (question.isMultipleChoice) {
             if (question.onlyFirstGainsPoints) {
-              // team cannot change their minds because they already know their previous answer was wrong
+              // Team cannot change their minds because they already know their previous answer was wrong
               earlierTeamSubmission.isDefined
             } else {
-              // allow teams to change their minds while the timer is running
+              // Allow teams to change their minds while the timer is running
               false
             }
           } else { // Not multiple choice
@@ -104,9 +104,9 @@ case class QuizState(
               // TODO: Move blockedBecauseSecondSubmissionTooClose to canSubmitResponse
               false
             } else {
-              // allow teams to change their minds while the timer is running if they filled in a free-text answer
-              // TODO: return true if the previous submission was a button press
-              false
+              // Allow teams to change their minds while the timer is running if they filled in a free-text answer.
+              // Teams that pressed a button to indicate that they are done, can only do so once.
+              earlierTeamSubmission.exists(_.value == SubmissionValue.PressedTheOneButton)
             }
           }
         }
