@@ -171,7 +171,7 @@ object QuizConfig {
       override def submissionAreOpen(questionProgressIndex: Int): Boolean = questionProgressIndex == 2
       override def isMultipleChoice: Boolean = true
       override def isCorrectAnswer(submissionValue: SubmissionValue): Boolean = {
-        submissionValue match {
+        (submissionValue: @unchecked) match {
           case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
             textualChoices.apply(answerIndex) == textualAnswer
         }
