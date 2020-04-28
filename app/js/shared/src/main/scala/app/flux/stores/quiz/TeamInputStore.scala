@@ -1,15 +1,11 @@
 package app.flux.stores.quiz
 
-import hydro.common.time.JavaTimeImplicits._
-import java.time.Duration
-
+import app.api.ScalaJsApiClient
 import app.flux.router.AppPages
 import app.flux.stores.quiz.GamepadStore.GamepadState
 import app.flux.stores.quiz.TeamInputStore.State
 import app.models.access.ModelFields
 import app.models.quiz.config.QuizConfig
-import app.models.quiz.QuizState.Submission
-import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.Team
@@ -40,6 +36,7 @@ final class TeamInputStore(
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     gamepadStore: GamepadStore,
+    scalaJsApiClient: ScalaJsApiClient,
 ) extends StateStore[State] {
 
   private var currentPage: Page = _
@@ -110,50 +107,39 @@ final class TeamInputStore(
 
       var resultFuture: Future[Unit] = Future.successful((): Unit)
       for (team <- randomTeams) {
-        resultFuture = resultFuture.flatMap(_ => maybeAddSubmission(team, teams))
+        resultFuture = resultFuture.flatMap(_ => maybeAddSubmission(team))
       }
       resultFuture
     }
 
-    private def maybeAddSubmission(team: Team, allTeams: Seq[Team]): Future[Unit] = async {
+    private def maybeAddSubmission(team: Team): Future[Unit] = async {
       val quizState = await(
         entityAccess
           .newQuery[QuizState]()
           .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId)) getOrElse QuizState.nullInstance
 
       if (onRelevantPageForSubmissions && quizState.canSubmitResponse(team)) {
-
         val question = quizState.maybeQuestion.get
         val gamepadState = _state.teamIdToGamepadState(team.id)
-        def teamHasSubmission(thisTeam: Team): Boolean =
-          quizState.submissions.exists(_.teamId == thisTeam.id)
-        def allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
 
-        if (question.isMultipleChoice) {
-          if (gamepadState.arrowPressed.isDefined) {
-            val arrow = gamepadState.arrowPressed.get
-            val submissionIsCorrect =
-              question.isCorrectAnswer(SubmissionValue.MultipleChoiceAnswer(arrow.answerIndex))
+        val submissinoValue = {
+          if (question.isMultipleChoice) {
+            if (gamepadState.arrowPressed.isDefined) {
+              Some(SubmissionValue.MultipleChoiceAnswer(gamepadState.arrowPressed.get.answerIndex))
+            } else {
+              None
+            }
+          } else { // Not multiple choice
+            if (gamepadState.anyButtonPressed) {
+              Some(SubmissionValue.PressedTheOneButton)
+            } else {
+              None
+            }
+          }
+        }
 
-            await(
-              teamsAndQuizStateStore.addSubmission(
-                Submission(teamId = team.id, SubmissionValue.MultipleChoiceAnswer(arrow.answerIndex)),
-                resetTimer = question.isInstanceOf[Question.Double],
-                pauseTimer =
-                  if (question.onlyFirstGainsPoints) submissionIsCorrect else allOtherTeamsHaveSubmission,
-                allowMoreThanOneSubmissionPerTeam = false,
-                removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
-              ))
-          }
-        } else { // Not multiple choice
-          if (gamepadState.anyButtonPressed) {
-            await(
-              teamsAndQuizStateStore.addSubmission(
-                Submission(teamId = team.id, SubmissionValue.PressedTheOneButton),
-                pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
-                allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
-              ))
-          }
+        if (submissinoValue.isDefined) {
+          await(scalaJsApiClient.addSubmission(team.id, submissinoValue.get))
         }
       }
     }

@@ -209,59 +209,6 @@ final class TeamsAndQuizStateStore(
         .map(_ => (): Unit)
     }
 
-  /** Returns true if something changed. */
-  def addSubmission(
-      submission: Submission,
-      resetTimer: Boolean = false,
-      pauseTimer: Boolean = false,
-      allowMoreThanOneSubmissionPerTeam: Boolean,
-      removeEarlierDifferentSubmissionBySameTeam: Boolean = false,
-  ): Future[Boolean] =
-    updateStateQueue.schedule {
-      StateUpsertHelper.doQuizStateUpsert(
-        Seq(ModelFields.QuizState.timerState, ModelFields.QuizState.submissions)) { quizState =>
-        val oldSubmissions = quizState.submissions
-        val newSubmissions = {
-          val filteredOldSubmissions = {
-            if (removeEarlierDifferentSubmissionBySameTeam) {
-              def differentSubmissionBySameTeam(s: Submission): Boolean = {
-                s.teamId == submission.teamId && s.value != submission.value
-              }
-              oldSubmissions.filterNot(differentSubmissionBySameTeam)
-            } else {
-              oldSubmissions
-            }
-          }
-
-          val submissionAlreadyExists = filteredOldSubmissions.exists(_.teamId == submission.teamId)
-
-          if (submissionAlreadyExists && !allowMoreThanOneSubmissionPerTeam) {
-            filteredOldSubmissions
-          } else {
-            filteredOldSubmissions :+ submission
-          }
-        }
-
-        if (oldSubmissions == newSubmissions) {
-          // Don't change timerState if there were no submissions, the return value is always true (incorrectly)
-          quizState
-        } else {
-          quizState.copy(
-            timerState =
-              if (resetTimer) TimerState.createStarted()
-              else if (pauseTimer)
-                TimerState(
-                  lastSnapshotInstant = clock.nowInstant,
-                  lastSnapshotElapsedTime = quizState.timerState.elapsedTime(),
-                  timerRunning = false,
-                )
-              else quizState.timerState,
-            submissions = newSubmissions,
-          )
-        }
-      }
-    }
-
   private object StateUpsertHelper {
 
     val progressionRelatedFields: Seq[ModelField[_, QuizState]] = Seq(
