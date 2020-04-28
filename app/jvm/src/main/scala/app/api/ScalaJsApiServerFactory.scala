@@ -1,11 +1,18 @@
 package app.api
 
+import hydro.models.access.DbQueryImplicits._
 import java.util.concurrent.Executors
 
 import app.api.ScalaJsApi._
 import app.models.access.JvmEntityAccess
+import app.models.access.ModelFields
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState.Submission
+import app.models.quiz.config.QuizConfig.Question
+import app.models.quiz.QuizState
+import app.models.quiz.QuizState.Submission.SubmissionValue
+import app.models.quiz.QuizState.TimerState
+import app.models.quiz.Team
 import app.models.user.User
 import com.google.inject._
 import hydro.api.PicklableDbQuery
@@ -81,8 +88,99 @@ final class ScalaJsApiServerFactory @Inject()(
 
     override def addSubmission(teamId: Long, submissionValue: Submission.SubmissionValue): Unit = {
       singleThreadedExecutor.execute(() => {
-        ???
+        implicit val quizState =
+          entityAccess
+            .newQuerySync[QuizState]()
+            .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId) getOrElse QuizState.nullInstance
+        val allTeams =
+          entityAccess
+            .newQuerySync[Team]()
+            .sort(DbQuery.Sorting.ascBy(ModelFields.Team.index))
+            .data()
+        val team = allTeams.find(_.id == teamId).get
+
+        if (quizState.canSubmitResponse(team)) {
+          val question = quizState.maybeQuestion.get
+          def teamHasSubmission(thisTeam: Team): Boolean =
+            quizState.submissions.exists(_.teamId == thisTeam.id)
+          lazy val allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
+
+          if (question.isMultipleChoice) {
+            addVerifiedSubmission(
+              Submission(teamId = team.id, submissionValue),
+              resetTimer = question.isInstanceOf[Question.Double],
+              pauseTimer =
+                if (question.onlyFirstGainsPoints) question.isCorrectAnswer(submissionValue)
+                else allOtherTeamsHaveSubmission,
+              allowMoreThanOneSubmissionPerTeam = false,
+              removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
+            )
+          } else { // Not multiple choice
+            addVerifiedSubmission(
+              Submission(teamId = team.id, submissionValue),
+              pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
+              allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
+            )
+          }
+        }
       })
+    }
+
+    private def addVerifiedSubmission(
+        submission: Submission,
+        resetTimer: Boolean = false,
+        pauseTimer: Boolean = false,
+        allowMoreThanOneSubmissionPerTeam: Boolean,
+        removeEarlierDifferentSubmissionBySameTeam: Boolean = false,
+    )(implicit quizState: QuizState): Unit = {
+
+      val updatedState = {
+        val oldSubmissions = quizState.submissions
+        val newSubmissions = {
+          val filteredOldSubmissions = {
+            if (removeEarlierDifferentSubmissionBySameTeam) {
+              def differentSubmissionBySameTeam(s: Submission): Boolean = {
+                s.teamId == submission.teamId && s.value != submission.value
+              }
+              oldSubmissions.filterNot(differentSubmissionBySameTeam)
+            } else {
+              oldSubmissions
+            }
+          }
+
+          val submissionAlreadyExists = filteredOldSubmissions.exists(_.teamId == submission.teamId)
+
+          if (submissionAlreadyExists && !allowMoreThanOneSubmissionPerTeam) {
+            filteredOldSubmissions
+          } else {
+            filteredOldSubmissions :+ submission
+          }
+        }
+
+        if (oldSubmissions == newSubmissions) {
+          // Don't change timerState if there were no submissions, the return value is always true (incorrectly)
+          quizState
+        } else {
+          quizState.copy(
+            timerState =
+              if (resetTimer) TimerState.createStarted()
+              else if (pauseTimer)
+                TimerState(
+                  lastSnapshotInstant = clock.nowInstant,
+                  lastSnapshotElapsedTime = quizState.timerState.elapsedTime(),
+                  timerRunning = false,
+                )
+              else quizState.timerState,
+            submissions = newSubmissions,
+          )
+        }
+      }
+
+      entityAccess.persistEntityModifications(
+        EntityModification.createUpdate(
+          updatedState,
+          Seq(ModelFields.QuizState.timerState, ModelFields.QuizState.submissions),
+        ))
     }
   }
 }

@@ -76,7 +76,7 @@ case class QuizState(
           if (question.shouldShowTimer(questionProgressIndex))
             !timerState.timerRunning || timerState.hasFinished(question.maxTime)
           else false
-        def earlierSubmissionFinishedTheQuestion = {
+        lazy val earlierSubmissionFinishedTheQuestion = {
           val alreadyAnsweredCorrectly = submissions.exists(s => question.isCorrectAnswer(s.value))
           question.onlyFirstGainsPoints && alreadyAnsweredCorrectly
         }
@@ -88,8 +88,8 @@ case class QuizState(
     maybeQuestion match {
       case None => false
       case Some(question) =>
-        def earlierTeamSubmission: Option[Submission] = submissions.find(_.teamId == team.id)
-        def blockedByEarlierSubmissionOfSameTeam = {
+        lazy val earlierTeamSubmission: Option[Submission] = submissions.find(_.teamId == team.id)
+        lazy val blockedByEarlierSubmissionOfSameTeam = {
           if (question.isMultipleChoice) {
             if (question.onlyFirstGainsPoints) {
               // Team cannot change their minds because they already know their previous answer was wrong
