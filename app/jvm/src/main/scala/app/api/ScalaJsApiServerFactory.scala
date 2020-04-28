@@ -1,5 +1,7 @@
 package app.api
 
+import java.util.concurrent.Executors
+
 import app.api.ScalaJsApi._
 import app.models.access.JvmEntityAccess
 import app.models.quiz.config.QuizConfig
@@ -16,7 +18,10 @@ import hydro.models.Entity
 import hydro.models.access.DbQuery
 
 import scala.collection.immutable.Seq
+import scala.concurrent.ExecutionContext
+import scala.util.Random
 
+@Singleton
 final class ScalaJsApiServerFactory @Inject()(
     implicit clock: Clock,
     entityAccess: JvmEntityAccess,
@@ -24,6 +29,9 @@ final class ScalaJsApiServerFactory @Inject()(
     quizConfig: QuizConfig,
     playConfiguration: play.api.Configuration,
 ) {
+
+  private val singleThreadedExecutor =
+    ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
 
   def create()(implicit user: User): ScalaJsApi = new ScalaJsApi() {
 
@@ -72,7 +80,9 @@ final class ScalaJsApiServerFactory @Inject()(
     }
 
     override def addSubmission(teamId: Long, submissionValue: Submission.SubmissionValue): Unit = {
-      ???
+      singleThreadedExecutor.execute(() => {
+        ???
+      })
     }
   }
 }
