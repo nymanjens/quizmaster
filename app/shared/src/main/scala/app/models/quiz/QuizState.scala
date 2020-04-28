@@ -100,9 +100,9 @@ case class QuizState(
             }
           } else { // Not multiple choice
             if (question.onlyFirstGainsPoints) {
-              // Allow multiple guesses while the timer is running
-              // TODO: Move blockedBecauseSecondSubmissionTooClose to canSubmitResponse
-              false
+              // Allow multiple guesses while the timer is running, but not the same team twice in a row
+              val blockedBecauseAdjacentSubmission = submissions.lastOption.exists(_.teamId == team.id)
+              blockedBecauseAdjacentSubmission
             } else {
               // Allow teams to change their minds while the timer is running if they filled in a free-text answer.
               // Teams that pressed a button to indicate that they are done, can only do so once.

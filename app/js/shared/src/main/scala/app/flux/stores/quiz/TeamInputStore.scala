@@ -147,27 +147,12 @@ final class TeamInputStore(
           }
         } else { // Not multiple choice
           if (gamepadState.anyButtonPressed) {
-            val blockedBecauseSecondSubmissionTooClose = {
-              if (question.onlyFirstGainsPoints) {
-                val blockedBecauseAdjacentSubmission =
-                  quizState.submissions.lastOption.exists(_.teamId == team.id)
-
-                blockedBecauseAdjacentSubmission
-              } else {
-                false
-              }
-            }
-
-            if (blockedBecauseSecondSubmissionTooClose) {
-              // Don't add
-            } else {
-              await(
-                teamsAndQuizStateStore.addSubmission(
-                  Submission(teamId = team.id, SubmissionValue.PressedTheOneButton),
-                  pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
-                  allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
-                ))
-            }
+            await(
+              teamsAndQuizStateStore.addSubmission(
+                Submission(teamId = team.id, SubmissionValue.PressedTheOneButton),
+                pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
+                allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
+              ))
           }
         }
       }
