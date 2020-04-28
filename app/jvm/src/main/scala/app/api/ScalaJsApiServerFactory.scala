@@ -3,6 +3,7 @@ package app.api
 import app.api.ScalaJsApi._
 import app.models.access.JvmEntityAccess
 import app.models.quiz.config.QuizConfig
+import app.models.quiz.QuizState.Submission
 import app.models.user.User
 import com.google.inject._
 import hydro.api.PicklableDbQuery
@@ -68,6 +69,10 @@ final class ScalaJsApiServerFactory @Inject()(
         entityAccess.queryExecutor[E].count(query)
       }
       internal
+    }
+
+    override def addSubmission(teamId: Long, submissionValue: Submission.SubmissionValue): Unit = {
+      ???
     }
   }
 }
