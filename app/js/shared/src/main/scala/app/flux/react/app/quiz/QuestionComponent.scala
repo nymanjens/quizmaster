@@ -87,7 +87,14 @@ final class QuestionComponent(
       newQuizState: QuizState,
       question: Question,
   ): Unit = {
-    val newSubmissions = newQuizState.submissions.filterNot(oldQuizState.submissions.toSet)
+    val newSubmissions = {
+      if (newQuizState.submissions.take(oldQuizState.submissions.size) == oldQuizState.submissions) {
+        newQuizState.submissions.drop(oldQuizState.submissions.size)
+      } else {
+        println("  Warning: The new submissions are not an extended version of the old submissions")
+        newQuizState.submissions.filterNot(oldQuizState.submissions.toSet)
+      }
+    }
     if (oldQuizState != QuizState.nullInstance && newSubmissions.nonEmpty) {
       if (question.onlyFirstGainsPoints && newSubmissions.exists(_.value.isScorable)) {
         // An answer was given that will be immediately visible, so the sound can indicate its correctness
