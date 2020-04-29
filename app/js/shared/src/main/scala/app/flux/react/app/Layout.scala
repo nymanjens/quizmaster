@@ -1,5 +1,7 @@
 package app.flux.react.app
 
+import hydro.flux.react.ReactVdomUtils.<<
+import hydro.flux.react.ReactVdomUtils.^^
 import app.flux.react.app.quiz.TeamsList
 import app.flux.router.AppPages
 import app.flux.stores.quiz.TeamsAndQuizStateStore
@@ -38,10 +40,12 @@ final class Layout(
         leftMenu = <.span(),
         pageContent = <.div(
           ^.id := "content-wrapper",
-          <.div(
-            ^.id := "left-content-wrapper",
-            teamsList(showScoreEditButtons = router.currentPage.isInstanceOf[AppPages.Master]),
-          ),
+          <<.ifThen(router.currentPage != AppPages.TeamController) {
+            <.div(
+              ^.id := "left-content-wrapper",
+              teamsList(showScoreEditButtons = router.currentPage.isInstanceOf[AppPages.Master]),
+            )
+          },
           <.div(
             ^.id := "right-content-wrapper",
             props.children.toVdomArray,
