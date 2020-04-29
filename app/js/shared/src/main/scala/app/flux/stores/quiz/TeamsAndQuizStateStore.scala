@@ -91,7 +91,7 @@ final class TeamsAndQuizStateStore(
       val maxIndex = if (teams.nonEmpty) teams.map(_.index).max else -1
       val modification = EntityModification.createAddWithRandomId(
         Team(
-          name = "",
+          name = name,
           score = 0,
           index = maxIndex + 1,
         ))
