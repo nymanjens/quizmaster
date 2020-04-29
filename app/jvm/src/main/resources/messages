@@ -140,3 +140,4 @@ app.expected-minutes=Expected duration: {0} minutes
 app.max-points-to-gain=Max points to gain
 app.quiz-settings=Quiz Settings
 app.team-name=Team name
+app.team=Team
