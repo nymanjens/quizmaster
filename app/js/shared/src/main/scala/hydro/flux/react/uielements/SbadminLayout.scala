@@ -69,6 +69,7 @@ final class SbadminLayout(
             ),
             s"v${AppVersion.versionString}",
           ),
+          <.li(linkToPage(AppPages.TeamController)),
           <.li(linkToPage(AppPages.Quiz)),
           <.li(linkToMasterSecretProtectedPage(AppPages.Master.apply)),
           <.li(
