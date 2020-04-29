@@ -19,6 +19,8 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
 
+import scala.concurrent.Future
+
 final class TeamControllerView(
     implicit pageHeader: PageHeader,
     i18n: I18n,
@@ -42,6 +44,7 @@ final class TeamControllerView(
       state =>
         state.copy(
           quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
+          teams = teamsAndQuizStateStore.stateOrEmpty.teams,
           // Update the team, e.g. in case the name changed
           maybeTeam =
             state.maybeTeam.map(team => teamsAndQuizStateStore.stateOrEmpty.teams.find(_.id == team.id).get)
@@ -52,6 +55,7 @@ final class TeamControllerView(
   protected case class Props(router: RouterContext)
   protected case class State(
       quizState: QuizState = QuizState.nullInstance,
+      teams: Seq[Team] = Seq(),
       maybeTeam: Option[Team] = None,
   )
 
@@ -61,6 +65,7 @@ final class TeamControllerView(
 
     override def render(props: Props, state: State): VdomElement = logExceptions {
       implicit val router = props.router
+      implicit val _: State = state
       implicit val quizState = state.quizState
 
       <.span(
@@ -72,33 +77,48 @@ final class TeamControllerView(
       )
     }
 
-    private def createTeamForm(): VdomNode = {
+    private def createTeamForm()(implicit state: State): VdomNode = {
       <.form(
-        TextInput(
-          ref = teamNameInputRef,
-          name = "team-name",
-          focusOnMount = true,
+        Bootstrap.FormGroup(
+          <.label(i18n("app.team-name")),
+          <.div(
+            TextInput(
+              ref = teamNameInputRef,
+              name = "team-name",
+              focusOnMount = true,
+            ),
+          ),
         ),
-        Bootstrap.Button(Variant.info, Size.sm, tpe = "submit")(
-          i18n("app.submit"),
-          ^.onClick ==> { (e: ReactEventFromInput) =>
-            e.preventDefault()
-            Callback.future {
-              teamsAndQuizStateStore
-                .addTeam(name = teamNameInputRef().valueOrDefault)
-                .map(team => $.modState(_.copy(maybeTeam = Some(team))))
+        <.div(
+          Bootstrap.Button(Variant.primary, Size.sm, tpe = "submit")(
+            i18n("app.submit"),
+            ^.onClick ==> { (e: ReactEventFromInput) =>
+              e.preventDefault()
+              val name = teamNameInputRef().valueOrDefault
+              if (name.nonEmpty) {
+                Callback.future {
+                  val teamFuture = state.teams.find(_.name == name) match {
+                    case None       => teamsAndQuizStateStore.addTeam(name = name)
+                    case Some(team) => Future.successful(team)
+                  }
+                  teamFuture.map(team => $.modState(_.copy(maybeTeam = Some(team))))
+                }
+              } else {
+                Callback.empty
+              }
             }
-          }
-        )
+          ),
+        ),
       )
     }
 
     private def controller(team: Team)(implicit quizState: QuizState): VdomNode = {
       <.span(
+        <.div(^.className := "team-name", team.name),
         quizProgressIndicator(quizState, showMasterData = false),
         quizState.maybeQuestion match {
           case None =>
-            <.span()
+            <.span("Waiting for the next question...")
           case Some(question) =>
             <.span("Question")
         },
