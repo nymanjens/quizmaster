@@ -53,7 +53,9 @@ private[router] final class RouterFactory(
         (emptyRule
 
           | staticRoute(RouterFactory.pathPrefix, StandardPages.Root)
-            ~> redirectToPage(AppPages.Quiz)(Redirect.Replace)
+            ~> redirectToPage(AppPages.TeamController)(Redirect.Replace)
+
+          | staticRuleFromPage(AppPages.TeamController, reactAppModule.teamController.apply)
 
           | staticRuleFromPage(AppPages.Quiz, reactAppModule.quizView.apply)
 

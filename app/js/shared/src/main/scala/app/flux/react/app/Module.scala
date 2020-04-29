@@ -13,6 +13,7 @@ import app.flux.react.app.quiz.QuizProgressIndicator
 import app.flux.react.app.quiz.QuizSettingsPanels
 import app.flux.react.app.quiz.QuizView
 import app.flux.react.app.quiz.SyncedTimerBar
+import app.flux.react.app.quiz.TeamControllerView
 import app.flux.react.app.quiz.TeamEditor
 import app.flux.react.app.quiz.TeamsList
 import app.flux.stores._
@@ -61,6 +62,7 @@ final class Module(
   implicit private val quizSettingsPanels: QuizSettingsPanels = new QuizSettingsPanels()
 
   implicit val layout: Layout = new Layout
+  implicit val teamController: TeamControllerView = new TeamControllerView()
   implicit val quizView: QuizView = new QuizView()
   implicit val masterView: MasterView = new MasterView()
   implicit val gamepadSetupView: GamepadSetupView = new GamepadSetupView()
