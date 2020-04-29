@@ -139,3 +139,4 @@ app.wrong-answer-loses-1-point=Fout antwoord verliest 1 punt
 app.enter-master-secret=Voer het master secret in
 app.expected-minutes=Verwachte duur: {0} minuten
 app.max-points-to-gain=Maximale aantal punten te verdienen
+

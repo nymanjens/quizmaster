@@ -115,6 +115,7 @@ app.is-admin=Is admin?
 app.no-entries=No entries
 app.playlist=Playlist
 app.artists=Artists
+app.submit=Submit
 
 # Added for quizmaster
 app.master=Master

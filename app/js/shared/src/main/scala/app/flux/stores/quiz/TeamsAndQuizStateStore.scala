@@ -85,18 +85,18 @@ final class TeamsAndQuizStateStore(
     }
   }
 
-  def addEmptyTeam(): Future[Unit] = updateStateQueue.schedule {
+  def addTeam(name: String): Future[Team] = updateStateQueue.schedule {
     async {
       val teams = await(stateFuture).teams
       val maxIndex = if (teams.nonEmpty) teams.map(_.index).max else -1
-      await(
-        entityAccess.persistModifications(
-          EntityModification.createAddWithRandomId(
-            Team(
-              name = "",
-              score = 0,
-              index = maxIndex + 1,
-            ))))
+      val modification = EntityModification.createAddWithRandomId(
+        Team(
+          name = "",
+          score = 0,
+          index = maxIndex + 1,
+        ))
+      await(entityAccess.persistModifications(modification))
+      modification.entity
     }
   }
 
