@@ -22,6 +22,7 @@ import hydro.flux.react.uielements.Bootstrap.Size
 import hydro.flux.react.uielements.Bootstrap.Variant
 import hydro.flux.react.ReactVdomUtils.<<
 import hydro.flux.react.ReactVdomUtils.^^
+import hydro.flux.react.uielements.Bootstrap
 import hydro.flux.router.RouterContext
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
@@ -156,22 +157,26 @@ final class TeamControllerView(
 
             <.li(
               ^.key := choice,
-              quizState.generalQuizSettings.answerBulletType match {
-                case AnswerBulletType.Arrows =>
-                  arrow.icon(
-                    ^.className := "choice-arrow",
-                  )
-                case AnswerBulletType.Characters => s"$character/ "
-              },
-              <.span(
-                ^^.ifThen(thisChoiceWasChosen) {
-                  ^.className := "chosen"
+              Bootstrap.Button(
+                variant = if(thisChoiceWasChosen) Variant.primary else Variant.default,
+              )(
+                quizState.generalQuizSettings.answerBulletType match {
+                  case AnswerBulletType.Arrows =>
+                    arrow.icon(
+                      ^.className := "choice-arrow",
+                    )
+                  case AnswerBulletType.Characters => s"$character/ "
                 },
-                ^^.ifThen(thisChoiceWasChosen && showSubmissionCorrectness) {
-                  ^.className := (if (thisChoiceIsCorrectAnswer) "correct" else "incorrect")
-                },
-                choice,
-              ),
+                <.span(
+                  ^^.ifThen(thisChoiceWasChosen) {
+                    ^.className := "chosen"
+                  },
+                  ^^.ifThen(thisChoiceWasChosen && showSubmissionCorrectness) {
+                    ^.className := (if (thisChoiceIsCorrectAnswer) "correct" else "incorrect")
+                  },
+                  choice,
+                ),
+              )
             )
           }).toVdomArray
       )
