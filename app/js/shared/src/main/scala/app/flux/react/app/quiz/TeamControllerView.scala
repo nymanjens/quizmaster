@@ -158,8 +158,9 @@ final class TeamControllerView(
             <.li(
               ^.key := choice,
               Bootstrap.Button(
-                variant = if(thisChoiceWasChosen) Variant.primary else Variant.default,
+                variant = if (thisChoiceWasChosen) Variant.primary else Variant.default,
               )(
+                ^.disabled := !canSubmitResponse,
                 quizState.generalQuizSettings.answerBulletType match {
                   case AnswerBulletType.Arrows =>
                     arrow.icon(
