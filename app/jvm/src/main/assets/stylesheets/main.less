@@ -199,16 +199,16 @@ table.table-bordered {
         white-space: normal !important;
         word-wrap: break-word !important;
 
+        &.correct {
+          background-color: green;
+        }
+        &.incorrect {
+          background-color: red;
+          text-decoration: line-through;
+        }
+
         .choice-arrow {
           padding-right: 10px;
-        }
-        .correct {
-          color: green;
-          font-weight: bold;
-        }
-        .incorrect {
-          color: red;
-          text-decoration: line-through;
         }
       }
     }

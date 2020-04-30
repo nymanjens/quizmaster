@@ -164,6 +164,9 @@ final class TeamControllerView(
               )(
                 ^.disabled := !canSubmitResponse,
                 ^.onClick --> submitResponse(thisChoiceSubmissionValue),
+                ^^.ifThen(thisChoiceWasChosen && showSubmissionCorrectness) {
+                  ^.className := (if (thisChoiceIsCorrectAnswer) "correct" else "incorrect")
+                },
                 quizState.generalQuizSettings.answerBulletType match {
                   case AnswerBulletType.Arrows =>
                     arrow.icon(
@@ -172,12 +175,6 @@ final class TeamControllerView(
                   case AnswerBulletType.Characters => s"$character/ "
                 },
                 <.span(
-                  ^^.ifThen(thisChoiceWasChosen) {
-                    ^.className := "chosen"
-                  },
-                  ^^.ifThen(thisChoiceWasChosen && showSubmissionCorrectness) {
-                    ^.className := (if (thisChoiceIsCorrectAnswer) "correct" else "incorrect")
-                  },
                   choice,
                 ),
               )
