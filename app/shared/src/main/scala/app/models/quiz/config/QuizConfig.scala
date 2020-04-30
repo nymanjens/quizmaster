@@ -95,11 +95,7 @@ object QuizConfig {
       }
 
       override def submissionAreOpen(questionProgressIndex: Int): Boolean = {
-        val rightProgressIndex = questionProgressIndex == progressIndexForQuestionBeingAnswered
-        //val questionSupportsSubmissions = choices.nonEmpty || onlyFirstGainsPoints
-        val questionSupportsSubmissions = true
-
-        rightProgressIndex && questionSupportsSubmissions
+        questionProgressIndex == progressIndexForQuestionBeingAnswered
       }
 
       override def isMultipleChoice: Boolean = choices.nonEmpty
