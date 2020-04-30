@@ -43,6 +43,9 @@ object QuizConfig {
     def submissionAreOpen(questionProgressIndex: Int): Boolean
     def isMultipleChoice: Boolean
 
+    def textualQuestion: String
+    def maybeTextualChoices: Option[Seq[String]]
+
     /**
       * Returns true if the given submission is correct according to configured answer.
       *
@@ -99,6 +102,9 @@ object QuizConfig {
       }
 
       override def isMultipleChoice: Boolean = choices.nonEmpty
+      override def textualQuestion: String = question
+      override def maybeTextualChoices: Option[Seq[String]] = choices
+
       override def isCorrectAnswer(submissionValue: SubmissionValue): Boolean = {
         submissionValue match {
           case SubmissionValue.PressedTheOneButton               => false
@@ -133,7 +139,7 @@ object QuizConfig {
     case class Double(
         verbalQuestion: String,
         verbalAnswer: String,
-        textualQuestion: String,
+        override val textualQuestion: String,
         textualAnswer: String,
         textualChoices: Seq[String],
         override val pointsToGain: Int,
@@ -166,6 +172,8 @@ object QuizConfig {
 
       override def submissionAreOpen(questionProgressIndex: Int): Boolean = questionProgressIndex == 2
       override def isMultipleChoice: Boolean = true
+      override def maybeTextualChoices: Option[Seq[String]] = Some(textualChoices)
+
       override def isCorrectAnswer(submissionValue: SubmissionValue): Boolean = {
         (submissionValue: @unchecked) match {
           case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
