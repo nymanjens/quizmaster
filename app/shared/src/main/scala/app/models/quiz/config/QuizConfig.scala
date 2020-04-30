@@ -42,6 +42,7 @@ object QuizConfig {
     /** Returns true if it would make sense to add a QuizState.Submission for this question for this progressIndex. */
     def submissionAreOpen(questionProgressIndex: Int): Boolean
     def isMultipleChoice: Boolean
+    def answerIsVisible(questionProgressIndex: Int): Boolean
 
     def textualQuestion: String
     def maybeTextualChoices: Option[Seq[String]]
@@ -123,7 +124,7 @@ object QuizConfig {
       def choicesAreVisible(questionProgressIndex: Int): Boolean = {
         choices.isDefined && questionProgressIndex >= 2
       }
-      def answerIsVisible(questionProgressIndex: Int): Boolean = {
+      override def answerIsVisible(questionProgressIndex: Int): Boolean = {
         if (choices.isDefined) {
           questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
         } else {
@@ -187,7 +188,7 @@ object QuizConfig {
       def choicesAreVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 2
       }
-      def answerIsVisible(questionProgressIndex: Int): Boolean = {
+      override def answerIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
       }
     }
