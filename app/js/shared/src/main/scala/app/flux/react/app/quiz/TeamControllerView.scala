@@ -1,5 +1,6 @@
 package app.flux.react.app.quiz
 
+import app.api.ScalaJsApiClient
 import app.flux.stores.quiz.GamepadStore.Arrow
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -36,6 +37,7 @@ final class TeamControllerView(
     dispatcher: Dispatcher,
     clock: Clock,
     quizConfig: QuizConfig,
+    scalaJsApiClient: ScalaJsApiClient,
     teamEditor: TeamEditor,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     quizProgressIndicator: QuizProgressIndicator,
@@ -161,6 +163,7 @@ final class TeamControllerView(
                 variant = if (thisChoiceWasChosen) Variant.primary else Variant.default,
               )(
                 ^.disabled := !canSubmitResponse,
+                ^.onClick --> submitResponse(thisChoiceSubmissionValue),
                 quizState.generalQuizSettings.answerBulletType match {
                   case AnswerBulletType.Arrows =>
                     arrow.icon(
@@ -181,6 +184,14 @@ final class TeamControllerView(
             )
           }).toVdomArray
       )
+    }
+
+    private def submitResponse(submissionValue: SubmissionValue)(implicit team: Team): Callback = {
+      Callback.future {
+        scalaJsApiClient
+          .addSubmission(teamId = team.id, submissionValue = submissionValue)
+          .map(_ => Callback.empty)
+      }
     }
 
     private def showSubmissionForm(question: Question)(implicit quizState: QuizState): Boolean = {

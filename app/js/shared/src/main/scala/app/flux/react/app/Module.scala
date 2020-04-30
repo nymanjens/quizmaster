@@ -1,6 +1,7 @@
 package app.flux.react.app
 
 import app.api.ScalaJsApi.GetInitialDataResponse
+import app.api.ScalaJsApiClient
 import app.flux.controllers.SoundEffectController
 import app.flux.react.app.quiz.GamepadSetupView
 import app.flux.react.app.quiz.GeneralQuizSettings
@@ -40,6 +41,7 @@ final class Module(
     teamInputStore: TeamInputStore,
     dispatcher: Dispatcher,
     clock: Clock,
+    scalaJsApiClient: ScalaJsApiClient,
     quizConfig: QuizConfig,
     soundEffectController: SoundEffectController,
     getInitialDataResponse: GetInitialDataResponse,
