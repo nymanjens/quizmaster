@@ -164,11 +164,12 @@ final class TeamControllerView(
                 case AnswerBulletType.Characters => s"$character/ "
               },
               <.span(
-                ^^.ifThen(thisChoiceWasChosen) { ^.className := "chosen" },
-                ^^.ifThen(showSubmissionCorrectness) {
-                  ^.className := (if (thisChoiceIsCorrectAnswer) "correct" else "incorrect"),
+                ^^.ifThen(thisChoiceWasChosen) {
+                  ^.className := "chosen"
                 },
-                ^.className := "correct",
+                ^^.ifThen(thisChoiceWasChosen && showSubmissionCorrectness) {
+                  ^.className := (if (thisChoiceIsCorrectAnswer) "correct" else "incorrect")
+                },
                 choice,
               ),
             )

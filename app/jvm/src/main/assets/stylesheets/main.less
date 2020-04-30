@@ -175,13 +175,30 @@ table.table-bordered {
 /****** Team controller view ******/
 .team-controller-view {
   .team-name {
-    font-size: 16px;
+    font-size: 21px;
     font-weight: bold;
-    padding-bottom: 13px;
+    padding-bottom: 20px;
   }
   .question {
-    font-size: 16px;
+    font-size: 17px;
     padding-bottom: 14px;
+  }
+
+  .choices {
+    list-style: none;
+    font-size: 25px;
+    padding-left: 0;
+    .choice-arrow {
+      padding-right: 25px;
+    }
+    .correct {
+      color: green;
+      font-weight: bold;
+    }
+    .incorrect {
+      color: red;
+      text-decoration: line-through;
+    }
   }
 }
 
