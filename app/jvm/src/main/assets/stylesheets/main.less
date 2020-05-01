@@ -147,9 +147,13 @@ table.table-bordered {
           font-size: 50px;
           text-align: center;
         }
+        .submission {
+          font-size: 23px;
+          text-align: center;
+        }
       }
 
-      &.teams-list-small {
+      &.teams-list-small, &.teams-list-smaller {
         li {
           .name {
             font-size: 30px;
@@ -159,6 +163,24 @@ table.table-bordered {
           .score {
             font-size: 30px;
             display:inline-block;
+          }
+          .submission {
+            text-align: left;
+          }
+        }
+      }
+
+      &.teams-list-smaller {
+        li {
+          margin-bottom: 10px;
+          .name {
+            font-size: 20px;
+          }
+          .score {
+            font-size: 20px;
+          }
+          .submission {
+            font-size: 15px;
           }
         }
       }

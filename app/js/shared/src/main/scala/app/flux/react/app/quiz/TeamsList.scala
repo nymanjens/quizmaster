@@ -75,8 +75,11 @@ final class TeamsList(
       <<.ifThen(state.teams.nonEmpty) {
         <.ul(
           ^.className := "teams-list",
-          ^^.ifThen(state.teams.size > 5) {
+          ^^.ifThen(state.teams.size > 4) {
             ^.className := "teams-list-small"
+          },
+          ^^.ifThen(state.teams.size > 6) {
+            ^.className := "teams-list-smaller"
           },
           (for (team <- state.teams) yield {
             val maybeSubmissionValue =
