@@ -25,6 +25,7 @@ object QuizConfig {
     def pointsToGainOnWrongAnswer: Int
 
     def onlyFirstGainsPoints: Boolean
+    def showSingleAnswerButtonToTeams: Boolean
 
     def progressStepsCount(includeAnswers: Boolean): Int
     final def progressStepsCount(implicit quizState: QuizState): Int = {
@@ -71,6 +72,7 @@ object QuizConfig {
         override val pointsToGainOnWrongAnswer: Int,
         override val maxTime: Duration,
         override val onlyFirstGainsPoints: Boolean,
+        override val showSingleAnswerButtonToTeams: Boolean,
     ) extends Question {
       if (choices.isDefined) {
         require(choices.get.size == 4, s"There should be 4 choices, but got ${choices.get}")
@@ -154,6 +156,7 @@ object QuizConfig {
       override def pointsToGainOnWrongAnswer: Int = 0
 
       override def onlyFirstGainsPoints: Boolean = true
+      override def showSingleAnswerButtonToTeams: Boolean = false
 
       /**
         * Steps:
