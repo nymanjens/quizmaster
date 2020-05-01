@@ -90,11 +90,12 @@ object QuizConfig {
         * 4- (if possible) Show answer and give points
         */
       override def progressStepsCount(includeAnswers: Boolean): Int = {
-        if (includeAnswers) {
-          if (choices.isDefined) 5 else 3
-        } else {
-          if (choices.isDefined) 3 else 2
-        }
+        def oneIfTrue(b: Boolean): Int = if(b)1 else 0
+        val includeStep2 = choices.isDefined
+        val includeStep3 = includeAnswers
+        val includeStep4 = includeAnswers && !showSingleAnswerButtonToTeams
+
+        2 + oneIfTrue(includeStep2) + oneIfTrue(includeStep3) + oneIfTrue(includeStep4)
       }
       override def shouldShowTimer(questionProgressIndex: Int): Boolean = {
         questionProgressIndex == progressIndexForQuestionBeingAnswered
