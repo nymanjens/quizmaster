@@ -120,6 +120,7 @@ final class ScalaJsApiServerFactory @Inject()(
               Submission(teamId = team.id, submissionValue),
               pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
               allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
+              removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
             )
           }
         }
