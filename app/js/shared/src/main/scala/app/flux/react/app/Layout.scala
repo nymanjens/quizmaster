@@ -43,7 +43,7 @@ final class Layout(
           <<.ifThen(router.currentPage != AppPages.TeamController) {
             <.div(
               ^.id := "left-content-wrapper",
-              teamsList(showScoreEditButtons = router.currentPage.isInstanceOf[AppPages.Master]),
+              teamsList(showMasterControls = router.currentPage.isInstanceOf[AppPages.Master]),
             )
           },
           <.div(

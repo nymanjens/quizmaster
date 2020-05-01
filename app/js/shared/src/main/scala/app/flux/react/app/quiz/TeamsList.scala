@@ -34,8 +34,8 @@ final class TeamsList(
 ) extends HydroReactComponent {
 
   // **************** API ****************//
-  def apply(showScoreEditButtons: Boolean): VdomElement = {
-    component(Props(showScoreEditButtons = showScoreEditButtons))
+  def apply(showMasterControls: Boolean): VdomElement = {
+    component(Props(showMasterControls = showMasterControls))
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//
@@ -52,7 +52,7 @@ final class TeamsList(
         _.copy(teamIdToGamepadState = teamInputStore.state.teamIdToGamepadState))
 
   // **************** Implementation of HydroReactComponent types ****************//
-  protected case class Props(showScoreEditButtons: Boolean)
+  protected case class Props(showMasterControls: Boolean)
   protected case class State(
       quizState: QuizState = QuizState.nullInstance,
       teams: Seq[Team] = Seq(),
@@ -66,7 +66,7 @@ final class TeamsList(
       val maybeQuestion = quizState.maybeQuestion
       val showSubmissionValue = maybeQuestion.exists { question =>
         (
-          props.showScoreEditButtons ||
+          props.showMasterControls ||
           question.onlyFirstGainsPoints ||
           question.answerIsVisible(quizState.questionProgressIndex)
         )
@@ -107,7 +107,7 @@ final class TeamsList(
               ),
               <.div(
                 ^.className := "score",
-                <<.ifThen(props.showScoreEditButtons) {
+                <<.ifThen(props.showMasterControls) {
                   Bootstrap
                     .Button()(
                       ^.onClick --> LogExceptionsCallback(
@@ -118,7 +118,7 @@ final class TeamsList(
                 " ",
                 team.score,
                 " ",
-                <<.ifThen(props.showScoreEditButtons) {
+                <<.ifThen(props.showMasterControls) {
                   Bootstrap
                     .Button()(
                       ^.onClick --> LogExceptionsCallback(
@@ -144,7 +144,7 @@ final class TeamsList(
 
     private def revealingSubmissionValueNode(submissionValue: SubmissionValue)(
         implicit quizState: QuizState,
-    )    : VdomNode =
+    ): VdomNode =
       submissionValue match {
         case SubmissionValue.PressedTheOneButton               => Bootstrap.FontAwesomeIcon("circle")
         case SubmissionValue.MultipleChoiceAnswer(answerIndex) => AnswerBullet.all(answerIndex).toVdomNode
