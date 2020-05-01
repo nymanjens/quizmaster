@@ -126,7 +126,12 @@ final class TeamControllerView(
 
     private def controller(implicit team: Team, quizState: QuizState): VdomNode = {
       <.span(
-        <.div(^.className := "team-name", team.name),
+        <.div(
+          ^.className := "team-name",
+          team.name,
+          " ",
+          TeamIcon(team),
+        ),
         quizState.maybeQuestion match {
           case Some(question) if showSubmissionForm(question) =>
             <.span(
