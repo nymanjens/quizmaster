@@ -39,6 +39,7 @@ final class TeamsList(
       .withStateStoresDependency(
         teamsAndQuizStateStore,
         _.copy(
+          quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
           teams = teamsAndQuizStateStore.stateOrEmpty.teams,
         ))
       .withStateStoresDependency(
@@ -48,6 +49,7 @@ final class TeamsList(
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(showScoreEditButtons: Boolean)
   protected case class State(
+      quizState: QuizState = QuizState.nullInstance,
       teams: Seq[Team] = Seq(),
       teamIdToGamepadState: Map[Long, GamepadState] = Map(),
   )
@@ -71,6 +73,7 @@ final class TeamsList(
                 <<.ifDefined(state.teamIdToGamepadState.get(team.id)) { gamepadState =>
                   <<.ifThen(gamepadState.connected) {
                     Bootstrap.FontAwesomeIcon("gamepad")(
+                        ^.className := "gamepad-icon",
                       ^^.ifThen(gamepadState.anyButtonPressed) {
                         ^.className := "pressed"
                       },

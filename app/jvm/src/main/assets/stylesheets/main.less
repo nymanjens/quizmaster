@@ -130,19 +130,19 @@ table.table-bordered {
           font-size: 30px;
           text-align: center;
 
+          .gamepad-icon {
+            &.pressed {
+              color: black;
+            }
+            &:not(.pressed) {
+              color: #BBB;
+            }
+          }
         }
         .score {
           font-weight: bold;
           font-size: 50px;
           text-align: center;
-        }
-        i {
-          &.pressed {
-            color: black;
-          }
-          &:not(.pressed) {
-            color: #BBB;
-          }
         }
       }
 
