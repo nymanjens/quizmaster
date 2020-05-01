@@ -123,15 +123,15 @@ object GamepadStore {
     val nullInstance = GamepadState()
   }
 
-  sealed abstract class Arrow(val icon: VdomTag) {
+  sealed abstract class Arrow {
     lazy val answerIndex: Int = Arrow.all.indexOf(this)
   }
   object Arrow {
     def all: Seq[Arrow] = Seq(Up, Right, Down, Left)
 
-    case object Up extends Arrow(Bootstrap.FontAwesomeIcon("chevron-circle-up"))
-    case object Right extends Arrow(Bootstrap.FontAwesomeIcon("chevron-circle-right"))
-    case object Down extends Arrow(Bootstrap.FontAwesomeIcon("chevron-circle-down"))
-    case object Left extends Arrow(Bootstrap.FontAwesomeIcon("chevron-circle-left"))
+    case object Up extends Arrow
+    case object Right extends Arrow
+    case object Down extends Arrow
+    case object Left extends Arrow
   }
 }

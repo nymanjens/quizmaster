@@ -1,6 +1,7 @@
 package app.flux.react.app.quiz
 
 import app.api.ScalaJsApiClient
+import app.common.AnswerBullet
 import app.flux.stores.quiz.GamepadStore.Arrow
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -179,9 +180,9 @@ final class TeamControllerView(
 
       <.ul(
         ^.className := "multiple-choice-answer-buttons",
-        (for ((choice, arrow, character) <- (choices, Arrow.all, Seq("A", "B", "C", "D")).zipped)
+        (for ((choice, answerBullet) <- choices zip AnswerBullet.all)
           yield {
-            val thisChoiceSubmissionValue = SubmissionValue.MultipleChoiceAnswer(arrow.answerIndex)
+            val thisChoiceSubmissionValue = SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex)
             val thisChoiceWasChosen = maybeCurrentSubmissionValue == Some(thisChoiceSubmissionValue)
             val thisChoiceIsCorrectAnswer = question.isCorrectAnswer(thisChoiceSubmissionValue)
 
@@ -195,13 +196,7 @@ final class TeamControllerView(
                 ^^.ifThen(thisChoiceWasChosen && showSubmissionCorrectness) {
                   ^.className := (if (thisChoiceIsCorrectAnswer) "correct" else "incorrect")
                 },
-                quizState.generalQuizSettings.answerBulletType match {
-                  case AnswerBulletType.Arrows =>
-                    arrow.icon(
-                      ^.className := "choice-arrow",
-                    )
-                  case AnswerBulletType.Characters => s"$character/ "
-                },
+                answerBullet.toVdomNode,
                 <.span(
                   choice,
                 ),

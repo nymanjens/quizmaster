@@ -1,5 +1,7 @@
 package app.flux.react.app.quiz
 
+import app.common.AnswerBullet
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.async.Async.async
 import scala.async.Async.await
@@ -168,6 +170,7 @@ final class QuestionComponent(
         implicit props: Props,
         state: State,
     ): VdomElement = {
+      implicit val _ = state.quizState
       val progressIndex = props.questionProgressIndex
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
       val showSubmissionsOnChoices = question.isMultipleChoice && (question.onlyFirstGainsPoints || answerIsVisible)
@@ -222,23 +225,17 @@ final class QuestionComponent(
                 },
                 <.ul(
                   ^.className := "choices",
-                  (for ((choice, arrow, character) <- (choices, Arrow.all, Seq("A", "B", "C", "D")).zipped)
+                  (for ((choice, answerBullet) <- choices zip AnswerBullet.all)
                     yield {
                       val visibleSubmissions =
                         if (showSubmissionsOnChoices)
                           state.quizState.submissions.filter(
-                            _.value == SubmissionValue.MultipleChoiceAnswer(arrow.answerIndex))
+                            _.value == SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
                         else Seq()
                       val isCorrectAnswer = choice == question.answer
                       <.li(
                         ^.key := choice,
-                        state.quizState.generalQuizSettings.answerBulletType match {
-                          case AnswerBulletType.Arrows =>
-                            arrow.icon(
-                              ^.className := "choice-arrow",
-                            )
-                          case AnswerBulletType.Characters => s"$character/ "
-                        },
+                        answerBullet.toVdomNode,
                         if (isCorrectAnswer && (answerIsVisible || visibleSubmissions.nonEmpty)) {
                           <.span(^.className := "correct", choice)
                         } else if (!isCorrectAnswer && visibleSubmissions.nonEmpty) {
@@ -307,6 +304,7 @@ final class QuestionComponent(
         implicit props: Props,
         state: State,
     ): VdomElement = {
+      implicit val _ = state.quizState
       val progressIndex = props.questionProgressIndex
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
       val correctSubmissionWasEntered =
@@ -349,17 +347,15 @@ final class QuestionComponent(
               ^.className := "choices-holder",
               <.ul(
                 ^.className := "choices",
-                (for ((choice, arrow) <- question.textualChoices zip Arrow.all)
+                (for ((choice, answerBullet) <- question.textualChoices zip AnswerBullet.all)
                   yield {
                     val submissions =
                       state.quizState.submissions.filter(
-                        _.value == SubmissionValue.MultipleChoiceAnswer(arrow.answerIndex))
+                        _.value == SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
                     val isCorrectAnswer = choice == question.textualAnswer
                     <.li(
                       ^.key := choice,
-                      arrow.icon(
-                        ^.className := "choice-arrow",
-                      ),
+                      answerBullet.toVdomNode,
                       if (isCorrectAnswer && (answerIsVisible || submissions.nonEmpty || props.showMasterData)) {
                         <.span(^.className := "correct", choice)
                       } else if (!isCorrectAnswer && submissions.nonEmpty) {
