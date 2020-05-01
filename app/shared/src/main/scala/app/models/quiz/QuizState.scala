@@ -158,7 +158,7 @@ object QuizState {
     object SubmissionValue {
       case object PressedTheOneButton extends SubmissionValue(isScorable = false)
       case class MultipleChoiceAnswer(answerIndex: Int) extends SubmissionValue(isScorable = true)
-      case class FreeTextAnswer(answerIndex: String) extends SubmissionValue(isScorable = true)
+      case class FreeTextAnswer(answerString: String) extends SubmissionValue(isScorable = true)
     }
   }
 

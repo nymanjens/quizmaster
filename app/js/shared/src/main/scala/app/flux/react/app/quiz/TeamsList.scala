@@ -8,6 +8,7 @@ import hydro.flux.react.ReactVdomUtils.<<
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState
+import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.Team
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.JsLoggingUtils.LogExceptionsCallback
@@ -60,6 +61,16 @@ final class TeamsList(
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
 
     override def render(props: Props, state: State): VdomNode = logExceptions {
+      val quizState = state.quizState
+      val maybeQuestion = quizState.maybeQuestion
+      val showSubmissionValue = maybeQuestion.exists { question =>
+        (
+          props.showScoreEditButtons ||
+          question.onlyFirstGainsPoints ||
+          question.answerIsVisible(quizState.questionProgressIndex)
+        )
+      }
+
       <<.ifThen(state.teams.nonEmpty) {
         <.ul(
           ^.className := "teams-list",
@@ -67,6 +78,9 @@ final class TeamsList(
             ^.className := "teams-list-small"
           },
           (for (team <- state.teams) yield {
+            val maybeSubmissionValue =
+              quizState.submissions.filter(_.teamId == team.id).map(_.value).lastOption
+
             <.li(
               ^.key := team.id,
               ^.style := js.Dictionary("borderColor" -> TeamIcon.colorOf(team)),
@@ -109,10 +123,26 @@ final class TeamsList(
                     )
                 },
               ),
+              <.div(
+                ^.className := "submission",
+                maybeSubmissionValue match {
+                  case Some(submissionValue) if showSubmissionValue =>
+                    revealingSubmissionValueNode(submissionValue)
+                  case Some(_) => Bootstrap.FontAwesomeIcon("circle")
+                  case None    => Bootstrap.FontAwesomeIcon("circle-o")
+                },
+              ),
             )
           }).toVdomArray
         )
       }
     }
+
+    private def revealingSubmissionValueNode(submissionValue: SubmissionValue): VdomNode =
+      submissionValue match {
+        case SubmissionValue.PressedTheOneButton               => Bootstrap.FontAwesomeIcon("circle")
+        case SubmissionValue.MultipleChoiceAnswer(answerIndex) => Bootstrap.FontAwesomeIcon("circle")
+        case SubmissionValue.FreeTextAnswer(answerString)      => Bootstrap.FontAwesomeIcon("circle")
+      }
   }
 }
