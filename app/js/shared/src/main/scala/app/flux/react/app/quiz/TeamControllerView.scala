@@ -163,7 +163,11 @@ final class TeamControllerView(
         ^.className := "the-one-button",
         ^.disabled := !canSubmitResponse,
         ^.onClick --> submitResponse(SubmissionValue.PressedTheOneButton),
-        "Stop the timer and give the answer",
+        if (question.onlyFirstGainsPoints) {
+          "Stop the timer and give the answer"
+        } else {
+          "Indicate that you have written down your answer"
+        },
       )
     }
 
