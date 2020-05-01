@@ -1,5 +1,6 @@
 package app.flux.react.app.quiz
 
+import app.common.AnswerBullet
 import app.flux.react.app.quiz.TeamIcon.colorOf
 import hydro.flux.react.ReactVdomUtils.^^
 import app.flux.stores.quiz.GamepadStore.GamepadState
@@ -61,7 +62,7 @@ final class TeamsList(
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
 
     override def render(props: Props, state: State): VdomNode = logExceptions {
-      val quizState = state.quizState
+      implicit val quizState = state.quizState
       val maybeQuestion = quizState.maybeQuestion
       val showSubmissionValue = maybeQuestion.exists { question =>
         (
@@ -112,7 +113,7 @@ final class TeamsList(
                     )
                 },
                 " ",
-                team.index,
+                team.score,
                 " ",
                 <<.ifThen(props.showScoreEditButtons) {
                   Bootstrap
@@ -138,11 +139,13 @@ final class TeamsList(
       }
     }
 
-    private def revealingSubmissionValueNode(submissionValue: SubmissionValue): VdomNode =
+    private def revealingSubmissionValueNode(submissionValue: SubmissionValue)(
+        implicit quizState: QuizState,
+    )    : VdomNode =
       submissionValue match {
         case SubmissionValue.PressedTheOneButton               => Bootstrap.FontAwesomeIcon("circle")
-        case SubmissionValue.MultipleChoiceAnswer(answerIndex) => Bootstrap.FontAwesomeIcon("circle")
-        case SubmissionValue.FreeTextAnswer(answerString)      => Bootstrap.FontAwesomeIcon("circle")
+        case SubmissionValue.MultipleChoiceAnswer(answerIndex) => AnswerBullet.all(answerIndex).toVdomNode
+        case SubmissionValue.FreeTextAnswer(answerString)      => answerString
       }
   }
 }
