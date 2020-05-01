@@ -8,7 +8,7 @@ import scala.scalajs.js
 
 object TeamIcon {
 
-  private val colors: Seq[String] = Seq("red", "orange", "blue", "deeppink", "green")
+  private val colors: Seq[String] = Seq("red", "orange", "blue", "green", "deeppink", "#DD0", "purple", "fuchsia")
   private val icons: Seq[VdomTag] = Seq(
     Bootstrap.FontAwesomeIcon("bomb", fixedWidth = true),
     Bootstrap.FontAwesomeIcon("beer", fixedWidth = true),
@@ -24,7 +24,11 @@ object TeamIcon {
 
   def apply(team: Team): VdomTag = {
     icons(team.index % icons.size)(
-      ^.style := js.Dictionary("color" -> colors(team.index % colors.size))
+      ^.style := js.Dictionary("color" -> colorOf(team))
     )
+  }
+
+  def colorOf(team: Team): String = {
+    colors(team.index % colors.size)
   }
 }

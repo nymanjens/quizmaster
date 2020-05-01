@@ -1,5 +1,6 @@
 package app.flux.react.app.quiz
 
+import app.flux.react.app.quiz.TeamIcon.colorOf
 import hydro.flux.react.ReactVdomUtils.^^
 import app.flux.stores.quiz.GamepadStore.GamepadState
 import app.flux.stores.quiz.TeamInputStore
@@ -19,6 +20,8 @@ import hydro.flux.react.uielements.PageHeader
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
+
+import scala.scalajs.js
 
 final class TeamsList(
     implicit pageHeader: PageHeader,
@@ -66,6 +69,7 @@ final class TeamsList(
           (for (team <- state.teams) yield {
             <.li(
               ^.key := team.id,
+              ^.style := js.Dictionary("borderColor" -> TeamIcon.colorOf(team)),
               <.div(
                 ^.className := "name",
                 team.name,
@@ -94,7 +98,7 @@ final class TeamsList(
                     )
                 },
                 " ",
-                team.score,
+                team.index,
                 " ",
                 <<.ifThen(props.showScoreEditButtons) {
                   Bootstrap
