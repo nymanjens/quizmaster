@@ -146,7 +146,7 @@ final class TeamControllerView(
               }
             )
           case _ =>
-            <.span("Waiting for the next question...")
+            <.span(i18n("app.waiting-for-the-next-question"))
         },
       )
     }
@@ -164,9 +164,9 @@ final class TeamControllerView(
         ^.disabled := !canSubmitResponse,
         ^.onClick --> submitResponse(SubmissionValue.PressedTheOneButton),
         if (question.onlyFirstGainsPoints) {
-          "Stop the timer and give the answer"
+          i18n("app.stop-the-timer-and-give-the-answer")
         } else {
-          "Indicate that you have written down your answer"
+          i18n("app.indicate-that-you-have-written-down-your-answer")
         },
       )
     }
@@ -227,7 +227,7 @@ final class TeamControllerView(
       <.form(
         ^.className := "free-text-answer-form",
         Bootstrap.FormGroup(
-          <.label("Enter your answer:"),
+          <.label(i18n("app.enter-your-answer"), ":"),
           <.div(
             TextInput(
               ref = freeTextAnswerInputRef,
@@ -256,7 +256,8 @@ final class TeamControllerView(
         <<.ifDefined(maybeCurrentSubmissionText) { currentSubmissionText =>
           <.div(
             ^.className := "you-submitted",
-            "You submitted: ",
+            i18n("app.you-submitted"),
+            ": ",
             <.span(
               ^^.ifThen(showSubmissionCorrectness) {
                 ^.className := (if (question.isCorrectAnswer(maybeCurrentSubmissionValue.get)) "correct"
