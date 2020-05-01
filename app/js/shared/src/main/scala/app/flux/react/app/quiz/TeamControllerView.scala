@@ -148,7 +148,16 @@ final class TeamControllerView(
         implicit team: Team,
         quizState: QuizState,
     ): VdomNode = {
-      ???
+      val canSubmitResponse = quizState.canSubmitResponse(team)
+
+      Bootstrap.Button(
+        variant = Variant.primary,
+      )(
+        ^.className := "the-one-button",
+        ^.disabled := !canSubmitResponse,
+        ^.onClick --> submitResponse(SubmissionValue.PressedTheOneButton),
+        "Stop the timer and give the answer",
+      )
     }
 
     private def multipleChoiceAnswerButtons(question: Question)(
@@ -199,7 +208,7 @@ final class TeamControllerView(
         implicit team: Team,
         quizState: QuizState,
     ): VdomNode = {
-      ???
+      <.span("TODO")
     }
 
     private def submitResponse(submissionValue: SubmissionValue)(implicit team: Team): Callback = {
