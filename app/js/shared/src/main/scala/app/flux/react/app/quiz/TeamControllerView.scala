@@ -173,7 +173,7 @@ final class TeamControllerView(
         quizState.questionProgressIndex)
 
       <.ul(
-        ^.className := "choices",
+        ^.className := "multiple-choice-answer-buttons",
         (for ((choice, arrow, character) <- (choices, Arrow.all, Seq("A", "B", "C", "D")).zipped)
           yield {
             val thisChoiceSubmissionValue = SubmissionValue.MultipleChoiceAnswer(arrow.answerIndex)
@@ -209,13 +209,21 @@ final class TeamControllerView(
         implicit team: Team,
         quizState: QuizState,
     ): VdomNode = {
-      val maybeCurrentSubmissionValue =
-        quizState.submissions.filter(_.teamId == team.id).map(_.value).lastOption
+      val maybeCurrentSubmissionText =
+        quizState.submissions
+          .filter(_.teamId == team.id)
+          .map(_.value)
+          .map {
+            case SubmissionValue.FreeTextAnswer(a) => Some(a)
+            case _                                 => None
+          }
+          .lastOption
       val canSubmitResponse = quizState.canSubmitResponse(team)
       val showSubmissionCorrectness = question.onlyFirstGainsPoints || question.answerIsVisible(
         quizState.questionProgressIndex)
 
       <.form(
+        ^.className := "free-text-answer-form",
         Bootstrap.FormGroup(
           <.label("Enter your answer:"),
           <.div(
@@ -243,6 +251,13 @@ final class TeamControllerView(
             i18n("app.submit"),
           ),
         ),
+        <<.ifDefined(maybeCurrentSubmissionText) { currentSubmissionText =>
+        <.div(
+          ^.className := "you-submitted",
+          "You submitted: ",
+          <.span(currentSubmissionText)
+        )
+        },
       )
     }
 
