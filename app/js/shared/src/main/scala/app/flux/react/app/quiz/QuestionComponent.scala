@@ -427,11 +427,13 @@ final class QuestionComponent(
 
     private def showSubmissions(submissions: Seq[Submission])(implicit state: State) = {
       <<.joinWithSpaces(
-        for ((submission, index) <- submissions.zipWithIndex)
-          yield
-            TeamIcon(state.teams.find(_.id == submission.teamId).get)(
-              ^.key := s"${submission.teamId}-$index",
-            )
+        for {
+          (submission, index) <- submissions.zipWithIndex
+          team <- state.teams.find(_.id == submission.teamId)
+        } yield
+          TeamIcon(team)(
+            ^.key := s"${submission.teamId}-$index",
+          )
       )
     }
 
