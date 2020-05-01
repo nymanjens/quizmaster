@@ -46,15 +46,6 @@ final class SbadminLayout(
         ^.style := js.Dictionary("marginBottom" -> 0),
         <.div(
           ^.className := "navbar-header",
-          <.button(
-            ^.className := "navbar-toggle",
-            VdomAttr("data-toggle") := "collapse",
-            VdomAttr("data-target") := ".navbar-collapse",
-            <.span(^.className := "sr-only", "Toggle navigation"),
-            <.span(^.className := "icon-bar"),
-            <.span(^.className := "icon-bar"),
-            <.span(^.className := "icon-bar")
-          ),
           Bootstrap.NavbarBrand(tag = router.anchorWithHrefTo(StandardPages.Root))(title),
           " ",
           pageLoadingSpinner()
