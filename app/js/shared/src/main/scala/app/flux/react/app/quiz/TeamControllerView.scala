@@ -74,6 +74,7 @@ final class TeamControllerView(
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
 
     val teamNameInputRef = TextInput.ref()
+    val freeTextAnswerInputRef = TextInput.ref()
 
     override def render(props: Props, state: State): VdomElement = logExceptions {
       implicit val router = props.router
@@ -102,7 +103,6 @@ final class TeamControllerView(
         ),
         <.div(
           Bootstrap.Button(Variant.primary, Size.sm, tpe = "submit")(
-            i18n("app.submit"),
             ^.onClick ==> { (e: ReactEventFromInput) =>
               e.preventDefault()
               val name = teamNameInputRef().valueOrDefault
@@ -117,7 +117,8 @@ final class TeamControllerView(
               } else {
                 Callback.empty
               }
-            }
+            },
+            i18n("app.submit"),
           ),
         ),
       )
@@ -208,7 +209,41 @@ final class TeamControllerView(
         implicit team: Team,
         quizState: QuizState,
     ): VdomNode = {
-      <.span("TODO")
+      val maybeCurrentSubmissionValue =
+        quizState.submissions.filter(_.teamId == team.id).map(_.value).lastOption
+      val canSubmitResponse = quizState.canSubmitResponse(team)
+      val showSubmissionCorrectness = question.onlyFirstGainsPoints || question.answerIsVisible(
+        quizState.questionProgressIndex)
+
+      <.form(
+        Bootstrap.FormGroup(
+          <.label("Enter your answer:"),
+          <.div(
+            TextInput(
+              ref = freeTextAnswerInputRef,
+              name = "answer",
+              focusOnMount = true,
+              disabled = !canSubmitResponse,
+            ),
+          ),
+        ),
+        <.div(
+          Bootstrap.Button(Variant.primary, Size.sm, tpe = "submit")(
+            ^.disabled := !canSubmitResponse,
+            ^.onClick ==> { (e: ReactEventFromInput) =>
+              e.preventDefault()
+              val answer = freeTextAnswerInputRef().valueOrDefault
+              if (answer.nonEmpty) {
+                freeTextAnswerInputRef().setValue("")
+                submitResponse(SubmissionValue.FreeTextAnswer(answer))
+              } else {
+                Callback.empty
+              }
+            },
+            i18n("app.submit"),
+          ),
+        ),
+      )
     }
 
     private def submitResponse(submissionValue: SubmissionValue)(implicit team: Team): Callback = {

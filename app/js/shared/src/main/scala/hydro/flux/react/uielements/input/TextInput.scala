@@ -30,8 +30,14 @@ object TextInput extends HydroReactComponent {
       placeholder: String = "",
       classes: Seq[String] = Seq(),
       focusOnMount: Boolean = false,
+      disabled: Boolean = false,
   ): VdomElement = {
-    val props = Props(name = name, placeholder = placeholder, classes = classes, focusOnMount = focusOnMount)
+    val props = Props(
+      name = name,
+      placeholder = placeholder,
+      classes = classes,
+      focusOnMount = focusOnMount,
+      disabled = disabled)
     ref.mutableRef.component(props)
   }
 
@@ -54,6 +60,7 @@ object TextInput extends HydroReactComponent {
       placeholder: String,
       classes: Seq[String],
       focusOnMount: Boolean,
+      disabled: Boolean,
   )
   protected case class State(value: String = "") {
     def withValue(newValue: String): State = copy(value = newValue)
@@ -95,6 +102,7 @@ object TextInput extends HydroReactComponent {
         ^^.classes(props.classes),
         ^.value := state.value,
         ^.placeholder := props.placeholder,
+        ^.disabled := props.disabled,
         ^.onChange ==> { (e: ReactEventFromInput) =>
           LogExceptionsCallback {
             val newString = e.target.value
