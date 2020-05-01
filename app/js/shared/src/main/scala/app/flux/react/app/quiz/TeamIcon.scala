@@ -8,7 +8,8 @@ import scala.scalajs.js
 
 object TeamIcon {
 
-  private val colors: Seq[String] = Seq("red", "orange", "blue", "green", "deeppink", "#DD0", "purple", "fuchsia")
+  private val colors: Seq[String] =
+    Seq("red", "orange", "blue", "green", "deeppink", "#DD0", "purple", "fuchsia")
   private val icons: Seq[VdomTag] = Seq(
     Bootstrap.FontAwesomeIcon("bomb", fixedWidth = true),
     Bootstrap.FontAwesomeIcon("beer", fixedWidth = true),

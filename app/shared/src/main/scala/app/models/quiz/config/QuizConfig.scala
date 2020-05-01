@@ -90,7 +90,7 @@ object QuizConfig {
         * 4- (if possible) Show answer and give points
         */
       override def progressStepsCount(includeAnswers: Boolean): Int = {
-        def oneIfTrue(b: Boolean): Int = if(b)1 else 0
+        def oneIfTrue(b: Boolean): Int = if (b) 1 else 0
         val includeStep2 = choices.isDefined
         val includeStep3 = includeAnswers
         val includeStep4 = includeAnswers && !showSingleAnswerButtonToTeams
