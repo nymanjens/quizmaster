@@ -130,8 +130,12 @@ final class TeamControllerView(
           case Some(question) if showSubmissionForm(question) =>
             <.span(
               <.div(^.className := "question", question.textualQuestion),
-              <<.ifThen(question.isMultipleChoice) {
-                multipleChoiceButtons(question)
+              if (question.showSingleAnswerButtonToTeams) {
+                singleAnswerButton(question)
+              } else if (question.isMultipleChoice) {
+                multipleChoiceAnswerButtons(question)
+              } else {
+                freeTextAnswerForm(question)
               }
             )
           case _ =>
@@ -140,8 +144,17 @@ final class TeamControllerView(
       )
     }
 
-    private def multipleChoiceButtons(question: Question)(implicit team: Team,
-                                                          quizState: QuizState): VdomNode = {
+    private def singleAnswerButton(question: Question)(
+        implicit team: Team,
+        quizState: QuizState,
+    ): VdomNode = {
+      ???
+    }
+
+    private def multipleChoiceAnswerButtons(question: Question)(
+        implicit team: Team,
+        quizState: QuizState,
+    ): VdomNode = {
       val choices = question.maybeTextualChoices.get
       val maybeCurrentSubmissionValue =
         quizState.submissions.filter(_.teamId == team.id).map(_.value).lastOption
@@ -181,6 +194,12 @@ final class TeamControllerView(
             )
           }).toVdomArray
       )
+    }
+    private def freeTextAnswerForm(question: Question)(
+        implicit team: Team,
+        quizState: QuizState,
+    ): VdomNode = {
+      ???
     }
 
     private def submitResponse(submissionValue: SubmissionValue)(implicit team: Team): Callback = {
