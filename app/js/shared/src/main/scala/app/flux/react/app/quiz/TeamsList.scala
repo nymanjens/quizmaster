@@ -73,7 +73,7 @@ final class TeamsList(
                 <<.ifDefined(state.teamIdToGamepadState.get(team.id)) { gamepadState =>
                   <<.ifThen(gamepadState.connected) {
                     Bootstrap.FontAwesomeIcon("gamepad")(
-                        ^.className := "gamepad-icon",
+                      ^.className := "gamepad-icon",
                       ^^.ifThen(gamepadState.anyButtonPressed) {
                         ^.className := "pressed"
                       },
