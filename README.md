@@ -29,6 +29,9 @@ This is a web-app to run locally while conducting a quiz (in real life) with abo
 
 This quiz can be played in different ways, which will inform the quiz settings (http://localhost:9000/app/quizsettings/*).
 
+- With every team using a phone/tablet/laptop connected to `http://<your-ip-address>:9000/app/teamcontroller`
+    - To choose from multiple-choice questions. Note that these are automatically scored.
+    - To fill in textual answers. Note that these are automatically scored.
 - With up to 4 physical game controllers
     - To choose from multiple-choice questions (in the quiz settings, choose "Answer bullet type" = Arrows). Note that these are automatically scored.
     - To stop the timer and give an answer
