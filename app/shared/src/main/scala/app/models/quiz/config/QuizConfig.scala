@@ -128,7 +128,7 @@ object QuizConfig {
         choices.isDefined && questionProgressIndex >= 2
       }
       override def answerIsVisible(questionProgressIndex: Int): Boolean = {
-        if (choices.isDefined) {
+        if (!showSingleAnswerButtonToTeams) {
           questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
         } else {
           questionProgressIndex == maxProgressIndex(includeAnswers = true)
