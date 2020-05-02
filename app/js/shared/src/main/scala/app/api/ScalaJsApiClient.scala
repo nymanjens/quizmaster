@@ -8,6 +8,7 @@ import hydro.models.modification.EntityType
 import autowire._
 import boopickle.Default._
 import app.api.Picklers._
+import app.models.quiz.QuizState.Submission.SubmissionValue
 import hydro.api.PicklableDbQuery
 import hydro.api.ScalaJsApiRequest
 import hydro.common.JsLoggingUtils.logExceptions
@@ -27,6 +28,7 @@ trait ScalaJsApiClient {
   def persistEntityModifications(modifications: Seq[EntityModification]): Future[Unit]
   def executeDataQuery[E <: Entity](dbQuery: DbQuery[E]): Future[Seq[E]]
   def executeCountQuery(dbQuery: DbQuery[_ <: Entity]): Future[Int]
+  def addSubmission(teamId: Long, submissionValue: SubmissionValue): Future[Unit]
 }
 
 object ScalaJsApiClient {
@@ -56,6 +58,12 @@ object ScalaJsApiClient {
     override def executeCountQuery(dbQuery: DbQuery[_ <: Entity]) = {
       val picklableDbQuery = PicklableDbQuery.fromRegular(dbQuery)
       HttpPostAutowireClient[ScalaJsApi].executeCountQuery(picklableDbQuery).call()
+    }
+
+    override def addSubmission(teamId: Long, submissionValue: SubmissionValue) = {
+      HttpPostAutowireClient[ScalaJsApi]
+        .addSubmission(teamId, submissionValue)
+        .call()
     }
 
     private object HttpPostAutowireClient extends autowire.Client[ByteBuffer, Pickler, Pickler] {

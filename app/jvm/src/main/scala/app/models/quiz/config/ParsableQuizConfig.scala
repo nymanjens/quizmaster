@@ -61,6 +61,7 @@ object ParsableQuizConfig {
         pointsToGainOnWrongAnswer: Int,
         maxTimeSeconds: java.lang.Integer,
         onlyFirstGainsPoints: Boolean,
+        showSingleAnswerButtonToTeams: Boolean,
     ) extends Question {
       def this() = this(
         question = null,
@@ -76,6 +77,7 @@ object ParsableQuizConfig {
         pointsToGainOnWrongAnswer = 0,
         maxTimeSeconds = null,
         onlyFirstGainsPoints = false,
+        showSingleAnswerButtonToTeams = false,
       )
       override def parse: QuizConfig.Question = {
         try {
@@ -94,6 +96,7 @@ object ParsableQuizConfig {
             pointsToGainOnWrongAnswer = pointsToGainOnWrongAnswer,
             maxTime = Duration.ofSeconds(maxTimeSeconds.toInt),
             onlyFirstGainsPoints = onlyFirstGainsPoints,
+            showSingleAnswerButtonToTeams = showSingleAnswerButtonToTeams,
           )
         } catch {
           case throwable: Throwable =>

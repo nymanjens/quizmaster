@@ -4,6 +4,7 @@ import app.models.quiz.config.QuizConfig.Round
 import java.time.Duration
 
 import app.models.quiz.QuizState
+import app.models.quiz.QuizState.Submission.SubmissionValue
 
 case class QuizConfig(
     rounds: Seq[Round],
@@ -24,6 +25,7 @@ object QuizConfig {
     def pointsToGainOnWrongAnswer: Int
 
     def onlyFirstGainsPoints: Boolean
+    def showSingleAnswerButtonToTeams: Boolean
 
     def progressStepsCount(includeAnswers: Boolean): Int
     final def progressStepsCount(implicit quizState: QuizState): Int = {
@@ -41,9 +43,17 @@ object QuizConfig {
     /** Returns true if it would make sense to add a QuizState.Submission for this question for this progressIndex. */
     def submissionAreOpen(questionProgressIndex: Int): Boolean
     def isMultipleChoice: Boolean
+    def answerIsVisible(questionProgressIndex: Int): Boolean
 
-    /** If `isMultipleChoice` is true, this is a way to see if an answer is correct. */
-    def isCorrectAnswerIndex(answerIndex: Int): Boolean
+    def textualQuestion: String
+    def maybeTextualChoices: Option[Seq[String]]
+
+    /**
+      * Returns true if the given submission is correct according to configured answer.
+      *
+      * Always returns false if the given value is not scorable.
+      */
+    def isCorrectAnswer(submissionValue: SubmissionValue): Boolean
   }
 
   object Question {
@@ -62,6 +72,7 @@ object QuizConfig {
         override val pointsToGainOnWrongAnswer: Int,
         override val maxTime: Duration,
         override val onlyFirstGainsPoints: Boolean,
+        override val showSingleAnswerButtonToTeams: Boolean,
     ) extends Question {
       if (choices.isDefined) {
         require(choices.get.size == 4, s"There should be 4 choices, but got ${choices.get}")
@@ -79,26 +90,36 @@ object QuizConfig {
         * 4- (if possible) Show answer and give points
         */
       override def progressStepsCount(includeAnswers: Boolean): Int = {
-        if (includeAnswers) {
-          if (choices.isDefined) 5 else 3
-        } else {
-          if (choices.isDefined) 3 else 2
-        }
+        def oneIfTrue(b: Boolean): Int = if (b) 1 else 0
+        val includeStep2 = choices.isDefined
+        val includeStep3 = includeAnswers
+        val includeStep4 = includeAnswers && !showSingleAnswerButtonToTeams
+
+        2 + oneIfTrue(includeStep2) + oneIfTrue(includeStep3) + oneIfTrue(includeStep4)
       }
       override def shouldShowTimer(questionProgressIndex: Int): Boolean = {
         questionProgressIndex == progressIndexForQuestionBeingAnswered
       }
 
       override def submissionAreOpen(questionProgressIndex: Int): Boolean = {
-        val rightProgressIndex = questionProgressIndex == progressIndexForQuestionBeingAnswered
-        //val questionSupportsSubmissions = choices.nonEmpty || onlyFirstGainsPoints
-        val questionSupportsSubmissions = true
-
-        rightProgressIndex && questionSupportsSubmissions
+        questionProgressIndex == progressIndexForQuestionBeingAnswered
       }
 
       override def isMultipleChoice: Boolean = choices.nonEmpty
-      override def isCorrectAnswerIndex(answerIndex: Int): Boolean = choices.get.apply(answerIndex) == answer
+      override def textualQuestion: String = question
+      override def maybeTextualChoices: Option[Seq[String]] = choices
+
+      override def isCorrectAnswer(submissionValue: SubmissionValue): Boolean = {
+        submissionValue match {
+          case SubmissionValue.PressedTheOneButton               => false
+          case SubmissionValue.MultipleChoiceAnswer(answerIndex) => choices.get.apply(answerIndex) == answer
+          case SubmissionValue.FreeTextAnswer(freeTextAnswer) =>
+            def normalizeTextForComparison(s: String): String = {
+              s.replace(" ", "").replace(".", "").replace("-", "").toLowerCase
+            }
+            normalizeTextForComparison(answer) == normalizeTextForComparison(freeTextAnswer)
+        }
+      }
 
       def questionIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 1
@@ -106,7 +127,7 @@ object QuizConfig {
       def choicesAreVisible(questionProgressIndex: Int): Boolean = {
         choices.isDefined && questionProgressIndex >= 2
       }
-      def answerIsVisible(questionProgressIndex: Int): Boolean = {
+      override def answerIsVisible(questionProgressIndex: Int): Boolean = {
         if (choices.isDefined) {
           questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
         } else {
@@ -122,7 +143,7 @@ object QuizConfig {
     case class Double(
         verbalQuestion: String,
         verbalAnswer: String,
-        textualQuestion: String,
+        override val textualQuestion: String,
         textualAnswer: String,
         textualChoices: Seq[String],
         override val pointsToGain: Int,
@@ -136,6 +157,7 @@ object QuizConfig {
       override def pointsToGainOnWrongAnswer: Int = 0
 
       override def onlyFirstGainsPoints: Boolean = true
+      override def showSingleAnswerButtonToTeams: Boolean = false
 
       /**
         * Steps:
@@ -155,8 +177,14 @@ object QuizConfig {
 
       override def submissionAreOpen(questionProgressIndex: Int): Boolean = questionProgressIndex == 2
       override def isMultipleChoice: Boolean = true
-      override def isCorrectAnswerIndex(answerIndex: Int): Boolean =
-        textualChoices.apply(answerIndex) == textualAnswer
+      override def maybeTextualChoices: Option[Seq[String]] = Some(textualChoices)
+
+      override def isCorrectAnswer(submissionValue: SubmissionValue): Boolean = {
+        (submissionValue: @unchecked) match {
+          case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
+            textualChoices.apply(answerIndex) == textualAnswer
+        }
+      }
 
       def questionIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 1
@@ -164,7 +192,7 @@ object QuizConfig {
       def choicesAreVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 2
       }
-      def answerIsVisible(questionProgressIndex: Int): Boolean = {
+      override def answerIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
       }
     }

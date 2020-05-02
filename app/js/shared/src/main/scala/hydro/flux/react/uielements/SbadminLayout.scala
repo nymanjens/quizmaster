@@ -46,45 +46,42 @@ final class SbadminLayout(
         ^.style := js.Dictionary("marginBottom" -> 0),
         <.div(
           ^.className := "navbar-header",
-          <.button(
-            ^.className := "navbar-toggle",
-            VdomAttr("data-toggle") := "collapse",
-            VdomAttr("data-target") := ".navbar-collapse",
-            <.span(^.className := "sr-only", "Toggle navigation"),
-            <.span(^.className := "icon-bar"),
-            <.span(^.className := "icon-bar"),
-            <.span(^.className := "icon-bar")
-          ),
           Bootstrap.NavbarBrand(tag = router.anchorWithHrefTo(StandardPages.Root))(title),
           " ",
           pageLoadingSpinner()
         ),
-        <.ul(
-          ^.className := "nav navbar-top-links navbar-right",
-          applicationDisconnectedIcon(),
-          pendingModificationsCounter(),
-          Bootstrap.NavbarBrand()(
-            ^.style := js.Dictionary(
-              "marginRight" -> "15px",
+        if (router.currentPage == AppPages.TeamController) {
+          <.ul(
+            ^.className := "nav navbar-top-links navbar-right",
+            applicationDisconnectedIcon(),
+            pendingModificationsCounter(),
+            versionNavbar(),
+            <.li(linkToMasterSecretProtectedPage(AppPages.Master.apply)),
+          )
+        } else {
+          <.ul(
+            ^.className := "nav navbar-top-links navbar-right",
+            applicationDisconnectedIcon(),
+            pendingModificationsCounter(),
+            versionNavbar(),
+            <.li(linkToPage(AppPages.TeamController)),
+            <.li(linkToPage(AppPages.Quiz)),
+            <.li(linkToMasterSecretProtectedPage(AppPages.Master.apply)),
+            <.li(
+              <.a(
+                ^.onClick --> LogExceptionsCallback {
+                  promptMasterSecret match {
+                    case None               =>
+                    case Some(masterSecret) => dom.window.location.href = s"/rounds/$masterSecret/"
+                  }
+                },
+                Bootstrap.FontAwesomeIcon("bar-chart-o", fixedWidth = true),
+              ),
             ),
-            s"v${AppVersion.versionString}",
-          ),
-          <.li(linkToPage(AppPages.Quiz)),
-          <.li(linkToMasterSecretProtectedPage(AppPages.Master.apply)),
-          <.li(
-            <.a(
-              ^.onClick --> LogExceptionsCallback {
-                promptMasterSecret match {
-                  case None               =>
-                  case Some(masterSecret) => dom.window.location.href = s"/rounds/$masterSecret/"
-                }
-              },
-              Bootstrap.FontAwesomeIcon("bar-chart-o", fixedWidth = true),
-            ),
-          ),
-          <.li(linkToPage(AppPages.Gamepad)),
-          <.li(linkToMasterSecretProtectedPage(AppPages.QuizSettings.apply)),
-        ),
+            <.li(linkToPage(AppPages.Gamepad)),
+            <.li(linkToMasterSecretProtectedPage(AppPages.QuizSettings.apply)),
+          )
+        },
       ),
       // Page Content
       <.div(
@@ -106,6 +103,15 @@ final class SbadminLayout(
   }
 
   // **************** Private helper methods ****************//
+  private def versionNavbar(): VdomNode = {
+    Bootstrap.NavbarBrand()(
+      ^.style := js.Dictionary(
+        "marginRight" -> "15px",
+      ),
+      s"v${AppVersion.versionString}",
+    )
+  }
+
   private def linkToPage(page: Page)(implicit router: RouterContext): VdomElement = {
     router.anchorWithHrefTo(page)(
       <.i(^.className := page.iconClass),

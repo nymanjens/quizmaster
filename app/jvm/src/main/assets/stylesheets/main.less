@@ -123,40 +123,64 @@ table.table-bordered {
       margin: 0;
 
       li {
-        padding-bottom: 30px;
+        margin-bottom: 30px;
+        border: 2px solid #008;
+        border-radius: 13px;
+        padding: 10px;
 
         .name {
           font-weight: bold;
           font-size: 30px;
           text-align: center;
 
+          .gamepad-icon {
+            &.pressed {
+              color: black;
+            }
+            &:not(.pressed) {
+              color: #BBB;
+            }
+          }
         }
         .score {
           font-weight: bold;
           font-size: 50px;
           text-align: center;
         }
-        i {
-          &.pressed {
-            color: black;
-          }
-          &:not(.pressed) {
-            color: #BBB;
-          }
+        .submission {
+          font-size: 23px;
+          text-align: center;
         }
       }
 
-      &.teams-list-small {
+      &.teams-list-small, &.teams-list-smaller {
         li {
-          padding-bottom: 35px;
-
           .name {
             font-size: 30px;
             display:inline-block;
+            padding-right: 15px;
           }
           .score {
             font-size: 30px;
             display:inline-block;
+          }
+          .submission {
+            text-align: left;
+          }
+        }
+      }
+
+      &.teams-list-smaller {
+        li {
+          margin-bottom: 10px;
+          .name {
+            font-size: 20px;
+          }
+          .score {
+            font-size: 20px;
+          }
+          .submission {
+            font-size: 15px;
           }
         }
       }
@@ -168,6 +192,75 @@ table.table-bordered {
     flex-basis: auto;
 
     padding: 20px 10px 0px 40px;
+  }
+}
+
+
+/****** Team controller view ******/
+.team-controller-view {
+  .team-name {
+    font-size: 21px;
+    font-weight: bold;
+    padding-bottom: 20px;
+  }
+  .question {
+    font-size: 17px;
+    padding-bottom: 14px;
+  }
+
+  .the-one-button {
+    width: 94%;
+    max-width: 400px;
+    height: 300px;
+    font-size: 40px;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+  }
+
+  .multiple-choice-answer-buttons {
+    list-style: none;
+    padding-left: 0px;
+
+    li {
+      font-size: 17px;
+      padding-bottom: 10px;
+
+      .btn {
+        width: 100%;
+        max-width: 400px;
+        text-align: left;
+        white-space: normal !important;
+        word-wrap: break-word !important;
+
+        &.correct {
+          background-color: green;
+        }
+        &.incorrect {
+          background-color: red;
+          text-decoration: line-through;
+        }
+
+        .choice-arrow {
+          padding-right: 10px;
+        }
+      }
+    }
+  }
+
+  .free-text-answer-form {
+    .btn {
+      margin-bottom: 20px;
+    }
+    .you-submitted {
+      font-size: 17px;
+      .correct {
+        color: green;
+      }
+      .incorrect {
+        color: red;
+        text-decoration: line-through;
+      }
+    }
   }
 }
 

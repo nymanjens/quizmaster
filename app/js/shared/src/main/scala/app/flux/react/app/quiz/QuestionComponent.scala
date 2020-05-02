@@ -1,6 +1,14 @@
 package app.flux.react.app.quiz
 
+import app.common.AnswerBullet
+
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.async.Async.async
+import scala.async.Async.await
+import app.flux.controllers.SoundEffectController
+import app.flux.stores.quiz.GamepadStore
 import app.flux.stores.quiz.GamepadStore.Arrow
+import app.flux.stores.quiz.TeamInputStore
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
@@ -8,6 +16,7 @@ import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.QuizState.Submission
+import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.Team
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.time.Clock
@@ -35,6 +44,8 @@ final class QuestionComponent(
     syncedTimerBar: SyncedTimerBar,
     obfuscatedAnswer: ObfuscatedAnswer,
     clock: Clock,
+    soundEffectController: SoundEffectController,
+    teamInputStore: TeamInputStore,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -56,12 +67,54 @@ final class QuestionComponent(
   // **************** Implementation of HydroReactComponent methods ****************//
   override protected val config =
     ComponentConfig(backendConstructor = new Backend(_), initialState = State())
-      .withStateStoresDependency(
-        teamsAndQuizStateStore,
-        _.copy(
-          quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
-          teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-        ))
+      .withStateStoresDependencyFromProps(props =>
+        StateStoresDependency(
+          teamsAndQuizStateStore,
+          state => {
+            makeSoundAndAlertForAddedSubmissions(
+              oldQuizState = state.quizState,
+              newQuizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
+              question = props.question,
+            )
+            state.copy(
+              quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
+              teams = teamsAndQuizStateStore.stateOrEmpty.teams,
+            )
+          }
+      ))
+
+  // **************** Private helper methods ****************//
+  private def makeSoundAndAlertForAddedSubmissions(
+      oldQuizState: QuizState,
+      newQuizState: QuizState,
+      question: Question,
+  ): Unit = {
+    val newSubmissions = {
+      if (newQuizState.submissions.take(oldQuizState.submissions.size) == oldQuizState.submissions) {
+        newQuizState.submissions.drop(oldQuizState.submissions.size)
+      } else {
+        println("  Warning: The new submissions are not an extended version of the old submissions")
+        newQuizState.submissions.filterNot(oldQuizState.submissions.toSet)
+      }
+    }
+    if (oldQuizState != QuizState.nullInstance && newSubmissions.nonEmpty) {
+      if (question.onlyFirstGainsPoints && newSubmissions.exists(_.value.isScorable)) {
+        // An answer was given that will be immediately visible, so the sound can indicate its correctness
+        val atLeastOneSubmissionIsCorrect = newSubmissions.exists(s => question.isCorrectAnswer(s.value))
+        soundEffectController.playRevealingSubmission(correct = atLeastOneSubmissionIsCorrect)
+      } else {
+        soundEffectController.playNewSubmission()
+      }
+
+      if (question.isInstanceOf[Question.Double]) {
+        for (submission <- newSubmissions) {
+          if (question.isCorrectAnswer(submission.value)) {
+            teamInputStore.alertTeam(submission.teamId)
+          }
+        }
+      }
+    }
+  }
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(
@@ -117,18 +170,18 @@ final class QuestionComponent(
         implicit props: Props,
         state: State,
     ): VdomElement = {
+      implicit val _ = state.quizState
       val progressIndex = props.questionProgressIndex
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
       val showSubmissionsOnChoices = question.isMultipleChoice && (question.onlyFirstGainsPoints || answerIsVisible)
       val showGamepadIconUnderChoices =
-        state.quizState.submissions.nonEmpty || (state.quizState.canSubmitResponse && question.onlyFirstGainsPoints)
+        state.quizState.submissions.nonEmpty || (state.quizState.canAnyTeamSubmitResponse && question.onlyFirstGainsPoints)
       val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
 
       <.div(
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
             ^.className := "question",
-            s"[Q${state.quizState.questionIndex + 1}] ",
             question.question,
           )
         },
@@ -171,22 +224,17 @@ final class QuestionComponent(
                 },
                 <.ul(
                   ^.className := "choices",
-                  (for ((choice, arrow, character) <- (choices, Arrow.all, Seq("A", "B", "C", "D")).zipped)
+                  (for ((choice, answerBullet) <- choices zip AnswerBullet.all)
                     yield {
                       val visibleSubmissions =
                         if (showSubmissionsOnChoices)
-                          state.quizState.submissions.filter(_.maybeAnswerIndex == Some(arrow.answerIndex))
+                          state.quizState.submissions.filter(
+                            _.value == SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
                         else Seq()
                       val isCorrectAnswer = choice == question.answer
                       <.li(
                         ^.key := choice,
-                        state.quizState.generalQuizSettings.answerBulletType match {
-                          case AnswerBulletType.Arrows =>
-                            arrow.icon(
-                              ^.className := "choice-arrow",
-                            )
-                          case AnswerBulletType.Characters => s"$character/ "
-                        },
+                        answerBullet.toVdomNode,
                         if (isCorrectAnswer && (answerIsVisible || visibleSubmissions.nonEmpty)) {
                           <.span(^.className := "correct", choice)
                         } else if (!isCorrectAnswer && visibleSubmissions.nonEmpty) {
@@ -255,10 +303,11 @@ final class QuestionComponent(
         implicit props: Props,
         state: State,
     ): VdomElement = {
+      implicit val _ = state.quizState
       val progressIndex = props.questionProgressIndex
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
-      val correctSubmissionWasEntered = state.quizState.submissions.exists(submission =>
-        question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
+      val correctSubmissionWasEntered =
+        state.quizState.submissions.exists(s => question.isCorrectAnswer(s.value))
 
       <.div(
         ifVisibleOrMaster(false) {
@@ -277,7 +326,6 @@ final class QuestionComponent(
           ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
             <.div(
               ^.className := "textual-question",
-              s"[Q${state.quizState.questionIndex + 1}] ",
               question.textualQuestion,
             )
           }
@@ -297,16 +345,15 @@ final class QuestionComponent(
               ^.className := "choices-holder",
               <.ul(
                 ^.className := "choices",
-                (for ((choice, arrow) <- question.textualChoices zip Arrow.all)
+                (for ((choice, answerBullet) <- question.textualChoices zip AnswerBullet.all)
                   yield {
                     val submissions =
-                      state.quizState.submissions.filter(_.maybeAnswerIndex == Some(arrow.answerIndex))
+                      state.quizState.submissions.filter(
+                        _.value == SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
                     val isCorrectAnswer = choice == question.textualAnswer
                     <.li(
                       ^.key := choice,
-                      arrow.icon(
-                        ^.className := "choice-arrow",
-                      ),
+                      answerBullet.toVdomNode,
                       if (isCorrectAnswer && (answerIsVisible || submissions.nonEmpty || props.showMasterData)) {
                         <.span(^.className := "correct", choice)
                       } else if (!isCorrectAnswer && submissions.nonEmpty) {
@@ -324,11 +371,11 @@ final class QuestionComponent(
         ),
         <.div(
           ^.className := "submissions-without-choices",
-          ifVisibleOrMaster(state.quizState.canSubmitResponse) {
+          ifVisibleOrMaster(state.quizState.canAnyTeamSubmitResponse) {
             Bootstrap.FontAwesomeIcon("gamepad")
           }
         ),
-        <<.ifThen(state.quizState.canSubmitResponse && correctSubmissionWasEntered) {
+        <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && correctSubmissionWasEntered) {
           <.div(
             ^.className := "timer",
             syncedTimerBar(maxTime = question.maxTime),
@@ -378,16 +425,18 @@ final class QuestionComponent(
 
     private def showSubmissions(submissions: Seq[Submission])(implicit state: State) = {
       <<.joinWithSpaces(
-        for ((submission, index) <- submissions.zipWithIndex)
-          yield
-            TeamIcon(state.teams.find(_.id == submission.teamId).get)(
-              ^.key := s"${submission.teamId}-$index",
-            )
+        for {
+          (submission, index) <- submissions.zipWithIndex
+          team <- state.teams.find(_.id == submission.teamId)
+        } yield
+          TeamIcon(team)(
+            ^.key := s"${submission.teamId}-$index",
+          )
       )
     }
-  }
 
-  private def audioPlayer(audioRelativePath: String, playing: Boolean): VdomNode = {
-    RawMusicPlayer(src = "/quizaudio/" + audioRelativePath, playing = playing)
+    private def audioPlayer(audioRelativePath: String, playing: Boolean): VdomNode = {
+      RawMusicPlayer(src = "/quizaudio/" + audioRelativePath, playing = playing)
+    }
   }
 }

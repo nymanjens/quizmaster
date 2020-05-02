@@ -11,6 +11,7 @@ import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.QuizState.GeneralQuizSettings
 import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.QuizState.Submission
+import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.QuizState.TimerState
 import hydro.common.time.Clock
 import hydro.common.I18n
@@ -66,17 +67,51 @@ case class QuizState(
   def quizIsBeingSetUp: Boolean = roundIndex < 0
   def quizHasEnded(implicit quizConfig: QuizConfig): Boolean = roundIndex >= quizConfig.rounds.size
 
-  def canSubmitResponse(implicit quizConfig: QuizConfig, clock: Clock): Boolean = {
+  def canAnyTeamSubmitResponse(implicit quizConfig: QuizConfig, clock: Clock): Boolean = {
     maybeQuestion match {
       case None => false
       case Some(question) =>
         val submissionAreOpen = question.submissionAreOpen(questionProgressIndex)
-        val submissionIsHinderedByTimer =
+        val hinderedByTimer =
           if (question.shouldShowTimer(questionProgressIndex))
             !timerState.timerRunning || timerState.hasFinished(question.maxTime)
           else false
+        lazy val earlierSubmissionFinishedTheQuestion = {
+          val alreadyAnsweredCorrectly = submissions.exists(s => question.isCorrectAnswer(s.value))
+          question.onlyFirstGainsPoints && alreadyAnsweredCorrectly
+        }
 
-        submissionAreOpen && !submissionIsHinderedByTimer
+        submissionAreOpen && !hinderedByTimer && !earlierSubmissionFinishedTheQuestion
+    }
+  }
+  def canSubmitResponse(team: Team)(implicit quizConfig: QuizConfig, clock: Clock): Boolean = {
+    maybeQuestion match {
+      case None => false
+      case Some(question) =>
+        lazy val earlierTeamSubmission: Option[Submission] = submissions.find(_.teamId == team.id)
+        lazy val blockedByEarlierSubmissionOfSameTeam = {
+          if (question.isMultipleChoice) {
+            if (question.onlyFirstGainsPoints) {
+              // Team cannot change their minds because they already know their previous answer was wrong
+              earlierTeamSubmission.isDefined
+            } else {
+              // Allow teams to change their minds while the timer is running
+              false
+            }
+          } else { // Not multiple choice
+            if (question.onlyFirstGainsPoints) {
+              // Allow multiple guesses while the timer is running, but not the same team twice in a row
+              val blockedBecauseAdjacentSubmission = submissions.lastOption.exists(_.teamId == team.id)
+              blockedBecauseAdjacentSubmission
+            } else {
+              // Allow teams to change their minds while the timer is running if they filled in a free-text answer.
+              // Teams that pressed a button to indicate that they are done, can only do so once.
+              earlierTeamSubmission.exists(_.value == SubmissionValue.PressedTheOneButton)
+            }
+          }
+        }
+
+        canAnyTeamSubmitResponse && !blockedByEarlierSubmissionOfSameTeam
     }
   }
 }
@@ -117,14 +152,13 @@ object QuizState {
     )
   }
 
-  case class Submission(teamId: Long, maybeAnswerIndex: Option[Int] = None, createTime: Instant)
+  case class Submission(teamId: Long, value: SubmissionValue)
   object Submission {
-    def createNow(teamId: Long, answerIndex: Int = -1)(implicit clock: Clock): Submission = {
-      Submission(
-        teamId = teamId,
-        maybeAnswerIndex = if (answerIndex == -1) None else Some(answerIndex),
-        createTime = clock.nowInstant,
-      )
+    sealed abstract class SubmissionValue(val isScorable: Boolean)
+    object SubmissionValue {
+      case object PressedTheOneButton extends SubmissionValue(isScorable = false)
+      case class MultipleChoiceAnswer(answerIndex: Int) extends SubmissionValue(isScorable = true)
+      case class FreeTextAnswer(answerString: String) extends SubmissionValue(isScorable = true)
     }
   }
 

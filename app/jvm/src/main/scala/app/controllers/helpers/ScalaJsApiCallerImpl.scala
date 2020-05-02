@@ -4,6 +4,7 @@ import java.nio.ByteBuffer
 
 import app.api.Picklers._
 import app.api.ScalaJsApiServerFactory
+import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.user.User.onlyUser
 import boopickle.Default._
 import com.google.inject.Inject
@@ -36,6 +37,10 @@ final class ScalaJsApiCallerImpl @Inject()(implicit scalaJsApiServerFactory: Sca
       case "executeCountQuery" =>
         val dbQuery = Unpickle[PicklableDbQuery].fromBytes(argsMap("dbQuery"))
         Pickle.intoBytes(scalaJsApiServer.executeCountQuery(dbQuery))
+      case "addSubmission" =>
+        val teamId = Unpickle[Long].fromBytes(argsMap("teamId"))
+        val submissionValue = Unpickle[SubmissionValue].fromBytes(argsMap("submissionValue"))
+        Pickle.intoBytes(scalaJsApiServer.addSubmission(teamId, submissionValue))
     }
   }
 }

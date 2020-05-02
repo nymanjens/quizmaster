@@ -1,5 +1,6 @@
 package app.flux.react.app.quiz
 
+import app.common.AnswerBullet
 import app.flux.stores.quiz.GamepadStore.Arrow
 import hydro.flux.react.ReactVdomUtils.<<
 import hydro.flux.react.ReactVdomUtils.^^
@@ -101,10 +102,10 @@ final class GamepadSetupView(
                     Bootstrap.FontAwesomeIcon("gamepad"),
                     gamepadState.arrowPressed match {
                       case None =>
-                        Arrow.Up.icon(
+                        AnswerBullet.all.head.arrowIcon(
                           ^.style := js.Dictionary("color" -> "white"),
                         )
-                      case Some(arrow) => arrow.icon
+                      case Some(arrow) => AnswerBullet.all(arrow.answerIndex).arrowIcon
                     },
                     Bootstrap.FontAwesomeIcon("circle")(
                       ^^.ifThen(!gamepadState.otherButtonPressed) {

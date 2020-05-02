@@ -115,6 +115,7 @@ app.is-admin=Is admin?
 app.no-entries=No entries
 app.playlist=Playlist
 app.artists=Artists
+app.submit=Submit
 
 # Added for quizmaster
 app.master=Master
@@ -138,3 +139,10 @@ app.enter-master-secret=Enter master secret
 app.expected-minutes=Expected duration: {0} minutes
 app.max-points-to-gain=Max points to gain
 app.quiz-settings=Quiz Settings
+app.team-name=Team name
+app.team=Team
+app.waiting-for-the-next-question=Waiting for the next question...
+app.stop-the-timer-and-give-the-answer=Stop the timer and give the answer
+app.indicate-that-you-have-written-down-your-answer=Indicate that you have written down your answer
+app.enter-your-answer=Enter your answer
+app.you-submitted=You submitted

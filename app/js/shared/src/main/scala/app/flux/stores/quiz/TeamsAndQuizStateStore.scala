@@ -85,18 +85,18 @@ final class TeamsAndQuizStateStore(
     }
   }
 
-  def addEmptyTeam(): Future[Unit] = updateStateQueue.schedule {
+  def addTeam(name: String): Future[Team] = updateStateQueue.schedule {
     async {
       val teams = await(stateFuture).teams
       val maxIndex = if (teams.nonEmpty) teams.map(_.index).max else -1
-      await(
-        entityAccess.persistModifications(
-          EntityModification.createAddWithRandomId(
-            Team(
-              name = "",
-              score = 0,
-              index = maxIndex + 1,
-            ))))
+      val modification = EntityModification.createAddWithRandomId(
+        Team(
+          name = name,
+          score = 0,
+          index = maxIndex + 1,
+        ))
+      await(entityAccess.persistModifications(modification))
+      modification.entity
     }
   }
 
@@ -207,59 +207,6 @@ final class TeamsAndQuizStateStore(
       StateUpsertHelper
         .doQuizStateUpsert(fieldMasks.toVector)(update)
         .map(_ => (): Unit)
-    }
-
-  /** Returns true if something changed. */
-  def addSubmission(
-      submission: Submission,
-      resetTimer: Boolean = false,
-      pauseTimer: Boolean = false,
-      allowMoreThanOneSubmissionPerTeam: Boolean,
-      removeEarlierDifferentSubmissionBySameTeam: Boolean = false,
-  ): Future[Boolean] =
-    updateStateQueue.schedule {
-      StateUpsertHelper.doQuizStateUpsert(
-        Seq(ModelFields.QuizState.timerState, ModelFields.QuizState.submissions)) { quizState =>
-        val oldSubmissions = quizState.submissions
-        val newSubmissions = {
-          val filteredOldSubmissions = {
-            if (removeEarlierDifferentSubmissionBySameTeam) {
-              def differentSubmissionBySameTeam(s: Submission): Boolean = {
-                s.teamId == submission.teamId && s.maybeAnswerIndex != submission.maybeAnswerIndex
-              }
-              oldSubmissions.filterNot(differentSubmissionBySameTeam)
-            } else {
-              oldSubmissions
-            }
-          }
-
-          val submissionAlreadyExists = filteredOldSubmissions.exists(_.teamId == submission.teamId)
-
-          if (submissionAlreadyExists && !allowMoreThanOneSubmissionPerTeam) {
-            filteredOldSubmissions
-          } else {
-            filteredOldSubmissions :+ submission
-          }
-        }
-
-        if (oldSubmissions == newSubmissions) {
-          // Don't change timerState if there were no submissions, the return value is always true (incorrectly)
-          quizState
-        } else {
-          quizState.copy(
-            timerState =
-              if (resetTimer) TimerState.createStarted()
-              else if (pauseTimer)
-                TimerState(
-                  lastSnapshotInstant = clock.nowInstant,
-                  lastSnapshotElapsedTime = quizState.timerState.elapsedTime(),
-                  timerRunning = false,
-                )
-              else quizState.timerState,
-            submissions = newSubmissions,
-          )
-        }
-      }
     }
 
   private object StateUpsertHelper {
@@ -500,11 +447,11 @@ final class TeamsAndQuizStateStore(
 
     private def addOrRemovePoints(quizState: QuizState): Unit = {
       val question = quizState.maybeQuestion.get
-      if (question.isMultipleChoice) {
-        var firstCorrectAnswerSeen = false
-        for (submission <- quizState.submissions) {
-          val correct = question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get)
-          val scoreDiff = {
+      var firstCorrectAnswerSeen = false
+      for (submission <- quizState.submissions) {
+        val scoreDiff = {
+          if (submission.value.isScorable) {
+            val correct = question.isCorrectAnswer(submission.value)
             if (correct) {
               if (firstCorrectAnswerSeen) {
                 question.pointsToGain
@@ -515,10 +462,12 @@ final class TeamsAndQuizStateStore(
             } else {
               question.pointsToGainOnWrongAnswer
             }
+          } else {
+            0
           }
-          val team = stateOrEmpty.teams.find(_.id == submission.teamId).get
-          updateScore(team, scoreDiff = scoreDiff)
         }
+        val team = stateOrEmpty.teams.find(_.id == submission.teamId).get
+        updateScore(team, scoreDiff = scoreDiff)
       }
     }
   }

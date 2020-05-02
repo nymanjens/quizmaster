@@ -28,12 +28,12 @@ final class SoundEffectController(
   entityAccess.registerListener(JsEntityAccessListener)
 
   // **************** Public API ****************//
-  def playNewSubmission(): Unit = playSoundEffect(SoundEffect.NewSubmission, skipPageCheck = true)
+  def playNewSubmission(): Unit = playSoundEffect(SoundEffect.NewSubmission)
   def playRevealingSubmission(correct: Boolean): Unit = {
     if (correct) {
-      playSoundEffect(SoundEffect.CorrectSubmission, skipPageCheck = true)
+      playSoundEffect(SoundEffect.CorrectSubmission)
     } else {
-      playSoundEffect(SoundEffect.IncorrectSubmission, skipPageCheck = true)
+      playSoundEffect(SoundEffect.IncorrectSubmission)
     }
   }
   def playTimerRunsOut(): Unit = playSoundEffect(SoundEffect.TimerRunsOut)
@@ -49,10 +49,9 @@ final class SoundEffectController(
   private def playSoundEffect(
       soundEffect: SoundEffect,
       minTimeBetweenPlays: Option[FiniteDuration] = None,
-      skipPageCheck: Boolean = false,
   ): Unit =
     logExceptions {
-      if (skipPageCheck || canPlaySoundEffectsOnThisPage) {
+      if (canPlaySoundEffectsOnThisPage) {
         if (minTimeBetweenPlays.isDefined && (soundsPlaying contains soundEffect)) {
           // Skip
         } else {

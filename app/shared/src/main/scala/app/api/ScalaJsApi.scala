@@ -2,6 +2,7 @@ package app.api
 
 import app.api.ScalaJsApi._
 import app.models.quiz.config.QuizConfig
+import app.models.quiz.QuizState.Submission.SubmissionValue
 import hydro.api.PicklableDbQuery
 import hydro.models.modification.EntityModification
 import hydro.models.modification.EntityType
@@ -24,6 +25,8 @@ trait ScalaJsApi {
   def executeDataQuery(dbQuery: PicklableDbQuery): Seq[Entity]
 
   def executeCountQuery(dbQuery: PicklableDbQuery): Int
+
+  def addSubmission(teamId: Long, submissionValue: SubmissionValue): Unit
 }
 
 object ScalaJsApi {

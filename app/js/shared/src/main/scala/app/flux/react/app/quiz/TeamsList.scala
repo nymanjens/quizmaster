@@ -1,5 +1,7 @@
 package app.flux.react.app.quiz
 
+import app.common.AnswerBullet
+import app.flux.react.app.quiz.TeamIcon.colorOf
 import hydro.flux.react.ReactVdomUtils.^^
 import app.flux.stores.quiz.GamepadStore.GamepadState
 import app.flux.stores.quiz.TeamInputStore
@@ -7,6 +9,7 @@ import hydro.flux.react.ReactVdomUtils.<<
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState
+import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.Team
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.JsLoggingUtils.LogExceptionsCallback
@@ -20,6 +23,8 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
 
+import scala.scalajs.js
+
 final class TeamsList(
     implicit pageHeader: PageHeader,
     dispatcher: Dispatcher,
@@ -29,8 +34,8 @@ final class TeamsList(
 ) extends HydroReactComponent {
 
   // **************** API ****************//
-  def apply(showScoreEditButtons: Boolean): VdomElement = {
-    component(Props(showScoreEditButtons = showScoreEditButtons))
+  def apply(showMasterControls: Boolean): VdomElement = {
+    component(Props(showMasterControls = showMasterControls))
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//
@@ -39,6 +44,7 @@ final class TeamsList(
       .withStateStoresDependency(
         teamsAndQuizStateStore,
         _.copy(
+          quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
           teams = teamsAndQuizStateStore.stateOrEmpty.teams,
         ))
       .withStateStoresDependency(
@@ -46,8 +52,9 @@ final class TeamsList(
         _.copy(teamIdToGamepadState = teamInputStore.state.teamIdToGamepadState))
 
   // **************** Implementation of HydroReactComponent types ****************//
-  protected case class Props(showScoreEditButtons: Boolean)
+  protected case class Props(showMasterControls: Boolean)
   protected case class State(
+      quizState: QuizState = QuizState.nullInstance,
       teams: Seq[Team] = Seq(),
       teamIdToGamepadState: Map[Long, GamepadState] = Map(),
   )
@@ -55,15 +62,32 @@ final class TeamsList(
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
 
     override def render(props: Props, state: State): VdomNode = logExceptions {
+      implicit val quizState = state.quizState
+      val maybeQuestion = quizState.maybeQuestion
+      val showSubmissionValue = maybeQuestion.exists { question =>
+        (
+          props.showMasterControls ||
+          question.onlyFirstGainsPoints ||
+          question.answerIsVisible(quizState.questionProgressIndex)
+        )
+      }
+
       <<.ifThen(state.teams.nonEmpty) {
         <.ul(
           ^.className := "teams-list",
-          ^^.ifThen(state.teams.size > 5) {
+          ^^.ifThen(state.teams.size > 4) {
             ^.className := "teams-list-small"
           },
+          ^^.ifThen(state.teams.size > 6) {
+            ^.className := "teams-list-smaller"
+          },
           (for (team <- state.teams) yield {
+            val maybeSubmissionValue =
+              quizState.submissions.filter(_.teamId == team.id).map(_.value).lastOption
+
             <.li(
               ^.key := team.id,
+              ^.style := js.Dictionary("borderColor" -> TeamIcon.colorOf(team)),
               <.div(
                 ^.className := "name",
                 team.name,
@@ -71,6 +95,7 @@ final class TeamsList(
                 <<.ifDefined(state.teamIdToGamepadState.get(team.id)) { gamepadState =>
                   <<.ifThen(gamepadState.connected) {
                     Bootstrap.FontAwesomeIcon("gamepad")(
+                      ^.className := "gamepad-icon",
                       ^^.ifThen(gamepadState.anyButtonPressed) {
                         ^.className := "pressed"
                       },
@@ -82,7 +107,7 @@ final class TeamsList(
               ),
               <.div(
                 ^.className := "score",
-                <<.ifThen(props.showScoreEditButtons) {
+                <<.ifThen(props.showMasterControls) {
                   Bootstrap
                     .Button()(
                       ^.onClick --> LogExceptionsCallback(
@@ -93,7 +118,7 @@ final class TeamsList(
                 " ",
                 team.score,
                 " ",
-                <<.ifThen(props.showScoreEditButtons) {
+                <<.ifThen(props.showMasterControls) {
                   Bootstrap
                     .Button()(
                       ^.onClick --> LogExceptionsCallback(
@@ -102,10 +127,28 @@ final class TeamsList(
                     )
                 },
               ),
+              <.div(
+                ^.className := "submission",
+                maybeSubmissionValue match {
+                  case Some(submissionValue) if showSubmissionValue =>
+                    revealingSubmissionValueNode(submissionValue)
+                  case Some(_) => Bootstrap.FontAwesomeIcon("circle")
+                  case None    => Bootstrap.FontAwesomeIcon("circle-o")
+                },
+              ),
             )
           }).toVdomArray
         )
       }
     }
+
+    private def revealingSubmissionValueNode(submissionValue: SubmissionValue)(
+        implicit quizState: QuizState,
+    ): VdomNode =
+      submissionValue match {
+        case SubmissionValue.PressedTheOneButton               => Bootstrap.FontAwesomeIcon("circle")
+        case SubmissionValue.MultipleChoiceAnswer(answerIndex) => AnswerBullet.all(answerIndex).toVdomNode
+        case SubmissionValue.FreeTextAnswer(answerString)      => answerString
+      }
   }
 }

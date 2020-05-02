@@ -1,17 +1,13 @@
 package app.flux.stores.quiz
 
-import hydro.common.time.JavaTimeImplicits._
-import java.time.Duration
-
-import app.flux.controllers.SoundEffectController
+import app.api.ScalaJsApiClient
 import app.flux.router.AppPages
 import app.flux.stores.quiz.GamepadStore.GamepadState
 import app.flux.stores.quiz.TeamInputStore.State
 import app.models.access.ModelFields
 import app.models.quiz.config.QuizConfig
-import app.models.quiz.QuizState.Submission
-import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.QuizState
+import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.Team
 import app.models.user.User
 import hydro.common.time.Clock
@@ -40,7 +36,7 @@ final class TeamInputStore(
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     gamepadStore: GamepadStore,
-    soundEffectController: SoundEffectController,
+    scalaJsApiClient: ScalaJsApiClient,
 ) extends StateStore[State] {
 
   private var currentPage: Page = _
@@ -54,8 +50,23 @@ final class TeamInputStore(
   gamepadStore.register(GamepadStoreListener)
   dispatcher.registerPartialSync(dispatcherListener)
 
+  // **************** Implementation of StateStore methods **************** //
   override def state: State = _state
 
+  // **************** Additional public API **************** //
+  def alertTeam(teamId: Long): Unit = async {
+    val allTeams = await(
+      entityAccess
+        .newQuery[Team]()
+        .sort(DbQuery.Sorting.ascBy(ModelFields.Team.index))
+        .data())
+
+    for (team <- allTeams.find(_.id == teamId)) {
+      gamepadStore.rumble(gamepadIndex = allTeams.indexOf(team))
+    }
+  }
+
+  // **************** Private helper methods and objects **************** //
   private def dispatcherListener: PartialFunction[Action, Unit] = {
     case StandardActions.SetPageLoadingState( /* isLoading = */ _, currentPage) =>
       this.currentPage = currentPage
@@ -96,94 +107,39 @@ final class TeamInputStore(
 
       var resultFuture: Future[Unit] = Future.successful((): Unit)
       for (team <- randomTeams) {
-        resultFuture = resultFuture.flatMap(_ => maybeAddSubmission(team, teams))
+        resultFuture = resultFuture.flatMap(_ => maybeAddSubmission(team))
       }
       resultFuture
     }
 
-    private def maybeAddSubmission(team: Team, allTeams: Seq[Team]): Future[Unit] = async {
+    private def maybeAddSubmission(team: Team): Future[Unit] = async {
       val quizState = await(
         entityAccess
           .newQuery[QuizState]()
           .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId)) getOrElse QuizState.nullInstance
 
-      if (onRelevantPageForSubmissions && quizState.canSubmitResponse) {
-
+      if (onRelevantPageForSubmissions && quizState.canSubmitResponse(team)) {
         val question = quizState.maybeQuestion.get
         val gamepadState = _state.teamIdToGamepadState(team.id)
-        def teamHasSubmission(thisTeam: Team): Boolean =
-          quizState.submissions.exists(_.teamId == thisTeam.id)
-        def allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
 
-        if (question.isMultipleChoice) {
-          if (gamepadState.arrowPressed.isDefined) {
-            val arrow = gamepadState.arrowPressed.get
-            val submissionIsCorrect = question.isCorrectAnswerIndex(arrow.answerIndex)
-            val tooLate = {
-              val alreadyAnsweredCorrectly = quizState.submissions.exists(submission =>
-                question.isCorrectAnswerIndex(submission.maybeAnswerIndex.get))
-              alreadyAnsweredCorrectly && question.onlyFirstGainsPoints
-            }
-
-            if (tooLate) {
-              // do nothing
+        val submissinoValue = {
+          if (question.isMultipleChoice) {
+            if (gamepadState.arrowPressed.isDefined) {
+              Some(SubmissionValue.MultipleChoiceAnswer(gamepadState.arrowPressed.get.answerIndex))
             } else {
-              if (submissionIsCorrect && question.isInstanceOf[Question.Double]) {
-                gamepadStore.rumble(gamepadIndex = allTeams.indexOf(team))
-              }
-
-              val somethingChanged = await(
-                teamsAndQuizStateStore.addSubmission(
-                  Submission.createNow(teamId = team.id, answerIndex = arrow.answerIndex),
-                  resetTimer = question.isInstanceOf[Question.Double],
-                  pauseTimer =
-                    if (question.onlyFirstGainsPoints) submissionIsCorrect else allOtherTeamsHaveSubmission,
-                  allowMoreThanOneSubmissionPerTeam = false,
-                  removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
-                ))
-
-              if (somethingChanged) {
-                if (question.onlyFirstGainsPoints) {
-                  soundEffectController.playRevealingSubmission(correct = submissionIsCorrect)
-                } else {
-                  soundEffectController.playNewSubmission()
-                }
-              }
+              None
+            }
+          } else { // Not multiple choice
+            if (gamepadState.anyButtonPressed) {
+              Some(SubmissionValue.PressedTheOneButton)
+            } else {
+              None
             }
           }
-        } else { // Not multiple choice
-          if (gamepadState.anyButtonPressed) {
-            val blockedBecauseSecondSubmissionTooClose = {
-              if (question.onlyFirstGainsPoints) {
-                val blockedBecauseAdjacentSubmission =
-                  quizState.submissions.lastOption.exists(_.teamId == team.id)
-                val blockedBecauseLastSubmissionTooRecent =
-                  quizState.submissions.exists { submission =>
-                    val isRecent = submission.createTime > (clock.nowInstant - Duration.ofSeconds(3))
-                    submission.teamId == team.id && isRecent
-                  }
+        }
 
-                blockedBecauseAdjacentSubmission || blockedBecauseLastSubmissionTooRecent
-              } else {
-                false
-              }
-            }
-
-            if (blockedBecauseSecondSubmissionTooClose) {
-              // Don't add
-            } else {
-              val somethingChanged = await(
-                teamsAndQuizStateStore.addSubmission(
-                  Submission.createNow(teamId = team.id),
-                  pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
-                  allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
-                ))
-
-              if (somethingChanged) {
-                soundEffectController.playNewSubmission()
-              }
-            }
-          }
+        if (submissinoValue.isDefined) {
+          await(scalaJsApiClient.addSubmission(team.id, submissinoValue.get))
         }
       }
     }
