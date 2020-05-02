@@ -1,5 +1,7 @@
 package app.flux.react.app
 
+import scala.concurrent.duration._
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import hydro.flux.react.ReactVdomUtils.<<
 import hydro.flux.react.ReactVdomUtils.^^
 import app.flux.react.app.quiz.TeamsList
@@ -13,11 +15,14 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.Callback
 
+import scala.concurrent.Future
+import scala.scalajs.js
+
 final class Layout(
     implicit sbadminLayout: SbadminLayout,
     teamsList: TeamsList,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
-) extends HydroReactComponent.Stateless {
+) extends HydroReactComponent {
 
   // **************** API ****************//
   def apply(router: RouterContext)(children: VdomNode*): VdomElement = {
@@ -25,16 +30,24 @@ final class Layout(
   }
 
   // **************** Implementation of HydroReactComponent methods **************** //
-  override protected val statelessConfig =
-    StatelessComponentConfig(backendConstructor = new Backend(_))
+  override protected val config = ComponentConfig(backendConstructor = new Backend(_), initialState = State())
 
   // **************** Implementation of HydroReactComponent types ****************//
+  protected case class State(
+      boundShortcutsAndPreloadedMedia: Boolean = false,
+  )
   protected case class Props(router: RouterContext, children: Seq[VdomNode])
 
-  protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) with DidMount {
+  protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
 
-    override def render(props: Props, state: Unit): VdomElement = {
+    override def render(props: Props, state: State): VdomElement = {
       implicit val router = props.router
+
+      // This would normally be done via DidMount and DidUpdate hooks, but due to a bug in React or japgolly's
+      // React wrapper, this isn't possible because duplicate hooks in the same page are mixed together
+      // (leading to ClassCastExceptions).
+      maybeScheduleBindShortcutsAndPreloadMedia(state)
+
       sbadminLayout(
         title = "Quizmaster",
         leftMenu = <.span(),
@@ -54,7 +67,22 @@ final class Layout(
       )
     }
 
-    override def didMount(props: Props, state: Unit): Callback = {
+    private def maybeScheduleBindShortcutsAndPreloadMedia(state: State)(implicit router: RouterContext): Unit = {
+      if (!state.boundShortcutsAndPreloadedMedia && router.currentPage != AppPages.TeamController) {
+        js.timers.setTimeout(300.milliseconds) {
+          val updatedState = $.state.runNow()
+          if (!updatedState.boundShortcutsAndPreloadedMedia) {
+            $.modState(_.copy(boundShortcutsAndPreloadedMedia = true)).runNow()
+            bindShortcuts()
+            preloadMedia()
+          }
+        }
+      }
+    }
+
+    private def bindShortcuts(): Unit = {
+      println("  Binding shortcuts...")
+
       def bind(shortcut: String, runnable: () => Unit): Unit = {
         Mousetrap.bind(shortcut, e => {
           e.preventDefault()
@@ -83,8 +111,12 @@ final class Layout(
         bind(s"$shortkey", () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = +1))
         bind(s"shift+$shortkey", () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = -1))
       }
+    }
 
-      Callback.empty
+    private def preloadMedia(): Unit = {
+      println("  Preloading media...")
+
+      //
     }
   }
 }
