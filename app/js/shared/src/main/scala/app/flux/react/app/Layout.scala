@@ -7,14 +7,19 @@ import hydro.flux.react.ReactVdomUtils.^^
 import app.flux.react.app.quiz.TeamsList
 import app.flux.router.AppPages
 import app.flux.stores.quiz.TeamsAndQuizStateStore
+import app.flux.ClientApp.HtmlImage
+import app.models.quiz.config.QuizConfig
+import app.models.quiz.config.QuizConfig.Question
 import hydro.flux.react.uielements.SbadminLayout
 import hydro.flux.react.HydroReactComponent
 import hydro.flux.router.RouterContext
+import hydro.jsfacades.Audio
 import hydro.jsfacades.Mousetrap
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.Callback
 
+import scala.collection.mutable
 import scala.concurrent.Future
 import scala.scalajs.js
 
@@ -22,7 +27,12 @@ final class Layout(
     implicit sbadminLayout: SbadminLayout,
     teamsList: TeamsList,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
+    quizConfig: QuizConfig,
 ) extends HydroReactComponent {
+
+  // Keep a reference to preloaded media to avoid garbage collection cleaning it up
+  private val preloadedImages: mutable.Buffer[HtmlImage] = mutable.Buffer()
+  private val preloadedAudios: mutable.Buffer[Audio] = mutable.Buffer()
 
   // **************** API ****************//
   def apply(router: RouterContext)(children: VdomNode*): VdomElement = {
@@ -116,7 +126,25 @@ final class Layout(
     private def preloadMedia(): Unit = {
       println("  Preloading media...")
 
-      //
+      for {
+        round <- quizConfig.rounds
+        question <- round.questions
+      } {
+        question match {
+          case single: Question.Single =>
+            for (image <- Seq() ++ single.image ++ single.answerImage) {
+              val htmlImage = new HtmlImage()
+              htmlImage.asInstanceOf[js.Dynamic].src = s"/quizimages/${image.src}"
+              preloadedImages.append(htmlImage)
+            }
+
+            for (audioSrc <- single.audioSrc) {
+              val audio = new Audio(s"/quizaudio/$audioSrc")
+              preloadedAudios.append(audio)
+            }
+          case _ =>
+        }
+      }
     }
   }
 }

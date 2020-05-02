@@ -37,7 +37,6 @@ object ClientApp {
     logExceptions {
       implicit val globalModule = new ClientAppModule()
 
-      preloadResources(initialDataResponse.quizConfig)
       setUpGamepad()
 
       // tell React to render the router in the document body
@@ -93,32 +92,6 @@ object ClientApp {
       )
 
       video.play()
-    }
-  }
-
-  private val preloadedImages: mutable.Buffer[HtmlImage] = mutable.Buffer()
-  private val preloadedAudios: mutable.Buffer[Audio] = mutable.Buffer()
-
-  private def preloadResources(quizConfig: QuizConfig): Unit = {
-
-    for {
-      round <- quizConfig.rounds
-      question <- round.questions
-    } {
-      question match {
-        case single: Question.Single =>
-          for (image <- Seq() ++ single.image ++ single.answerImage) {
-            val htmlImage = new HtmlImage()
-            htmlImage.asInstanceOf[js.Dynamic].src = s"/quizimages/${image.src}"
-            preloadedImages.append(htmlImage)
-          }
-
-          for (audioSrc <- single.audioSrc) {
-            val audio = new Audio(s"/quizaudio/$audioSrc")
-            preloadedAudios.append(audio)
-          }
-        case _ =>
-      }
     }
   }
 
