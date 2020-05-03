@@ -1,9 +1,5 @@
 package app.api
 
-import java.util.concurrent.Callable
-
-import scala.concurrent.duration._
-import hydro.models.access.DbQueryImplicits._
 import java.util.concurrent.Executors
 
 import app.api.ScalaJsApi._
@@ -13,26 +9,25 @@ import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.QuizState
-import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.QuizState.TimerState
 import app.models.quiz.Team
 import app.models.user.User
-import com.google.common.base.Preconditions
-import com.google.common.base.Preconditions.checkArgument
 import com.google.inject._
 import hydro.api.PicklableDbQuery
 import hydro.common.PlayI18n
 import hydro.common.UpdateTokens.toUpdateToken
 import hydro.common.time.Clock
+import hydro.common.CollectionUtils.maybeGet
+import hydro.models.access.DbQueryImplicits._
 import hydro.models.modification.EntityModification
 import hydro.models.modification.EntityType
 import hydro.models.Entity
 import hydro.models.access.DbQuery
 
 import scala.collection.immutable.Seq
-import scala.concurrent.Await
 import scala.concurrent.ExecutionContext
-import scala.util.Random
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 final class ScalaJsApiServerFactory @Inject()(
@@ -93,16 +88,9 @@ final class ScalaJsApiServerFactory @Inject()(
     }
 
     override def addSubmission(teamId: Long, submissionValue: Submission.SubmissionValue): Unit = {
-      executeInSingleThreadAndWait(() => {
-        implicit val quizState =
-          entityAccess
-            .newQuerySync[QuizState]()
-            .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId) getOrElse QuizState.nullInstance
-        val allTeams =
-          entityAccess
-            .newQuerySync[Team]()
-            .sort(DbQuery.Sorting.ascBy(ModelFields.Team.index))
-            .data()
+      executeInSingleThreadAndWait {
+        implicit val quizState = fetchQuizState()
+        val allTeams = fetchAllTeams()
         val team = allTeams.find(_.id == teamId).get
 
         require(quizState.canSubmitResponse(team), "Responses are closed")
@@ -130,7 +118,7 @@ final class ScalaJsApiServerFactory @Inject()(
             removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
           )
         }
-      })
+      }
     }
 
     private def addVerifiedSubmission(
@@ -139,9 +127,8 @@ final class ScalaJsApiServerFactory @Inject()(
         pauseTimer: Boolean = false,
         allowMoreThanOneSubmissionPerTeam: Boolean,
         removeEarlierDifferentSubmissionBySameTeam: Boolean = false,
-    )(implicit quizState: QuizState): Unit = {
-
-      val updatedState = {
+    ): Unit = {
+      StateUpsertHelper.doQuizStateUpsert(quizState => {
         val oldSubmissions = quizState.submissions
         val newSubmissions = {
           val filteredOldSubmissions = {
@@ -178,17 +165,260 @@ final class ScalaJsApiServerFactory @Inject()(
             else quizState.timerState,
           submissions = newSubmissions,
         )
-      }
-
-      entityAccess.persistEntityModifications(
-        EntityModification.createUpdate(
-          updatedState,
-          Seq(ModelFields.QuizState.timerState, ModelFields.QuizState.submissions),
-        ))
+      })
     }
   }
 
-  private def executeInSingleThreadAndWait[R](func: () => R): R = {
-    singleThreadedExecutor.submit[R](() => func()).get()
+  private def fetchAllTeams(): Seq[Team] = {
+    entityAccess
+      .newQuerySync[Team]()
+      .sort(DbQuery.Sorting.ascBy(ModelFields.Team.index))
+      .data()
+  }
+  private def fetchQuizState(): QuizState = {
+    entityAccess
+      .newQuerySync[QuizState]()
+      .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId) getOrElse QuizState.nullInstance
+  }
+
+  private def executeInSingleThreadAndWait[R](func: => R): R = {
+    singleThreadedExecutor.submit[R](() => func).get()
+  }
+
+  private object StateUpsertHelper {
+
+    /** Returns true if something changed. */
+    def doQuizStateUpsert(update: QuizState => QuizState): Boolean = {
+      val maybeQuizState =
+        entityAccess.newQuerySync[QuizState]().findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId)
+
+      maybeQuizState match {
+        case None =>
+          entityAccess.persistEntityModifications(EntityModification.Add(update(QuizState.nullInstance)))
+          true
+        case Some(quizState2) =>
+          val updatedState = update(quizState2)
+          if (quizState2 == updatedState) {
+            false
+          } else {
+            entityAccess.persistEntityModifications(EntityModification.createUpdateAllFields(updatedState))
+            true
+          }
+      }
+    }
+
+    def goToPreviousStepUpdate(quizState: QuizState): QuizState = {
+      implicit val implicitOldQuizState = quizState
+
+      quizState.roundIndex match {
+        case -1 => quizState // Do nothing
+        case _ =>
+          quizState.maybeQuestion match {
+            case None if quizState.roundIndex == 0 =>
+              QuizState.nullInstance
+            case None =>
+              // Go to the end of the previous round
+              val newRoundIndex = Math.min(quizState.roundIndex - 1, quizConfig.rounds.size - 1)
+              val newRound = quizConfig.rounds(newRoundIndex)
+              quizState.copy(
+                roundIndex = newRoundIndex,
+                questionIndex = newRound.questions.size - 1,
+                questionProgressIndex = newRound.questions.lastOption.map(_.maxProgressIndex) getOrElse 0,
+                timerState = TimerState.createStarted(),
+                submissions = Seq(),
+                imageIsEnlarged = false,
+              )
+            case Some(question) if quizState.questionProgressIndex == 0 =>
+              // Go to the end of the previous question
+              val newQuestionIndex = quizState.questionIndex - 1
+              quizState.copy(
+                questionIndex = newQuestionIndex,
+                questionProgressIndex =
+                  maybeGet(quizState.round.questions, newQuestionIndex)
+                    .map(_.maxProgressIndex) getOrElse 0,
+                timerState = TimerState.createStarted(),
+                submissions = Seq(),
+                imageIsEnlarged = false,
+              )
+            case Some(question) if quizState.questionProgressIndex > 0 =>
+              // Decrement questionProgressIndex
+              quizState.copy(
+                questionProgressIndex = quizState.questionProgressIndex - 1,
+                timerState = TimerState.createStarted(),
+                imageIsEnlarged = false,
+              )
+          }
+      }
+    }
+
+    def goToNextStepUpdate(quizState: QuizState): QuizState = {
+      implicit val implicitOldQuizState = quizState
+
+      quizState.maybeQuestion match {
+        case None =>
+          goToNextQuestionUpdate(quizState)
+        case Some(question) if quizState.questionProgressIndex < question.maxProgressIndex =>
+          // Add and remove points
+          if (quizState.questionProgressIndex == question.maxProgressIndex - 1) {
+            Future(addOrRemovePoints(quizState))
+          }
+
+          // Increment questionProgressIndex
+          quizState.copy(
+            questionProgressIndex = quizState.questionProgressIndex + 1,
+            timerState = TimerState.createStarted(),
+            imageIsEnlarged = false,
+          )
+        case Some(question) if quizState.questionProgressIndex == question.maxProgressIndex =>
+          goToNextQuestionUpdate(quizState)
+      }
+    }
+
+    def goToPreviousQuestionUpdate(quizState: QuizState): QuizState = {
+      quizState.roundIndex match {
+        case -1 => quizState // Do nothing
+        case _ =>
+          quizState.maybeQuestion match {
+            case None if quizState.roundIndex == 0 =>
+              QuizState.nullInstance
+            case None =>
+              // Go to the start of the last question of the previous round
+              val newRoundIndex = Math.min(quizState.roundIndex - 1, quizConfig.rounds.size - 1)
+              val newRound = quizConfig.rounds(newRoundIndex)
+              quizState.copy(
+                roundIndex = newRoundIndex,
+                questionIndex = newRound.questions.size - 1,
+                questionProgressIndex = 0,
+                timerState = TimerState.createStarted(),
+                submissions = Seq(),
+                imageIsEnlarged = false,
+              )
+            case Some(question) if quizState.questionProgressIndex == 0 =>
+              // Go to the start of the previous question
+              val newQuestionIndex = quizState.questionIndex - 1
+              quizState.copy(
+                questionIndex = newQuestionIndex,
+                questionProgressIndex = 0,
+                timerState = TimerState.createStarted(),
+                submissions = Seq(),
+                imageIsEnlarged = false,
+              )
+            case Some(question) if quizState.questionProgressIndex > 0 =>
+              // Go to the start of the question
+              quizState.copy(
+                questionProgressIndex = 0,
+                timerState = TimerState.createStarted(),
+                imageIsEnlarged = false,
+              )
+          }
+      }
+    }
+
+    def goToNextQuestionUpdate(quizState: QuizState): QuizState = {
+      quizState.maybeQuestion match {
+        case None =>
+          if (quizState.round.questions.isEmpty) {
+            // Go to next round
+            goToNextRoundUpdate(quizState)
+          } else {
+            // Go to first question
+            quizState.copy(
+              questionIndex = 0,
+              questionProgressIndex = 0,
+              timerState = TimerState.createStarted(),
+              submissions = Seq(),
+              imageIsEnlarged = false,
+            )
+          }
+        case Some(question) =>
+          if (quizState.questionIndex == quizState.round.questions.size - 1) {
+            // Go to next round
+            goToNextRoundUpdate(quizState)
+          } else {
+            // Go to next question
+            quizState.copy(
+              questionIndex = quizState.questionIndex + 1,
+              questionProgressIndex = 0,
+              timerState = TimerState.createStarted(),
+              submissions = Seq(),
+              imageIsEnlarged = false,
+            )
+          }
+      }
+    }
+
+    def goToPreviousRoundUpdate(quizState: QuizState): QuizState = {
+      quizState.roundIndex match {
+        case -1 => quizState // Do nothing
+        case _ =>
+          quizState.maybeQuestion match {
+            case None if quizState.roundIndex == 0 =>
+              QuizState.nullInstance
+            case None =>
+              // Go to the start of the previous round
+              val newRoundIndex = Math.min(quizState.roundIndex - 1, quizConfig.rounds.size - 1)
+              quizState.copy(
+                roundIndex = newRoundIndex,
+                questionIndex = -1,
+                questionProgressIndex = 0,
+                timerState = TimerState.createStarted(),
+                submissions = Seq(),
+                imageIsEnlarged = false,
+              )
+            case Some(question) =>
+              // Go to the start of the current round
+              quizState.copy(
+                questionIndex = -1,
+                questionProgressIndex = 0,
+                timerState = TimerState.createStarted(),
+                submissions = Seq(),
+                imageIsEnlarged = false,
+              )
+          }
+      }
+    }
+
+    def goToNextRoundUpdate(quizState: QuizState): QuizState = {
+      quizState.copy(
+        roundIndex = quizState.roundIndex + 1,
+        questionIndex = -1,
+        questionProgressIndex = 0,
+        timerState = TimerState.createStarted(),
+        submissions = Seq(),
+        imageIsEnlarged = false,
+      )
+    }
+
+    private def addOrRemovePoints(quizState: QuizState): Unit = executeInSingleThreadAndWait[Unit] {
+      val question = quizState.maybeQuestion.get
+      var firstCorrectAnswerSeen = false
+      entityAccess.persistEntityModifications {
+        for {
+          submission <- quizState.submissions
+          scoreDiff <- Some {
+            if (submission.value.isScorable) {
+              val correct = question.isCorrectAnswer(submission.value)
+              if (correct) {
+                if (firstCorrectAnswerSeen) {
+                  question.pointsToGain
+                } else {
+                  firstCorrectAnswerSeen = true
+                  question.pointsToGainOnFirstAnswer
+                }
+              } else {
+                question.pointsToGainOnWrongAnswer
+              }
+            } else {
+              0
+            }
+          }
+          if scoreDiff != 0
+        } yield {
+          val team = fetchAllTeams().find(_.id == submission.teamId).get
+          val newScore = team.score + scoreDiff
+          EntityModification.createUpdateAllFields(team.copy(score = newScore))
+        }
+      }
+    }
   }
 }
