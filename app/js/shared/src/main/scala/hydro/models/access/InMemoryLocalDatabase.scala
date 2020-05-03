@@ -6,7 +6,7 @@ import hydro.models.Entity
 
 import scala.collection.immutable.Seq
 
-final class LocalDatabaseImpl extends LocalDatabase {
+final class InMemoryLocalDatabase extends LocalDatabase {
 
   def queryExecutor[E <: Entity: EntityType]() = ???
   def pendingModifications() = ???
@@ -19,4 +19,7 @@ final class LocalDatabaseImpl extends LocalDatabase {
   def setSingletonValue[V](key: SingletonKey[V], value: V) = ???
   def save() = ???
   def resetAndInitialize() = ???
+
+
+
 }

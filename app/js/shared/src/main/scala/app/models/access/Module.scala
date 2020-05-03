@@ -8,10 +8,12 @@ import hydro.common.time.Clock
 import hydro.models.access.EntitySyncLogic
 import hydro.models.access.HybridRemoteDatabaseProxy
 import hydro.models.access.HydroPushSocketClientFactory
+import hydro.models.access.InMemoryLocalDatabase
 import hydro.models.access.JsEntityAccess
 import hydro.models.access.JsEntityAccessImpl
 import hydro.models.access.LocalDatabase
 
+import scala.concurrent.Future
 import scala.concurrent.Promise
 
 final class Module(
@@ -28,7 +30,7 @@ final class Module(
 
   implicit val entityAccess: JsEntityAccess = {
     implicit val remoteDatabaseProxy =
-      HybridRemoteDatabaseProxy.create(Promise[LocalDatabase]().future)
+      HybridRemoteDatabaseProxy.create(Future.successful(new InMemoryLocalDatabase))
     val entityAccess = new JsEntityAccessImpl()
 
     entityAccess.startCheckingForModifiedEntityUpdates()
