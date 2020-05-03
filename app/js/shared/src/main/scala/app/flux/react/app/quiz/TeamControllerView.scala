@@ -2,6 +2,7 @@ package app.flux.react.app.quiz
 
 import app.api.ScalaJsApiClient
 import app.common.AnswerBullet
+import app.flux.action.AppActions
 import app.flux.stores.quiz.GamepadStore.Arrow
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -272,8 +273,8 @@ final class TeamControllerView(
 
     private def submitResponse(submissionValue: SubmissionValue)(implicit team: Team): Callback = {
       Callback.future {
-        scalaJsApiClient
-          .addSubmission(teamId = team.id, submissionValue = submissionValue)
+        dispatcher
+          .dispatch(AppActions.AddSubmission(teamId = team.id, submissionValue = submissionValue))
           .map(_ => Callback.empty)
       }
     }

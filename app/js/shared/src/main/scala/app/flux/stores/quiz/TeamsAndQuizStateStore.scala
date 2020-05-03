@@ -1,5 +1,7 @@
 package app.flux.stores.quiz
 
+import app.api.ScalaJsApiClient
+import app.flux.action.AppActions
 import app.flux.stores.quiz.TeamsAndQuizStateStore.State
 import app.models.access.ModelFields
 import app.models.quiz.QuizState
@@ -37,7 +39,13 @@ final class TeamsAndQuizStateStore(
     dispatcher: Dispatcher,
     clock: Clock,
     quizConfig: QuizConfig,
+    scalaJsApiClient: ScalaJsApiClient,
 ) extends AsyncEntityDerivedStateStore[State] {
+
+  dispatcher.registerPartialAsync {
+    case AppActions.AddSubmission(teamId, submissionValue) =>
+      scalaJsApiClient.addSubmission(teamId, submissionValue)
+  }
 
   /**
     * Queue that processes a single task at once to avoid concurrent update issues (on the same client tab).
