@@ -1,5 +1,8 @@
 package app.api
 
+import java.util.concurrent.Callable
+
+import scala.concurrent.duration._
 import hydro.models.access.DbQueryImplicits._
 import java.util.concurrent.Executors
 
@@ -14,6 +17,8 @@ import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.QuizState.TimerState
 import app.models.quiz.Team
 import app.models.user.User
+import com.google.common.base.Preconditions
+import com.google.common.base.Preconditions.checkArgument
 import com.google.inject._
 import hydro.api.PicklableDbQuery
 import hydro.common.PlayI18n
@@ -25,6 +30,7 @@ import hydro.models.Entity
 import hydro.models.access.DbQuery
 
 import scala.collection.immutable.Seq
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext
 import scala.util.Random
 
@@ -87,7 +93,7 @@ final class ScalaJsApiServerFactory @Inject()(
     }
 
     override def addSubmission(teamId: Long, submissionValue: Submission.SubmissionValue): Unit = {
-      singleThreadedExecutor.execute(() => {
+      executeInSingleThreadAndWait(() => {
         implicit val quizState =
           entityAccess
             .newQuerySync[QuizState]()
@@ -99,30 +105,30 @@ final class ScalaJsApiServerFactory @Inject()(
             .data()
         val team = allTeams.find(_.id == teamId).get
 
-        if (quizState.canSubmitResponse(team)) {
-          val question = quizState.maybeQuestion.get
-          def teamHasSubmission(thisTeam: Team): Boolean =
-            quizState.submissions.exists(_.teamId == thisTeam.id)
-          lazy val allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
+        require(quizState.canSubmitResponse(team), "Responses are closed")
 
-          if (question.isMultipleChoice) {
-            addVerifiedSubmission(
-              Submission(teamId = team.id, submissionValue),
-              resetTimer = question.isInstanceOf[Question.Double],
-              pauseTimer =
-                if (question.onlyFirstGainsPoints) question.isCorrectAnswer(submissionValue)
-                else allOtherTeamsHaveSubmission,
-              allowMoreThanOneSubmissionPerTeam = false,
-              removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
-            )
-          } else { // Not multiple choice
-            addVerifiedSubmission(
-              Submission(teamId = team.id, submissionValue),
-              pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
-              allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
-              removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
-            )
-          }
+        val question = quizState.maybeQuestion.get
+        def teamHasSubmission(thisTeam: Team): Boolean =
+          quizState.submissions.exists(_.teamId == thisTeam.id)
+        lazy val allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
+
+        if (question.isMultipleChoice) {
+          addVerifiedSubmission(
+            Submission(teamId = team.id, submissionValue),
+            resetTimer = question.isInstanceOf[Question.Double],
+            pauseTimer =
+              if (question.onlyFirstGainsPoints) question.isCorrectAnswer(submissionValue)
+              else allOtherTeamsHaveSubmission,
+            allowMoreThanOneSubmissionPerTeam = false,
+            removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
+          )
+        } else { // Not multiple choice
+          addVerifiedSubmission(
+            Submission(teamId = team.id, submissionValue),
+            pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
+            allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
+            removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
+          )
         }
       })
     }
@@ -158,23 +164,20 @@ final class ScalaJsApiServerFactory @Inject()(
           }
         }
 
-        if (oldSubmissions == newSubmissions) {
-          // Don't change timerState if there were no submissions, the return value is always true (incorrectly)
-          quizState
-        } else {
-          quizState.copy(
-            timerState =
-              if (resetTimer) TimerState.createStarted()
-              else if (pauseTimer)
-                TimerState(
-                  lastSnapshotInstant = clock.nowInstant,
-                  lastSnapshotElapsedTime = quizState.timerState.elapsedTime(),
-                  timerRunning = false,
-                )
-              else quizState.timerState,
-            submissions = newSubmissions,
-          )
-        }
+        require(oldSubmissions != newSubmissions, "Identical submissions")
+
+        quizState.copy(
+          timerState =
+            if (resetTimer) TimerState.createStarted()
+            else if (pauseTimer)
+              TimerState(
+                lastSnapshotInstant = clock.nowInstant,
+                lastSnapshotElapsedTime = quizState.timerState.elapsedTime(),
+                timerRunning = false,
+              )
+            else quizState.timerState,
+          submissions = newSubmissions,
+        )
       }
 
       entityAccess.persistEntityModifications(
@@ -183,5 +186,9 @@ final class ScalaJsApiServerFactory @Inject()(
           Seq(ModelFields.QuizState.timerState, ModelFields.QuizState.submissions),
         ))
     }
+  }
+
+  private def executeInSingleThreadAndWait[R](func: () => R): R = {
+    singleThreadedExecutor.submit[R](() => func()).get()
   }
 }
