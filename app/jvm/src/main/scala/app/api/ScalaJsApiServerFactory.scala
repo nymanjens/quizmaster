@@ -121,6 +121,10 @@ final class ScalaJsApiServerFactory @Inject()(
       }
     }
 
+    override def doTeamOrQuizStateUpdate(teamOrQuizStateUpdate: TeamOrQuizStateUpdate): Unit = {
+      ???
+    }
+
     private def addVerifiedSubmission(
         submission: Submission,
         resetTimer: Boolean = false,
