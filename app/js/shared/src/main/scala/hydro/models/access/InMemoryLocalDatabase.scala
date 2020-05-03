@@ -8,6 +8,8 @@ import scala.collection.immutable.Seq
 
 final class InMemoryLocalDatabase extends LocalDatabase {
 
+  private val inMemoryEntityDatabase: InMemoryEntityDatabase = new InMemoryEntityDatabase()
+
   def queryExecutor[E <: Entity: EntityType]() = ???
   def pendingModifications() = ???
   def getSingletonValue[V](key: SingletonKey[V]) = ???
@@ -19,7 +21,5 @@ final class InMemoryLocalDatabase extends LocalDatabase {
   def setSingletonValue[V](key: SingletonKey[V], value: V) = ???
   def save() = ???
   def resetAndInitialize() = ???
-
-
 
 }
