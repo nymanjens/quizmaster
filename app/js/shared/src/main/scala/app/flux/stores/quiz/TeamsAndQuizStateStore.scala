@@ -210,12 +210,18 @@ final class TeamsAndQuizStateStore(
       .map(_ => (): Unit)
   }
 
-  def doQuizStateUpdate(fieldMasks: ModelField[_, QuizState]*)(update: QuizState => QuizState): Future[Unit] =
-    updateStateQueue.schedule {
-      StateUpsertHelper
-        .doQuizStateUpsert(fieldMasks.toVector)(update)
-        .map(_ => (): Unit)
-    }
+  def togglePaused(timerRunningValue: Option[Boolean] = None): Future[Unit] = updateStateQueue.schedule {
+    StateUpsertHelper
+      .doQuizStateUpsert(StateUpsertHelper.progressionRelatedFields) { state =>
+        val timerState = state.timerState
+        state.copy(timerState = TimerState(
+          lastSnapshotInstant = clock.nowInstant,
+          lastSnapshotElapsedTime = timerState.elapsedTime(),
+          timerRunning = timerRunningValue getOrElse (!timerState.timerRunning),
+        ))
+      }
+      .map(_ => (): Unit)
+  }
 
   private object StateUpsertHelper {
 

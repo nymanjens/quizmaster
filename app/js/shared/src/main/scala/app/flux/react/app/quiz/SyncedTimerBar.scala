@@ -84,7 +84,7 @@ final class SyncedTimerBar(
               val newElapsedTime = state.timerState.elapsedTime()
               if (state.elapsedTime < props.maxTime && newElapsedTime >= props.maxTime) {
                 soundEffectController.playTimerRunsOut()
-                togglePaused(timerRunningValue = Some(false))
+                teamsAndQuizStateStore.togglePaused(timerRunningValue = Some(false))
               }
               state.copy(elapsedTime = newElapsedTime)
             }.runNow()
@@ -107,19 +107,7 @@ final class SyncedTimerBar(
           runnable()
         })
       }
-      bind("space", () => togglePaused())
-    }
-
-    private def togglePaused(timerRunningValue: Option[Boolean] = None): Future[Unit] = {
-      teamsAndQuizStateStore.doQuizStateUpdate(ModelFields.QuizState.timerState) { state =>
-        val timerState = state.timerState
-        state.copy(
-          timerState = TimerState(
-            lastSnapshotInstant = clock.nowInstant,
-            lastSnapshotElapsedTime = timerState.elapsedTime(),
-            timerRunning = timerRunningValue getOrElse (!timerState.timerRunning),
-          ))
-      }
+      bind("space", () => teamsAndQuizStateStore.togglePaused())
     }
 
     private def formatDuration(duration: Duration): String = {

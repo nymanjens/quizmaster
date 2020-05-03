@@ -69,7 +69,6 @@ object ScalaJsApi {
 
   sealed trait TeamOrQuizStateUpdate
   object TeamOrQuizStateUpdate {
-    case class AddTeam(name: String) extends TeamOrQuizStateUpdate
     case class UpdateName(teamId: Long, newName: String) extends TeamOrQuizStateUpdate
     case class UpdateScore(teamId: Long, scoreDiff: Int) extends TeamOrQuizStateUpdate
     case class DeleteTeam(teamId: Long) extends TeamOrQuizStateUpdate
