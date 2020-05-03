@@ -2,6 +2,7 @@ package app.flux.stores
 
 import java.time.Instant
 
+import app.flux.action.AppActions
 import app.flux.action.AppActions._
 import app.flux.stores.GlobalMessagesStore.Message
 import hydro.common.I18n
@@ -64,7 +65,10 @@ final class GlobalMessagesStore(
       }
   }
 
-  private def getCompletionMessage: PartialFunction[Action, String] = PartialFunction.empty
+  private def getCompletionMessage: PartialFunction[Action, String] = {
+    case AppActions.AddSubmission(teamId, submissionValue) =>
+      i18n("app.successfully-submitted-answer")
+  }
 
   /** Clear this message after some delay */
   private def clearMessageAfterDelay(): Unit = {

@@ -145,3 +145,4 @@ app.stop-the-timer-and-give-the-answer=Stop de timer en geef het antwoord
 app.indicate-that-you-have-written-down-your-answer=Laat weten dat het antwoord is opgeschreven
 app.enter-your-answer=Voer het antwoord in
 app.you-submitted=Uw antwoord
+app.successfully-submitted-answer=Uw antwoord is ingediend
