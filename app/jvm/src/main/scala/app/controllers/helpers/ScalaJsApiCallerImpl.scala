@@ -3,6 +3,7 @@ package app.controllers.helpers
 import java.nio.ByteBuffer
 
 import app.api.Picklers._
+import app.api.ScalaJsApi.TeamOrQuizStateUpdate
 import app.api.ScalaJsApiServerFactory
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.user.User.onlyUser
@@ -41,6 +42,9 @@ final class ScalaJsApiCallerImpl @Inject()(implicit scalaJsApiServerFactory: Sca
         val teamId = Unpickle[Long].fromBytes(argsMap("teamId"))
         val submissionValue = Unpickle[SubmissionValue].fromBytes(argsMap("submissionValue"))
         Pickle.intoBytes(scalaJsApiServer.addSubmission(teamId, submissionValue))
+      case "doTeamOrQuizStateUpdate" =>
+        val teamOrQuizStateUpdate = Unpickle[TeamOrQuizStateUpdate].fromBytes(argsMap("teamOrQuizStateUpdate"))
+        Pickle.intoBytes(scalaJsApiServer.doTeamOrQuizStateUpdate(teamOrQuizStateUpdate))
     }
   }
 }
