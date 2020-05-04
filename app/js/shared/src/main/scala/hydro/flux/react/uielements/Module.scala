@@ -30,6 +30,5 @@ final class Module(
   implicit lazy val pageLoadingSpinner: PageLoadingSpinner = new PageLoadingSpinner
   implicit lazy val applicationDisconnectedIcon: ApplicationDisconnectedIcon = new ApplicationDisconnectedIcon
   implicit lazy val pendingModificationsCounter: PendingModificationsCounter = new PendingModificationsCounter
-  implicit lazy val sbadminMenu: SbadminMenu = new SbadminMenu()
   implicit lazy val sbadminLayout: SbadminLayout = new SbadminLayout()
 }

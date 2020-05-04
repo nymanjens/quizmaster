@@ -50,7 +50,6 @@ final class Module(
   // Configuration of submodules
   private val hydroUielementsModule = new hydro.flux.react.uielements.Module
   implicit private val pageHeader = hydroUielementsModule.pageHeader
-  implicit private val sbadminMenu = hydroUielementsModule.sbadminMenu
   implicit private val sbadminLayout = hydroUielementsModule.sbadminLayout
 
   implicit private val syncedTimerBar: SyncedTimerBar = new SyncedTimerBar()
