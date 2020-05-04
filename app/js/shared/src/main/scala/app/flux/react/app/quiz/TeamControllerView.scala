@@ -1,7 +1,11 @@
 package app.flux.react.app.quiz
 
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.async.Async.async
+import scala.async.Async.await
 import app.api.ScalaJsApiClient
 import app.common.AnswerBullet
+import app.common.LocalStorageClient
 import app.flux.action.AppActions
 import app.flux.stores.quiz.GamepadStore.Arrow
 
@@ -30,6 +34,7 @@ import hydro.flux.router.RouterContext
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
+import org.scalajs.dom
 
 import scala.concurrent.Future
 
@@ -60,8 +65,8 @@ final class TeamControllerView(
           quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
           teams = teamsAndQuizStateStore.stateOrEmpty.teams,
           // Update the team, e.g. in case the name changed
-          maybeTeam =
-            state.maybeTeam.map(team => teamsAndQuizStateStore.stateOrEmpty.teams.find(_.id == team.id).get)
+          maybeTeam = state.maybeTeam.map(team =>
+            teamsAndQuizStateStore.stateOrEmpty.teams.find(_.name == team.name).get)
       )
     )
 
@@ -73,7 +78,7 @@ final class TeamControllerView(
       maybeTeam: Option[Team] = None,
   )
 
-  protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
+  protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) with WillMount {
 
     val teamNameInputRef = TextInput.ref()
     val freeTextAnswerInputRef = TextInput.ref()
@@ -89,6 +94,14 @@ final class TeamControllerView(
           case Some(team) => controller(team, state.quizState)
         }
       )
+    }
+
+    override def willMount(props: Props, state: State): Callback = Callback.future {
+      LocalStorageClient.getCurrentTeamName() match {
+        case Some(teamName) =>
+          getOrCreateTeam(name = teamName).map(team => $.modState(_.copy(maybeTeam = Some(team))))
+        case None => Future.successful(Callback.empty)
+      }
     }
 
     private def createTeamForm()(implicit state: State): VdomNode = {
@@ -110,11 +123,10 @@ final class TeamControllerView(
               val name = teamNameInputRef().valueOrDefault
               if (name.nonEmpty) {
                 Callback.future {
-                  val teamFuture = state.teams.find(_.name == name) match {
-                    case None       => teamsAndQuizStateStore.addTeam(name = name)
-                    case Some(team) => Future.successful(team)
+                  getOrCreateTeam(name = name).map { team =>
+                    LocalStorageClient.setCurrentTeamName(name)
+                    $.modState(_.copy(maybeTeam = Some(team)))
                   }
-                  teamFuture.map(team => $.modState(_.copy(maybeTeam = Some(team))))
                 }
               } else {
                 Callback.empty
@@ -268,6 +280,13 @@ final class TeamControllerView(
           )
         },
       )
+    }
+
+    private def getOrCreateTeam(name: String): Future[Team] = async {
+      await(teamsAndQuizStateStore.stateFuture).teams.find(_.name == name) match {
+        case None       => await(teamsAndQuizStateStore.addTeam(name = name))
+        case Some(team) => team
+      }
     }
 
     private def submitResponse(submissionValue: SubmissionValue)(implicit team: Team): Callback = {
