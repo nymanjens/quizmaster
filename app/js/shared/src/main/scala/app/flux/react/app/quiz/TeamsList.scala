@@ -1,5 +1,6 @@
 package app.flux.react.app.quiz
 
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import app.common.AnswerBullet
 import app.flux.react.app.quiz.TeamIcon.colorOf
 import hydro.flux.react.ReactVdomUtils.^^
@@ -9,6 +10,7 @@ import hydro.flux.react.ReactVdomUtils.<<
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState
+import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.Team
 import hydro.common.JsLoggingUtils.logExceptions
@@ -63,6 +65,7 @@ final class TeamsList(
 
     override def render(props: Props, state: State): VdomNode = logExceptions {
       implicit val quizState = state.quizState
+      implicit val _ = props
       val maybeQuestion = quizState.maybeQuestion
       val showSubmissionValue = maybeQuestion.exists { question =>
         (
@@ -82,8 +85,8 @@ final class TeamsList(
             ^.className := "teams-list-smaller"
           },
           (for (team <- state.teams) yield {
-            val maybeSubmissionValue =
-              quizState.submissions.filter(_.teamId == team.id).map(_.value).lastOption
+            val maybeSubmission =
+              quizState.submissions.filter(_.teamId == team.id).lastOption
 
             <.li(
               ^.key := team.id,
@@ -129,11 +132,10 @@ final class TeamsList(
               ),
               <.div(
                 ^.className := "submission",
-                maybeSubmissionValue match {
-                  case Some(submissionValue) if showSubmissionValue =>
-                    revealingSubmissionValueNode(submissionValue)
-                  case Some(_) => Bootstrap.FontAwesomeIcon("circle")
-                  case None    => Bootstrap.FontAwesomeIcon("circle-o")
+                maybeSubmission match {
+                  case Some(submission) if showSubmissionValue => revealingSubmissionValueNode(submission)
+                  case Some(_)                                 => Bootstrap.FontAwesomeIcon("circle")
+                  case None                                    => Bootstrap.FontAwesomeIcon("circle-o")
                 },
               ),
             )
@@ -142,13 +144,35 @@ final class TeamsList(
       }
     }
 
-    private def revealingSubmissionValueNode(submissionValue: SubmissionValue)(
+    private def revealingSubmissionValueNode(submission: Submission)(
         implicit quizState: QuizState,
-    ): VdomNode =
-      submissionValue match {
-        case SubmissionValue.PressedTheOneButton               => Bootstrap.FontAwesomeIcon("circle")
-        case SubmissionValue.MultipleChoiceAnswer(answerIndex) => AnswerBullet.all(answerIndex).toVdomNode
-        case SubmissionValue.FreeTextAnswer(answerString)      => answerString
-      }
+        props: Props,
+    ): VdomNode = {
+      val correctnessClass = if (submission.isCorrectAnswer) "correct" else "incorrect"
+
+      <.span(
+        <<.ifThen(props.showMasterControls) {
+          Bootstrap.Button()(
+            ^.onClick --> Callback
+              .future(
+                teamsAndQuizStateStore
+                  .setSubmissionCorrectness(submission.teamId, submission.value, !submission.isCorrectAnswer)
+                  .map(_ => Callback.empty)),
+            if (submission.isCorrectAnswer) Bootstrap.FontAwesomeIcon("check")
+            else Bootstrap.FontAwesomeIcon("times"),
+          )
+        },
+        submission.value match {
+          case SubmissionValue.PressedTheOneButton => Bootstrap.FontAwesomeIcon("circle")
+          case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
+            AnswerBullet.all(answerIndex).toVdomNode.apply(^.className := correctnessClass)
+          case SubmissionValue.FreeTextAnswer(answerString) =>
+            <.span(
+              ^.className := correctnessClass,
+              answerString,
+            )
+        },
+      )
+    }
   }
 }

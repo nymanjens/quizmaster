@@ -189,7 +189,8 @@ final class QuestionComponent(
                           state.quizState.submissions.filter(
                             _.value == SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
                         else Seq()
-                      val isCorrectAnswer = choice == question.answer
+                      val isCorrectAnswer = question.isCorrectAnswer(
+                        SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
                       <.li(
                         ^.key := choice,
                         answerBullet.toVdomNode,
@@ -264,8 +265,7 @@ final class QuestionComponent(
       implicit val _ = state.quizState
       val progressIndex = props.questionProgressIndex
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
-      val correctSubmissionWasEntered =
-        state.quizState.submissions.exists(s => question.isCorrectAnswer(s.value))
+      val correctSubmissionWasEntered = state.quizState.submissions.exists(s => s.isCorrectAnswer)
 
       <.div(
         ifVisibleOrMaster(false) {
@@ -308,7 +308,8 @@ final class QuestionComponent(
                     val submissions =
                       state.quizState.submissions.filter(
                         _.value == SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
-                    val isCorrectAnswer = choice == question.textualAnswer
+                    val isCorrectAnswer =
+                      question.isCorrectAnswer(SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
                     <.li(
                       ^.key := choice,
                       answerBullet.toVdomNode,

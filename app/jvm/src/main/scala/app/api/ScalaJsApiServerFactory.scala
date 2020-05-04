@@ -15,6 +15,7 @@ import app.models.quiz.Team
 import app.models.quiz.export.ExportImport
 import app.models.quiz.export.ExportImport.FullState
 import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
+import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.user.User
 import com.google.inject._
@@ -179,6 +180,20 @@ final class ScalaJsApiServerFactory @Inject()(
 
           case AddSubmission(teamId: Long, submissionValue: SubmissionValue) =>
             addSubmission(teamId, submissionValue)
+
+          case SetSubmissionCorrectness(
+              teamId: Long,
+              submissionValue: SubmissionValue,
+              isCorrectAnswer: Boolean) =>
+            StateUpsertHelper.doQuizStateUpsert { oldState =>
+              oldState.copy(
+                submissions = oldState.submissions.map {
+                  case s @ Submission(`teamId`, `submissionValue`, _) =>
+                    s.copy(isCorrectAnswer = isCorrectAnswer)
+                  case s => s
+                },
+              )
+            }
         }
       }
     }
@@ -197,7 +212,11 @@ final class ScalaJsApiServerFactory @Inject()(
 
       if (question.isMultipleChoice) {
         addVerifiedSubmission(
-          Submission(teamId = team.id, submissionValue),
+          Submission(
+            teamId = team.id,
+            value = submissionValue,
+            isCorrectAnswer = question.isCorrectAnswer(submissionValue),
+          ),
           resetTimer = question.isInstanceOf[Question.Double],
           pauseTimer =
             if (question.onlyFirstGainsPoints) question.isCorrectAnswer(submissionValue)
@@ -207,7 +226,11 @@ final class ScalaJsApiServerFactory @Inject()(
         )
       } else { // Not multiple choice
         addVerifiedSubmission(
-          Submission(teamId = team.id, submissionValue),
+          Submission(
+            teamId = team.id,
+            value = submissionValue,
+            isCorrectAnswer = question.isCorrectAnswer(submissionValue),
+          ),
           pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
           allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
           removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
@@ -491,8 +514,7 @@ final class ScalaJsApiServerFactory @Inject()(
           submission <- quizState.submissions
           scoreDiff <- Some {
             if (submission.value.isScorable) {
-              val correct = question.isCorrectAnswer(submission.value)
-              if (correct) {
+              if (submission.isCorrectAnswer) {
                 if (firstCorrectAnswerSeen) {
                   question.pointsToGain
                 } else {

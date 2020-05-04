@@ -77,7 +77,7 @@ case class QuizState(
             !timerState.timerRunning || timerState.hasFinished(question.maxTime)
           else false
         lazy val earlierSubmissionFinishedTheQuestion = {
-          val alreadyAnsweredCorrectly = submissions.exists(s => question.isCorrectAnswer(s.value))
+          val alreadyAnsweredCorrectly = submissions.exists(_.isCorrectAnswer)
           question.onlyFirstGainsPoints && alreadyAnsweredCorrectly
         }
 
@@ -152,7 +152,11 @@ object QuizState {
     )
   }
 
-  case class Submission(teamId: Long, value: SubmissionValue)
+  case class Submission(
+      teamId: Long,
+      value: SubmissionValue,
+      isCorrectAnswer: Boolean,
+  )
   object Submission {
     sealed abstract class SubmissionValue(val isScorable: Boolean)
     object SubmissionValue {

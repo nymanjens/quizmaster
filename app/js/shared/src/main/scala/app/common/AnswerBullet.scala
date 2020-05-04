@@ -15,10 +15,10 @@ final class AnswerBullet private (character: Char, val arrowIcon: VdomTag) {
 
   def answerIndex: Int = AnswerBullet.all.indexOf(this)
 
-  def toVdomNode(implicit quizState: QuizState): VdomNode =
+  def toVdomNode(implicit quizState: QuizState): VdomTag =
     quizState.generalQuizSettings.answerBulletType match {
       case AnswerBulletType.Arrows     => arrowIcon(^.className := "choice-arrow")
-      case AnswerBulletType.Characters => s"$character/ "
+      case AnswerBulletType.Characters => <.span(s"$character/ ")
     }
 
 }

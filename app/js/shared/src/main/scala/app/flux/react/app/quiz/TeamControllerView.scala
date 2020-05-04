@@ -214,10 +214,9 @@ final class TeamControllerView(
         implicit team: Team,
         quizState: QuizState,
     ): VdomNode = {
-      val maybeCurrentSubmissionValue =
-        quizState.submissions.filter(_.teamId == team.id).map(_.value).lastOption
+      val maybeCurrentSubmission = quizState.submissions.filter(_.teamId == team.id).lastOption
       val maybeCurrentSubmissionText =
-        maybeCurrentSubmissionValue.flatMap {
+        maybeCurrentSubmission.map(_.value).flatMap {
           case SubmissionValue.FreeTextAnswer(a) => Some(a)
           case _                                 => None
         }
@@ -261,7 +260,7 @@ final class TeamControllerView(
             ": ",
             <.span(
               ^^.ifThen(showSubmissionCorrectness) {
-                ^.className := (if (question.isCorrectAnswer(maybeCurrentSubmissionValue.get)) "correct"
+                ^.className := (if (maybeCurrentSubmission.get.isCorrectAnswer) "correct"
                                 else "incorrect")
               },
               currentSubmissionText,

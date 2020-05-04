@@ -73,7 +73,7 @@ final class QuizView(
       if (oldQuizState != QuizState.nullInstance && newSubmissions.nonEmpty) {
         if (question.onlyFirstGainsPoints && newSubmissions.exists(_.value.isScorable)) {
           // An answer was given that will be immediately visible, so the sound can indicate its correctness
-          val atLeastOneSubmissionIsCorrect = newSubmissions.exists(s => question.isCorrectAnswer(s.value))
+          val atLeastOneSubmissionIsCorrect = newSubmissions.exists(_.isCorrectAnswer)
           soundEffectController.playRevealingSubmission(correct = atLeastOneSubmissionIsCorrect)
         } else {
           soundEffectController.playNewSubmission()
@@ -81,7 +81,7 @@ final class QuizView(
 
         if (question.isInstanceOf[Question.Double]) {
           for (submission <- newSubmissions) {
-            if (question.isCorrectAnswer(submission.value)) {
+            if (submission.isCorrectAnswer) {
               teamInputStore.alertTeam(submission.teamId)
             }
           }
