@@ -77,7 +77,8 @@ final class Layout(
       )
     }
 
-    private def maybeScheduleBindShortcutsAndPreloadMedia(state: State)(implicit router: RouterContext): Unit = {
+    private def maybeScheduleBindShortcutsAndPreloadMedia(state: State)(
+        implicit router: RouterContext): Unit = {
       if (!state.boundShortcutsAndPreloadedMedia && router.currentPage != AppPages.TeamController) {
         js.timers.setTimeout(300.milliseconds) {
           val updatedState = $.state.runNow()
