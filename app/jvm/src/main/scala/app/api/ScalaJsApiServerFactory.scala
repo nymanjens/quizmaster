@@ -15,6 +15,7 @@ import app.models.quiz.Team
 import app.models.quiz.export.ExportImport
 import app.models.quiz.export.ExportImport.FullState
 import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
+import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.user.User
 import com.google.inject._
@@ -197,7 +198,11 @@ final class ScalaJsApiServerFactory @Inject()(
 
       if (question.isMultipleChoice) {
         addVerifiedSubmission(
-          Submission(teamId = team.id, submissionValue),
+          Submission(
+            teamId = team.id,
+            value = submissionValue,
+            isCorrectAnswer = question.isCorrectAnswer(submissionValue),
+          ),
           resetTimer = question.isInstanceOf[Question.Double],
           pauseTimer =
             if (question.onlyFirstGainsPoints) question.isCorrectAnswer(submissionValue)
@@ -207,7 +212,11 @@ final class ScalaJsApiServerFactory @Inject()(
         )
       } else { // Not multiple choice
         addVerifiedSubmission(
-          Submission(teamId = team.id, submissionValue),
+          Submission(
+            teamId = team.id,
+            value = submissionValue,
+            isCorrectAnswer = question.isCorrectAnswer(submissionValue),
+          ),
           pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
           allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
           removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,

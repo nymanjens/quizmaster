@@ -152,7 +152,11 @@ object QuizState {
     )
   }
 
-  case class Submission(teamId: Long, value: SubmissionValue)
+  case class Submission(
+      teamId: Long,
+      value: SubmissionValue,
+      isCorrectAnswer: Boolean,
+  )
   object Submission {
     sealed abstract class SubmissionValue(val isScorable: Boolean)
     object SubmissionValue {
