@@ -74,7 +74,17 @@ object ScalaJsApi {
     case class GoToPreviousStep() extends TeamOrQuizStateUpdate
     case class GoToNextStep() extends TeamOrQuizStateUpdate
     case class GoToPreviousQuestion() extends TeamOrQuizStateUpdate
+
+    /**
+      * Go to the start of the current question if it's not already there or the start of the previous question
+      * otherwise
+      */
     case class GoToNextQuestion() extends TeamOrQuizStateUpdate
+
+    /**
+      * Go to the start of the current round if it's not already there or the start of the previous round
+      * otherwise
+      */
     case class GoToPreviousRound() extends TeamOrQuizStateUpdate
     case class GoToNextRound() extends TeamOrQuizStateUpdate
     case class ResetCurrentQuestion() extends TeamOrQuizStateUpdate
