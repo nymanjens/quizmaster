@@ -260,7 +260,7 @@ final class TeamControllerView(
             ": ",
             <.span(
               ^^.ifThen(showSubmissionCorrectness) {
-                ^.className := (if ( maybeCurrentSubmission.get.isCorrectAnswer) "correct"
+                ^.className := (if (maybeCurrentSubmission.get.isCorrectAnswer) "correct"
                                 else "incorrect")
               },
               currentSubmissionText,

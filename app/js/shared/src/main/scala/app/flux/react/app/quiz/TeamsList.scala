@@ -144,21 +144,19 @@ final class TeamsList(
 
     private def revealingSubmissionValueNode(submission: Submission)(
         implicit quizState: QuizState,
-    ): VdomNode =
+    ): VdomNode = {
+      val correctnessClass = if (submission.isCorrectAnswer) "correct" else "incorrect"
+
       submission.value match {
         case SubmissionValue.PressedTheOneButton => Bootstrap.FontAwesomeIcon("circle")
         case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
-          AnswerBullet
-            .all(answerIndex)
-            .toVdomNode
-            .apply(
-              ^.className := (if (submission.isCorrectAnswer) "correct" else "incorrect"),
-            )
+          AnswerBullet.all(answerIndex).toVdomNode.apply(^.className := correctnessClass)
         case SubmissionValue.FreeTextAnswer(answerString) =>
           <.span(
-            ^.className := (if (submission.isCorrectAnswer) "correct" else "incorrect"),
+            ^.className := correctnessClass,
             answerString,
           )
       }
+    }
   }
 }
