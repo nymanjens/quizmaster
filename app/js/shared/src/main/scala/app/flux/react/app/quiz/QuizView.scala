@@ -63,12 +63,8 @@ final class QuizView(
     // Make sound and alert for new submissions
     for (question <- newQuizState.maybeQuestion) {
       val newSubmissions = {
-        if (newQuizState.submissions.take(oldQuizState.submissions.size) == oldQuizState.submissions) {
-          newQuizState.submissions.drop(oldQuizState.submissions.size)
-        } else {
-          println("  Warning: The new submissions are not an extended version of the old submissions")
-          newQuizState.submissions.filterNot(oldQuizState.submissions.toSet)
-        }
+        val oldSubmissionIds = oldQuizState.submissions.map(_.id).toSet
+        newQuizState.submissions.filterNot(s => oldSubmissionIds.contains(s.id))
       }
       if (oldQuizState != QuizState.nullInstance && newSubmissions.nonEmpty) {
         if (question.onlyFirstGainsPoints && newSubmissions.exists(_.value.isScorable)) {

@@ -156,7 +156,7 @@ final class TeamsList(
             ^.onClick --> Callback
               .future(
                 teamsAndQuizStateStore
-                  .setSubmissionCorrectness(submission.teamId, submission.value, !submission.isCorrectAnswer)
+                  .setSubmissionCorrectness(submission.id, !submission.isCorrectAnswer)
                   .map(_ => Callback.empty)),
             if (submission.isCorrectAnswer) Bootstrap.FontAwesomeIcon("check")
             else Bootstrap.FontAwesomeIcon("times"),

@@ -83,10 +83,7 @@ object ScalaJsApi {
     case class SetAnswerBulletType(answerBulletType: AnswerBulletType) extends TeamOrQuizStateUpdate
     case class ToggleTimerPaused(timerRunningValue: Option[Boolean] = None) extends TeamOrQuizStateUpdate
     case class AddSubmission(teamId: Long, submissionValue: SubmissionValue) extends TeamOrQuizStateUpdate
-    case class SetSubmissionCorrectness(
-        teamId: Long,
-        submissionValue: SubmissionValue,
-        isCorrectAnswer: Boolean,
-    ) extends TeamOrQuizStateUpdate
+    case class SetSubmissionCorrectness(submissionId: Long, isCorrectAnswer: Boolean)
+        extends TeamOrQuizStateUpdate
   }
 }

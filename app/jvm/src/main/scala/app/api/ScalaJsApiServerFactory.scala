@@ -181,14 +181,11 @@ final class ScalaJsApiServerFactory @Inject()(
           case AddSubmission(teamId: Long, submissionValue: SubmissionValue) =>
             addSubmission(teamId, submissionValue)
 
-          case SetSubmissionCorrectness(
-              teamId: Long,
-              submissionValue: SubmissionValue,
-              isCorrectAnswer: Boolean) =>
+          case SetSubmissionCorrectness(submissionId: Long, isCorrectAnswer: Boolean) =>
             StateUpsertHelper.doQuizStateUpsert { oldState =>
               oldState.copy(
                 submissions = oldState.submissions.map {
-                  case s @ Submission(_, `teamId`, `submissionValue`, _) =>
+                  case s if s.id == submissionId =>
                     s.copy(isCorrectAnswer = isCorrectAnswer)
                   case s => s
                 },
