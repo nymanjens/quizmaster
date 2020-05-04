@@ -119,7 +119,7 @@ final class ScalaJsApiServerFactory @Inject()(
               val oldScore = team.score
               val newScore = oldScore + scoreDiff
               entityAccess.persistEntityModifications(
-                EntityModification.createUpdate(team.copy(score = newScore), Seq(ModelFields.Team.score)))
+                EntityModification.createUpdateAllFields(team.copy(score = newScore)))
             }
 
           case DeleteTeam(teamId: Long) =>
