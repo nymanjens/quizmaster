@@ -28,8 +28,6 @@ trait ScalaJsApi {
 
   def executeCountQuery(dbQuery: PicklableDbQuery): Int
 
-  def addSubmission(teamId: Long, submissionValue: SubmissionValue): Unit
-
   def doTeamOrQuizStateUpdate(teamOrQuizStateUpdate: TeamOrQuizStateUpdate): Unit
 }
 
@@ -84,5 +82,6 @@ object ScalaJsApi {
     case class SetShowAnswers(showAnswers: Boolean) extends TeamOrQuizStateUpdate
     case class SetAnswerBulletType(answerBulletType: AnswerBulletType) extends TeamOrQuizStateUpdate
     case class ToggleTimerPaused(timerRunningValue: Option[Boolean] = None) extends TeamOrQuizStateUpdate
+    case class AddSubmission(teamId: Long, submissionValue: SubmissionValue) extends TeamOrQuizStateUpdate
   }
 }

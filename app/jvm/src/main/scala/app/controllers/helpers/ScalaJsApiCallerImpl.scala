@@ -38,12 +38,9 @@ final class ScalaJsApiCallerImpl @Inject()(implicit scalaJsApiServerFactory: Sca
       case "executeCountQuery" =>
         val dbQuery = Unpickle[PicklableDbQuery].fromBytes(argsMap("dbQuery"))
         Pickle.intoBytes(scalaJsApiServer.executeCountQuery(dbQuery))
-      case "addSubmission" =>
-        val teamId = Unpickle[Long].fromBytes(argsMap("teamId"))
-        val submissionValue = Unpickle[SubmissionValue].fromBytes(argsMap("submissionValue"))
-        Pickle.intoBytes(scalaJsApiServer.addSubmission(teamId, submissionValue))
       case "doTeamOrQuizStateUpdate" =>
-        val teamOrQuizStateUpdate = Unpickle[TeamOrQuizStateUpdate].fromBytes(argsMap("teamOrQuizStateUpdate"))
+        val teamOrQuizStateUpdate =
+          Unpickle[TeamOrQuizStateUpdate].fromBytes(argsMap("teamOrQuizStateUpdate"))
         Pickle.intoBytes(scalaJsApiServer.doTeamOrQuizStateUpdate(teamOrQuizStateUpdate))
     }
   }

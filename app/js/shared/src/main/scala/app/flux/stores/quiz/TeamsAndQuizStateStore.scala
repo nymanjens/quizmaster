@@ -38,7 +38,7 @@ final class TeamsAndQuizStateStore(
 
   dispatcher.registerPartialAsync {
     case AppActions.AddSubmission(teamId, submissionValue) =>
-      scalaJsApiClient.addSubmission(teamId, submissionValue)
+      scalaJsApiClient.doTeamOrQuizStateUpdate(AddSubmission(teamId, submissionValue))
   }
 
   /**

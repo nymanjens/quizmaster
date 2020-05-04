@@ -15,6 +15,7 @@ import app.models.quiz.Team
 import app.models.quiz.export.ExportImport
 import app.models.quiz.export.ExportImport.FullState
 import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
+import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.user.User
 import com.google.inject._
 import hydro.api.PicklableDbQuery
@@ -89,40 +90,6 @@ final class ScalaJsApiServerFactory @Inject()(
         entityAccess.queryExecutor[E].count(query)
       }
       internal
-    }
-
-    override def addSubmission(teamId: Long, submissionValue: Submission.SubmissionValue): Unit = {
-      executeInSingleThreadAndWait {
-        implicit val quizState = fetchQuizState()
-        val allTeams = fetchAllTeams()
-        val team = allTeams.find(_.id == teamId).get
-
-        require(quizState.canSubmitResponse(team), "Responses are closed")
-
-        val question = quizState.maybeQuestion.get
-        def teamHasSubmission(thisTeam: Team): Boolean =
-          quizState.submissions.exists(_.teamId == thisTeam.id)
-        lazy val allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
-
-        if (question.isMultipleChoice) {
-          addVerifiedSubmission(
-            Submission(teamId = team.id, submissionValue),
-            resetTimer = question.isInstanceOf[Question.Double],
-            pauseTimer =
-              if (question.onlyFirstGainsPoints) question.isCorrectAnswer(submissionValue)
-              else allOtherTeamsHaveSubmission,
-            allowMoreThanOneSubmissionPerTeam = false,
-            removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
-          )
-        } else { // Not multiple choice
-          addVerifiedSubmission(
-            Submission(teamId = team.id, submissionValue),
-            pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
-            allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
-            removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
-          )
-        }
-      }
     }
 
     override def doTeamOrQuizStateUpdate(teamOrQuizStateUpdate: TeamOrQuizStateUpdate): Unit = {
@@ -209,7 +176,42 @@ final class ScalaJsApiServerFactory @Inject()(
                   timerRunning = timerRunningValue getOrElse (!timerState.timerRunning),
                 ))
             }
+
+          case AddSubmission(teamId: Long, submissionValue: SubmissionValue) =>
+            addSubmission(teamId, submissionValue)
         }
+      }
+    }
+
+    private def addSubmission(teamId: Long, submissionValue: Submission.SubmissionValue): Unit = {
+      implicit val quizState = fetchQuizState()
+      val allTeams = fetchAllTeams()
+      val team = allTeams.find(_.id == teamId).get
+
+      require(quizState.canSubmitResponse(team), "Responses are closed")
+
+      val question = quizState.maybeQuestion.get
+      def teamHasSubmission(thisTeam: Team): Boolean =
+        quizState.submissions.exists(_.teamId == thisTeam.id)
+      lazy val allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
+
+      if (question.isMultipleChoice) {
+        addVerifiedSubmission(
+          Submission(teamId = team.id, submissionValue),
+          resetTimer = question.isInstanceOf[Question.Double],
+          pauseTimer =
+            if (question.onlyFirstGainsPoints) question.isCorrectAnswer(submissionValue)
+            else allOtherTeamsHaveSubmission,
+          allowMoreThanOneSubmissionPerTeam = false,
+          removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
+        )
+      } else { // Not multiple choice
+        addVerifiedSubmission(
+          Submission(teamId = team.id, submissionValue),
+          pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
+          allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
+          removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
+        )
       }
     }
 
