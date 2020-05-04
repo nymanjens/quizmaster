@@ -76,6 +76,21 @@ final class TeamsAndQuizStateStore(
   def stateOrEmpty: State = state getOrElse State.nullInstance
 
   // **************** Additional public API: Write methods **************** //
+  def addTeam(name: String): Future[Team] = updateStateQueue.schedule {
+    async {
+      val teams = await(stateFuture).teams
+      val maxIndex = if (teams.nonEmpty) teams.map(_.index).max else -1
+      val modification = EntityModification.createAddWithRandomId(
+        Team(
+          name = name,
+          score = 0,
+          index = maxIndex + 1,
+        ))
+      await(entityAccess.persistModifications(modification))
+      modification.entity
+    }
+  }
+
   def replaceAllEntitiesByImportString(importString: String): Future[Unit] = {
     val FullState(teamsToImport, quizStateToImport) = ExportImport.importFromString(importString)
     println(s"  Importing: teams = ${teamsToImport}, quizState = ${quizStateToImport}")
@@ -90,21 +105,6 @@ final class TeamsAndQuizStateStore(
         )
         await(entityAccess.persistModifications(deleteExistingTeams ++ importTeams ++ addOrUpdateQuizState))
       }
-    }
-  }
-
-  def addTeam(name: String): Future[Team] = updateStateQueue.schedule {
-    async {
-      val teams = await(stateFuture).teams
-      val maxIndex = if (teams.nonEmpty) teams.map(_.index).max else -1
-      val modification = EntityModification.createAddWithRandomId(
-        Team(
-          name = name,
-          score = 0,
-          index = maxIndex + 1,
-        ))
-      await(entityAccess.persistModifications(modification))
-      modification.entity
     }
   }
 
