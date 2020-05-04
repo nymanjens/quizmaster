@@ -67,71 +67,12 @@ final class QuestionComponent(
   // **************** Implementation of HydroReactComponent methods ****************//
   override protected val config =
     ComponentConfig(backendConstructor = new Backend(_), initialState = State())
-      .withStateStoresDependencyFromProps(props =>
-        StateStoresDependency(
-          teamsAndQuizStateStore,
-          state => {
-            makeSoundsAndAlert(
-              oldQuizState = state.quizState,
-              newQuizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
-              oldTeams = state.teams,
-              newTeams = teamsAndQuizStateStore.stateOrEmpty.teams,
-              question = props.question,
-            )
-            state.copy(
-              quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
-              teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-            )
-          }
-      ))
-
-  // **************** Private helper methods ****************//
-  private def makeSoundsAndAlert(
-      oldQuizState: QuizState,
-      newQuizState: QuizState,
-      newTeams: Seq[Team],
-      oldTeams: Seq[Team],
-      question: Question,
-  ): Unit = {
-    // Make sound and alert for new submissions
-    val newSubmissions = {
-      if (newQuizState.submissions.take(oldQuizState.submissions.size) == oldQuizState.submissions) {
-        newQuizState.submissions.drop(oldQuizState.submissions.size)
-      } else {
-        println("  Warning: The new submissions are not an extended version of the old submissions")
-        newQuizState.submissions.filterNot(oldQuizState.submissions.toSet)
-      }
-    }
-    if (oldQuizState != QuizState.nullInstance && newSubmissions.nonEmpty) {
-      if (question.onlyFirstGainsPoints && newSubmissions.exists(_.value.isScorable)) {
-        // An answer was given that will be immediately visible, so the sound can indicate its correctness
-        val atLeastOneSubmissionIsCorrect = newSubmissions.exists(s => question.isCorrectAnswer(s.value))
-        soundEffectController.playRevealingSubmission(correct = atLeastOneSubmissionIsCorrect)
-      } else {
-        soundEffectController.playNewSubmission()
-      }
-
-      if (question.isInstanceOf[Question.Double]) {
-        for (submission <- newSubmissions) {
-          if (question.isCorrectAnswer(submission.value)) {
-            teamInputStore.alertTeam(submission.teamId)
-          }
-        }
-      }
-    }
-
-    // Make sound if score changed
-    val scoreIncreased = {
-      val oldTeamsMap = oldTeams.map(t => (t.id -> t)).toMap
-      newTeams.exists { newTeam =>
-        val maybeOldTeam = oldTeamsMap.get(newTeam.id)
-        maybeOldTeam.isDefined && newTeam.score > maybeOldTeam.get.score
-      }
-    }
-    if (scoreIncreased) {
-      soundEffectController.playScoreIncreased()
-    }
-  }
+      .withStateStoresDependency(
+        teamsAndQuizStateStore,
+        _.copy(
+          quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
+          teams = teamsAndQuizStateStore.stateOrEmpty.teams,
+        ))
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(

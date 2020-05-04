@@ -1,9 +1,12 @@
 package app.flux.react.app.quiz
 
+import app.flux.controllers.SoundEffectController
+import app.flux.stores.quiz.TeamInputStore
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState
 import app.models.quiz.Team
+import app.models.quiz.config.QuizConfig.Question
 import hydro.common.I18n
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.flux.action.Dispatcher
@@ -23,6 +26,8 @@ final class QuizView(
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     quizProgressIndicator: QuizProgressIndicator,
     questionComponent: QuestionComponent,
+    soundEffectController: SoundEffectController,
+    teamInputStore: TeamInputStore,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -34,10 +39,68 @@ final class QuizView(
   override protected val config = ComponentConfig(backendConstructor = new Backend(_), initialState = State())
     .withStateStoresDependency(
       teamsAndQuizStateStore,
-      _.copy(
-        teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-        quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
-      ))
+      oldState => {
+        makeSoundsAndAlert(
+          oldQuizState = oldState.quizState,
+          newQuizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
+          oldTeams = oldState.teams,
+          newTeams = teamsAndQuizStateStore.stateOrEmpty.teams,
+        )
+        oldState.copy(
+          teams = teamsAndQuizStateStore.stateOrEmpty.teams,
+          quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
+        )
+      }
+    )
+
+  // **************** Private helper methods ****************//
+  private def makeSoundsAndAlert(
+      oldQuizState: QuizState,
+      newQuizState: QuizState,
+      newTeams: Seq[Team],
+      oldTeams: Seq[Team],
+  ): Unit = {
+    // Make sound and alert for new submissions
+    for (question <- newQuizState.maybeQuestion) {
+      val newSubmissions = {
+        if (newQuizState.submissions.take(oldQuizState.submissions.size) == oldQuizState.submissions) {
+          newQuizState.submissions.drop(oldQuizState.submissions.size)
+        } else {
+          println("  Warning: The new submissions are not an extended version of the old submissions")
+          newQuizState.submissions.filterNot(oldQuizState.submissions.toSet)
+        }
+      }
+      if (oldQuizState != QuizState.nullInstance && newSubmissions.nonEmpty) {
+        if (question.onlyFirstGainsPoints && newSubmissions.exists(_.value.isScorable)) {
+          // An answer was given that will be immediately visible, so the sound can indicate its correctness
+          val atLeastOneSubmissionIsCorrect = newSubmissions.exists(s => question.isCorrectAnswer(s.value))
+          soundEffectController.playRevealingSubmission(correct = atLeastOneSubmissionIsCorrect)
+        } else {
+          soundEffectController.playNewSubmission()
+        }
+
+        if (question.isInstanceOf[Question.Double]) {
+          for (submission <- newSubmissions) {
+            if (question.isCorrectAnswer(submission.value)) {
+              teamInputStore.alertTeam(submission.teamId)
+            }
+          }
+        }
+      }
+    }
+
+    // Make sound if score changed
+    val scoreIncreased = {
+      val oldTeamsMap = oldTeams.map(t => (t.id -> t)).toMap
+      newTeams.exists { newTeam =>
+        val maybeOldTeam = oldTeamsMap.get(newTeam.id)
+        maybeOldTeam.isDefined && newTeam.score > maybeOldTeam.get.score
+      }
+    }
+    if (scoreIncreased) {
+      soundEffectController.playScoreIncreased()
+    }
+  }
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(router: RouterContext)
