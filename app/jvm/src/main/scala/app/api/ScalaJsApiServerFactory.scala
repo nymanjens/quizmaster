@@ -3,6 +3,7 @@ package app.api
 import java.util.concurrent.Executors
 
 import app.api.ScalaJsApi._
+import app.api.ScalaJsApi.TeamOrQuizStateUpdate._
 import app.models.access.JvmEntityAccess
 import app.models.access.ModelFields
 import app.models.quiz.config.QuizConfig
@@ -11,6 +12,9 @@ import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.TimerState
 import app.models.quiz.Team
+import app.models.quiz.export.ExportImport
+import app.models.quiz.export.ExportImport.FullState
+import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.user.User
 import com.google.inject._
 import hydro.api.PicklableDbQuery
@@ -122,7 +126,91 @@ final class ScalaJsApiServerFactory @Inject()(
     }
 
     override def doTeamOrQuizStateUpdate(teamOrQuizStateUpdate: TeamOrQuizStateUpdate): Unit = {
-      ???
+      executeInSingleThreadAndWait {
+        teamOrQuizStateUpdate match {
+          case ReplaceAllEntitiesByImportString(importString: String) =>
+            val FullState(teamsToImport, quizStateToImport) = ExportImport.importFromString(importString)
+            println(s"  Importing: teams = ${teamsToImport}, quizState = ${quizStateToImport}")
+
+            val deleteExistingTeams = fetchAllTeams().map(team => EntityModification.createRemove(team))
+            val importTeams = teamsToImport.map(team => EntityModification.createAddWithRandomId(team))
+            val addOrUpdateQuizState = Seq(
+              EntityModification.Add(quizStateToImport),
+              EntityModification.createUpdateAllFields(quizStateToImport),
+            )
+            entityAccess.persistEntityModifications(
+              deleteExistingTeams ++ importTeams ++ addOrUpdateQuizState)
+
+          case UpdateName(teamId: Long, newName: String) =>
+            val team = fetchAllTeams().find(_.id == teamId).get
+            entityAccess.persistEntityModifications(
+              EntityModification.createUpdateAllFields(team.copy(name = newName)))
+
+          case UpdateScore(teamId: Long, scoreDiff: Int) =>
+            if (scoreDiff != 0) {
+              val team = fetchAllTeams().find(_.id == teamId).get
+              val oldScore = team.score
+              val newScore = oldScore + scoreDiff
+              entityAccess.persistEntityModifications(
+                EntityModification.createUpdate(team.copy(score = newScore), Seq(ModelFields.Team.score)))
+            }
+
+          case DeleteTeam(teamId: Long) =>
+            for {
+              team <- fetchAllTeams()
+              if team.id == teamId
+            } entityAccess.persistEntityModifications(EntityModification.createRemove(team))
+
+          case GoToPreviousStep() =>
+            StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.goToPreviousStepUpdate)
+
+          case GoToNextStep() =>
+            StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.goToNextStepUpdate)
+
+          case GoToPreviousQuestion() =>
+            StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.goToPreviousQuestionUpdate)
+
+          case GoToNextQuestion() =>
+            StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.goToNextQuestionUpdate)
+
+          case GoToPreviousRound() =>
+            StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.goToPreviousRoundUpdate)
+          case GoToNextRound() =>
+            StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.goToNextRoundUpdate)
+
+          case ResetCurrentQuestion() =>
+            StateUpsertHelper.doQuizStateUpsert(
+              _.copy(timerState = TimerState.createStarted(), submissions = Seq()))
+
+          case ToggleImageIsEnlarged() =>
+            StateUpsertHelper.doQuizStateUpsert { oldState =>
+              oldState.copy(imageIsEnlarged = !oldState.imageIsEnlarged)
+            }
+
+          case SetShowAnswers(showAnswers: Boolean) =>
+            StateUpsertHelper.doQuizStateUpsert { oldState =>
+              oldState.copy(
+                generalQuizSettings = oldState.generalQuizSettings.copy(showAnswers = showAnswers))
+            }
+
+          case SetAnswerBulletType(answerBulletType: AnswerBulletType) =>
+            StateUpsertHelper.doQuizStateUpsert { oldState =>
+              oldState.copy(
+                generalQuizSettings = oldState.generalQuizSettings.copy(answerBulletType = answerBulletType))
+            }
+
+          case ToggleTimerPaused(timerRunningValue: Option[Boolean]) =>
+            StateUpsertHelper.doQuizStateUpsert { state =>
+              val timerState = state.timerState
+              state.copy(
+                timerState = TimerState(
+                  lastSnapshotInstant = clock.nowInstant,
+                  lastSnapshotElapsedTime = timerState.elapsedTime(),
+                  timerRunning = timerRunningValue getOrElse (!timerState.timerRunning),
+                ))
+            }
+        }
+      }
     }
 
     private def addVerifiedSubmission(
