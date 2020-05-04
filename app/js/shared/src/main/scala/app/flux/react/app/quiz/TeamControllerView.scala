@@ -90,8 +90,8 @@ final class TeamControllerView(
       <.span(
         ^.className := "team-controller-view",
         state.maybeTeam match {
-          case None       => createTeamForm()
-          case Some(team) => controller(team, state.quizState)
+          case None => createTeamForm()
+          case Some(team) =>              controller(team, state.quizState)
         }
       )
     }
@@ -146,6 +146,7 @@ final class TeamControllerView(
           " ",
           TeamIcon(team),
         ),
+        chooseOtherTeamLink(),
         quizState.maybeQuestion match {
           case Some(question) if showSubmissionForm(question) =>
             <.span(
@@ -162,6 +163,17 @@ final class TeamControllerView(
             <.span(i18n("app.waiting-for-the-next-question"))
         },
       )
+    }
+
+    private def chooseOtherTeamLink(): VdomNode = {
+      <.div(
+        ^.className := "choose-other-team",
+        <.a(
+          ^.href := "javascript:void",
+          ^.onClick --> $.modState(_.copy(maybeTeam = None)),
+          "<< ",
+          i18n("app.choose-other-team"),
+        ))
     }
 
     private def singleAnswerButton(question: Question)(

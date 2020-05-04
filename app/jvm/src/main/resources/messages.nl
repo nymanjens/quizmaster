@@ -146,3 +146,4 @@ app.indicate-that-you-have-written-down-your-answer=Laat weten dat het antwoord 
 app.enter-your-answer=Voer het antwoord in
 app.you-submitted=Uw antwoord
 app.successfully-submitted-answer=Uw antwoord is ingediend
+app.choose-other-team=Kies een ander team
