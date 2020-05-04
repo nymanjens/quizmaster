@@ -10,4 +10,11 @@ object LocalStorageClient {
   def getCurrentTeamName(): Option[String] = {
     Option(dom.window.localStorage.getItem("current-team-name"))
   }
+
+  def setMasterPassword(password: String): Unit = {
+    dom.window.localStorage.setItem("master-password", password)
+  }
+  def getMasterPassword(): Option[String] = {
+    Option(dom.window.localStorage.getItem("master-password"))
+  }
 }
