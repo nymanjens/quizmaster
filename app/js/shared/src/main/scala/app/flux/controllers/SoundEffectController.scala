@@ -19,13 +19,11 @@ import scala.scalajs.js
 
 final class SoundEffectController(
     implicit dispatcher: Dispatcher,
-    entityAccess: JsEntityAccess,
 ) {
   private var currentPage: Page = _
   private val soundsPlaying: mutable.Set[SoundEffect] = mutable.Set()
 
   dispatcher.registerPartialSync(dispatcherListener)
-  entityAccess.registerListener(JsEntityAccessListener)
 
   // **************** Public API ****************//
   def playNewSubmission(): Unit = playSoundEffect(SoundEffect.NewSubmission)
@@ -37,6 +35,7 @@ final class SoundEffectController(
     }
   }
   def playTimerRunsOut(): Unit = playSoundEffect(SoundEffect.TimerRunsOut)
+  def playScoreIncreased(): Unit = playSoundEffect(SoundEffect.ScoreIncreased)
 
   // **************** Private helper methods ****************//
   private def dispatcherListener: PartialFunction[Action, Unit] = {
@@ -49,38 +48,25 @@ final class SoundEffectController(
   private def playSoundEffect(
       soundEffect: SoundEffect,
       minTimeBetweenPlays: Option[FiniteDuration] = None,
-  ): Unit =
-    logExceptions {
-      if (canPlaySoundEffectsOnThisPage) {
-        if (minTimeBetweenPlays.isDefined && (soundsPlaying contains soundEffect)) {
-          // Skip
-        } else {
-          soundsPlaying.add(soundEffect)
-          val audio = new Audio(soundEffect.filepath)
-          audio.addEventListener(
-            "ended",
-            () => {
-              val timeoutTime = minTimeBetweenPlays getOrElse (0.seconds)
-              js.timers.setTimeout(timeoutTime)(logExceptions {
-                soundsPlaying.remove(soundEffect)
-              })
-            }
-          )
-
-          println(s"  Playing ${soundEffect.filepath}..")
-          audio.play()
-        }
-      }
-    }
-
-  private object JsEntityAccessListener extends JsEntityAccess.Listener {
-    override def modificationsAddedOrPendingStateChanged(modifications: Seq[EntityModification]): Unit = {
-      modifications.collect {
-        case EntityModification.Update(team: Team) =>
-          if (Some(team.lastUpdateTime.mostRecentInstant) ==
-                team.lastUpdateTime.timePerField.get(ModelFields.Team.score)) {
-            playSoundEffect(SoundEffect.ScoreIncreased)
+  ): Unit = logExceptions {
+    if (canPlaySoundEffectsOnThisPage) {
+      if (minTimeBetweenPlays.isDefined && (soundsPlaying contains soundEffect)) {
+        // Skip
+      } else {
+        soundsPlaying.add(soundEffect)
+        val audio = new Audio(soundEffect.filepath)
+        audio.addEventListener(
+          "ended",
+          () => {
+            val timeoutTime = minTimeBetweenPlays getOrElse (0.seconds)
+            js.timers.setTimeout(timeoutTime)(logExceptions {
+              soundsPlaying.remove(soundEffect)
+            })
           }
+        )
+
+        println(s"  Playing ${soundEffect.filepath}..")
+        audio.play()
       }
     }
   }

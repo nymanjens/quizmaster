@@ -71,9 +71,11 @@ final class QuestionComponent(
         StateStoresDependency(
           teamsAndQuizStateStore,
           state => {
-            makeSoundAndAlertForAddedSubmissions(
+            makeSoundsAndAlert(
               oldQuizState = state.quizState,
               newQuizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
+              oldTeams = state.teams,
+              newTeams = teamsAndQuizStateStore.stateOrEmpty.teams,
               question = props.question,
             )
             state.copy(
@@ -84,11 +86,14 @@ final class QuestionComponent(
       ))
 
   // **************** Private helper methods ****************//
-  private def makeSoundAndAlertForAddedSubmissions(
+  private def makeSoundsAndAlert(
       oldQuizState: QuizState,
       newQuizState: QuizState,
+      newTeams: Seq[Team],
+      oldTeams: Seq[Team],
       question: Question,
   ): Unit = {
+    // Make sound and alert for new submissions
     val newSubmissions = {
       if (newQuizState.submissions.take(oldQuizState.submissions.size) == oldQuizState.submissions) {
         newQuizState.submissions.drop(oldQuizState.submissions.size)
@@ -113,6 +118,18 @@ final class QuestionComponent(
           }
         }
       }
+    }
+
+    // Make sound if score changed
+    val scoreIncreased = {
+      val oldTeamsMap = oldTeams.map(t => (t.id -> t)).toMap
+      newTeams.exists { newTeam =>
+        val maybeOldTeam = oldTeamsMap.get(newTeam.id)
+        maybeOldTeam.isDefined && newTeam.score > maybeOldTeam.get.score
+      }
+    }
+    if (scoreIncreased) {
+      soundEffectController.playScoreIncreased()
     }
   }
 
