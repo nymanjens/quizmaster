@@ -153,6 +153,7 @@ object QuizState {
   }
 
   case class Submission(
+      id: Long,
       teamId: Long,
       value: SubmissionValue,
       isCorrectAnswer: Boolean,

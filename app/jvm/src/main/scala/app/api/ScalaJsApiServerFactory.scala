@@ -188,7 +188,7 @@ final class ScalaJsApiServerFactory @Inject()(
             StateUpsertHelper.doQuizStateUpsert { oldState =>
               oldState.copy(
                 submissions = oldState.submissions.map {
-                  case s @ Submission(`teamId`, `submissionValue`, _) =>
+                  case s @ Submission(_, `teamId`, `submissionValue`, _) =>
                     s.copy(isCorrectAnswer = isCorrectAnswer)
                   case s => s
                 },
@@ -213,6 +213,7 @@ final class ScalaJsApiServerFactory @Inject()(
       if (question.isMultipleChoice) {
         addVerifiedSubmission(
           Submission(
+            id = EntityModification.generateRandomId(),
             teamId = team.id,
             value = submissionValue,
             isCorrectAnswer = question.isCorrectAnswer(submissionValue),
@@ -227,6 +228,7 @@ final class ScalaJsApiServerFactory @Inject()(
       } else { // Not multiple choice
         addVerifiedSubmission(
           Submission(
+            id = EntityModification.generateRandomId(),
             teamId = team.id,
             value = submissionValue,
             isCorrectAnswer = question.isCorrectAnswer(submissionValue),
