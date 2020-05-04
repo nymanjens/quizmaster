@@ -28,7 +28,7 @@ trait ScalaJsApiClient {
   def persistEntityModifications(modifications: Seq[EntityModification]): Future[Unit]
   def executeDataQuery[E <: Entity](dbQuery: DbQuery[E]): Future[Seq[E]]
   def executeCountQuery(dbQuery: DbQuery[_ <: Entity]): Future[Int]
-  def addSubmission(teamId: Long, submissionValue: SubmissionValue): Future[Unit]
+  def doTeamOrQuizStateUpdate(teamOrQuizStateUpdate: TeamOrQuizStateUpdate): Future[Unit]
 }
 
 object ScalaJsApiClient {
@@ -60,9 +60,9 @@ object ScalaJsApiClient {
       HttpPostAutowireClient[ScalaJsApi].executeCountQuery(picklableDbQuery).call()
     }
 
-    override def addSubmission(teamId: Long, submissionValue: SubmissionValue) = {
+    override def doTeamOrQuizStateUpdate(teamOrQuizStateUpdate: TeamOrQuizStateUpdate) = {
       HttpPostAutowireClient[ScalaJsApi]
-        .addSubmission(teamId, submissionValue)
+        .doTeamOrQuizStateUpdate(teamOrQuizStateUpdate)
         .call()
     }
 

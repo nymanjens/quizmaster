@@ -1,5 +1,6 @@
 package app.flux.stores.quiz
 
+import app.api.ScalaJsApi.TeamOrQuizStateUpdate.AddSubmission
 import app.api.ScalaJsApiClient
 import app.flux.router.AppPages
 import app.flux.stores.quiz.GamepadStore.GamepadState
@@ -139,7 +140,7 @@ final class TeamInputStore(
         }
 
         if (submissinoValue.isDefined) {
-          await(scalaJsApiClient.addSubmission(team.id, submissinoValue.get))
+          await(scalaJsApiClient.doTeamOrQuizStateUpdate(AddSubmission(team.id, submissinoValue.get)))
         }
       }
     }

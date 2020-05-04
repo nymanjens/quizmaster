@@ -67,54 +67,12 @@ final class QuestionComponent(
   // **************** Implementation of HydroReactComponent methods ****************//
   override protected val config =
     ComponentConfig(backendConstructor = new Backend(_), initialState = State())
-      .withStateStoresDependencyFromProps(props =>
-        StateStoresDependency(
-          teamsAndQuizStateStore,
-          state => {
-            makeSoundAndAlertForAddedSubmissions(
-              oldQuizState = state.quizState,
-              newQuizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
-              question = props.question,
-            )
-            state.copy(
-              quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
-              teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-            )
-          }
-      ))
-
-  // **************** Private helper methods ****************//
-  private def makeSoundAndAlertForAddedSubmissions(
-      oldQuizState: QuizState,
-      newQuizState: QuizState,
-      question: Question,
-  ): Unit = {
-    val newSubmissions = {
-      if (newQuizState.submissions.take(oldQuizState.submissions.size) == oldQuizState.submissions) {
-        newQuizState.submissions.drop(oldQuizState.submissions.size)
-      } else {
-        println("  Warning: The new submissions are not an extended version of the old submissions")
-        newQuizState.submissions.filterNot(oldQuizState.submissions.toSet)
-      }
-    }
-    if (oldQuizState != QuizState.nullInstance && newSubmissions.nonEmpty) {
-      if (question.onlyFirstGainsPoints && newSubmissions.exists(_.value.isScorable)) {
-        // An answer was given that will be immediately visible, so the sound can indicate its correctness
-        val atLeastOneSubmissionIsCorrect = newSubmissions.exists(s => question.isCorrectAnswer(s.value))
-        soundEffectController.playRevealingSubmission(correct = atLeastOneSubmissionIsCorrect)
-      } else {
-        soundEffectController.playNewSubmission()
-      }
-
-      if (question.isInstanceOf[Question.Double]) {
-        for (submission <- newSubmissions) {
-          if (question.isCorrectAnswer(submission.value)) {
-            teamInputStore.alertTeam(submission.teamId)
-          }
-        }
-      }
-    }
-  }
+      .withStateStoresDependency(
+        teamsAndQuizStateStore,
+        _.copy(
+          quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
+          teams = teamsAndQuizStateStore.stateOrEmpty.teams,
+        ))
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(

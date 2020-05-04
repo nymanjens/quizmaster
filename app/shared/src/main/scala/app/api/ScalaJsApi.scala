@@ -2,7 +2,9 @@ package app.api
 
 import app.api.ScalaJsApi._
 import app.models.quiz.config.QuizConfig
+import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.QuizState.Submission.SubmissionValue
+import app.models.quiz.Team
 import hydro.api.PicklableDbQuery
 import hydro.models.modification.EntityModification
 import hydro.models.modification.EntityType
@@ -26,7 +28,7 @@ trait ScalaJsApi {
 
   def executeCountQuery(dbQuery: PicklableDbQuery): Int
 
-  def addSubmission(teamId: Long, submissionValue: SubmissionValue): Unit
+  def doTeamOrQuizStateUpdate(teamOrQuizStateUpdate: TeamOrQuizStateUpdate): Unit
 }
 
 object ScalaJsApi {
@@ -61,5 +63,25 @@ object ScalaJsApi {
     ) extends HydroPushSocketPacket
     object Heartbeat extends HydroPushSocketPacket
     case class VersionCheck(versionString: String) extends HydroPushSocketPacket
+  }
+
+  sealed trait TeamOrQuizStateUpdate
+  object TeamOrQuizStateUpdate {
+    case class ReplaceAllEntitiesByImportString(importString: String) extends TeamOrQuizStateUpdate
+    case class UpdateName(teamId: Long, newName: String) extends TeamOrQuizStateUpdate
+    case class UpdateScore(teamId: Long, scoreDiff: Int) extends TeamOrQuizStateUpdate
+    case class DeleteTeam(teamId: Long) extends TeamOrQuizStateUpdate
+    case class GoToPreviousStep() extends TeamOrQuizStateUpdate
+    case class GoToNextStep() extends TeamOrQuizStateUpdate
+    case class GoToPreviousQuestion() extends TeamOrQuizStateUpdate
+    case class GoToNextQuestion() extends TeamOrQuizStateUpdate
+    case class GoToPreviousRound() extends TeamOrQuizStateUpdate
+    case class GoToNextRound() extends TeamOrQuizStateUpdate
+    case class ResetCurrentQuestion() extends TeamOrQuizStateUpdate
+    case class ToggleImageIsEnlarged() extends TeamOrQuizStateUpdate
+    case class SetShowAnswers(showAnswers: Boolean) extends TeamOrQuizStateUpdate
+    case class SetAnswerBulletType(answerBulletType: AnswerBulletType) extends TeamOrQuizStateUpdate
+    case class ToggleTimerPaused(timerRunningValue: Option[Boolean] = None) extends TeamOrQuizStateUpdate
+    case class AddSubmission(teamId: Long, submissionValue: SubmissionValue) extends TeamOrQuizStateUpdate
   }
 }
