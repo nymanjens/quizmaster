@@ -9,6 +9,7 @@ import app.models.quiz.QuizState
 import app.models.quiz.Team
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
+import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.user.User
 import hydro.common.time.Clock
 import hydro.common.I18n
@@ -133,6 +134,14 @@ final class TeamsAndQuizStateStore(
   }
   def togglePaused(timerRunningValue: Option[Boolean] = None): Future[Unit] = {
     scalaJsApiClient.doTeamOrQuizStateUpdate(ToggleTimerPaused(timerRunningValue))
+  }
+  def setSubmissionCorrectness(
+      teamId: Long,
+      submissionValue: SubmissionValue,
+      isCorrectAnswer: Boolean,
+  ): Future[Unit] = {
+    scalaJsApiClient.doTeamOrQuizStateUpdate(
+      SetSubmissionCorrectness(teamId, submissionValue, isCorrectAnswer))
   }
 }
 
