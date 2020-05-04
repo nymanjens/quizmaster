@@ -1,5 +1,6 @@
 package app.flux.react.app.quiz
 
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import app.common.AnswerBullet
 import app.flux.react.app.quiz.TeamIcon.colorOf
 import hydro.flux.react.ReactVdomUtils.^^
@@ -64,6 +65,7 @@ final class TeamsList(
 
     override def render(props: Props, state: State): VdomNode = logExceptions {
       implicit val quizState = state.quizState
+      implicit val _ = props
       val maybeQuestion = quizState.maybeQuestion
       val showSubmissionValue = maybeQuestion.exists { question =>
         (
@@ -144,19 +146,33 @@ final class TeamsList(
 
     private def revealingSubmissionValueNode(submission: Submission)(
         implicit quizState: QuizState,
+        props: Props,
     ): VdomNode = {
       val correctnessClass = if (submission.isCorrectAnswer) "correct" else "incorrect"
 
-      submission.value match {
-        case SubmissionValue.PressedTheOneButton => Bootstrap.FontAwesomeIcon("circle")
-        case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
-          AnswerBullet.all(answerIndex).toVdomNode.apply(^.className := correctnessClass)
-        case SubmissionValue.FreeTextAnswer(answerString) =>
-          <.span(
-            ^.className := correctnessClass,
-            answerString,
+      <.span(
+        <<.ifThen(props.showMasterControls) {
+          Bootstrap.Button()(
+            ^.onClick --> Callback
+              .future(
+                teamsAndQuizStateStore
+                  .setSubmissionCorrectness(submission.teamId, submission.value, !submission.isCorrectAnswer)
+                  .map(_ => Callback.empty)),
+            if (submission.isCorrectAnswer) Bootstrap.FontAwesomeIcon("check")
+            else Bootstrap.FontAwesomeIcon("times"),
           )
-      }
+        },
+        submission.value match {
+          case SubmissionValue.PressedTheOneButton => Bootstrap.FontAwesomeIcon("circle")
+          case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
+            AnswerBullet.all(answerIndex).toVdomNode.apply(^.className := correctnessClass)
+          case SubmissionValue.FreeTextAnswer(answerString) =>
+            <.span(
+              ^.className := correctnessClass,
+              answerString,
+            )
+        },
+      )
     }
   }
 }
