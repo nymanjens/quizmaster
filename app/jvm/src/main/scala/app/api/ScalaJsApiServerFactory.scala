@@ -514,8 +514,7 @@ final class ScalaJsApiServerFactory @Inject()(
           submission <- quizState.submissions
           scoreDiff <- Some {
             if (submission.value.isScorable) {
-              val correct = question.isCorrectAnswer(submission.value)
-              if (correct) {
+              if (submission.isCorrectAnswer) {
                 if (firstCorrectAnswerSeen) {
                   question.pointsToGain
                 } else {
