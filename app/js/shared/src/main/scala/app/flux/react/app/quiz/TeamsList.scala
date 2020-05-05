@@ -171,8 +171,15 @@ final class TeamsList(
               <<.ifDefined(quizState.maybeQuestion) { question =>
                 <<.ifThen(question.onlyFirstGainsPoints && quizState.submissions.last.id == submission.id) {
                   <.span(
-                  " ",
-                    i18n("app.give-your-answer"),
+                    " ",
+                    if (submission.isCorrectAnswer) {
+                      <.span(
+                        ^.className := "correct",
+                        i18n("app.correct"),
+                      )
+                    } else {
+                      i18n("app.give-your-answer")
+                    }
                   )
                 }
               },
