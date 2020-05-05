@@ -13,6 +13,7 @@ import app.models.quiz.QuizState
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.Team
+import hydro.common.I18n
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.JsLoggingUtils.LogExceptionsCallback
 import hydro.flux.action.Dispatcher
@@ -33,6 +34,7 @@ final class TeamsList(
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     teamInputStore: TeamInputStore,
+    i18n: I18n,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -163,7 +165,18 @@ final class TeamsList(
           )
         },
         submission.value match {
-          case SubmissionValue.PressedTheOneButton => Bootstrap.FontAwesomeIcon("circle")
+          case SubmissionValue.PressedTheOneButton =>
+            <.span(
+              Bootstrap.FontAwesomeIcon("circle"),
+              <<.ifDefined(quizState.maybeQuestion) { question =>
+                <<.ifThen(question.onlyFirstGainsPoints && quizState.submissions.last.id == submission.id) {
+                  <.span(
+                  " ",
+                    i18n("app.give-your-answer"),
+                  )
+                }
+              },
+            )
           case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
             AnswerBullet.all(answerIndex).toVdomNode.apply(^.className := correctnessClass)
           case SubmissionValue.FreeTextAnswer(answerString) =>

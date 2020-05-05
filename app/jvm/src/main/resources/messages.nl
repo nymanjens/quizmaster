@@ -147,3 +147,4 @@ app.enter-your-answer=Voer het antwoord in
 app.you-submitted=Uw antwoord
 app.successfully-submitted-answer=Uw antwoord is ingediend
 app.choose-other-team=Kies een ander team
+app.give-your-answer=Geef uw antwoord
