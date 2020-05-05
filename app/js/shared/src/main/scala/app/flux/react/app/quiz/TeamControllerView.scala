@@ -90,8 +90,8 @@ final class TeamControllerView(
       <.span(
         ^.className := "team-controller-view",
         state.maybeTeam match {
-          case None => createTeamForm()
-          case Some(team) =>              controller(team, state.quizState)
+          case None       => createTeamForm()
+          case Some(team) => controller(team, state.quizState)
         }
       )
     }
@@ -284,7 +284,7 @@ final class TeamControllerView(
             ": ",
             <.span(
               ^^.ifThen(showSubmissionCorrectness) {
-                ^.className := (if (maybeCurrentSubmission.get.isCorrectAnswer) "correct"
+                ^.className := (if (maybeCurrentSubmission.get.isCorrectAnswer == Some(true)) "correct"
                                 else "incorrect")
               },
               currentSubmissionText,

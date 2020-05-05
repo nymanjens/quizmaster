@@ -186,7 +186,7 @@ final class ScalaJsApiServerFactory @Inject()(
               oldState.copy(
                 submissions = oldState.submissions.map {
                   case s if s.id == submissionId =>
-                    s.copy(isCorrectAnswer = isCorrectAnswer)
+                    s.copy(isCorrectAnswer = Some(isCorrectAnswer))
                   case s => s
                 },
               )
@@ -203,6 +203,10 @@ final class ScalaJsApiServerFactory @Inject()(
       require(quizState.canSubmitResponse(team), "Responses are closed")
 
       val question = quizState.maybeQuestion.get
+      val isCorrectAnswer = submissionValue match {
+        case SubmissionValue.PressedTheOneButton => None
+        case _                                   => Some(question.isCorrectAnswer(submissionValue))
+      }
       def teamHasSubmission(thisTeam: Team): Boolean =
         quizState.submissions.exists(_.teamId == thisTeam.id)
       lazy val allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
@@ -213,11 +217,11 @@ final class ScalaJsApiServerFactory @Inject()(
             id = EntityModification.generateRandomId(),
             teamId = team.id,
             value = submissionValue,
-            isCorrectAnswer = question.isCorrectAnswer(submissionValue),
+            isCorrectAnswer = isCorrectAnswer,
           ),
           resetTimer = question.isInstanceOf[Question.Double],
           pauseTimer =
-            if (question.onlyFirstGainsPoints) question.isCorrectAnswer(submissionValue)
+            if (question.onlyFirstGainsPoints) isCorrectAnswer == Some(true)
             else allOtherTeamsHaveSubmission,
           allowMoreThanOneSubmissionPerTeam = false,
           removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
@@ -228,7 +232,7 @@ final class ScalaJsApiServerFactory @Inject()(
             id = EntityModification.generateRandomId(),
             teamId = team.id,
             value = submissionValue,
-            isCorrectAnswer = question.isCorrectAnswer(submissionValue),
+            isCorrectAnswer = isCorrectAnswer,
           ),
           pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
           allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
@@ -512,19 +516,16 @@ final class ScalaJsApiServerFactory @Inject()(
         for {
           submission <- quizState.submissions
           scoreDiff <- Some {
-            if (submission.value.isScorable) {
-              if (submission.isCorrectAnswer) {
+            submission.isCorrectAnswer match {
+              case Some(true) =>
                 if (firstCorrectAnswerSeen) {
                   question.pointsToGain
                 } else {
                   firstCorrectAnswerSeen = true
                   question.pointsToGainOnFirstAnswer
                 }
-              } else {
-                question.pointsToGainOnWrongAnswer
-              }
-            } else {
-              0
+              case Some(false) => question.pointsToGainOnWrongAnswer
+              case None        => 0
             }
           }
           if scoreDiff != 0

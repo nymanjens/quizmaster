@@ -77,7 +77,7 @@ case class QuizState(
             !timerState.timerRunning || timerState.hasFinished(question.maxTime)
           else false
         lazy val earlierSubmissionFinishedTheQuestion = {
-          val alreadyAnsweredCorrectly = submissions.exists(_.isCorrectAnswer)
+          val alreadyAnsweredCorrectly = submissions.exists(_.isCorrectAnswer == Some(true))
           question.onlyFirstGainsPoints && alreadyAnsweredCorrectly
         }
 
@@ -156,14 +156,15 @@ object QuizState {
       id: Long,
       teamId: Long,
       value: SubmissionValue,
-      isCorrectAnswer: Boolean,
+      // If none, there is no information available to make an estimation of correctness
+      isCorrectAnswer: Option[Boolean],
   )
   object Submission {
-    sealed abstract class SubmissionValue(val isScorable: Boolean)
+    sealed abstract class SubmissionValue
     object SubmissionValue {
-      case object PressedTheOneButton extends SubmissionValue(isScorable = false)
-      case class MultipleChoiceAnswer(answerIndex: Int) extends SubmissionValue(isScorable = true)
-      case class FreeTextAnswer(answerString: String) extends SubmissionValue(isScorable = true)
+      case object PressedTheOneButton extends SubmissionValue
+      case class MultipleChoiceAnswer(answerIndex: Int) extends SubmissionValue
+      case class FreeTextAnswer(answerString: String) extends SubmissionValue
     }
   }
 

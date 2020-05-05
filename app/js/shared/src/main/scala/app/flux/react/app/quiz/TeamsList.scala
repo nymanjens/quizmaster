@@ -150,18 +150,33 @@ final class TeamsList(
         implicit quizState: QuizState,
         props: Props,
     ): VdomNode = {
-      val correctnessClass = if (submission.isCorrectAnswer) "correct" else "incorrect"
+      val correctnessClass = submission.isCorrectAnswer match {
+        case Some(true)  => "correct"
+        case Some(false) => "incorrect"
+        case None        => ""
+      }
 
       <.span(
         <<.ifThen(props.showMasterControls) {
           Bootstrap.Button()(
+            ^.disabled := submission.isCorrectAnswer == Some(false),
             ^.onClick --> Callback
               .future(
                 teamsAndQuizStateStore
-                  .setSubmissionCorrectness(submission.id, !submission.isCorrectAnswer)
+                  .setSubmissionCorrectness(submission.id, isCorrectAnswer = false)
                   .map(_ => Callback.empty)),
-            if (submission.isCorrectAnswer) Bootstrap.FontAwesomeIcon("check")
-            else Bootstrap.FontAwesomeIcon("times"),
+            Bootstrap.FontAwesomeIcon("times"),
+          )
+        },
+        <<.ifThen(props.showMasterControls) {
+          Bootstrap.Button()(
+            ^.disabled := submission.isCorrectAnswer == Some(true),
+            ^.onClick --> Callback
+              .future(
+                teamsAndQuizStateStore
+                  .setSubmissionCorrectness(submission.id, isCorrectAnswer = true)
+                  .map(_ => Callback.empty)),
+            Bootstrap.FontAwesomeIcon("check"),
           )
         },
         submission.value match {
@@ -171,15 +186,13 @@ final class TeamsList(
               <<.ifDefined(quizState.maybeQuestion) { question =>
                 <<.ifThen(question.onlyFirstGainsPoints && quizState.submissions.last.id == submission.id) {
                   <.span(
+                    ^.className := correctnessClass,
                     " ",
-                    if (submission.isCorrectAnswer) {
-                      <.span(
-                        ^.className := "correct",
-                        i18n("app.correct"),
-                      )
-                    } else {
-                      i18n("app.give-your-answer")
-                    }
+                    submission.isCorrectAnswer match {
+                      case Some(true)  => i18n("app.correct")
+                      case Some(false) => i18n("app.incorrect")
+                      case _           => i18n("app.give-your-answer")
+                    },
                   )
                 }
               },
