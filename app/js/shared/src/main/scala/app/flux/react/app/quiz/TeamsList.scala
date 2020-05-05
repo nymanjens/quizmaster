@@ -155,56 +155,72 @@ final class TeamsList(
         case Some(false) => "incorrect"
         case None        => ""
       }
+      val isMostRecentSubmission = quizState.submissions.last.id == submission.id
 
       <.span(
-        <<.ifThen(props.showMasterControls) {
-          Bootstrap.Button()(
-            ^.disabled := submission.isCorrectAnswer == Some(false),
-            ^.onClick --> Callback
-              .future(
-                teamsAndQuizStateStore
-                  .setSubmissionCorrectness(submission.id, isCorrectAnswer = false)
-                  .map(_ => Callback.empty)),
-            Bootstrap.FontAwesomeIcon("times"),
-          )
-        },
-        <<.ifThen(props.showMasterControls) {
-          Bootstrap.Button()(
-            ^.disabled := submission.isCorrectAnswer == Some(true),
-            ^.onClick --> Callback
-              .future(
-                teamsAndQuizStateStore
-                  .setSubmissionCorrectness(submission.id, isCorrectAnswer = true)
-                  .map(_ => Callback.empty)),
-            Bootstrap.FontAwesomeIcon("check"),
-          )
-        },
         submission.value match {
           case SubmissionValue.PressedTheOneButton =>
-            <.span(
-              Bootstrap.FontAwesomeIcon("circle"),
-              <<.ifDefined(quizState.maybeQuestion) { question =>
-                <<.ifThen(question.onlyFirstGainsPoints && quizState.submissions.last.id == submission.id) {
+            <<.ifDefined(quizState.maybeQuestion) {
+              question =>
+                <.span(
+                  <<.ifThen(if (question.onlyFirstGainsPoints) isMostRecentSubmission else true) {
+                    maybeMasterSubmissionControls(submission)
+                  },
                   <.span(
                     ^.className := correctnessClass,
-                    " ",
-                    submission.isCorrectAnswer match {
-                      case Some(true)  => i18n("app.correct")
-                      case Some(false) => i18n("app.incorrect")
-                      case _           => i18n("app.give-your-answer")
+                    Bootstrap.FontAwesomeIcon("circle"),
+                    <<.ifThen(question.onlyFirstGainsPoints && isMostRecentSubmission) {
+                      <.span(
+                        " ",
+                        submission.isCorrectAnswer match {
+                          case Some(true)  => i18n("app.correct")
+                          case Some(false) => i18n("app.incorrect")
+                          case _           => i18n("app.give-your-answer")
+                        },
+                      )
                     },
-                  )
-                }
-              },
-            )
+                  ),
+                )
+            }
           case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
             AnswerBullet.all(answerIndex).toVdomNode.apply(^.className := correctnessClass)
           case SubmissionValue.FreeTextAnswer(answerString) =>
             <.span(
-              ^.className := correctnessClass,
-              answerString,
+              maybeMasterSubmissionControls(submission),
+              <.span(
+                ^.className := correctnessClass,
+                answerString,
+              ),
             )
         },
+      )
+    }
+  }
+
+  private def maybeMasterSubmissionControls(submission: Submission)(
+      implicit quizState: QuizState,
+      props: Props,
+  ): VdomNode = {
+    <<.ifThen(props.showMasterControls) {
+      Bootstrap.ButtonGroup(
+        Bootstrap.Button()(
+          ^.disabled := submission.isCorrectAnswer == Some(false),
+          ^.onClick --> Callback
+            .future(
+              teamsAndQuizStateStore
+                .setSubmissionCorrectness(submission.id, isCorrectAnswer = false)
+                .map(_ => Callback.empty)),
+          Bootstrap.FontAwesomeIcon("times"),
+        ),
+        Bootstrap.Button()(
+          ^.disabled := submission.isCorrectAnswer == Some(true),
+          ^.onClick --> Callback
+            .future(
+              teamsAndQuizStateStore
+                .setSubmissionCorrectness(submission.id, isCorrectAnswer = true)
+                .map(_ => Callback.empty)),
+          Bootstrap.FontAwesomeIcon("check"),
+        ),
       )
     }
   }
