@@ -88,9 +88,12 @@ final class SbadminLayout(
               <.li(linkToPage(AppPages.QuizSettings)),
               <.li(
                 <.a(
+                  ^.href := "javascript:void(0)",
                   ^.onClick --> {
                     LocalStorageClient.removeMasterSecret()
-                    $.modState(_.copy(isQuizMaster = false))
+                    $.modState(_.copy(isQuizMaster = false)).thenRun {
+                      router.setPage(AppPages.TeamController)
+                    }
                   },
                   Bootstrap.FontAwesomeIcon("lock", fixedWidth = true),
                 ),
@@ -104,12 +107,16 @@ final class SbadminLayout(
               versionNavbar(),
               <.li(
                 <.a(
+                  ^.href := "javascript:void(0)",
                   ^.onClick --> {
                     promptMasterSecret() match {
                       case None => Callback.empty
                       case Some(masterSecret) =>
+                        e.preventDefault()
                         LocalStorageClient.setMasterSecret(masterSecret)
-                        $.modState(_.copy(isQuizMaster = true))
+                        $.modState(_.copy(isQuizMaster = true)).thenRun {
+                          router.setPage(AppPages.Quiz)
+                        }
                     }
                   },
                   Bootstrap.FontAwesomeIcon("unlock", fixedWidth = true),
