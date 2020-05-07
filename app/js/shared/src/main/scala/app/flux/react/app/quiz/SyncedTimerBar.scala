@@ -84,7 +84,7 @@ final class SyncedTimerBar(
               val newElapsedTime = state.timerState.elapsedTime()
               if (state.elapsedTime < props.maxTime && newElapsedTime >= props.maxTime) {
                 soundEffectController.playTimerRunsOut()
-                teamsAndQuizStateStore.togglePaused(timerRunningValue = Some(false))
+                teamsAndQuizStateStore.toggleTimerPaused(timerRunningValue = Some(false))
               }
               state.copy(elapsedTime = newElapsedTime)
             }.runNow()
@@ -107,7 +107,7 @@ final class SyncedTimerBar(
           runnable()
         })
       }
-      bind("space", () => teamsAndQuizStateStore.togglePaused())
+      bind("space", () => teamsAndQuizStateStore.toggleTimerPaused())
     }
 
     private def formatDuration(duration: Duration): String = {
