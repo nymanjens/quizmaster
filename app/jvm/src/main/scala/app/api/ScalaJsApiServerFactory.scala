@@ -1,5 +1,7 @@
 package app.api
 
+import hydro.common.time.JavaTimeImplicits._
+import java.time.Duration
 import java.util.concurrent.Executors
 
 import app.api.ScalaJsApi._
@@ -177,6 +179,18 @@ final class ScalaJsApiServerFactory @Inject()(
                   timerRunning = timerRunningValue getOrElse (!timerState.timerRunning),
                 ))
             }
+
+          case AddTimeToTimer(duration: Duration) =>
+            StateUpsertHelper.doQuizStateUpsert { state =>
+              val timerState = state.timerState
+              state.copy(
+                timerState = TimerState(
+                  lastSnapshotInstant = clock.nowInstant,
+                  lastSnapshotElapsedTime = Seq(Duration.ZERO, timerState.elapsedTime() - duration).max,
+                  timerRunning = timerState.timerRunning,
+                ))
+            }
+
 
           case AddSubmission(teamId: Long, submissionValue: SubmissionValue) =>
             addSubmission(teamId, submissionValue)

@@ -1,5 +1,7 @@
 package app.api
 
+import java.time.Duration
+
 import app.api.ScalaJsApi._
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
@@ -92,6 +94,7 @@ object ScalaJsApi {
     case class SetShowAnswers(showAnswers: Boolean) extends TeamOrQuizStateUpdate
     case class SetAnswerBulletType(answerBulletType: AnswerBulletType) extends TeamOrQuizStateUpdate
     case class ToggleTimerPaused(timerRunningValue: Option[Boolean] = None) extends TeamOrQuizStateUpdate
+    case class AddTimeToTimer(duration: Duration) extends TeamOrQuizStateUpdate
     case class AddSubmission(teamId: Long, submissionValue: SubmissionValue) extends TeamOrQuizStateUpdate
     case class SetSubmissionCorrectness(submissionId: Long, isCorrectAnswer: Boolean)
         extends TeamOrQuizStateUpdate

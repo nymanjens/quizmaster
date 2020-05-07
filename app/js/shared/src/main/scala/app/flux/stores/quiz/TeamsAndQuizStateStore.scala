@@ -1,5 +1,7 @@
 package app.flux.stores.quiz
 
+import java.time.Duration
+
 import app.api.ScalaJsApi.TeamOrQuizStateUpdate._
 import app.api.ScalaJsApiClient
 import app.flux.action.AppActions
@@ -134,6 +136,9 @@ final class TeamsAndQuizStateStore(
   }
   def toggleTimerPaused(timerRunningValue: Option[Boolean] = None): Future[Unit] = {
     scalaJsApiClient.doTeamOrQuizStateUpdate(ToggleTimerPaused(timerRunningValue))
+  }
+  def addTimeToTimer(duration: Duration): Future[Unit] = {
+    scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(duration))
   }
   def setSubmissionCorrectness(submissionId: Long, isCorrectAnswer: Boolean): Future[Unit] = {
     scalaJsApiClient.doTeamOrQuizStateUpdate(SetSubmissionCorrectness(submissionId, isCorrectAnswer))

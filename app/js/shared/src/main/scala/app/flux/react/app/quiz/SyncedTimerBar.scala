@@ -108,6 +108,9 @@ final class SyncedTimerBar(
         })
       }
       bind("space", () => teamsAndQuizStateStore.toggleTimerPaused())
+      bind("shift+r", () => teamsAndQuizStateStore.addTimeToTimer(Duration.ofDays(9999)))
+      bind("shift+plus", () => teamsAndQuizStateStore.addTimeToTimer(Duration.ofSeconds(30)))
+      bind("shift+-", () => teamsAndQuizStateStore.addTimeToTimer(Duration.ofSeconds(-30)))
     }
 
     private def formatDuration(duration: Duration): String = {
