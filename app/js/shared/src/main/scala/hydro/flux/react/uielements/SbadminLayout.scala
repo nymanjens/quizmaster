@@ -9,6 +9,8 @@ import hydro.common.I18n
 import hydro.common.JsLoggingUtils.LogExceptionsCallback
 import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
+import hydro.flux.react.ReactVdomUtils.<<
+import hydro.flux.react.ReactVdomUtils.^^
 import hydro.flux.router.Page
 import hydro.flux.router.RouterContext
 import hydro.flux.router.StandardPages
@@ -112,7 +114,6 @@ final class SbadminLayout(
                     promptMasterSecret() match {
                       case None => Callback.empty
                       case Some(masterSecret) =>
-                        e.preventDefault()
                         LocalStorageClient.setMasterSecret(masterSecret)
                         $.modState(_.copy(isQuizMaster = true)).thenRun {
                           router.setPage(AppPages.Quiz)
@@ -156,7 +157,12 @@ final class SbadminLayout(
 
     private def linkToPage(page: Page)(implicit router: RouterContext): VdomElement = {
       router.anchorWithHrefTo(page)(
-        <.i(^.className := page.iconClass),
+        ^^.ifThen(router.currentPage == page) {
+          ^.className := "selected"
+        },
+        <.i(
+          ^.className := page.iconClass,
+        ),
       )
     }
 
