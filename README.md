@@ -42,11 +42,16 @@ This quiz can be played in different ways, which will inform the quiz settings (
 
 ### Shortcuts
 
-- `spacebar`: Pause and resume the timer
-- `left/right`: Go to the previous/next step of the question
-- `alt + left/right`: Go to the previous/next question
-- `alt + shift + left/right`: Go to the previous/next round
-- `alt + enter`: Toggle enlarged image (if there is a visible image)
-- `a`: toggle the answer to be visible in the master view (http://localhost:9000/app/master)
-- `1/2/3/.../0`: Increase the score of team 1, 2, ..., 10 by one point
-- `shift + 1/2/3/.../0`: Decrease the score of team 1, 2, ..., 10 by one point
+- **Quiz navigation**
+  - `left/right`: Go to the previous/next step of the question
+  - `alt + left/right`: Go to the previous/next question
+  - `alt + shift + left/right`: Go to the previous/next round
+- **Tools during question**
+  - `spacebar`: Pause and resume the timer
+  - `shift + r`: Restart the current timer
+  - `shift + =/-`: Add/subtract 30 seconds from the current timer
+  - `alt + enter`: Toggle enlarged image (if there is a visible image)
+  - `a`: toggle the answer to be visible in the master view (http://localhost:9000/app/master)
+- **Scoring**
+  - `1/2/3/.../0`: Increase the score of team 1, 2, ..., 10 by one point
+  - `shift + 1/2/3/.../0`: Decrease the score of team 1, 2, ..., 10 by one point
