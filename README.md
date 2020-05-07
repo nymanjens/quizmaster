@@ -27,7 +27,7 @@ This is a web-app to run locally while conducting a quiz (in real life) with abo
 
 ### Game modes
 
-This quiz can be played in different ways, which will inform the quiz settings (http://localhost:9000/app/quizsettings/*).
+This quiz can be played in different ways, which will inform the quiz settings (http://localhost:9000/app/quizsettings).
 
 - With every team using a phone/tablet/laptop connected to `http://<your-ip-address>:9000/app/teamcontroller`
     - To choose from multiple-choice questions. Note that these are automatically scored.
@@ -47,6 +47,6 @@ This quiz can be played in different ways, which will inform the quiz settings (
 - `alt + left/right`: Go to the previous/next question
 - `alt + shift + left/right`: Go to the previous/next round
 - `alt + enter`: Toggle enlarged image (if there is a visible image)
-- `a`: toggle the answer to be visible in the master view (http://localhost:9000/app/master/*)
+- `a`: toggle the answer to be visible in the master view (http://localhost:9000/app/master)
 - `1/2/3/.../0`: Increase the score of team 1, 2, ..., 10 by one point
 - `shift + 1/2/3/.../0`: Decrease the score of team 1, 2, ..., 10 by one point

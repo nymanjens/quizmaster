@@ -1,6 +1,8 @@
 package app.flux.react.app.quiz
 
+import app.api.ScalaJsApi.GetInitialDataResponse
 import app.common.AnswerBullet
+import app.common.MasterSecretUtils
 import app.flux.stores.quiz.GamepadStore.Arrow
 import hydro.flux.react.ReactVdomUtils.<<
 import hydro.flux.react.ReactVdomUtils.^^
@@ -33,11 +35,12 @@ final class GamepadSetupView(
     teamInputStore: TeamInputStore,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     i18n: I18n,
+    getInitialDataResponse: GetInitialDataResponse,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
   def apply(router: RouterContext): VdomElement = {
-    component(Props(router))
+    MasterSecretUtils.requireMasterSecretOrRedirect(component(Props(router)), router)
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//

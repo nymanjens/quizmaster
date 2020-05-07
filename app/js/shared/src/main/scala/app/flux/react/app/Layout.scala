@@ -1,15 +1,12 @@
 package app.flux.react.app
 
-import scala.concurrent.duration._
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import hydro.flux.react.ReactVdomUtils.<<
-import hydro.flux.react.ReactVdomUtils.^^
 import app.flux.react.app.quiz.TeamsList
 import app.flux.router.AppPages
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.flux.ClientApp.HtmlImage
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
+import hydro.flux.react.ReactVdomUtils.<<
 import hydro.flux.react.uielements.SbadminLayout
 import hydro.flux.react.HydroReactComponent
 import hydro.flux.router.RouterContext
@@ -17,10 +14,9 @@ import hydro.jsfacades.Audio
 import hydro.jsfacades.Mousetrap
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
-import japgolly.scalajs.react.Callback
 
 import scala.collection.mutable
-import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.scalajs.js
 
 final class Layout(
@@ -66,7 +62,7 @@ final class Layout(
           <<.ifThen(router.currentPage != AppPages.TeamController) {
             <.div(
               ^.id := "left-content-wrapper",
-              teamsList(showMasterControls = router.currentPage.isInstanceOf[AppPages.Master]),
+              teamsList(showMasterControls = router.currentPage == AppPages.Master),
             )
           },
           <.div(
