@@ -2,6 +2,7 @@ package app.flux.react.app.quiz
 
 import app.api.ScalaJsApi.GetInitialDataResponse
 import app.common.LocalStorageClient
+import app.common.MasterSecretUtils
 import app.flux.router.AppPages
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
@@ -37,12 +38,7 @@ final class MasterView(
 
   // **************** API ****************//
   def apply(router: RouterContext): VdomElement = {
-    if (LocalStorageClient.getMasterSecret() == Some(getInitialDataResponse.masterSecret)) {
-      component(Props(router))
-    } else {
-      router.setPage(AppPages.TeamController)
-      <.span()
-    }
+    MasterSecretUtils.requireMasterSecretOrRedirect(component(Props(router)), router)
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//
