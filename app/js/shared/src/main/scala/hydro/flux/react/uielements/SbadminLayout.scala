@@ -5,24 +5,18 @@ import app.AppVersion
 import app.api.ScalaJsApi.GetInitialDataResponse
 import app.common.LocalStorageClient
 import app.flux.router.AppPages
-import hydro.common.CollectionUtils.ifThenSeq
 import hydro.common.I18n
 import hydro.common.JsLoggingUtils.LogExceptionsCallback
 import hydro.flux.action.Dispatcher
-import hydro.flux.action.StandardActions
 import hydro.flux.react.HydroReactComponent
-import hydro.flux.react.ReactVdomUtils.^^
 import hydro.flux.router.Page
 import hydro.flux.router.RouterContext
 import hydro.flux.router.StandardPages
 import hydro.models.access.JsEntityAccess
 import japgolly.scalajs.react._
-import japgolly.scalajs.react.vdom.PackageBase.VdomAttr
 import japgolly.scalajs.react.vdom.html_<^._
 import org.scalajs.dom
 
-import scala.collection.immutable.Seq
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js
 
 final class SbadminLayout(
@@ -48,7 +42,9 @@ final class SbadminLayout(
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class State(
-      isQuizMaster: Boolean = LocalStorageClient.getMasterPassword() == Some(getInitialDataResponse.masterSecret),
+      isQuizMaster: Boolean = {
+        LocalStorageClient.getMasterSecret() == Some(getInitialDataResponse.masterSecret)
+      },
   )
   protected case class Props(
       title: TagMod,
@@ -73,15 +69,7 @@ final class SbadminLayout(
             " ",
             pageLoadingSpinner()
           ),
-          if (router.currentPage == AppPages.TeamController) {
-            <.ul(
-              ^.className := "nav navbar-top-links navbar-right",
-              applicationDisconnectedIcon(),
-              pendingModificationsCounter(),
-              versionNavbar(),
-              <.li(linkToMasterSecretProtectedPage(AppPages.Master.apply)),
-            )
-          } else {
+          if (state.isQuizMaster) {
             <.ul(
               ^.className := "nav navbar-top-links navbar-right",
               applicationDisconnectedIcon(),
@@ -89,20 +77,44 @@ final class SbadminLayout(
               versionNavbar(),
               <.li(linkToPage(AppPages.TeamController)),
               <.li(linkToPage(AppPages.Quiz)),
-              <.li(linkToMasterSecretProtectedPage(AppPages.Master.apply)),
+              <.li(linkToPage(AppPages.Master)),
               <.li(
                 <.a(
-                  ^.onClick --> LogExceptionsCallback {
-                    promptMasterSecret match {
-                      case None               =>
-                      case Some(masterSecret) => dom.window.location.href = s"/rounds/$masterSecret/"
-                    }
-                  },
+                  ^.href := s"/rounds/${getInitialDataResponse.masterSecret}/",
                   Bootstrap.FontAwesomeIcon("bar-chart-o", fixedWidth = true),
                 ),
               ),
               <.li(linkToPage(AppPages.Gamepad)),
-              <.li(linkToMasterSecretProtectedPage(AppPages.QuizSettings.apply)),
+              <.li(linkToPage(AppPages.QuizSettings)),
+              <.li(
+                <.a(
+                  ^.onClick --> {
+                    LocalStorageClient.removeMasterSecret()
+                    $.modState(_.copy(isQuizMaster = false))
+                  },
+                  Bootstrap.FontAwesomeIcon("lock", fixedWidth = true),
+                ),
+              ),
+            )
+          } else {
+            <.ul(
+              ^.className := "nav navbar-top-links navbar-right",
+              applicationDisconnectedIcon(),
+              pendingModificationsCounter(),
+              versionNavbar(),
+              <.li(
+                <.a(
+                  ^.onClick --> {
+                    promptMasterSecret() match {
+                      case None => Callback.empty
+                      case Some(masterSecret) =>
+                        LocalStorageClient.setMasterSecret(masterSecret)
+                        $.modState(_.copy(isQuizMaster = true))
+                    }
+                  },
+                  Bootstrap.FontAwesomeIcon("unlock", fixedWidth = true),
+                ),
+              ),
             )
           },
         ),
@@ -140,24 +152,6 @@ final class SbadminLayout(
         <.i(^.className := page.iconClass),
       )
     }
-    private def linkToMasterSecretProtectedPage(pageFromSecret: String => Page)(
-        implicit router: RouterContext): VdomElement = {
-      if (getInitialDataResponse.masterSecret == "*") {
-        // If the master secret is a wildcard, return a regular link so that ctrl-click works
-        linkToPage(pageFromSecret(getInitialDataResponse.masterSecret))
-      } else {
-        val arbitraryPageInstance = pageFromSecret("---")
-        <.a(
-          ^.onClick --> LogExceptionsCallback {
-            promptMasterSecret match {
-              case None               =>
-              case Some(masterSecret) => router.setPage(pageFromSecret(masterSecret))
-            }
-          },
-          <.i(^.className := arbitraryPageInstance.iconClass),
-        )
-      }
-    }
 
     private def promptMasterSecret(): Option[String] = {
       if (getInitialDataResponse.masterSecret == "*") {
@@ -168,7 +162,7 @@ final class SbadminLayout(
           // Canceled
           None
         } else if (userInput != getInitialDataResponse.masterSecret) {
-          dom.window.alert("Wrong password")
+          dom.window.alert("Wrong secret")
           None
         } else {
           Some(userInput)

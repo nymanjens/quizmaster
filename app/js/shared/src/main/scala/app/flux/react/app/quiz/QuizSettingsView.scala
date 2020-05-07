@@ -1,6 +1,8 @@
 package app.flux.react.app.quiz
 
 import app.api.ScalaJsApi.GetInitialDataResponse
+import app.common.LocalStorageClient
+import app.flux.router.AppPages
 import app.flux.stores.quiz.GamepadStore.Arrow
 import app.flux.stores.quiz.GamepadStore.GamepadState
 import app.flux.stores.quiz.TeamInputStore
@@ -37,9 +39,13 @@ final class QuizSettingsView(
 ) extends HydroReactComponent.Stateless {
 
   // **************** API ****************//
-  def apply(masterSecret: String, router: RouterContext): VdomElement = {
-    require(getInitialDataResponse.masterSecret == masterSecret)
-    component(Props(router))
+  def apply(router: RouterContext): VdomElement = {
+    if (LocalStorageClient.getMasterSecret() == Some(getInitialDataResponse.masterSecret)) {
+      component(Props(router))
+    } else {
+      router.setPage(AppPages.TeamController)
+      <.span()
+    }
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//
