@@ -1,5 +1,7 @@
 package app.flux.react.app.quiz
 
+import app.api.ScalaJsApi.GetInitialDataResponse
+import app.common.MasterSecretUtils
 import app.flux.controllers.SoundEffectController
 import app.flux.stores.quiz.TeamInputStore
 import app.flux.stores.quiz.TeamsAndQuizStateStore
@@ -28,11 +30,12 @@ final class QuizView(
     questionComponent: QuestionComponent,
     soundEffectController: SoundEffectController,
     teamInputStore: TeamInputStore,
+    getInitialDataResponse: GetInitialDataResponse,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
   def apply(router: RouterContext): VdomElement = {
-    component(Props(router))
+    MasterSecretUtils.requireMasterSecretOrRedirect(component(Props(router)), router)
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//
