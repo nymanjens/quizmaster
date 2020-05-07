@@ -91,7 +91,8 @@ final class SbadminLayout(
               <.li(
                 <.a(
                   ^.href := "javascript:void(0)",
-                  ^.onClick --> {
+                  ^.onClick ==> { (e: ReactEventFromInput) =>
+                    e.preventDefault()
                     LocalStorageClient.removeMasterSecret()
                     $.modState(_.copy(isQuizMaster = false)).thenRun {
                       router.setPage(AppPages.TeamController)
@@ -110,7 +111,8 @@ final class SbadminLayout(
               <.li(
                 <.a(
                   ^.href := "javascript:void(0)",
-                  ^.onClick --> {
+                  ^.onClick ==> { (e: ReactEventFromInput) =>
+                    e.preventDefault()
                     promptMasterSecret() match {
                       case None => Callback.empty
                       case Some(masterSecret) =>
