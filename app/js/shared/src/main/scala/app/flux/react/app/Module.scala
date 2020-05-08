@@ -13,6 +13,7 @@ import app.flux.react.app.quiz.QuestionComponent
 import app.flux.react.app.quiz.QuizProgressIndicator
 import app.flux.react.app.quiz.QuizSettingsPanels
 import app.flux.react.app.quiz.QuizView
+import app.flux.react.app.quiz.RoundComponent
 import app.flux.react.app.quiz.SubmissionsSummaryTable
 import app.flux.react.app.quiz.SubmissionsSummaryTable
 import app.flux.react.app.quiz.SubmissionsSummaryView
@@ -67,6 +68,7 @@ final class Module(
   implicit private val question: QuestionComponent = new QuestionComponent()
   implicit private val quizSettingsPanels: QuizSettingsPanels = new QuizSettingsPanels()
   implicit private val submissionsSummaryTable = new SubmissionsSummaryTable()
+  implicit private val roundComponent = new RoundComponent()
 
   implicit val layout: Layout = new Layout
   implicit val teamController: TeamControllerView = new TeamControllerView()

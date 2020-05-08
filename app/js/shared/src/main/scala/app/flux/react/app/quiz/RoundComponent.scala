@@ -1,13 +1,20 @@
 package app.flux.react.app.quiz
 
 import app.models.quiz.config.QuizConfig
+import app.models.quiz.QuizState
 import hydro.common.I18n
 import hydro.flux.react.ReactVdomUtils.<<
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
 
-object RoundComponent {
-  def apply(round: QuizConfig.Round, showMasterData: Boolean = false)(implicit i18n: I18n): VdomElement = {
+final class RoundComponent(
+    implicit
+    quizConfig: QuizConfig,
+    i18n: I18n,
+    submissionsSummaryTable: SubmissionsSummaryTable,
+) {
+  def apply(round: QuizConfig.Round, showMasterData: Boolean = false)(
+      implicit quizState: QuizState): VdomElement = {
     <.div(
       ^.className := "round-wrapper",
       <.div(
@@ -27,6 +34,9 @@ object RoundComponent {
           ^.className := "round-metadata",
           s"${i18n("app.max-points-to-gain")}: ${round.questions.map(_.pointsToGainOnFirstAnswer).sum}",
         )
+      },
+      <<.ifThen(quizState.quizHasEnded) {
+        submissionsSummaryTable(selectedTeamId = None)
       },
     )
   }
