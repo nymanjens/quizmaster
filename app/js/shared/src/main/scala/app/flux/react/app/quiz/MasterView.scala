@@ -34,6 +34,7 @@ final class MasterView(
     quizProgressIndicator: QuizProgressIndicator,
     questionComponent: QuestionComponent,
     getInitialDataResponse: GetInitialDataResponse,
+    submissionsSummaryTable: SubmissionsSummaryTable,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -71,8 +72,12 @@ final class MasterView(
             quizSettingsPanels()
           case quizState =>
             quizState.maybeQuestion match {
-              case None =>
-                RoundComponent(quizState.round, showMasterData = true)
+              case None if quizState.quizHasEnded =>
+                <.span(
+                  RoundComponent(quizState.round),
+                  submissionsSummaryTable(selectedTeamId = None),
+                )
+              case None => RoundComponent(quizState.round, showMasterData = true)
               case Some(question) =>
                 questionComponent(
                   question = question,
