@@ -19,6 +19,7 @@ import app.models.quiz.export.ExportImport.FullState
 import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.Submission.SubmissionValue
+import app.models.quiz.SubmissionEntity
 import app.models.user.User
 import com.google.inject._
 import hydro.api.PicklableDbQuery
@@ -191,7 +192,6 @@ final class ScalaJsApiServerFactory @Inject()(
                 ))
             }
 
-
           case AddSubmission(teamId: Long, submissionValue: SubmissionValue) =>
             addSubmission(teamId, submissionValue)
 
@@ -262,30 +262,32 @@ final class ScalaJsApiServerFactory @Inject()(
         allowMoreThanOneSubmissionPerTeam: Boolean,
         removeEarlierDifferentSubmissionBySameTeam: Boolean = false,
     ): Unit = {
-      StateUpsertHelper.doQuizStateUpsert(quizState => {
-        val oldSubmissions = quizState.submissions
-        val newSubmissions = {
-          val filteredOldSubmissions = {
-            if (removeEarlierDifferentSubmissionBySameTeam) {
-              def differentSubmissionBySameTeam(s: Submission): Boolean = {
-                s.teamId == submission.teamId && s.value != submission.value
-              }
-              oldSubmissions.filterNot(differentSubmissionBySameTeam)
-            } else {
-              oldSubmissions
-            }
-          }
+      val quizState =
+        entityAccess
+          .newQuerySync[QuizState]()
+          .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId) getOrElse QuizState.nullInstance
 
+      val submissionsToRemove = {
+        if (removeEarlierDifferentSubmissionBySameTeam) {
+          def differentSubmissionBySameTeam(s: Submission): Boolean = {
+            s.teamId == submission.teamId && s.value != submission.value
+          }
+          quizState.submissions.filter(differentSubmissionBySameTeam)
+        } else {
+          Seq()
+        }
+      }
+
+      val newQuizState = {
+        val newSubmissions = {
+          val filteredOldSubmissions = quizState.submissions.filterNot(submissionsToRemove.toSet)
           val submissionAlreadyExists = filteredOldSubmissions.exists(_.teamId == submission.teamId)
 
-          if (submissionAlreadyExists && !allowMoreThanOneSubmissionPerTeam) {
-            filteredOldSubmissions
-          } else {
-            filteredOldSubmissions :+ submission
-          }
+          require(
+            !submissionAlreadyExists || allowMoreThanOneSubmissionPerTeam,
+            s"Could not add submission $submission because this team already has a submission")
+          filteredOldSubmissions :+ submission
         }
-
-        require(oldSubmissions != newSubmissions, "Identical submissions")
 
         quizState.copy(
           timerState =
@@ -299,7 +301,24 @@ final class ScalaJsApiServerFactory @Inject()(
             else quizState.timerState,
           submissions = newSubmissions,
         )
-      })
+      }
+
+      entityAccess.persistEntityModifications(
+        Seq(
+          EntityModification.createUpdateAllFields(newQuizState),
+          EntityModification.createAddWithId(
+            submission.id,
+            SubmissionEntity(
+              teamId = submission.teamId,
+              roundIndex = quizState.roundIndex,
+              questionIndex = quizState.questionIndex,
+              createTime = clock.nowInstant,
+              value = submission.value,
+              isCorrectAnswer = submission.isCorrectAnswer,
+            )
+          ),
+        ) ++ submissionsToRemove.map(s => EntityModification.Remove[SubmissionEntity](s.id))
+      )
     }
   }
 
