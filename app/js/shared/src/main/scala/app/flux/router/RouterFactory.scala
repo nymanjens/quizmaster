@@ -63,6 +63,8 @@ private[router] final class RouterFactory(
 
           | staticRuleFromPage(AppPages.QuizSettings, reactAppModule.quizSettingsView.apply)
 
+          | staticRuleFromPage(AppPages.SubmissionsSummary, reactAppModule.submissionsSummaryView.apply)
+
           | staticRuleFromPage(AppPages.Gamepad, reactAppModule.gamepadSetupView.apply)
 
         // Fallback

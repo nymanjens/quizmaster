@@ -4,6 +4,8 @@ import app.api.ScalaJsApi.GetInitialDataResponse
 import app.api.ScalaJsApiClient
 import app.flux.controllers.SoundEffectController
 import app.flux.stores.quiz.GamepadStore
+import app.flux.stores.quiz.SubmissionsSummaryStore
+import app.flux.stores.quiz.SubmissionsSummaryStore
 import app.flux.stores.quiz.TeamInputStore
 import app.models.user.User
 import hydro.common.I18n
@@ -34,6 +36,7 @@ final class Module(
   implicit val pendingModificationsStore = new PendingModificationsStore
   implicit val applicationIsOnlineStore = new ApplicationIsOnlineStore
   implicit val teamsAndQuizStateStore = new TeamsAndQuizStateStore
+  implicit val submissionsSummaryStore = new SubmissionsSummaryStore
   implicit private val gamepadStore = new GamepadStore
   implicit val teamInputStore = new TeamInputStore
 }
