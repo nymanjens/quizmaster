@@ -1,4 +1,8 @@
 !!app.models.quiz.config.ParsableQuizConfig
+title: Demo quiz
+author: Jens Nyman
+masterSecret: quiz # Remove this line to allow anyone to access the master controls
+
 rounds:
   - name: Geography
     questions:
