@@ -64,28 +64,33 @@ final class SubmissionsSummaryTable(
       implicit val _ = props
       implicit val __ = state
       <.div(
-        ^.className := "table-responsive",
+        ^.className := "table-responsive submissions-summary",
         <.table(
           ^.className := "table table-bordered table-hover table-condensed",
-          <.tr(
-            <.th(i18n("app.question")), {
-              for (team <- state.teams)
-                yield
-                  <.th(
-                    ^.key := team.id,
-                    ^^.ifThen(props.selectedTeamId == Some(team.id)) {
-                      ^.className := "info"
-                    },
-                    team.name,
-                  )
-            }.toVdomArray
-          ), {
-            for ((round, roundIndex) <- quizConfig.rounds.zipWithIndex) yield {
-              roundTitleRow(round) +: round.questions.zipWithIndex.map {
-                case (question, questionIndex) => questionRow(question, roundIndex, questionIndex)
+          <.thead(
+            <.tr(
+              <.th(i18n("app.question")), {
+                for (team <- state.teams)
+                  yield
+                    <.th(
+                      ^.key := team.id,
+                      ^^.ifThen(props.selectedTeamId == Some(team.id)) {
+                        ^.className := "info"
+                      },
+                      team.name,
+                    )
+              }.toVdomArray,
+            ),
+          ),
+          <.tbody(
+            {
+              for ((round, roundIndex) <- quizConfig.rounds.zipWithIndex) yield {
+                roundTitleRow(round) +: round.questions.zipWithIndex.map {
+                  case (question, questionIndex) => questionRow(question, roundIndex, questionIndex)
+                }
               }
-            }
-          }.flatten.toVdomArray
+            }.flatten.toVdomArray,
+          ),
         ),
       )
     }
