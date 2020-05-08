@@ -10,6 +10,7 @@ import hydro.flux.stores.ApplicationIsOnlineStore
 import hydro.flux.stores.PageLoadingStateStore
 import hydro.models.access.JsEntityAccess
 import app.flux.stores.quiz.TeamsAndQuizStateStore
+import app.models.quiz.config.QuizConfig
 
 final class Module(
     implicit i18n: I18n,
@@ -23,6 +24,7 @@ final class Module(
     dispatcher: Dispatcher,
     clock: Clock,
     getInitialDataResponse: GetInitialDataResponse,
+    quizConfig: QuizConfig,
 ) {
 
   implicit lazy val pageHeader = new PageHeader
