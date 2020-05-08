@@ -35,6 +35,14 @@ final class RoundComponent(
           s"${i18n("app.max-points-to-gain")}: ${round.questions.map(_.pointsToGainOnFirstAnswer).sum}",
         )
       },
+      <<.ifThen(quizState.quizIsBeingSetUp) {
+        <<.ifDefined(quizConfig.author) { author =>
+          <.div(
+            ^.className := "round-metadata",
+            author,
+          )
+        }
+      },
       <<.ifThen(quizState.quizHasEnded) {
         submissionsSummaryTable(selectedTeamId = None)
       },
