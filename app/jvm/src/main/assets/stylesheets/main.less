@@ -522,4 +522,20 @@ table.table-bordered {
 
 /****** SubmissionsSummaryTable ******/
 .submissions-summary {
+  td, th {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 160px;
+    white-space: nowrap;
+  }
+
+  @media screen and (min-width: 450px) and (max-width: 767px) {
+    max-width: 400px;
+  }
+  @media screen and (min-width: 400px) and (max-width: 450px) {
+    max-width: 350px;
+  }
+  @media screen and (max-width: 400px) {
+    max-width: 300px;
+  }
 }
