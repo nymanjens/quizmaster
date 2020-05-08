@@ -97,8 +97,8 @@ final class SubmissionsSummaryTable(
 
     private def roundTitleRow(round: Round, roundIndex: Int): VdomNode = {
       <.tr(
+        ^.key := s"round-$roundIndex",
         <.th(
-          ^.key := s"round-roundIndex",
           ^.colSpan := 999,
           round.name,
         ),
