@@ -151,3 +151,5 @@ app.give-your-answer=Geef uw antwoord
 app.summary-of-all-scores=Samenvatting van alle scores
 app.totals=Totaal
 app.total-from-submissions=Totaal van antwoorden
+app.discretionary-points=Extra punten van quizmaster
+app.total-team-score=Totale score

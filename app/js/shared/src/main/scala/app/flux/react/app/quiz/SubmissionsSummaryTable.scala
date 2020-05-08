@@ -151,15 +151,46 @@ final class SubmissionsSummaryTable(
         ),
         <.tr(
           ^.key := "total-from-submissions",
-          <.th("app.total-from-submissions"), {
+          <.th(i18n("app.total-from-submissions")), {
             for (team <- state.teams)
               yield
                 <.td(
                   ^.key := team.id,
+                  ^^.ifThen(props.selectedTeamId == Some(team.id)) {
+                    ^.className := "info"
+                  },
                   state.submissionsSummaryState.totalPoints(team)
                 )
-          }.toVdomArray
-        )
+            }.toVdomArray
+        ),
+        <.tr(
+          ^.key := "discretionary",
+          <.th(i18n("app.discretionary-points")), {
+            for (team <- state.teams)
+              yield
+                <.td(
+                  ^.key := team.id,
+                  ^^.ifThen(props.selectedTeamId == Some(team.id)) {
+                    ^.className := "info"
+                  },
+                  (team.score - state.submissionsSummaryState.totalPoints(team))
+                )
+            }.toVdomArray
+        ),
+        <.tr(
+          ^.key := "team-score",
+          <.th(i18n("app.total-team-score")), {
+            for (team <- state.teams)
+              yield
+                <.th(
+                  ^.key := team.id,
+                  ^^.ifThen(props.selectedTeamId == Some(team.id)) {
+                    ^.className := "info"
+                  },
+                  team.score,
+                )
+            }.toVdomArray
+        ),
       )
     }
   }
