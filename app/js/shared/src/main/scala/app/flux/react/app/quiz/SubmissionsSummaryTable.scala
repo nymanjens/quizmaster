@@ -85,7 +85,7 @@ final class SubmissionsSummaryTable(
           <.tbody(
             {
               for ((round, roundIndex) <- quizConfig.rounds.zipWithIndex) yield {
-                roundTitleRow(round) +: round.questions.zipWithIndex.map {
+                roundTitleRow(round, roundIndex) +: round.questions.zipWithIndex.map {
                   case (question, questionIndex) => questionRow(question, roundIndex, questionIndex)
                 }
               }
@@ -95,9 +95,10 @@ final class SubmissionsSummaryTable(
       )
     }
 
-    private def roundTitleRow(round: Round): VdomNode = {
+    private def roundTitleRow(round: Round, roundIndex: Int): VdomNode = {
       <.tr(
         <.th(
+          ^.key := s"round-roundIndex",
           ^.colSpan := 999,
           round.name,
         ),
@@ -109,6 +110,7 @@ final class SubmissionsSummaryTable(
         props: Props,
     ): VdomNode = {
       <.tr(
+        ^.key := s"question-$roundIndex-$questionIndex",
         <.td(
           question match {
             case question: Question.Single => s"${question.question} (${question.answer})"
@@ -118,7 +120,7 @@ final class SubmissionsSummaryTable(
           for (team <- state.teams)
             yield
               <.td(
-                ^.key := team.id,
+                ^.key := s"$roundIndex-$questionIndex-${team.id}",
                 ^^.ifThen(props.selectedTeamId == Some(team.id)) {
                   ^.className := "info"
                 },

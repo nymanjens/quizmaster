@@ -71,16 +71,15 @@ object SubmissionsSummaryStore {
       if (hasAnySubmission(roundIndex, questionIndex, teamId)) {
         val allSubmissionsForQuestion = latestSubmissionsMap(QuestionIndex(roundIndex, questionIndex))
         val submissionEntity: SubmissionEntity = allSubmissionsForQuestion(teamId)
-        val firstCorrectSubmission: SubmissionEntity =
+        val maybeFirstCorrectSubmission: Option[SubmissionEntity] =
           allSubmissionsForQuestion.values.toVector
             .sortBy(_.createTime)
             .find(_.isCorrectAnswer == Some(true))
-            .get
         val question = quizConfig.rounds(roundIndex).questions(questionIndex)
 
         submissionEntity.isCorrectAnswer match {
           case Some(true) =>
-            if (firstCorrectSubmission == submissionEntity) {
+            if (maybeFirstCorrectSubmission == Some(submissionEntity)) {
               question.pointsToGainOnFirstAnswer
             } else {
               question.pointsToGain
