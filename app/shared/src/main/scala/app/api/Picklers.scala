@@ -3,6 +3,7 @@ package app.api
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.QuizState.Submission.SubmissionValue
+import app.models.quiz.SubmissionEntity
 import app.models.quiz.Team
 import boopickle.Default._
 import hydro.api.StandardPicklers
@@ -22,4 +23,5 @@ object Picklers extends StandardPicklers {
   override implicit val entityPickler: Pickler[Entity] = compositePickler[Entity]
     .addConcreteType[Team]
     .addConcreteType[QuizState]
+    .addConcreteType[SubmissionEntity]
 }

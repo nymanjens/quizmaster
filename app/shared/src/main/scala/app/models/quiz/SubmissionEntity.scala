@@ -6,6 +6,7 @@ import app.models.quiz.QuizState.Submission.SubmissionValue
 import hydro.models.Entity
 import hydro.models.UpdatableEntity
 import hydro.models.UpdatableEntity.LastUpdateTime
+import hydro.models.modification.EntityType
 
 case class SubmissionEntity(
     teamId: Long,
@@ -21,4 +22,9 @@ case class SubmissionEntity(
 
   override def withId(id: Long) = copy(idOption = Some(id))
   override def withLastUpdateTime(time: LastUpdateTime): Entity = copy(lastUpdateTime = time)
+}
+object SubmissionEntity {
+  implicit val Type: EntityType[SubmissionEntity] = EntityType()
+
+  def tupled = (this.apply _).tupled
 }

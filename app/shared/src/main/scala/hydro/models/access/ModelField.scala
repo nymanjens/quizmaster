@@ -1,7 +1,10 @@
 package hydro.models.access
 
+import java.time.Instant
+
 import app.models.quiz.QuizState.GeneralQuizSettings
 import app.models.quiz.QuizState.Submission
+import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.QuizState.TimerState
 import hydro.common.GuavaReplacement.ImmutableBiMap
 import hydro.common.OrderToken
@@ -47,6 +50,8 @@ object ModelField {
     implicit case object TimerStateType extends FieldType[TimerState]
     implicit case object SubmissionSeqType extends FieldType[Seq[Submission]]
     implicit case object GeneralQuizSettingsType extends FieldType[GeneralQuizSettings]
+    implicit case object InstantType extends FieldType[Instant]
+    implicit case object SubmissionValueType extends FieldType[SubmissionValue]
   }
 
   abstract class IdModelField[E <: Entity]
