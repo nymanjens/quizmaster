@@ -8,6 +8,9 @@ import app.models.quiz.QuizState.Submission.SubmissionValue
 
 case class QuizConfig(
     rounds: Seq[Round],
+    title: Option[String],
+    author: Option[String],
+    masterSecret: String,
 )
 
 object QuizConfig {

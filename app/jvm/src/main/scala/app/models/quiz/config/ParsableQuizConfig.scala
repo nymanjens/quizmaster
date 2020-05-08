@@ -7,12 +7,23 @@ import java.time.Duration
 
 case class ParsableQuizConfig(
     rounds: java.util.List[ParsableQuizConfig.Round],
+    title: String,
+    author: String,
+    masterSecret: String,
 ) {
-  def this() = this(null)
+  def this() = this(
+    rounds = null,
+    title = null,
+    author = null,
+    masterSecret = "*",
+  )
   def parse: QuizConfig = {
     try {
       QuizConfig(
         rounds = rounds.asScala.toVector.map(_.parse),
+        title = Option(title),
+        author = Option(author),
+        masterSecret = checkNotNull(masterSecret),
       )
     } catch {
       case throwable: Throwable =>
