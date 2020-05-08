@@ -150,8 +150,11 @@ final class ScalaJsApiServerFactory @Inject()(
             StateUpsertHelper.doQuizStateUpsert(StateUpsertHelper.goToNextRoundUpdate)
 
           case ResetCurrentQuestion() =>
+            val oldQuizState = fetchQuizState()
             StateUpsertHelper.doQuizStateUpsert(
               _.copy(timerState = TimerState.createStarted(), submissions = Seq()))
+            entityAccess.persistEntityModifications(
+              oldQuizState.submissions.map(s => EntityModification.Remove[SubmissionEntity](s.id)))
 
           case ToggleImageIsEnlarged() =>
             StateUpsertHelper.doQuizStateUpsert { oldState =>
@@ -196,15 +199,20 @@ final class ScalaJsApiServerFactory @Inject()(
             addSubmission(teamId, submissionValue)
 
           case SetSubmissionCorrectness(submissionId: Long, isCorrectAnswer: Boolean) =>
-            StateUpsertHelper.doQuizStateUpsert { oldState =>
-              oldState.copy(
-                submissions = oldState.submissions.map {
-                  case s if s.id == submissionId =>
-                    s.copy(isCorrectAnswer = Some(isCorrectAnswer))
-                  case s => s
-                },
-              )
-            }
+            val oldQuizState = fetchQuizState()
+            val newQuizState = oldQuizState.copy(
+              submissions = oldQuizState.submissions.map {
+                case s if s.id == submissionId =>
+                  s.copy(isCorrectAnswer = Some(isCorrectAnswer))
+                case s => s
+              },
+            )
+            val oldSubmissionEntity = entityAccess.newQuerySync[SubmissionEntity]().findById(submissionId)
+            val newSubmissionEntity = oldSubmissionEntity.copy(isCorrectAnswer = Some(isCorrectAnswer))
+            entityAccess.persistEntityModifications(
+              EntityModification.createUpdateAllFields(newQuizState),
+              EntityModification.createUpdateAllFields(newSubmissionEntity),
+            )
         }
       }
     }
@@ -261,12 +269,7 @@ final class ScalaJsApiServerFactory @Inject()(
         pauseTimer: Boolean = false,
         allowMoreThanOneSubmissionPerTeam: Boolean,
         removeEarlierDifferentSubmissionBySameTeam: Boolean = false,
-    ): Unit = {
-      val quizState =
-        entityAccess
-          .newQuerySync[QuizState]()
-          .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId) getOrElse QuizState.nullInstance
-
+    )(implicit quizState: QuizState): Unit = {
       val submissionsToRemove = {
         if (removeEarlierDifferentSubmissionBySameTeam) {
           def differentSubmissionBySameTeam(s: Submission): Boolean = {
