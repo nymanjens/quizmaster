@@ -1,5 +1,6 @@
 package app.flux.react.app.quiz
 
+import scala.collection.immutable.Seq
 import app.common.AnswerBullet
 import app.flux.stores.quiz.GamepadStore.GamepadState
 import app.flux.stores.quiz.SubmissionsSummaryStore
@@ -10,6 +11,8 @@ import app.models.quiz.QuizState
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.Team
+import app.models.quiz.config.QuizConfig.Question
+import app.models.quiz.config.QuizConfig.Round
 import hydro.common.I18n
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.JsLoggingUtils.LogExceptionsCallback
@@ -59,6 +62,7 @@ final class SubmissionsSummaryTable(
 
     override def render(props: Props, state: State): VdomNode = logExceptions {
       implicit val _ = props
+      implicit val __ = state
       <.div(
         ^.className := "table-responsive",
         <.table(
@@ -75,8 +79,49 @@ final class SubmissionsSummaryTable(
                     team.name,
                   )
             }.toVdomArray
-          )
+          ), {
+            for ((round, roundIndex) <- quizConfig.rounds.zipWithIndex) yield {
+              roundTitleRow(round) +: round.questions.zipWithIndex.map {
+                case (question, questionIndex) => questionRow(question, roundIndex, questionIndex)
+              }
+            }
+          }.flatten.toVdomArray
         ),
+      )
+    }
+
+    private def roundTitleRow(round: Round): VdomNode = {
+      <.tr(
+        <.th(
+          ^.colSpan := 999,
+          round.name,
+        ),
+      )
+    }
+
+    private def questionRow(question: Question, roundIndex: Int, questionIndex: Int)(
+        implicit state: State,
+        props: Props,
+    ): VdomNode = {
+      <.tr(
+        <.td(
+          question match {
+            case question: Question.Single => s"${question.question} (${question.answer})"
+            case question: Question.Double => s"${question.textualQuestion} (${question.textualAnswer})"
+          },
+        ), {
+          for (team <- state.teams)
+            yield
+              <.td(
+                ^.key := team.id,
+                ^^.ifThen(props.selectedTeamId == Some(team.id)) {
+                  ^.className := "info"
+                },
+                <<.ifThen(state.submissionsSummaryState.hasAnySubmission(roundIndex, questionIndex, team.id)) {
+                  state.submissionsSummaryState.points(roundIndex, questionIndex, team.id)
+                },
+              )
+        }.toVdomArray
       )
     }
   }
