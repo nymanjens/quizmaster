@@ -48,7 +48,10 @@ case class QuizState(
   // **************** Additional public API **************** //
   def round(implicit quizConfig: QuizConfig, i18n: I18n): Round = {
     if (roundIndex < 0) {
-      Round(name = i18n("app.welcome"), questions = Seq())
+      Round(
+        name = quizConfig.title getOrElse i18n("app.welcome"),
+        questions = Seq(),
+      )
     } else if (roundIndex < quizConfig.rounds.size) {
       quizConfig.rounds(roundIndex)
     } else {
