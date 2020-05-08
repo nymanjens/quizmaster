@@ -68,19 +68,7 @@ final class SubmissionsSummaryTable(
         <.table(
           ^.className := "table table-bordered table-hover table-condensed",
           <.thead(
-            <.tr(
-              <.th(i18n("app.question")), {
-                for (team <- state.teams)
-                  yield
-                    <.th(
-                      ^.key := team.id,
-                      ^^.ifThen(props.selectedTeamId == Some(team.id)) {
-                        ^.className := "info"
-                      },
-                      team.name,
-                    )
-              }.toVdomArray,
-            ),
+            headerRow(),
           ),
           <.tbody(
             {
@@ -90,14 +78,31 @@ final class SubmissionsSummaryTable(
                 }
               }
             }.flatten.toVdomArray,
+            totalRows().toVdomArray,
           ),
         ),
       )
     }
 
+    private def headerRow()(implicit state: State, props: Props): VdomNode = {
+      <.tr(
+        <.th(i18n("app.question")), {
+          for (team <- state.teams)
+            yield
+              <.th(
+                ^.key := team.id,
+                ^^.ifThen(props.selectedTeamId == Some(team.id)) {
+                  ^.className := "info"
+                },
+                team.name,
+              )
+        }.toVdomArray,
+      )
+    }
+
     private def roundTitleRow(round: Round, roundIndex: Int)(
-      implicit state: State,
-      props: Props,
+        implicit state: State,
+        props: Props,
     ): VdomNode = {
       <.tr(
         ^.key := s"round-$roundIndex",
@@ -132,6 +137,29 @@ final class SubmissionsSummaryTable(
                 },
               )
         }.toVdomArray
+      )
+    }
+
+    private def totalRows()(implicit state: State, props: Props): Seq[VdomNode] = {
+      Seq(
+        <.tr(
+          ^.key := "total",
+          <.th(
+            ^.colSpan := 1 + state.teams.size,
+            i18n("app.totals"),
+          ),
+        ),
+        <.tr(
+          ^.key := "total-from-submissions",
+          <.th("app.total-from-submissions"), {
+            for (team <- state.teams)
+              yield
+                <.td(
+                  ^.key := team.id,
+                  state.submissionsSummaryState.totalPoints(team)
+                )
+          }.toVdomArray
+        )
       )
     }
   }

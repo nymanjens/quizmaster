@@ -92,6 +92,13 @@ object SubmissionsSummaryStore {
       }
     }
 
+    def totalPoints(team: Team)(implicit quizConfig: QuizConfig): Int = {
+      {
+        for (QuestionIndex(roundIndex, questionIndex) <- latestSubmissionsMap.keys)
+          yield points(roundIndex, questionIndex, team.id)
+      }.sum
+    }
+
     def hasAnySubmission(roundIndex: Int, questionIndex: Int, teamId: Long): Boolean = {
       val maybeSubmission: Option[SubmissionEntity] =
         for {
