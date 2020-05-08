@@ -44,11 +44,6 @@ final class TeamsAndQuizStateStore(
       scalaJsApiClient.doTeamOrQuizStateUpdate(AddSubmission(teamId, submissionValue))
   }
 
-  /**
-    * Queue that processes a single task at once to avoid concurrent update issues (on the same client tab).
-    */
-  private val updateStateQueue: SerializingTaskQueue = SerializingTaskQueue.create()
-
   // **************** Implementation of AsyncEntityDerivedStateStore methods **************** //
   override protected def calculateState(): Future[State] = async {
     State(
@@ -67,25 +62,25 @@ final class TeamsAndQuizStateStore(
   override protected def modificationImpactsState(
       entityModification: EntityModification,
       state: State,
-  ): Boolean = true
+  ): Boolean = {
+    entityModification.entityType == QuizState.Type || entityModification.entityType == Team.Type
+  }
 
   // **************** Additional public API: Read methods **************** //
   def stateOrEmpty: State = state getOrElse State.nullInstance
 
   // **************** Additional public API: Write methods **************** //
-  def addTeam(name: String): Future[Team] = updateStateQueue.schedule {
-    async {
-      val teams = await(stateFuture).teams
-      val maxIndex = if (teams.nonEmpty) teams.map(_.index).max else -1
-      val modification = EntityModification.createAddWithRandomId(
-        Team(
-          name = name,
-          score = 0,
-          index = maxIndex + 1,
-        ))
-      await(entityAccess.persistModifications(modification))
-      modification.entity
-    }
+  def addTeam(name: String): Future[Team] = async {
+    val teams = await(stateFuture).teams
+    val maxIndex = if (teams.nonEmpty) teams.map(_.index).max else -1
+    val modification = EntityModification.createAddWithRandomId(
+      Team(
+        name = name,
+        score = 0,
+        index = maxIndex + 1,
+      ))
+    await(entityAccess.persistModifications(modification))
+    modification.entity
   }
 
   def replaceAllEntitiesByImportString(importString: String): Future[Unit] = {

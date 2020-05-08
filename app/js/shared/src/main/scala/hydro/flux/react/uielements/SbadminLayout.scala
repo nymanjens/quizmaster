@@ -86,6 +86,7 @@ final class SbadminLayout(
                   Bootstrap.FontAwesomeIcon("bar-chart-o", fixedWidth = true),
                 ),
               ),
+              <.li(linkToPage(AppPages.SubmissionsSummary)),
               <.li(linkToPage(AppPages.Gamepad)),
               <.li(linkToPage(AppPages.QuizSettings)),
               <.li(

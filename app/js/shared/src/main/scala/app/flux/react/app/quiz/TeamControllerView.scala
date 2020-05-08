@@ -49,6 +49,7 @@ final class TeamControllerView(
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     quizProgressIndicator: QuizProgressIndicator,
     questionComponent: QuestionComponent,
+    submissionsSummaryTable: SubmissionsSummaryTable,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -159,6 +160,8 @@ final class TeamControllerView(
                 freeTextAnswerForm(question)
               }
             )
+          case _ if quizState.quizHasEnded =>
+            submissionsSummaryTable(selectedTeamId = Some(team.id))
           case _ =>
             <.span(i18n("app.waiting-for-the-next-question"))
         },

@@ -2,10 +2,13 @@ package app.models.access
 
 import java.time.Instant
 
+import app.models.access.ModelFields.QuizState.E
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.GeneralQuizSettings
 import app.models.quiz.QuizState.Submission
+import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.QuizState.TimerState
+import app.models.quiz.SubmissionEntity
 import app.models.quiz.Team
 import hydro.common.CollectionUtils
 import hydro.common.GuavaReplacement.ImmutableBiMap
@@ -20,8 +23,9 @@ import scala.collection.immutable.Seq
 object ModelFields {
   // **************** Methods **************** //
   def id[E <: Entity](implicit entityType: EntityType[E]): ModelField[Long, E] = entityType match {
-    case app.models.quiz.Team.Type      => Team.id.asInstanceOf[ModelField[Long, E]]
-    case app.models.quiz.QuizState.Type => QuizState.id.asInstanceOf[ModelField[Long, E]]
+    case app.models.quiz.Team.Type             => Team.id.asInstanceOf[ModelField[Long, E]]
+    case app.models.quiz.QuizState.Type        => QuizState.id.asInstanceOf[ModelField[Long, E]]
+    case app.models.quiz.SubmissionEntity.Type => SubmissionEntity.id.asInstanceOf[ModelField[Long, E]]
   }
 
   // **************** Enumeration of all fields **************** //
@@ -59,6 +63,24 @@ object ModelFields {
           v => _.copy(generalQuizSettings = v))
   }
 
+  object SubmissionEntity {
+    private type E = SubmissionEntity
+
+    case object id extends IdModelField[E]
+    case object teamId extends ModelField[Long, E]("teamId", _.teamId, v => _.copy(teamId = v))
+    case object roundIndex extends ModelField[Int, E]("roundIndex", _.roundIndex, v => _.copy(roundIndex = v))
+    case object questionIndex
+        extends ModelField[Int, E]("questionIndex", _.questionIndex, v => _.copy(questionIndex = v))
+    case object createTime
+        extends ModelField[Instant, E]("createTime", _.createTime, v => _.copy(createTime = v))
+    case object value extends ModelField[SubmissionValue, E]("value", _.value, v => _.copy(value = v))
+    case object isCorrectAnswer
+        extends ModelField[Option[Boolean], E](
+          "isCorrectAnswer",
+          _.isCorrectAnswer,
+          v => _.copy(isCorrectAnswer = v))
+  }
+
   // **************** Field numbers **************** //
   private val fieldToNumberMap: ImmutableBiMap[ModelField.any, Int] =
     CollectionUtils.toBiMapWithStableIntKeys(
@@ -77,6 +99,13 @@ object ModelFields {
         QuizState.submissions,
         QuizState.imageIsEnlarged,
         QuizState.generalQuizSettings,
+        SubmissionEntity.id,
+        SubmissionEntity.teamId,
+        SubmissionEntity.roundIndex,
+        SubmissionEntity.questionIndex,
+        SubmissionEntity.createTime,
+        SubmissionEntity.value,
+        SubmissionEntity.isCorrectAnswer,
       )
     )
   def toNumber(field: ModelField.any): Int = fieldToNumberMap.get(field)

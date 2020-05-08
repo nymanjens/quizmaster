@@ -13,11 +13,15 @@ import app.flux.react.app.quiz.QuestionComponent
 import app.flux.react.app.quiz.QuizProgressIndicator
 import app.flux.react.app.quiz.QuizSettingsPanels
 import app.flux.react.app.quiz.QuizView
+import app.flux.react.app.quiz.SubmissionsSummaryTable
+import app.flux.react.app.quiz.SubmissionsSummaryTable
+import app.flux.react.app.quiz.SubmissionsSummaryView
 import app.flux.react.app.quiz.SyncedTimerBar
 import app.flux.react.app.quiz.TeamControllerView
 import app.flux.react.app.quiz.TeamEditor
 import app.flux.react.app.quiz.TeamsList
 import app.flux.stores._
+import app.flux.stores.quiz.SubmissionsSummaryStore
 import app.flux.stores.quiz.TeamInputStore
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
@@ -38,6 +42,7 @@ final class Module(
     pendingModificationsStore: PendingModificationsStore,
     applicationIsOnlineStore: ApplicationIsOnlineStore,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
+    submissionsSummaryStore: SubmissionsSummaryStore,
     teamInputStore: TeamInputStore,
     dispatcher: Dispatcher,
     clock: Clock,
@@ -61,11 +66,13 @@ final class Module(
   implicit private val generalQuizSettings: GeneralQuizSettings = new GeneralQuizSettings()
   implicit private val question: QuestionComponent = new QuestionComponent()
   implicit private val quizSettingsPanels: QuizSettingsPanels = new QuizSettingsPanels()
+  implicit private val submissionsSummaryTable = new SubmissionsSummaryTable()
 
   implicit val layout: Layout = new Layout
   implicit val teamController: TeamControllerView = new TeamControllerView()
   implicit val quizView: QuizView = new QuizView()
   implicit val masterView: MasterView = new MasterView()
+  implicit val submissionsSummaryView: SubmissionsSummaryView = new SubmissionsSummaryView()
   implicit val gamepadSetupView: GamepadSetupView = new GamepadSetupView()
   implicit val quizSettingsView: QuizSettingsView = new QuizSettingsView()
 }

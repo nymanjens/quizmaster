@@ -31,6 +31,7 @@ final class QuizView(
     soundEffectController: SoundEffectController,
     teamInputStore: TeamInputStore,
     getInitialDataResponse: GetInitialDataResponse,
+    submissionsSummaryTable: SubmissionsSummaryTable,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -119,8 +120,12 @@ final class QuizView(
         ^.className := "quiz-view",
         quizProgressIndicator(state.quizState, showMasterData = false),
         quizState.maybeQuestion match {
-          case None =>
-            RoundComponent(quizState.round)
+          case None if quizState.quizHasEnded =>
+            <.span(
+              RoundComponent(quizState.round),
+              submissionsSummaryTable(selectedTeamId = None),
+            )
+          case None => RoundComponent(quizState.round)
           case Some(question) =>
             questionComponent(
               question = question,
