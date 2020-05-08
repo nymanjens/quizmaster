@@ -95,11 +95,14 @@ final class SubmissionsSummaryTable(
       )
     }
 
-    private def roundTitleRow(round: Round, roundIndex: Int): VdomNode = {
+    private def roundTitleRow(round: Round, roundIndex: Int)(
+      implicit state: State,
+      props: Props,
+    ): VdomNode = {
       <.tr(
         ^.key := s"round-$roundIndex",
         <.th(
-          ^.colSpan := 999,
+          ^.colSpan := 1 + state.teams.size,
           round.name,
         ),
       )
