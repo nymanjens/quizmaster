@@ -5,6 +5,7 @@ import app.AppVersion
 import app.api.ScalaJsApi.GetInitialDataResponse
 import app.common.LocalStorageClient
 import app.flux.router.AppPages
+import app.models.quiz.config.QuizConfig
 import hydro.common.I18n
 import hydro.common.JsLoggingUtils.LogExceptionsCallback
 import hydro.flux.action.Dispatcher
@@ -28,6 +29,7 @@ final class SbadminLayout(
     pendingModificationsCounter: PendingModificationsCounter,
     user: User,
     i18n: I18n,
+    quizConfig: QuizConfig,
     jsEntityAccess: JsEntityAccess,
     dispatcher: Dispatcher,
     getInitialDataResponse: GetInitialDataResponse,
@@ -45,7 +47,7 @@ final class SbadminLayout(
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class State(
       isQuizMaster: Boolean = {
-        LocalStorageClient.getMasterSecret() == Some(getInitialDataResponse.masterSecret)
+        LocalStorageClient.getMasterSecret() == Some(quizConfig.masterSecret)
       },
   )
   protected case class Props(
@@ -82,7 +84,7 @@ final class SbadminLayout(
               <.li(linkToPage(AppPages.Master)),
               <.li(
                 <.a(
-                  ^.href := s"/rounds/${getInitialDataResponse.masterSecret}/",
+                  ^.href := s"/rounds/${quizConfig.masterSecret}/",
                   Bootstrap.FontAwesomeIcon("bar-chart-o", fixedWidth = true),
                 ),
               ),
@@ -170,14 +172,14 @@ final class SbadminLayout(
     }
 
     private def promptMasterSecret(): Option[String] = {
-      if (getInitialDataResponse.masterSecret == "*") {
-        Some(getInitialDataResponse.masterSecret)
+      if (quizConfig.masterSecret == "*") {
+        Some(quizConfig.masterSecret)
       } else {
         val userInput = dom.window.prompt(i18n("app.enter-master-secret"))
         if (userInput == null) {
           // Canceled
           None
-        } else if (userInput != getInitialDataResponse.masterSecret) {
+        } else if (userInput != quizConfig.masterSecret) {
           dom.window.alert("Wrong secret")
           None
         } else {

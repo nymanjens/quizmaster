@@ -93,7 +93,7 @@ final class Application @Inject()(
   }
 
   def roundsInfo(secret: String) = Action { implicit request =>
-    require(secret == playConfiguration.get[String]("app.quiz.master-secret"))
+    require(secret == quizConfig.masterSecret)
 
     val infiniteDurationThreshold = Duration.ofMinutes(900)
     def round1(double: Double): String = "%,.1f".format(double)

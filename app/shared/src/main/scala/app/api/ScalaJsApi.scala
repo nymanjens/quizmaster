@@ -44,7 +44,6 @@ object ScalaJsApi {
       i18nMessages: Map[String, String],
       nextUpdateToken: UpdateToken,
       quizConfig: QuizConfig,
-      masterSecret: String,
   )
 
   case class GetAllEntitiesResponse(

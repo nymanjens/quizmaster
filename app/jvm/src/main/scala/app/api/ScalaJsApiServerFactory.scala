@@ -57,7 +57,6 @@ final class ScalaJsApiServerFactory @Inject()(
         i18nMessages = i18n.allI18nMessages,
         nextUpdateToken = toUpdateToken(clock.nowInstant),
         quizConfig = quizConfig,
-        masterSecret = playConfiguration.get[String]("app.quiz.master-secret"),
       )
 
     override def getAllEntities(types: Seq[EntityType.any]) = {
