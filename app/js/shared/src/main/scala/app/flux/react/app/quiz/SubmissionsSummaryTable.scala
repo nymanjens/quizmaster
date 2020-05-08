@@ -161,7 +161,7 @@ final class SubmissionsSummaryTable(
                   },
                   state.submissionsSummaryState.totalPoints(team)
                 )
-            }.toVdomArray
+          }.toVdomArray
         ),
         <.tr(
           ^.key := "discretionary",
@@ -175,7 +175,7 @@ final class SubmissionsSummaryTable(
                   },
                   (team.score - state.submissionsSummaryState.totalPoints(team))
                 )
-            }.toVdomArray
+          }.toVdomArray
         ),
         <.tr(
           ^.key := "team-score",
@@ -189,7 +189,7 @@ final class SubmissionsSummaryTable(
                   },
                   team.score,
                 )
-            }.toVdomArray
+          }.toVdomArray
         ),
       )
     }
