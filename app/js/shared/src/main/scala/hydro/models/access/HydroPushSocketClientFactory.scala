@@ -108,7 +108,7 @@ final class HydroPushSocketClientFactory(implicit clock: Clock) {
       * This aims to solve a bug that sometimes the connection seems to be open while nothing actually gets received.
       */
     private def startCheckingLastPacketTimeNotTooLongAgo(): Unit = {
-      val timeoutDuration = 3.seconds
+      val timeoutDuration = 8.seconds
       def cyclicLogic(): Unit = {
         websocketClient match {
           case Some(clientFuture)
