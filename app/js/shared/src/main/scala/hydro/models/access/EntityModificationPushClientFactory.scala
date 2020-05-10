@@ -105,7 +105,7 @@ final class HydroPushSocketClientFactory(implicit clock: Clock) {
         },
         onClose = () => {
           websocketClient = None
-          js.timers.setTimeout(10.seconds)(openWebsocketIfEmpty())
+          js.timers.setTimeout(500.milliseconds)(openWebsocketIfEmpty())
           _pushClientsAreOnline.set(false)
           firstMessageWasProcessedPromise.tryFailure(
             new RuntimeException(s"[$name] WebSocket was closed before first message was processed"))
@@ -119,7 +119,7 @@ final class HydroPushSocketClientFactory(implicit clock: Clock) {
       * This aims to solve a bug that sometimes the connection seems to be open while nothing actually gets received.
       */
     private def startCheckingLastPacketTimeNotTooLongAgo(): Unit = {
-      val timeoutDuration = 15.seconds
+      val timeoutDuration = 3.seconds
       def cyclicLogic(): Unit = {
         websocketClient match {
           case Some(clientFuture)
@@ -132,15 +132,13 @@ final class HydroPushSocketClientFactory(implicit clock: Clock) {
             websocketClient = None
             clientFuture.value.get.get.close()
 
-            openWebsocketIfEmpty()
           case _ =>
         }
 
-        if (!isClosed) {
-          js.timers.setTimeout(timeoutDuration)(cyclicLogic())
-        }
+        openWebsocketIfEmpty()
       }
-      cyclicLogic()
+
+      js.timers.setInterval(100.milliseconds)(cyclicLogic())
     }
   }
 }
