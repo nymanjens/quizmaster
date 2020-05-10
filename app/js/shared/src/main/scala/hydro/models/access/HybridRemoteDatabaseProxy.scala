@@ -118,22 +118,10 @@ final class HybridRemoteDatabaseProxy(futureLocalDatabase: FutureLocalDatabase)(
 
   override def startCheckingForModifiedEntityUpdates(
       maybeNewEntityModificationsListener: Seq[EntityModification] => Future[Unit]): Unit = {
-    val temporaryPushClient = hydroPushSocketClientFactory.createClient(
-      name = "HydroPushSocket[temporary]",
-      updateToken = getInitialDataResponse.nextUpdateToken,
-      onMessageReceived = modificationsWithToken =>
-        async {
-          val modifications = modificationsWithToken.modifications
-          console.log(s"  [temporary push client] ${modifications.size} remote modifications received")
-          await(maybeNewEntityModificationsListener(modifications))
-      }
-    )
-
     // Adding at start here because old modifications were already reflected in API lookups
     futureLocalDatabase.scheduleUpdateAtStart(localDatabase =>
       async {
         val storedUpdateToken = await(localDatabase.getSingletonValue(NextUpdateTokenKey).map(_.get))
-        temporaryPushClient.close()
 
         val permanentPushClient = hydroPushSocketClientFactory.createClient(
           name = "HydroPushSocket[permanent]",
