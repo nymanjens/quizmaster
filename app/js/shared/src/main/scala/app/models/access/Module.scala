@@ -23,7 +23,7 @@ final class Module(
     getInitialDataResponse: GetInitialDataResponse,
 ) {
 
-  implicit private val entitySyncLogic = new EntitySyncLogic.FullySynced(EntityTypes.all)
+  implicit private val entitySyncLogic = new EntitySyncLogic.FullySynced(EntityTypes.fullySyncedLocally)
 
   implicit val hydroPushSocketClientFactory: HydroPushSocketClientFactory =
     new HydroPushSocketClientFactory()

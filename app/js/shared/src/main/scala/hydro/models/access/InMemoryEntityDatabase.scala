@@ -79,7 +79,7 @@ object InMemoryEntityDatabase {
 
   private final class TypeToCollectionMap() {
     private val typeToCollection: Map[EntityType.any, EntityCollection.any] = {
-      for (entityType <- EntityTypes.all) yield {
+      for (entityType <- EntityTypes.fullySyncedLocally) yield {
         def internal[E <: Entity](
             implicit entityType: EntityType[E]): (EntityType.any, EntityCollection.any) = {
           entityType -> new EntityCollection[E]()

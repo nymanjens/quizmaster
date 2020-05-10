@@ -9,7 +9,7 @@ import scala.collection.immutable.Seq
 
 object EntityTypes {
 
-  private[models] val fullySyncedLocally: Seq[EntityType.any] = Seq()
+  val fullySyncedLocally: Seq[EntityType.any] = Seq(Team.Type, QuizState.Type)
 
-  val all: Seq[EntityType.any] = fullySyncedLocally ++ Seq(Team.Type, QuizState.Type, SubmissionEntity.Type)
+  val all: Seq[EntityType.any] = fullySyncedLocally ++ Seq(SubmissionEntity.Type)
 }
