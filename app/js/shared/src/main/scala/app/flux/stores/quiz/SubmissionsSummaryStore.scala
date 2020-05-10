@@ -94,7 +94,7 @@ object SubmissionsSummaryStore {
 
     def totalPoints(team: Team)(implicit quizConfig: QuizConfig): Int = {
       {
-        for (QuestionIndex(roundIndex, questionIndex) <- latestSubmissionsMap.keys)
+        for (QuestionIndex(roundIndex, questionIndex) <- latestSubmissionsMap.keysIterator)
           yield points(roundIndex, questionIndex, team.id)
       }.sum
     }
