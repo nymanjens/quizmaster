@@ -10,6 +10,7 @@ import hydro.jsfacades.Gamepad
 import hydro.jsfacades.Gamepad.ButtonIndex
 import japgolly.scalajs.react.vdom.VdomElement
 import org.scalajs.dom
+import org.scalajs.dom.raw.Event
 
 import scala.collection.immutable.Seq
 import scala.concurrent.Future
@@ -50,12 +51,21 @@ final class GamepadStore extends StateStore[State] {
     }
   }
 
+  private var startedCheckingForControllerInput: Boolean = false
   private def startButtonCheckerLoop(): Unit = {
-    dom.window.setInterval(
-      () => {
-        setState(getCurrentStateFromControllers())
-      },
-      /* timeout in millis */ 3
+    dom.window.addEventListener(
+      "gamepadconnected", { (e: Event) =>
+        if (!startedCheckingForControllerInput) {
+
+          startedCheckingForControllerInput = true
+          dom.window.setInterval(
+            () => {
+              setState(getCurrentStateFromControllers())
+            },
+            /* timeout in millis */ 3
+          )
+        }
+      }
     )
   }
 
