@@ -53,7 +53,6 @@ final class HydroPushSocketClientFactory(implicit clock: Clock) {
     private var lastStartToOpenTime: Instant = clock.nowInstant
     private var lastPacketTime: Instant = clock.nowInstant
 
-    private var isClosed = false
     private var websocketClient: Option[Future[WebsocketClient[ByteBuffer]]] = Some(
       openWebsocketClient(updateToken))
 
@@ -64,16 +63,6 @@ final class HydroPushSocketClientFactory(implicit clock: Clock) {
     startCheckingLastPacketTimeNotTooLongAgo()
 
     def firstMessageWasProcessedFuture: Future[Unit] = firstMessageWasProcessedPromise.future
-
-    def close(): Unit = {
-      if (websocketClient.isDefined) {
-        websocketClient.get.map(_.close())
-      }
-      websocketClient = Some(Future.failed(new IllegalStateException("WebSocket is closed")))
-      isClosed = true
-      dom.window.removeEventListener("online", onlineListener)
-      dom.window.removeEventListener("focus", onlineListener)
-    }
 
     private def openWebsocketIfEmpty() = {
       if (websocketClient.isEmpty) {
@@ -124,7 +113,6 @@ final class HydroPushSocketClientFactory(implicit clock: Clock) {
         websocketClient match {
           case Some(clientFuture)
               if clientFuture.isCompleted &&
-                !isClosed &&
                 (clock.nowInstant - lastPacketTime) > java.time.Duration.ofSeconds(10) &&
                 (clock.nowInstant - lastStartToOpenTime) > java.time.Duration.ofSeconds(10) =>
             println(
