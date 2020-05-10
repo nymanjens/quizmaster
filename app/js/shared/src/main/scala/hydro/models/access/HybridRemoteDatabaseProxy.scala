@@ -38,41 +38,13 @@ final class HybridRemoteDatabaseProxy(futureLocalDatabase: FutureLocalDatabase)(
           dbQuery: DbQuery[E],
           apiClientCall: DbQuery[E] => Future[R],
           localDatabaseCall: (DbQueryExecutor.Async[E], DbQuery[E]) => Future[R],
-      ): Future[R] = {
-        futureLocalDatabase.option() match {
-          case None =>
-            hybridCall(dbQuery, apiClientCall, localDatabaseCall)
-
-          case Some(localDatabase) =>
-            async {
-              if (await(entitySyncLogic.canBeExecutedLocally(dbQuery, localDatabase))) {
-                await(localDatabaseCall(localDatabase.queryExecutor(), dbQuery))
-              } else {
-                await(apiClientCall(dbQuery))
-              }
-            }
+      ): Future[R] = async {
+        val localDatabase = await(futureLocalDatabase.future())
+        if (await(entitySyncLogic.canBeExecutedLocally(dbQuery, localDatabase))) {
+          await(localDatabaseCall(localDatabase.queryExecutor(), dbQuery))
+        } else {
+          await(apiClientCall(dbQuery))
         }
-      }
-
-      private def hybridCall[R](
-          dbQuery: DbQuery[E],
-          apiClientCall: DbQuery[E] => Future[R],
-          localDatabaseCall: (DbQueryExecutor.Async[E], DbQuery[E]) => Future[R],
-      ): Future[R] = {
-        val resultPromise = Promise[R]()
-
-        for (seq <- logFailure(apiClientCall(dbQuery))) {
-          resultPromise.trySuccess(seq)
-        }
-
-        for {
-          localDatabase <- futureLocalDatabase.future()
-          canBeExecutedLocally <- entitySyncLogic.canBeExecutedLocally(dbQuery, localDatabase)
-          if canBeExecutedLocally && !resultPromise.isCompleted
-          seq <- logFailure(localDatabaseCall(localDatabase.queryExecutor(), dbQuery))
-        } resultPromise.trySuccess(seq)
-
-        resultPromise.future
       }
     }
   }
