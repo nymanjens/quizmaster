@@ -94,6 +94,7 @@ final class TeamControllerView(
                 ref = teamNameInputRef,
                 name = "team-name",
                 focusOnMount = true,
+                defaultValue = LocalStorageClient.getCurrentTeamName() getOrElse "",
               ),
             ),
           ),
