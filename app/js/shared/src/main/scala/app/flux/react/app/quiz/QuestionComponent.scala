@@ -251,7 +251,9 @@ final class QuestionComponent(
             val timerState = state.quizState.timerState
             val timerIsRunning = timerState.timerRunning && !timerState.hasFinished(question.maxTime)
             audioPlayer(
-              audioRelativePath, playing = timerIsRunning, key = state.quizState.timerState.uniqueIdOfMediaPlaying.toString,
+              audioRelativePath,
+              playing = timerIsRunning,
+              key = state.quizState.timerState.uniqueIdOfMediaPlaying.toString,
             )
           }
         }
