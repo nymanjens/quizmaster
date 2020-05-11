@@ -250,7 +250,9 @@ final class QuestionComponent(
           <<.ifDefined(question.audioSrc) { audioRelativePath =>
             val timerState = state.quizState.timerState
             val timerIsRunning = timerState.timerRunning && !timerState.hasFinished(question.maxTime)
-            audioPlayer(audioRelativePath, playing = timerIsRunning)
+            audioPlayer(
+              audioRelativePath, playing = timerIsRunning, key = state.quizState.timerState.uniqueIdOfMediaPlaying.toString,
+            )
           }
         }
       )
@@ -395,8 +397,8 @@ final class QuestionComponent(
       )
     }
 
-    private def audioPlayer(audioRelativePath: String, playing: Boolean): VdomNode = {
-      RawMusicPlayer(src = "/quizaudio/" + audioRelativePath, playing = playing)
+    private def audioPlayer(audioRelativePath: String, playing: Boolean, key: String): VdomNode = {
+      RawMusicPlayer(src = "/quizaudio/" + audioRelativePath, playing = playing, key = key)
     }
   }
 }

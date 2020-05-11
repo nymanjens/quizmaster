@@ -14,12 +14,13 @@ private[quiz] object RawMusicPlayer extends HydroReactComponent.Stateless {
   def apply(
       src: String,
       playing: Boolean,
+      key: String,
   ): VdomElement = {
     val props = Props(
       src = src,
       playing = playing,
     )
-    component(props)
+    component.withKey(key).apply(props)
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//

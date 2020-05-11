@@ -180,6 +180,7 @@ final class ScalaJsApiServerFactory @Inject()(
                   lastSnapshotInstant = clock.nowInstant,
                   lastSnapshotElapsedTime = timerState.elapsedTime(),
                   timerRunning = timerRunningValue getOrElse (!timerState.timerRunning),
+                  uniqueIdOfMediaPlaying = timerState.uniqueIdOfMediaPlaying,
                 ))
             }
 
@@ -191,6 +192,7 @@ final class ScalaJsApiServerFactory @Inject()(
                   lastSnapshotInstant = clock.nowInstant,
                   lastSnapshotElapsedTime = Seq(Duration.ZERO, timerState.elapsedTime() - duration).max,
                   timerRunning = timerState.timerRunning,
+                  uniqueIdOfMediaPlaying = timerState.uniqueIdOfMediaPlaying,
                 ))
             }
 
@@ -299,6 +301,7 @@ final class ScalaJsApiServerFactory @Inject()(
                 lastSnapshotInstant = clock.nowInstant,
                 lastSnapshotElapsedTime = quizState.timerState.elapsedTime(),
                 timerRunning = false,
+                uniqueIdOfMediaPlaying = quizState.timerState.uniqueIdOfMediaPlaying,
               )
             else quizState.timerState,
           submissions = newSubmissions,

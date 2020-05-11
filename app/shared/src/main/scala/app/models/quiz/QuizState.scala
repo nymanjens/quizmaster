@@ -1,5 +1,7 @@
 package app.models.quiz
 
+import java.lang.Math.abs
+
 import hydro.common.time.JavaTimeImplicits._
 import java.time.Duration
 import java.time.Instant
@@ -19,6 +21,8 @@ import hydro.models.Entity
 import hydro.models.UpdatableEntity
 import hydro.models.UpdatableEntity.LastUpdateTime
 import hydro.models.modification.EntityType
+
+import scala.util.Random
 
 case class QuizState(
     /**
@@ -131,6 +135,8 @@ object QuizState {
       lastSnapshotInstant: Instant,
       lastSnapshotElapsedTime: Duration,
       timerRunning: Boolean,
+      // Unique ID that should only change when a song/video should start from the beginning
+      uniqueIdOfMediaPlaying: Long,
   ) {
 
     def hasFinished(maxTime: Duration)(implicit clock: Clock): Boolean = {
@@ -150,12 +156,14 @@ object QuizState {
       lastSnapshotInstant = Instant.EPOCH,
       lastSnapshotElapsedTime = Duration.ZERO,
       timerRunning = false,
+      uniqueIdOfMediaPlaying = 0,
     )
 
     def createStarted()(implicit clock: Clock): TimerState = TimerState(
       lastSnapshotInstant = clock.nowInstant,
       lastSnapshotElapsedTime = Duration.ZERO,
       timerRunning = true,
+      uniqueIdOfMediaPlaying = abs(Random.nextLong),
     )
   }
 
