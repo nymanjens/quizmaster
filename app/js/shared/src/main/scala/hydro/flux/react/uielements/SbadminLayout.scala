@@ -113,6 +113,7 @@ final class SbadminLayout(
               versionNavbar(),
               <.li(
                 <.a(
+                  ^.id := "master-secret-prompt-link",
                   ^.href := "javascript:void(0)",
                   ^.onClick ==> { (e: ReactEventFromInput) =>
                     e.preventDefault()
