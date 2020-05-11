@@ -1,5 +1,7 @@
 package app.api
 
+import java.lang.Math.abs
+
 import hydro.common.time.JavaTimeImplicits._
 import java.time.Duration
 import java.util.concurrent.Executors
@@ -37,6 +39,7 @@ import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Random
 
 @Singleton
 final class ScalaJsApiServerFactory @Inject()(
@@ -193,6 +196,18 @@ final class ScalaJsApiServerFactory @Inject()(
                   lastSnapshotElapsedTime = Seq(Duration.ZERO, timerState.elapsedTime() - duration).max,
                   timerRunning = timerState.timerRunning,
                   uniqueIdOfMediaPlaying = timerState.uniqueIdOfMediaPlaying,
+                ))
+            }
+
+          case ResetTimerAndMedia() =>
+            StateUpsertHelper.doQuizStateUpsert { state =>
+              val timerState = state.timerState
+              state.copy(
+                timerState = TimerState(
+                  lastSnapshotInstant = clock.nowInstant,
+                  lastSnapshotElapsedTime = Duration.ZERO,
+                  timerRunning = timerState.timerRunning,
+                  uniqueIdOfMediaPlaying = abs(Random.nextLong),
                 ))
             }
 

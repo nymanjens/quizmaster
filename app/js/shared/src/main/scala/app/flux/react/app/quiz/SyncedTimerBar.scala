@@ -2,6 +2,8 @@ package app.flux.react.app.quiz
 
 import java.time.Duration
 
+import app.api.ScalaJsApi.TeamOrQuizStateUpdate._
+import app.api.ScalaJsApiClient
 import app.flux.controllers.SoundEffectController
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.access.ModelFields
@@ -21,8 +23,9 @@ import scala.concurrent.Future
 
 final class SyncedTimerBar(
     implicit clock: Clock,
-    teamsAndQuizStateStore: TeamsAndQuizStateStore,
     soundEffectController: SoundEffectController,
+    teamsAndQuizStateStore: TeamsAndQuizStateStore,
+    scalaJsApiClient: ScalaJsApiClient,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
@@ -84,7 +87,7 @@ final class SyncedTimerBar(
               val newElapsedTime = state.timerState.elapsedTime()
               if (state.elapsedTime < props.maxTime && newElapsedTime >= props.maxTime) {
                 soundEffectController.playTimerRunsOut()
-                teamsAndQuizStateStore.toggleTimerPaused(timerRunningValue = Some(false))
+                scalaJsApiClient.doTeamOrQuizStateUpdate(ToggleTimerPaused(timerRunningValue = Some(false)))
               }
               state.copy(elapsedTime = newElapsedTime)
             }.runNow()
@@ -107,10 +110,10 @@ final class SyncedTimerBar(
           runnable()
         })
       }
-      bind("space", () => teamsAndQuizStateStore.toggleTimerPaused())
-      bind("shift+r", () => teamsAndQuizStateStore.addTimeToTimer(Duration.ofDays(9999)))
-      bind("shift+=", () => teamsAndQuizStateStore.addTimeToTimer(Duration.ofSeconds(30)))
-      bind("shift+-", () => teamsAndQuizStateStore.addTimeToTimer(Duration.ofSeconds(-30)))
+      bind("space", () => scalaJsApiClient.doTeamOrQuizStateUpdate(ToggleTimerPaused()))
+      bind("shift+r", () => scalaJsApiClient.doTeamOrQuizStateUpdate(ResetTimerAndMedia()))
+      bind("shift+=", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(30))))
+      bind("shift+-", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(-30))))
     }
 
     private def formatDuration(duration: Duration): String = {

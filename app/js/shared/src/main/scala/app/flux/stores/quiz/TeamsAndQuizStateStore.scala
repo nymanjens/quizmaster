@@ -129,12 +129,6 @@ final class TeamsAndQuizStateStore(
   def setAnswerBulletType(answerBulletType: AnswerBulletType): Future[Unit] = {
     scalaJsApiClient.doTeamOrQuizStateUpdate(SetAnswerBulletType(answerBulletType))
   }
-  def toggleTimerPaused(timerRunningValue: Option[Boolean] = None): Future[Unit] = {
-    scalaJsApiClient.doTeamOrQuizStateUpdate(ToggleTimerPaused(timerRunningValue))
-  }
-  def addTimeToTimer(duration: Duration): Future[Unit] = {
-    scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(duration))
-  }
   def setSubmissionCorrectness(submissionId: Long, isCorrectAnswer: Boolean): Future[Unit] = {
     scalaJsApiClient.doTeamOrQuizStateUpdate(SetSubmissionCorrectness(submissionId, isCorrectAnswer))
   }
