@@ -59,7 +59,7 @@ final class TeamControllerView(
       ^.className := "team-controller-view",
       teamId match {
         case -1     => CreateTeamForm(router)
-        case teamId => Controller(teamId)
+        case teamId => Controller(teamId, router)
       }
     )
   }
@@ -132,8 +132,8 @@ final class TeamControllerView(
 
   object Controller extends HydroReactComponent {
 
-    def apply(teamId: Long): VdomElement = {
-      component(Props(teamId))
+    def apply(teamId: Long, router: RouterContext): VdomElement = {
+      component(Props(teamId, router))
     }
 
     // **************** Implementation of HydroReactComponent methods ****************//
@@ -152,7 +152,10 @@ final class TeamControllerView(
         }
 
     // **************** Implementation of HydroReactComponent types ****************//
-    protected case class Props(teamId: Long)
+    protected case class Props(
+        teamId: Long,
+        router: RouterContext,
+    )
     protected case class State(
         quizState: QuizState = QuizState.nullInstance,
         teams: Seq[Team] = Seq(),
@@ -164,15 +167,15 @@ final class TeamControllerView(
       private val freeTextAnswerInputRef = TextInput.ref()
 
       override def render(props: Props, state: State): VdomElement = logExceptions {
-        implicit val _: State = state
-
         state.maybeTeam match {
           case None       => <.span(i18n("app.loading"), "...")
-          case Some(team) => controller(team, state.quizState)
+          case Some(team) => controller(team, state.quizState, props.router)
         }
       }
 
-      private def controller(implicit team: Team, quizState: QuizState): VdomElement = {
+      private def controller(implicit team: Team,
+                             quizState: QuizState,
+                             router: RouterContext): VdomElement = {
         <.span(
           <.div(
             ^.className := "team-name",
@@ -201,15 +204,19 @@ final class TeamControllerView(
         )
       }
 
-      private def chooseOtherTeamLink(): VdomNode = {
+      private def chooseOtherTeamLink()(implicit router: RouterContext): VdomNode = {
         <.div(
           ^.className := "choose-other-team",
           <.a(
             ^.href := "javascript:void",
-            ^.onClick --> $.modState(_.copy(maybeTeam = None)),
+            ^.onClick --> {
+              router.setPage(AppPages.TeamSelection)
+              Callback.empty
+            },
             "<< ",
             i18n("app.choose-other-team"),
-          ))
+          )
+        )
       }
 
       private def singleAnswerButton(question: Question)(
