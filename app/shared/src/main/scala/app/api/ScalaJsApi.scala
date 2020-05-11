@@ -95,8 +95,8 @@ object ScalaJsApi {
     case class ToggleTimerPaused(timerRunningValue: Option[Boolean] = None) extends TeamOrQuizStateUpdate
     case class AddTimeToTimer(duration: Duration) extends TeamOrQuizStateUpdate
 
-    /** Start the timer from zero and start from the beginning if audio/video is playing. */
-    case class ResetTimerAndMedia() extends TeamOrQuizStateUpdate
+    /** Start from the beginning if audio/video is playing. */
+    case class ResetMedia() extends TeamOrQuizStateUpdate
 
     case class AddSubmission(teamId: Long, submissionValue: SubmissionValue) extends TeamOrQuizStateUpdate
     case class SetSubmissionCorrectness(submissionId: Long, isCorrectAnswer: Boolean)

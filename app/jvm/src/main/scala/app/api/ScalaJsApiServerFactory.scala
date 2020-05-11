@@ -199,16 +199,11 @@ final class ScalaJsApiServerFactory @Inject()(
                 ))
             }
 
-          case ResetTimerAndMedia() =>
+          case ResetMedia() =>
             StateUpsertHelper.doQuizStateUpsert { state =>
-              val timerState = state.timerState
               state.copy(
-                timerState = TimerState(
-                  lastSnapshotInstant = clock.nowInstant,
-                  lastSnapshotElapsedTime = Duration.ZERO,
-                  timerRunning = timerState.timerRunning,
-                  uniqueIdOfMediaPlaying = abs(Random.nextLong),
-                ))
+                timerState = state.timerState.copy(uniqueIdOfMediaPlaying = abs(Random.nextLong)),
+              )
             }
 
           case AddSubmission(teamId: Long, submissionValue: SubmissionValue) =>

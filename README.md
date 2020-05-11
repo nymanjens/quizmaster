@@ -48,7 +48,7 @@ This quiz can be played in different ways, which will inform the quiz settings (
   - `alt + shift + left/right`: Go to the previous/next round
 - **Tools during question**
   - `spacebar`: Pause and resume the timer
-  - `shift + r`: Restart the current timer
+  - `shift + r`: Play the current audio file from the beginning
   - `shift + =/-`: Add/subtract 30 seconds from the current timer
   - `alt + enter`: Toggle enlarged image (if there is a visible image)
   - `a`: toggle the answer to be visible in the master view (http://localhost:9000/app/master)

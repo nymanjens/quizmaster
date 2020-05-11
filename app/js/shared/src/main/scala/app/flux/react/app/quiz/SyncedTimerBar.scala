@@ -111,7 +111,7 @@ final class SyncedTimerBar(
         })
       }
       bind("space", () => scalaJsApiClient.doTeamOrQuizStateUpdate(ToggleTimerPaused()))
-      bind("shift+r", () => scalaJsApiClient.doTeamOrQuizStateUpdate(ResetTimerAndMedia()))
+      bind("shift+r", () => scalaJsApiClient.doTeamOrQuizStateUpdate(ResetMedia()))
       bind("shift+=", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(30))))
       bind("shift+-", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(-30))))
     }
