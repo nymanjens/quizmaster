@@ -128,9 +128,9 @@ object QuizState {
   def tupled = (this.apply _).tupled
 
   case class TimerState(
-      lastSnapshotInstant: Instant = Instant.EPOCH,
-      lastSnapshotElapsedTime: Duration = Duration.ZERO,
-      timerRunning: Boolean = false,
+      lastSnapshotInstant: Instant,
+      lastSnapshotElapsedTime: Duration,
+      timerRunning: Boolean,
   ) {
 
     def hasFinished(maxTime: Duration)(implicit clock: Clock): Boolean = {
@@ -146,7 +146,11 @@ object QuizState {
     }
   }
   object TimerState {
-    val nullInstance = TimerState()
+    val nullInstance = TimerState(
+      lastSnapshotInstant = Instant.EPOCH,
+      lastSnapshotElapsedTime = Duration.ZERO,
+      timerRunning = false,
+    )
 
     def createStarted()(implicit clock: Clock): TimerState = TimerState(
       lastSnapshotInstant = clock.nowInstant,
