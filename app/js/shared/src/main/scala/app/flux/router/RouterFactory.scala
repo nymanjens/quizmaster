@@ -53,9 +53,13 @@ private[router] final class RouterFactory(
         (emptyRule
 
           | staticRoute(RouterFactory.pathPrefix, StandardPages.Root)
-            ~> redirectToPage(AppPages.TeamController)(Redirect.Replace)
+            ~> redirectToPage(AppPages.TeamSelection)(Redirect.Replace)
 
-          | staticRuleFromPage(AppPages.TeamController, reactAppModule.teamController.apply)
+          | staticRuleFromPage(AppPages.TeamSelection, reactAppModule.teamController.forTeamSelection)
+
+          | dynamicRuleFromPage(_ / long.caseClass[AppPages.TeamController]) { (page, ctl) =>
+            reactAppModule.teamController(teamId = page.teamId, ctl)
+          }
 
           | staticRuleFromPage(AppPages.Quiz, reactAppModule.quizView.apply)
 

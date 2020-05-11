@@ -59,7 +59,7 @@ final class Layout(
         leftMenu = <.span(),
         pageContent = <.div(
           ^.id := "content-wrapper",
-          <<.ifThen(router.currentPage != AppPages.TeamController) {
+          <<.ifThen(AppPages.isMasterOnlyPage(router.currentPage)) {
             <.div(
               ^.id := "left-content-wrapper",
               teamsList(showMasterControls = router.currentPage == AppPages.Master),
@@ -75,7 +75,7 @@ final class Layout(
 
     private def maybeScheduleBindShortcutsAndPreloadMedia(state: State)(
         implicit router: RouterContext): Unit = {
-      if (!state.boundShortcutsAndPreloadedMedia && router.currentPage != AppPages.TeamController) {
+      if (!state.boundShortcutsAndPreloadedMedia && AppPages.isMasterOnlyPage(router.currentPage)) {
         js.timers.setTimeout(300.milliseconds) {
           val updatedState = $.state.runNow()
           if (!updatedState.boundShortcutsAndPreloadedMedia) {

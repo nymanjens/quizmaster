@@ -79,7 +79,7 @@ final class SbadminLayout(
               applicationDisconnectedIcon(),
               pendingModificationsCounter(),
               versionNavbar(),
-              <.li(linkToPage(AppPages.TeamController)),
+              <.li(linkToPage(AppPages.TeamSelection)),
               <.li(linkToPage(AppPages.Quiz)),
               <.li(linkToPage(AppPages.Master)),
               <.li(
@@ -98,7 +98,7 @@ final class SbadminLayout(
                     e.preventDefault()
                     LocalStorageClient.removeMasterSecret()
                     $.modState(_.copy(isQuizMaster = false)).thenRun {
-                      router.setPage(AppPages.TeamController)
+                      router.setPage(AppPages.TeamSelection)
                     }
                   },
                   Bootstrap.FontAwesomeIcon("lock", fixedWidth = true),

@@ -7,6 +7,7 @@ import app.api.ScalaJsApiClient
 import app.common.AnswerBullet
 import app.common.LocalStorageClient
 import app.flux.action.AppActions
+import app.flux.router.AppPages
 import app.flux.stores.quiz.GamepadStore.Arrow
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -50,272 +51,297 @@ final class TeamControllerView(
     quizProgressIndicator: QuizProgressIndicator,
     questionComponent: QuestionComponent,
     submissionsSummaryTable: SubmissionsSummaryTable,
-) extends HydroReactComponent {
+) {
 
   // **************** API ****************//
-  def apply(router: RouterContext): VdomElement = {
-    component(Props(router))
+  def apply(teamId: Long, router: RouterContext): VdomElement = {
+    <.span(
+      ^.className := "team-controller-view",
+      teamId match {
+        case -1     => CreateTeamForm(router)
+        case teamId => Controller(teamId)
+      }
+    )
   }
 
-  // **************** Implementation of HydroReactComponent methods ****************//
-  override protected val config = ComponentConfig(backendConstructor = new Backend(_), initialState = State())
-    .withStateStoresDependency(
-      teamsAndQuizStateStore,
-      state =>
-        state.copy(
-          quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
-          teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-          // Update the team, e.g. in case the name changed
-          maybeTeam = state.maybeTeam.map(team =>
-            teamsAndQuizStateStore.stateOrEmpty.teams.find(_.name == team.name).get)
-      )
-    )
+  def forTeamSelection(router: RouterContext): VdomElement = {
+    apply(teamId = -1, router = router)
+  }
 
-  // **************** Implementation of HydroReactComponent types ****************//
-  protected case class Props(router: RouterContext)
-  protected case class State(
-      quizState: QuizState = QuizState.nullInstance,
-      teams: Seq[Team] = Seq(),
-      maybeTeam: Option[Team] = None,
-  )
+  private object CreateTeamForm extends HydroReactComponent.Stateless {
 
-  protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) with WillMount {
-
-    val teamNameInputRef = TextInput.ref()
-    val freeTextAnswerInputRef = TextInput.ref()
-
-    override def render(props: Props, state: State): VdomElement = logExceptions {
-      implicit val router = props.router
-      implicit val _: State = state
-
-      <.span(
-        ^.className := "team-controller-view",
-        state.maybeTeam match {
-          case None       => createTeamForm()
-          case Some(team) => controller(team, state.quizState)
-        }
-      )
+    // **************** API ****************//
+    def apply(router: RouterContext): VdomElement = {
+      component(Props(router))
     }
 
-    override def willMount(props: Props, state: State): Callback = Callback.future {
-      LocalStorageClient.getCurrentTeamName() match {
-        case Some(teamName) =>
-          getOrCreateTeam(name = teamName).map(team => $.modState(_.copy(maybeTeam = Some(team))))
-        case None => Future.successful(Callback.empty)
+    // **************** Implementation of HydroReactComponent methods ****************//
+    override protected val statelessConfig = StatelessComponentConfig(backendConstructor = new Backend(_))
+
+    // **************** Implementation of HydroReactComponent types ****************//
+    protected case class Props(router: RouterContext)
+
+    protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
+
+      private val teamNameInputRef = TextInput.ref()
+
+      override def render(props: Props, state: State): VdomElement = logExceptions {
+        <.form(
+          Bootstrap.FormGroup(
+            <.label(i18n("app.team-name")),
+            <.div(
+              TextInput(
+                ref = teamNameInputRef,
+                name = "team-name",
+                focusOnMount = true,
+              ),
+            ),
+          ),
+          <.div(
+            Bootstrap.Button(Variant.primary, Size.sm, tpe = "submit")(
+              ^.onClick ==> { (e: ReactEventFromInput) =>
+                e.preventDefault()
+                val name = teamNameInputRef().valueOrDefault
+                if (name.nonEmpty) {
+                  Callback.future {
+                    getOrCreateTeam(name = name).map { team =>
+                      LocalStorageClient.setCurrentTeamName(name)
+                      props.router.setPage(AppPages.TeamController(team.id))
+                      Callback.empty
+                    }
+                  }
+                } else {
+                  Callback.empty
+                }
+              },
+              i18n("app.submit"),
+            ),
+          ),
+        )
+      }
+
+      private def getOrCreateTeam(name: String): Future[Team] = async {
+        await(teamsAndQuizStateStore.stateFuture).teams.find(_.name == name) match {
+          case None       => await(teamsAndQuizStateStore.addTeam(name = name))
+          case Some(team) => team
+        }
       }
     }
+  }
 
-    private def createTeamForm()(implicit state: State): VdomNode = {
-      <.form(
-        Bootstrap.FormGroup(
-          <.label(i18n("app.team-name")),
-          <.div(
-            TextInput(
-              ref = teamNameInputRef,
-              name = "team-name",
-              focusOnMount = true,
-            ),
-          ),
-        ),
-        <.div(
-          Bootstrap.Button(Variant.primary, Size.sm, tpe = "submit")(
-            ^.onClick ==> { (e: ReactEventFromInput) =>
-              e.preventDefault()
-              val name = teamNameInputRef().valueOrDefault
-              if (name.nonEmpty) {
-                Callback.future {
-                  getOrCreateTeam(name = name).map { team =>
-                    LocalStorageClient.setCurrentTeamName(name)
-                    $.modState(_.copy(maybeTeam = Some(team)))
-                  }
-                }
-              } else {
-                Callback.empty
-              }
-            },
-            i18n("app.submit"),
-          ),
-        ),
-      )
+  object Controller extends HydroReactComponent {
+
+    def apply(teamId: Long): VdomElement = {
+      component(Props(teamId))
     }
 
-    private def controller(implicit team: Team, quizState: QuizState): VdomNode = {
-      <.span(
-        <.div(
-          ^.className := "team-name",
-          team.name,
-          " ",
-          TeamIcon(team),
-        ),
-        chooseOtherTeamLink(),
-        quizState.maybeQuestion match {
-          case Some(question) if showSubmissionForm(question) =>
-            <.span(
-              <.div(^.className := "question", question.textualQuestion),
-              if (question.showSingleAnswerButtonToTeams) {
-                singleAnswerButton(question)
-              } else if (question.isMultipleChoice) {
-                multipleChoiceAnswerButtons(question)
-              } else {
-                freeTextAnswerForm(question)
-              }
-            )
-          case _ if quizState.quizHasEnded =>
-            submissionsSummaryTable(selectedTeamId = Some(team.id))
-          case _ =>
-            <.span(i18n("app.waiting-for-the-next-question"))
-        },
-      )
-    }
-
-    private def chooseOtherTeamLink(): VdomNode = {
-      <.div(
-        ^.className := "choose-other-team",
-        <.a(
-          ^.href := "javascript:void",
-          ^.onClick --> $.modState(_.copy(maybeTeam = None)),
-          "<< ",
-          i18n("app.choose-other-team"),
-        ))
-    }
-
-    private def singleAnswerButton(question: Question)(
-        implicit team: Team,
-        quizState: QuizState,
-    ): VdomNode = {
-      val canSubmitResponse = quizState.canSubmitResponse(team)
-
-      Bootstrap.Button(
-        variant = Variant.primary,
-      )(
-        ^.className := "the-one-button",
-        ^.disabled := !canSubmitResponse,
-        ^.onClick --> submitResponse(SubmissionValue.PressedTheOneButton),
-        if (question.onlyFirstGainsPoints) {
-          i18n("app.stop-the-timer-and-give-the-answer")
-        } else {
-          i18n("app.indicate-that-you-have-written-down-your-answer")
-        },
-      )
-    }
-
-    private def multipleChoiceAnswerButtons(question: Question)(
-        implicit team: Team,
-        quizState: QuizState,
-    ): VdomNode = {
-      val choices = question.maybeTextualChoices.get
-      val maybeCurrentSubmissionValue =
-        quizState.submissions.filter(_.teamId == team.id).map(_.value).lastOption
-      val canSubmitResponse = quizState.canSubmitResponse(team)
-      val showSubmissionCorrectness = question.onlyFirstGainsPoints || question.answerIsVisible(
-        quizState.questionProgressIndex)
-
-      <.ul(
-        ^.className := "multiple-choice-answer-buttons",
-        (for ((choice, answerBullet) <- choices zip AnswerBullet.all)
-          yield {
-            val thisChoiceSubmissionValue = SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex)
-            val thisChoiceWasChosen = maybeCurrentSubmissionValue == Some(thisChoiceSubmissionValue)
-            val thisChoiceIsCorrectAnswer = question.isCorrectAnswer(thisChoiceSubmissionValue)
-
-            <.li(
-              ^.key := choice,
-              Bootstrap.Button(
-                variant = if (thisChoiceWasChosen) Variant.primary else Variant.default,
-              )(
-                ^.disabled := !canSubmitResponse,
-                ^.onClick --> submitResponse(thisChoiceSubmissionValue),
-                ^^.ifThen(thisChoiceWasChosen && showSubmissionCorrectness) {
-                  ^.className := (if (thisChoiceIsCorrectAnswer) "correct" else "incorrect")
-                },
-                answerBullet.toVdomNode,
-                <.span(
-                  choice,
-                ),
-              )
-            )
-          }).toVdomArray
-      )
-    }
-    private def freeTextAnswerForm(question: Question)(
-        implicit team: Team,
-        quizState: QuizState,
-    ): VdomNode = {
-      val maybeCurrentSubmission = quizState.submissions.filter(_.teamId == team.id).lastOption
-      val maybeCurrentSubmissionText =
-        maybeCurrentSubmission.map(_.value).flatMap {
-          case SubmissionValue.FreeTextAnswer(a) => Some(a)
-          case _                                 => None
-        }
-      val canSubmitResponse = quizState.canSubmitResponse(team)
-      val showSubmissionCorrectness = question.onlyFirstGainsPoints || question.answerIsVisible(
-        quizState.questionProgressIndex)
-
-      <.form(
-        ^.className := "free-text-answer-form",
-        Bootstrap.FormGroup(
-          <.label(i18n("app.enter-your-answer"), ":"),
-          <.div(
-            TextInput(
-              ref = freeTextAnswerInputRef,
-              name = "answer",
-              focusOnMount = true,
-              disabled = !canSubmitResponse,
-            ),
-          ),
-        ),
-        <.div(
-          Bootstrap.Button(Variant.primary, Size.sm, tpe = "submit")(
-            ^.disabled := !canSubmitResponse,
-            ^.onClick ==> { (e: ReactEventFromInput) =>
-              e.preventDefault()
-              val answer = freeTextAnswerInputRef().valueOrDefault
-              if (answer.nonEmpty) {
-                freeTextAnswerInputRef().setValue("")
-                submitResponse(SubmissionValue.FreeTextAnswer(answer))
-              } else {
-                Callback.empty
-              }
-            },
-            i18n("app.submit"),
-          ),
-        ),
-        <<.ifDefined(maybeCurrentSubmissionText) { currentSubmissionText =>
-          <.div(
-            ^.className := "you-submitted",
-            i18n("app.you-submitted"),
-            ": ",
-            <.span(
-              ^^.ifThen(showSubmissionCorrectness) {
-                ^.className := (if (maybeCurrentSubmission.get.isCorrectAnswer == Some(true)) "correct"
-                                else "incorrect")
-              },
-              currentSubmissionText,
+    // **************** Implementation of HydroReactComponent methods ****************//
+    override protected val config =
+      ComponentConfig(backendConstructor = new Backend(_), initialState = State())
+        .withStateStoresDependencyFromProps { props =>
+          StateStoresDependency(
+            teamsAndQuizStateStore,
+            state =>
+              state.copy(
+                quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
+                teams = teamsAndQuizStateStore.stateOrEmpty.teams,
+                maybeTeam = teamsAndQuizStateStore.stateOrEmpty.teams.find(_.id == props.teamId)
             )
           )
-        },
-      )
-    }
+        }
 
-    private def getOrCreateTeam(name: String): Future[Team] = async {
-      await(teamsAndQuizStateStore.stateFuture).teams.find(_.name == name) match {
-        case None       => await(teamsAndQuizStateStore.addTeam(name = name))
-        case Some(team) => team
+    // **************** Implementation of HydroReactComponent types ****************//
+    protected case class Props(teamId: Long)
+    protected case class State(
+        quizState: QuizState = QuizState.nullInstance,
+        teams: Seq[Team] = Seq(),
+        maybeTeam: Option[Team] = None,
+    )
+
+    protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
+
+      private val freeTextAnswerInputRef = TextInput.ref()
+
+      override def render(props: Props, state: State): VdomElement = logExceptions {
+        implicit val _: State = state
+
+        state.maybeTeam match {
+          case None       => <.span(i18n("app.loading"), "...")
+          case Some(team) => controller(team, state.quizState)
+        }
       }
-    }
 
-    private def submitResponse(submissionValue: SubmissionValue)(implicit team: Team): Callback = {
-      Callback.future {
-        dispatcher
-          .dispatch(AppActions.AddSubmission(teamId = team.id, submissionValue = submissionValue))
-          .map(_ => Callback.empty)
+      private def controller(implicit team: Team, quizState: QuizState): VdomElement = {
+        <.span(
+          <.div(
+            ^.className := "team-name",
+            team.name,
+            " ",
+            TeamIcon(team),
+          ),
+          chooseOtherTeamLink(),
+          quizState.maybeQuestion match {
+            case Some(question) if showSubmissionForm(question) =>
+              <.span(
+                <.div(^.className := "question", question.textualQuestion),
+                if (question.showSingleAnswerButtonToTeams) {
+                  singleAnswerButton(question)
+                } else if (question.isMultipleChoice) {
+                  multipleChoiceAnswerButtons(question)
+                } else {
+                  freeTextAnswerForm(question)
+                }
+              )
+            case _ if quizState.quizHasEnded =>
+              submissionsSummaryTable(selectedTeamId = Some(team.id))
+            case _ =>
+              <.span(i18n("app.waiting-for-the-next-question"))
+          },
+        )
       }
-    }
 
-    private def showSubmissionForm(question: Question)(implicit quizState: QuizState): Boolean = {
-      // Show the form if the question in the right state. If this is a question where teams submitted anything,
-      // it makes sense to keep showing their submission (even if this particular team didn't submit anything).
-      question.submissionAreOpen(quizState.questionProgressIndex) || quizState.submissions.nonEmpty
+      private def chooseOtherTeamLink(): VdomNode = {
+        <.div(
+          ^.className := "choose-other-team",
+          <.a(
+            ^.href := "javascript:void",
+            ^.onClick --> $.modState(_.copy(maybeTeam = None)),
+            "<< ",
+            i18n("app.choose-other-team"),
+          ))
+      }
+
+      private def singleAnswerButton(question: Question)(
+          implicit team: Team,
+          quizState: QuizState,
+      ): VdomNode = {
+        val canSubmitResponse = quizState.canSubmitResponse(team)
+
+        Bootstrap.Button(
+          variant = Variant.primary,
+        )(
+          ^.className := "the-one-button",
+          ^.disabled := !canSubmitResponse,
+          ^.onClick --> submitResponse(SubmissionValue.PressedTheOneButton),
+          if (question.onlyFirstGainsPoints) {
+            i18n("app.stop-the-timer-and-give-the-answer")
+          } else {
+            i18n("app.indicate-that-you-have-written-down-your-answer")
+          },
+        )
+      }
+
+      private def multipleChoiceAnswerButtons(question: Question)(
+          implicit team: Team,
+          quizState: QuizState,
+      ): VdomNode = {
+        val choices = question.maybeTextualChoices.get
+        val maybeCurrentSubmissionValue =
+          quizState.submissions.filter(_.teamId == team.id).map(_.value).lastOption
+        val canSubmitResponse = quizState.canSubmitResponse(team)
+        val showSubmissionCorrectness = question.onlyFirstGainsPoints || question.answerIsVisible(
+          quizState.questionProgressIndex)
+
+        <.ul(
+          ^.className := "multiple-choice-answer-buttons",
+          (for ((choice, answerBullet) <- choices zip AnswerBullet.all)
+            yield {
+              val thisChoiceSubmissionValue = SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex)
+              val thisChoiceWasChosen = maybeCurrentSubmissionValue == Some(thisChoiceSubmissionValue)
+              val thisChoiceIsCorrectAnswer = question.isCorrectAnswer(thisChoiceSubmissionValue)
+
+              <.li(
+                ^.key := choice,
+                Bootstrap.Button(
+                  variant = if (thisChoiceWasChosen) Variant.primary else Variant.default,
+                )(
+                  ^.disabled := !canSubmitResponse,
+                  ^.onClick --> submitResponse(thisChoiceSubmissionValue),
+                  ^^.ifThen(thisChoiceWasChosen && showSubmissionCorrectness) {
+                    ^.className := (if (thisChoiceIsCorrectAnswer) "correct" else "incorrect")
+                  },
+                  answerBullet.toVdomNode,
+                  <.span(
+                    choice,
+                  ),
+                )
+              )
+            }).toVdomArray
+        )
+      }
+      private def freeTextAnswerForm(question: Question)(
+          implicit team: Team,
+          quizState: QuizState,
+      ): VdomNode = {
+        val maybeCurrentSubmission = quizState.submissions.filter(_.teamId == team.id).lastOption
+        val maybeCurrentSubmissionText =
+          maybeCurrentSubmission.map(_.value).flatMap {
+            case SubmissionValue.FreeTextAnswer(a) => Some(a)
+            case _                                 => None
+          }
+        val canSubmitResponse = quizState.canSubmitResponse(team)
+        val showSubmissionCorrectness = question.onlyFirstGainsPoints || question.answerIsVisible(
+          quizState.questionProgressIndex)
+
+        <.form(
+          ^.className := "free-text-answer-form",
+          Bootstrap.FormGroup(
+            <.label(i18n("app.enter-your-answer"), ":"),
+            <.div(
+              TextInput(
+                ref = freeTextAnswerInputRef,
+                name = "answer",
+                focusOnMount = true,
+                disabled = !canSubmitResponse,
+              ),
+            ),
+          ),
+          <.div(
+            Bootstrap.Button(Variant.primary, Size.sm, tpe = "submit")(
+              ^.disabled := !canSubmitResponse,
+              ^.onClick ==> { (e: ReactEventFromInput) =>
+                e.preventDefault()
+                val answer = freeTextAnswerInputRef().valueOrDefault
+                if (answer.nonEmpty) {
+                  freeTextAnswerInputRef().setValue("")
+                  submitResponse(SubmissionValue.FreeTextAnswer(answer))
+                } else {
+                  Callback.empty
+                }
+              },
+              i18n("app.submit"),
+            ),
+          ),
+          <<.ifDefined(maybeCurrentSubmissionText) { currentSubmissionText =>
+            <.div(
+              ^.className := "you-submitted",
+              i18n("app.you-submitted"),
+              ": ",
+              <.span(
+                ^^.ifThen(showSubmissionCorrectness) {
+                  ^.className := (if (maybeCurrentSubmission.get.isCorrectAnswer == Some(true)) "correct"
+                                  else "incorrect")
+                },
+                currentSubmissionText,
+              )
+            )
+          },
+        )
+      }
+
+      private def submitResponse(submissionValue: SubmissionValue)(implicit team: Team): Callback = {
+        Callback.future {
+          dispatcher
+            .dispatch(AppActions.AddSubmission(teamId = team.id, submissionValue = submissionValue))
+            .map(_ => Callback.empty)
+        }
+      }
+
+      private def showSubmissionForm(question: Question)(implicit quizState: QuizState): Boolean = {
+        // Show the form if the question in the right state. If this is a question where teams submitted anything,
+        // it makes sense to keep showing their submission (even if this particular team didn't submit anything).
+        question.submissionAreOpen(quizState.questionProgressIndex) || quizState.submissions.nonEmpty
+      }
     }
   }
 }
