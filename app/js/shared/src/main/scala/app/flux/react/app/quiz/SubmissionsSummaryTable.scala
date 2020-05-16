@@ -151,34 +151,38 @@ final class SubmissionsSummaryTable(
             s" [${state.submissionsSummaryState.totalQuizTimeEstimate.toMinutes}']"
           ),
         ),
-        <.tr(
-          ^.key := "total-from-submissions",
-          <.th(i18n("app.total-from-submissions")), {
-            for (team <- state.teams)
-              yield
-                <.td(
-                  ^.key := team.id,
-                  ^^.ifThen(props.selectedTeamId == Some(team.id)) {
-                    ^.className := "info"
-                  },
-                  state.submissionsSummaryState.totalPoints(team)
-                )
-          }.toVdomArray
-        ),
-        <.tr(
-          ^.key := "discretionary",
-          <.th(i18n("app.discretionary-points")), {
-            for (team <- state.teams)
-              yield
-                <.td(
-                  ^.key := team.id,
-                  ^^.ifThen(props.selectedTeamId == Some(team.id)) {
-                    ^.className := "info"
-                  },
-                  (team.score - state.submissionsSummaryState.totalPoints(team))
-                )
-          }.toVdomArray
-        ),
+        <<.ifThen(state.teams.exists(team => team.score != state.submissionsSummaryState.totalPoints(team))) {
+          VdomArray(
+            <.tr(
+              ^.key := "total-from-submissions",
+              <.th(i18n("app.total-from-submissions")), {
+                for (team <- state.teams)
+                  yield
+                    <.td(
+                      ^.key := team.id,
+                      ^^.ifThen(props.selectedTeamId == Some(team.id)) {
+                        ^.className := "info"
+                      },
+                      state.submissionsSummaryState.totalPoints(team)
+                    )
+              }.toVdomArray
+            ),
+            <.tr(
+              ^.key := "discretionary",
+              <.th(i18n("app.discretionary-points")), {
+                for (team <- state.teams)
+                  yield
+                    <.td(
+                      ^.key := team.id,
+                      ^^.ifThen(props.selectedTeamId == Some(team.id)) {
+                        ^.className := "info"
+                      },
+                      (team.score - state.submissionsSummaryState.totalPoints(team))
+                    )
+              }.toVdomArray
+            ),
+          )
+        },
         <.tr(
           ^.key := "team-score",
           <.th(i18n("app.total-team-score")), {
