@@ -168,7 +168,7 @@ final class TeamControllerView(
 
       override def render(props: Props, state: State): VdomElement = logExceptions {
         state.maybeTeam match {
-          case None       => <.span(i18n("app.loading"), "...")
+          case None       => CreateTeamForm(props.router)
           case Some(team) => controller(team, state.quizState, props.router)
         }
       }
