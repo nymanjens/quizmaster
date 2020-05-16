@@ -44,7 +44,8 @@ final class SubmissionsSummaryStore(
 
   // **************** Implementation of AsyncEntityDerivedStateStore methods **************** //
   override protected def calculateState(): Future[State] = async {
-    val allSubmissions = await(entityAccess.newQuery[SubmissionEntity]().data()).sortBy(_.createTime)
+    val allSubmissions =
+      await(entityAccess.newQuery[SubmissionEntity]().data()).sortBy(s => (s.roundIndex, s.createTime))
 
     State(
       latestSubmissionsMap = allSubmissions
@@ -53,10 +54,22 @@ final class SubmissionsSummaryStore(
           submissions.groupBy(_.teamId).mapValues(_.last)
         },
       roundToTimeEstimateMap = (
-        for (roundIndex <- quizConfig.rounds.indices) yield roundIndex -> {
-          Duration.ZERO
-        }
-      ).toMap,
+        for (roundIndex <- quizConfig.rounds.indices)
+          yield
+            roundIndex -> {
+              if (allSubmissions.exists(_.roundIndex == roundIndex)) {
+                val previousRoundEnd = allSubmissions.reverseIterator.find(s => s.roundIndex < roundIndex)
+                val firstQuestionInRound = allSubmissions.find(_.roundIndex == roundIndex).get
+                val lastQuestionInRound = allSubmissions.reverseIterator.find(_.roundIndex == roundIndex).get
+                val startTime = previousRoundEnd
+                  .map(_.createTime) getOrElse (firstQuestionInRound.createTime - firstQuestionDurationEstimate)
+
+                lastQuestionInRound.createTime - startTime
+              } else {
+                Duration.ZERO
+              }
+            }
+      ).toMap.withDefault(_ => Duration.ZERO),
       totalQuizTimeEstimate = if (allSubmissions.nonEmpty) {
         firstQuestionDurationEstimate + (allSubmissions.last.createTime - allSubmissions.head.createTime)
       } else Duration.ZERO
@@ -125,7 +138,7 @@ object SubmissionsSummaryStore {
   case object State {
     val nullInstance = State(
       latestSubmissionsMap = Map(),
-      roundToTimeEstimateMap = Map(),
+      roundToTimeEstimateMap = Map().withDefault(_ => Duration.ZERO),
       totalQuizTimeEstimate = Duration.ZERO,
     )
   }

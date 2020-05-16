@@ -109,6 +109,7 @@ final class SubmissionsSummaryTable(
         <.th(
           ^.colSpan := 1 + state.teams.size,
           round.name,
+          s" [${state.submissionsSummaryState.roundToTimeEstimateMap(roundIndex).toMinutes}']"
         ),
       )
     }
@@ -147,6 +148,7 @@ final class SubmissionsSummaryTable(
           <.th(
             ^.colSpan := 1 + state.teams.size,
             i18n("app.totals"),
+            s" [${state.submissionsSummaryState.totalQuizTimeEstimate.toMinutes}']"
           ),
         ),
         <.tr(
