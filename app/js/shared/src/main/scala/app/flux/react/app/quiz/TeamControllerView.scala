@@ -146,7 +146,7 @@ final class TeamControllerView(
               state.copy(
                 quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
                 teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-                maybeTeam = teamsAndQuizStateStore.stateOrEmpty.teams.find(_.id == props.teamId)
+                maybeTeam = teamsAndQuizStateStore.stateOrEmpty.teams.find(_.id == props.teamId),
             )
           )
         }
@@ -173,9 +173,11 @@ final class TeamControllerView(
         }
       }
 
-      private def controller(implicit team: Team,
-                             quizState: QuizState,
-                             router: RouterContext): VdomElement = {
+      private def controller(
+          implicit team: Team,
+          quizState: QuizState,
+          router: RouterContext,
+      ): VdomElement = {
         <.span(
           <.div(
             ^.className := "team-name",
