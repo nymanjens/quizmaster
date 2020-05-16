@@ -45,20 +45,23 @@ final class ExternalApi @Inject()(
       new HttpPostAutowireClient(serverDomain).apply[ScalaJsApi].getAllEntities(EntityTypes.all).call(),
       atMost = Duration.Inf)
 
-    val entityModifications = for {
-      (entityType, entities) <- allEntitiesResponse.entitiesMap
-      entity <- entities
-    } yield {
-      def internal[E <: Entity](): EntityModification = {
-        EntityModification.Add(entity.asInstanceOf[E])(entityType.asInstanceOf[EntityType[E]])
-      }
+    for (entityType <- EntityTypes.all) {
+      entityAccess.persistEntityModifications(
+        for (entity <- entityAccess.newQuerySync()(entityType).data())
+          yield EntityModification.Remove(entity.id)(entityType)
+      )
 
-      internal()
+      entityAccess.persistEntityModifications(
+        for (entity <- allEntitiesResponse.entitiesMap(entityType)) yield {
+          def internal[E <: Entity](): EntityModification = {
+            EntityModification.Add(entity.asInstanceOf[E])(entityType.asInstanceOf[EntityType[E]])
+          }
+
+          internal()
+        })
     }
 
-    entityAccess.persistEntityModifications(entityModifications.toVector)
-
-    Ok(s"Done importing ${entityModifications.size} entities")
+    Ok(s"Done importing ${allEntitiesResponse.entitiesMap.values.flatten.size} entities")
   }
 
   private class HttpPostAutowireClient(serverDomain: String)
