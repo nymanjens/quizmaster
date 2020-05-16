@@ -72,6 +72,7 @@ object BuildSettings {
       "com.google.guava" % "guava" % "27.0-jre",
       "com.googlecode.json-simple" % "json-simple" % "1.1.1",
       "org.yaml" % "snakeyaml" % "1.14",
+      "org.scalaj" %% "scalaj-http" % "2.4.2",
       "net.jcip" % "jcip-annotations" % "1.0"
     ))
 
