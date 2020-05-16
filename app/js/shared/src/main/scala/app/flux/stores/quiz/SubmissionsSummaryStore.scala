@@ -2,6 +2,7 @@ package app.flux.stores.quiz
 
 import java.time.Duration
 
+import hydro.common.time.JavaTimeImplicits._
 import app.api.ScalaJsApi.TeamOrQuizStateUpdate._
 import app.api.ScalaJsApiClient
 import app.flux.action.AppActions
@@ -39,6 +40,8 @@ final class SubmissionsSummaryStore(
     scalaJsApiClient: ScalaJsApiClient,
 ) extends AsyncEntityDerivedStateStore[State] {
 
+  private val firstQuestionDurationEstimate: Duration = Duration.ofMinutes(1)
+
   // **************** Implementation of AsyncEntityDerivedStateStore methods **************** //
   override protected def calculateState(): Future[State] = async {
     val allSubmissions = await(entityAccess.newQuery[SubmissionEntity]().data()).sortBy(_.createTime)
@@ -48,7 +51,15 @@ final class SubmissionsSummaryStore(
         .groupBy(e => QuestionIndex(roundIndex = e.roundIndex, questionIndex = e.questionIndex))
         .mapValues { submissions =>
           submissions.groupBy(_.teamId).mapValues(_.last)
+        },
+      roundToTimeEstimateMap = (
+        for (roundIndex <- quizConfig.rounds.indices) yield roundIndex -> {
+          Duration.ZERO
         }
+      ).toMap,
+      totalQuizTimeEstimate = if (allSubmissions.nonEmpty) {
+        firstQuestionDurationEstimate + (allSubmissions.last.createTime - allSubmissions.head.createTime)
+      } else Duration.ZERO
     )
   }
 
@@ -66,6 +77,8 @@ final class SubmissionsSummaryStore(
 object SubmissionsSummaryStore {
   case class State(
       latestSubmissionsMap: Map[QuestionIndex, Map[TeamId, SubmissionEntity]],
+      roundToTimeEstimateMap: Map[RoundIndex, Duration],
+      totalQuizTimeEstimate: Duration,
   ) {
     def points(roundIndex: Int, questionIndex: Int, teamId: Long)(implicit quizConfig: QuizConfig): Int = {
       if (hasAnySubmission(roundIndex, questionIndex, teamId)) {
@@ -110,10 +123,15 @@ object SubmissionsSummaryStore {
     }
   }
   case object State {
-    val nullInstance = State(latestSubmissionsMap = Map())
+    val nullInstance = State(
+      latestSubmissionsMap = Map(),
+      roundToTimeEstimateMap = Map(),
+      totalQuizTimeEstimate = Duration.ZERO,
+    )
   }
 
   type TeamId = Long
+  type RoundIndex = Int
   case class QuestionIndex(
       roundIndex: Int,
       questionIndex: Int,
