@@ -199,7 +199,7 @@ final class ScalaJsApiServerFactory @Inject()(
                 ))
             }
 
-          case ResetMedia() =>
+          case RestartMedia() =>
             StateUpsertHelper.doQuizStateUpsert { state =>
               state.copy(
                 timerState = state.timerState.copy(uniqueIdOfMediaPlaying = abs(Random.nextLong)),
