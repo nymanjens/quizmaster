@@ -143,6 +143,14 @@ final class QuestionComponent(
             question.question,
           )
         },
+        <<.ifDefined(question.questionDetail) { questionDetail =>
+          ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
+            <.div(
+              ^.className := "question-detail",
+              questionDetail,
+            )
+          }
+        },
         pointsMetadata(question),
         <<.ifDefined(question.masterNotes) { masterNotes =>
           ifVisibleOrMaster(false) {

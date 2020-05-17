@@ -60,6 +60,7 @@ object ParsableQuizConfig {
   object Question {
     case class Single(
         question: String,
+        questionDetail: String,
         choices: java.util.List[String],
         answer: String,
         answerDetail: String,
@@ -76,6 +77,7 @@ object ParsableQuizConfig {
     ) extends Question {
       def this() = this(
         question = null,
+        questionDetail = null,
         choices = null,
         answer = null,
         answerDetail = null,
@@ -95,6 +97,7 @@ object ParsableQuizConfig {
           require(maxTimeSeconds != null, "maxTimeSeconds is not set")
           QuizConfig.Question.Single(
             question = checkNotNull(question),
+            questionDetail = Option(questionDetail),
             choices = if (choices == null) None else Some(choices.asScala.toVector),
             answer = checkNotNull(answer),
             answerDetail = Option(answerDetail),

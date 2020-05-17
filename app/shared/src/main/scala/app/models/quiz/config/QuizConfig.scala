@@ -62,6 +62,7 @@ object QuizConfig {
   object Question {
     case class Single(
         question: String,
+        questionDetail: Option[String],
         choices: Option[Seq[String]],
         answer: String,
         answerDetail: Option[String],
