@@ -134,7 +134,7 @@ final class SubmissionsSummaryTable(
                   ^.className := "info"
                 },
                 <<.ifThen(state.submissionsSummaryState.hasAnySubmission(roundIndex, questionIndex, team.id)) {
-                  state.submissionsSummaryState.points(roundIndex, questionIndex, team.id)
+                  hideIfZero(state.submissionsSummaryState.points(roundIndex, questionIndex, team.id))
                 },
               )
         }.toVdomArray
@@ -177,7 +177,7 @@ final class SubmissionsSummaryTable(
                       ^^.ifThen(props.selectedTeamId == Some(team.id)) {
                         ^.className := "info"
                       },
-                      (team.score - state.submissionsSummaryState.totalPoints(team))
+                      hideIfZero(team.score - state.submissionsSummaryState.totalPoints(team)),
                     )
               }.toVdomArray
             ),
@@ -198,6 +198,10 @@ final class SubmissionsSummaryTable(
           }.toVdomArray
         ),
       )
+    }
+
+    private def hideIfZero(int: Int): String = {
+      if(int == 0) "" else int.toString
     }
   }
 }
