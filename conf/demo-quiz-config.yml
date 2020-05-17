@@ -32,7 +32,8 @@ rounds:
     questions:
       - !!app.models.quiz.config.ParsableQuizConfig$Question$Single
         question: After which season is this track named?
+        questionDetail: (Royalty Free Music from Bensound)
         answer: Summer
-        answerDetail: Royalty Free Music from Bensound
+        answerDetail: (By Bensound)
         audioSrc: music_round/bensound-summer.mp3
         maxTimeSeconds: 15
