@@ -75,10 +75,9 @@ final class MasterView(
               case None => roundComponent(quizState.round, showMasterData = true)(quizState)
               case Some(question) =>
                 questionComponent(
-                  question = question,
-                  round = state.quizState.round,
-                  questionProgressIndex = quizState.questionProgressIndex,
                   showMasterData = true,
+                  quizState = state.quizState,
+                  teams = state.teams,
                 )
             }
         },

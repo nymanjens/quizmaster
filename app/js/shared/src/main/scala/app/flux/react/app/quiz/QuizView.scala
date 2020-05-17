@@ -123,10 +123,9 @@ final class QuizView(
           case None => roundComponent(quizState.round)
           case Some(question) =>
             questionComponent(
-              question = question,
-              round = state.quizState.round,
-              questionProgressIndex = quizState.questionProgressIndex,
               showMasterData = false,
+              quizState = state.quizState,
+              teams = state.teams,
             )
         },
       )

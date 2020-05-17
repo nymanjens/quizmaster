@@ -46,51 +46,40 @@ final class QuestionComponent(
     clock: Clock,
     soundEffectController: SoundEffectController,
     teamInputStore: TeamInputStore,
-) extends HydroReactComponent {
+) extends HydroReactComponent.Stateless {
 
   // **************** API ****************//
   def apply(
-      question: Question,
-      round: Round,
-      questionProgressIndex: Int,
       showMasterData: Boolean,
+      quizState: QuizState,
+      teams: Seq[Team],
   ): VdomElement = {
     component(
       Props(
-        question = question,
-        round = round,
-        questionProgressIndex = questionProgressIndex,
         showMasterData = showMasterData,
+        quizState = quizState,
+        teams = teams,
       ))
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//
-  override protected val config =
-    ComponentConfig(backendConstructor = new Backend(_), initialState = State())
-      .withStateStoresDependency(
-        teamsAndQuizStateStore,
-        _.copy(
-          quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
-          teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-        ))
+  override protected val statelessConfig = StatelessComponentConfig(backendConstructor = new Backend(_))
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(
-      question: Question,
-      round: Round,
-      questionProgressIndex: Int,
       showMasterData: Boolean,
-  )
-  protected case class State(
       quizState: QuizState = QuizState.nullInstance,
       teams: Seq[Team] = Seq(),
-  )
+  ) {
+    def question: Question = quizState.maybeQuestion.get
+    def round: Round = quizState.round
+    def questionProgressIndex: Int = quizState.questionProgressIndex
+  }
 
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
 
     override def render(props: Props, state: State): VdomElement = logExceptions {
       implicit val _1: Props = props
-      implicit val _2: State = state
       <.div(
         ^.className := "question-wrapper",
         props.question match {
@@ -126,14 +115,13 @@ final class QuestionComponent(
         question: Question.Single,
     )(
         implicit props: Props,
-        state: State,
     ): VdomElement = {
-      implicit val _ = state.quizState
+      implicit val _ = props.quizState
       val progressIndex = props.questionProgressIndex
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
       val showSubmissionsOnChoices = question.isMultipleChoice && (question.onlyFirstGainsPoints || answerIsVisible)
       val showGamepadIconUnderChoices =
-        state.quizState.submissions.nonEmpty || (state.quizState.canAnyTeamSubmitResponse && question.onlyFirstGainsPoints)
+        props.quizState.submissions.nonEmpty || (props.quizState.canAnyTeamSubmitResponse && question.onlyFirstGainsPoints)
       val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
 
       <.div(
@@ -170,7 +158,7 @@ final class QuestionComponent(
                 <.img(
                   ^.src := s"/quizimages/${image.src}",
                   ^.className := image.size,
-                  ^^.ifThen(state.quizState.imageIsEnlarged) {
+                  ^^.ifThen(props.quizState.imageIsEnlarged) {
                     if (props.showMasterData) {
                       ^.className := "indicate-enlarged"
                     } else {
@@ -194,7 +182,7 @@ final class QuestionComponent(
                     yield {
                       val visibleSubmissions =
                         if (showSubmissionsOnChoices)
-                          state.quizState.submissions.filter(
+                          props.quizState.submissions.filter(
                             _.value == SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
                         else Seq()
                       val isCorrectAnswer = question.isCorrectAnswer(
@@ -225,7 +213,7 @@ final class QuestionComponent(
           },
           " ",
           <<.ifThen(!showSubmissionsOnChoices) {
-            showSubmissions(state.quizState.submissions)
+            showSubmissions(props.quizState.submissions)
           }
         ),
         <<.ifThen(question.choices.isEmpty || !answerIsVisible) {
@@ -256,12 +244,12 @@ final class QuestionComponent(
         },
         <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && !props.showMasterData) {
           <<.ifDefined(question.audioSrc) { audioRelativePath =>
-            val timerState = state.quizState.timerState
+            val timerState = props.quizState.timerState
             val timerIsRunning = timerState.timerRunning && !timerState.hasFinished(question.maxTime)
             audioPlayer(
               audioRelativePath,
               playing = timerIsRunning,
-              key = state.quizState.timerState.uniqueIdOfMediaPlaying.toString,
+              key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
             )
           }
         }
@@ -272,13 +260,12 @@ final class QuestionComponent(
         question: Question.Double,
     )(
         implicit props: Props,
-        state: State,
     ): VdomElement = {
-      implicit val _ = state.quizState
+      implicit val _ = props.quizState
       val progressIndex = props.questionProgressIndex
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
       val correctSubmissionWasEntered =
-        state.quizState.submissions.exists(s => s.isCorrectAnswer == Some(true))
+        props.quizState.submissions.exists(s => s.isCorrectAnswer == Some(true))
 
       <.div(
         ifVisibleOrMaster(false) {
@@ -319,7 +306,7 @@ final class QuestionComponent(
                 (for ((choice, answerBullet) <- question.textualChoices zip AnswerBullet.all)
                   yield {
                     val submissions =
-                      state.quizState.submissions.filter(
+                      props.quizState.submissions.filter(
                         _.value == SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
                     val isCorrectAnswer =
                       question.isCorrectAnswer(SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
@@ -343,7 +330,7 @@ final class QuestionComponent(
         ),
         <.div(
           ^.className := "submissions-without-choices",
-          ifVisibleOrMaster(state.quizState.canAnyTeamSubmitResponse) {
+          ifVisibleOrMaster(props.quizState.canAnyTeamSubmitResponse) {
             Bootstrap.FontAwesomeIcon("gamepad")
           }
         ),
@@ -395,11 +382,11 @@ final class QuestionComponent(
       )
     }
 
-    private def showSubmissions(submissions: Seq[Submission])(implicit state: State) = {
+    private def showSubmissions(submissions: Seq[Submission])(implicit props: Props) = {
       <<.joinWithSpaces(
         for {
           (submission, index) <- submissions.zipWithIndex
-          team <- state.teams.find(_.id == submission.teamId)
+          team <- props.teams.find(_.id == submission.teamId)
         } yield
           TeamIcon(team)(
             ^.key := s"${submission.teamId}-$index",
