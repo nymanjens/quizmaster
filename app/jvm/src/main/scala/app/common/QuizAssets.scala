@@ -35,25 +35,37 @@ final class QuizAssets @Inject()(
   }
 
   private def validateThatAssetsExist(quizConfig: QuizConfig): Unit = {
-    def validateImage(maybeImage: Option[Image]): Unit = {
-      if (maybeImage.isDefined) assertExists(quizImage(maybeImage.get.src))
+    def relativeImagePath(maybeImage: Option[Image]): Option[Path] = {
+      maybeImage.map(i => Paths.get("images").resolve(i.src))
     }
-    def validateAudio(maybeAudio: Option[String]): Unit = {
-      if (maybeAudio.isDefined) assertExists(quizAudio(maybeAudio.get))
+    def relativeAudioPath(maybeAudio: Option[String]): Option[Path] = {
+      maybeAudio.map(a => Paths.get("audio").resolve(a))
     }
 
-    for {
-      round <- quizConfig.rounds
-      question <- round.questions
-    } {
-      question match {
-        case single: Question.Single =>
-          validateImage(single.image)
-          validateImage(single.answerImage)
-          validateAudio(single.audioSrc)
-        case double: Question.Double =>
-      }
-    }
+    val missingRelativePaths =
+      for {
+        round <- quizConfig.rounds
+        question <- round.questions
+        relativePath <- {
+          question match {
+            case single: Question.Single =>
+              Seq() ++
+                relativeImagePath(single.image) ++
+                relativeImagePath(single.answerImage) ++
+                relativeAudioPath(single.audioSrc)
+            case double: Question.Double => Seq()
+          }
+        }
+        if !Files.exists(configPath.resolve(relativePath))
+      } yield relativePath
+
+    require(
+      missingRelativePaths.isEmpty,
+      s"""Could not find the following assets:
+        |
+        |${missingRelativePaths.sorted.map(p => s"  - $p").mkString("\n")}
+        |
+        |""".stripMargin)
   }
 
   private def assertExists(path: Path): Path = {
