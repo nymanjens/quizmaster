@@ -89,24 +89,22 @@ object QuizConfig {
         * Steps:
         * 0- Show preparatory title: "Question 2"
         * 1- Show question: "This is the question, do you know the answer?"
-        * 2- (if relevant) Show choices
-        * 3- Show answer
-        * 4- (if possible) Show answer and give points
+        * 2- Show answer
+        * 3- (if possible) Show answer and give points
         */
       override def progressStepsCount(includeAnswers: Boolean): Int = {
         def oneIfTrue(b: Boolean): Int = if (b) 1 else 0
-        val includeStep2 = choices.isDefined
-        val includeStep3 = includeAnswers
-        val includeStep4 = includeAnswers && !showSingleAnswerButtonToTeams
+        val includeStep2 = includeAnswers
+        val includeStep3 = includeAnswers && !showSingleAnswerButtonToTeams
 
-        2 + oneIfTrue(includeStep2) + oneIfTrue(includeStep3) + oneIfTrue(includeStep4)
+        2 + oneIfTrue(includeStep2) + oneIfTrue(includeStep3)
       }
       override def shouldShowTimer(questionProgressIndex: Int): Boolean = {
-        questionProgressIndex == progressIndexForQuestionBeingAnswered
+        questionProgressIndex == 1
       }
 
       override def submissionAreOpen(questionProgressIndex: Int): Boolean = {
-        questionProgressIndex == progressIndexForQuestionBeingAnswered
+        questionProgressIndex == 1
       }
 
       override def isMultipleChoice: Boolean = choices.nonEmpty
@@ -129,7 +127,7 @@ object QuizConfig {
         questionProgressIndex >= 1
       }
       def choicesAreVisible(questionProgressIndex: Int): Boolean = {
-        choices.isDefined && questionProgressIndex >= 2
+        questionProgressIndex >= 1
       }
       override def answerIsVisible(questionProgressIndex: Int): Boolean = {
         if (!showSingleAnswerButtonToTeams) {
@@ -137,10 +135,6 @@ object QuizConfig {
         } else {
           questionProgressIndex == maxProgressIndex(includeAnswers = true)
         }
-      }
-
-      private def progressIndexForQuestionBeingAnswered: Int = {
-        if (choices.isDefined) 2 else 1
       }
     }
 
