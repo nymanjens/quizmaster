@@ -29,7 +29,7 @@ final class RoundComponent(
           )
         }
       },
-      <<.ifThen(showMasterData) {
+      <<.ifThen(showMasterData && round.questions.nonEmpty) {
         <.div(
           ^.className := "round-metadata",
           s"${i18n("app.max-points-to-gain")}: ${round.questions.map(_.pointsToGainOnFirstAnswer).sum}",
@@ -42,6 +42,12 @@ final class RoundComponent(
             author,
           )
         }
+      },
+      <<.ifThen(quizState.quizIsBeingSetUp) {
+        <.div(
+          ^.className := "round-help",
+          i18n("app.first-round-help"),
+        )
       },
       <<.ifThen(quizState.quizHasEnded) {
         submissionsSummaryTable(selectedTeamId = None)

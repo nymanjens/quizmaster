@@ -68,8 +68,6 @@ final class MasterView(
         quizNavigationButtons(state.quizState),
         quizProgressIndicator(state.quizState, showMasterData = true),
         state.quizState match {
-          case quizState if quizState.quizIsBeingSetUp =>
-            quizSettingsPanels()
           case quizState =>
             quizState.maybeQuestion match {
               case None => roundComponent(quizState.round, showMasterData = true)(quizState)
