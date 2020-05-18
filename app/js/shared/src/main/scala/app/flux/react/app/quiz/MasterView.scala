@@ -63,8 +63,9 @@ final class MasterView(
     override def render(props: Props, state: State): VdomElement = logExceptions {
       implicit val router = props.router
 
-      <.span(
+      <.div(
         ^.className := "master-view",
+        masterBanner(),
         quizNavigationButtons(state.quizState),
         quizProgressIndicator(state.quizState, showMasterData = true),
         state.quizState match {
@@ -79,6 +80,16 @@ final class MasterView(
                 )
             }
         },
+      )
+    }
+
+    private def masterBanner(): VdomTag = {
+      <.div(
+        ^.className := "banner-container",
+        <.div(
+          ^.className := "banner",
+          "Master",
+        )
       )
     }
 

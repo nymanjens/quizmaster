@@ -96,6 +96,51 @@ table.table-bordered {
   }
 }
 
+/****** banner ******/
+@banner-color: #76AB1E;
+
+.banner-container {
+  width: 150px;
+  height: 150px;
+  overflow: hidden;
+  position: absolute;
+  top: -5px;
+  &:after {
+    content: "";
+    display: block;
+    width: 10px;
+    height: 5px;
+    background-color: darken(@banner-color, 5%);
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: -1;
+  }
+  &:before {
+    content: "";
+    display: block;
+    height: 10px;
+    width: 5px;
+    background-color: darken(@banner-color, 5%);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+  }
+
+  .banner {
+    width: 200px;
+    padding: 15px;
+    background-color: @banner-color;
+    color: #fff;
+    text-align: center;
+    transform: rotate(-45deg) translate(-28%, -35%);
+    box-shadow: 0px 5px 5px rgba(0,0,0,0.4);
+    text-transform: uppercase;
+    text-shadow: 0 2px 2px rgba(0,0,0,0.4);
+  }
+}
+
 /***********************************************/
 /************ quiz-specific styling ************/
 /***********************************************/
