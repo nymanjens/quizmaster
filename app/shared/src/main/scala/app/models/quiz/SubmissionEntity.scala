@@ -2,6 +2,7 @@ package app.models.quiz
 
 import java.time.Instant
 
+import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import hydro.models.Entity
 import hydro.models.UpdatableEntity
@@ -22,6 +23,15 @@ case class SubmissionEntity(
 
   override def withId(id: Long) = copy(idOption = Some(id))
   override def withLastUpdateTime(time: LastUpdateTime): Entity = copy(lastUpdateTime = time)
+
+  def toSubmission: Submission = {
+    Submission(
+      id = id,
+      teamId = teamId,
+      value = value,
+      isCorrectAnswer = isCorrectAnswer,
+    )
+  }
 }
 object SubmissionEntity {
   implicit val Type: EntityType[SubmissionEntity] = EntityType()

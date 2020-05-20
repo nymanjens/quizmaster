@@ -34,6 +34,7 @@ import hydro.models.modification.EntityModification
 import hydro.models.modification.EntityType
 import hydro.models.Entity
 import hydro.models.access.DbQuery
+import hydro.models.access.DbQuery.Sorting
 
 import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
@@ -388,26 +389,28 @@ final class ScalaJsApiServerFactory @Inject()(
               // Go to the end of the previous round
               val newRoundIndex = Math.min(quizState.roundIndex - 1, quizConfig.rounds.size - 1)
               val newRound = quizConfig.rounds(newRoundIndex)
-              quizState.copy(
-                roundIndex = newRoundIndex,
-                questionIndex = newRound.questions.size - 1,
-                questionProgressIndex = newRound.questions.lastOption.map(_.maxProgressIndex) getOrElse 0,
-                timerState = TimerState.createStarted(),
-                submissions = Seq(),
-                imageIsEnlarged = false,
-              )
+              recoverSubmissions(
+                quizState.copy(
+                  roundIndex = newRoundIndex,
+                  questionIndex = newRound.questions.size - 1,
+                  questionProgressIndex = newRound.questions.lastOption.map(_.maxProgressIndex) getOrElse 0,
+                  timerState = TimerState.createStarted(),
+                  submissions = Seq(),
+                  imageIsEnlarged = false,
+                ))
             case Some(question) if quizState.questionProgressIndex == 0 =>
               // Go to the end of the previous question
               val newQuestionIndex = quizState.questionIndex - 1
-              quizState.copy(
-                questionIndex = newQuestionIndex,
-                questionProgressIndex =
-                  maybeGet(quizState.round.questions, newQuestionIndex)
-                    .map(_.maxProgressIndex) getOrElse 0,
-                timerState = TimerState.createStarted(),
-                submissions = Seq(),
-                imageIsEnlarged = false,
-              )
+              recoverSubmissions(
+                quizState.copy(
+                  questionIndex = newQuestionIndex,
+                  questionProgressIndex =
+                    maybeGet(quizState.round.questions, newQuestionIndex)
+                      .map(_.maxProgressIndex) getOrElse 0,
+                  timerState = TimerState.createStarted(),
+                  submissions = Seq(),
+                  imageIsEnlarged = false,
+                ))
             case Some(question) if quizState.questionProgressIndex > 0 =>
               // Decrement questionProgressIndex
               quizState.copy(
@@ -453,24 +456,26 @@ final class ScalaJsApiServerFactory @Inject()(
               // Go to the start of the last question of the previous round
               val newRoundIndex = Math.min(quizState.roundIndex - 1, quizConfig.rounds.size - 1)
               val newRound = quizConfig.rounds(newRoundIndex)
-              quizState.copy(
-                roundIndex = newRoundIndex,
-                questionIndex = newRound.questions.size - 1,
-                questionProgressIndex = 0,
-                timerState = TimerState.createStarted(),
-                submissions = Seq(),
-                imageIsEnlarged = false,
-              )
+              recoverSubmissions(
+                quizState.copy(
+                  roundIndex = newRoundIndex,
+                  questionIndex = newRound.questions.size - 1,
+                  questionProgressIndex = 0,
+                  timerState = TimerState.createStarted(),
+                  submissions = Seq(),
+                  imageIsEnlarged = false,
+                ))
             case Some(question) if quizState.questionProgressIndex == 0 =>
               // Go to the start of the previous question
               val newQuestionIndex = quizState.questionIndex - 1
-              quizState.copy(
-                questionIndex = newQuestionIndex,
-                questionProgressIndex = 0,
-                timerState = TimerState.createStarted(),
-                submissions = Seq(),
-                imageIsEnlarged = false,
-              )
+              recoverSubmissions(
+                quizState.copy(
+                  questionIndex = newQuestionIndex,
+                  questionProgressIndex = 0,
+                  timerState = TimerState.createStarted(),
+                  submissions = Seq(),
+                  imageIsEnlarged = false,
+                ))
             case Some(question) if quizState.questionProgressIndex > 0 =>
               // Go to the start of the question
               quizState.copy(
@@ -490,13 +495,14 @@ final class ScalaJsApiServerFactory @Inject()(
             goToNextRoundUpdate(quizState)
           } else {
             // Go to first question
-            quizState.copy(
-              questionIndex = 0,
-              questionProgressIndex = 0,
-              timerState = TimerState.createStarted(),
-              submissions = Seq(),
-              imageIsEnlarged = false,
-            )
+            recoverSubmissions(
+              quizState.copy(
+                questionIndex = 0,
+                questionProgressIndex = 0,
+                timerState = TimerState.createStarted(),
+                submissions = Seq(),
+                imageIsEnlarged = false,
+              ))
           }
         case Some(question) =>
           if (quizState.questionIndex == quizState.round.questions.size - 1) {
@@ -504,13 +510,14 @@ final class ScalaJsApiServerFactory @Inject()(
             goToNextRoundUpdate(quizState)
           } else {
             // Go to next question
-            quizState.copy(
-              questionIndex = quizState.questionIndex + 1,
-              questionProgressIndex = 0,
-              timerState = TimerState.createStarted(),
-              submissions = Seq(),
-              imageIsEnlarged = false,
-            )
+            recoverSubmissions(
+              quizState.copy(
+                questionIndex = quizState.questionIndex + 1,
+                questionProgressIndex = 0,
+                timerState = TimerState.createStarted(),
+                submissions = Seq(),
+                imageIsEnlarged = false,
+              ))
           }
       }
     }
@@ -583,6 +590,20 @@ final class ScalaJsApiServerFactory @Inject()(
           EntityModification.createUpdateAllFields(team.copy(score = newScore))
         }
       }
+    }
+
+    private def recoverSubmissions(quizState: QuizState): QuizState = {
+      require(quizState.submissions.isEmpty)
+
+      val submissionEntities =
+        entityAccess
+          .newQuerySync[SubmissionEntity]()
+          .filter(ModelFields.SubmissionEntity.roundIndex === quizState.roundIndex)
+          .filter(ModelFields.SubmissionEntity.questionIndex === quizState.questionIndex)
+          .sort(Sorting.ascBy(ModelFields.SubmissionEntity.createTime))
+          .data()
+
+      quizState.copy(submissions = submissionEntities.map(_.toSubmission))
     }
   }
 }

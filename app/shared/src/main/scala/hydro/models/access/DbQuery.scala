@@ -1,5 +1,7 @@
 package hydro.models.access
 
+import java.time.Instant
+
 import hydro.models.modification.EntityType
 import hydro.common.time.LocalDateTime
 import hydro.models.Entity
@@ -37,6 +39,9 @@ object DbQuery {
     }
     implicit case object LocalDateTimeOrdering extends PicklableOrdering[LocalDateTime] {
       override def toOrdering: Ordering[LocalDateTime] = implicitly[Ordering[LocalDateTime]]
+    }
+    implicit case object InstantOrdering extends PicklableOrdering[Instant] {
+      override def toOrdering: Ordering[Instant] = implicitly[Ordering[Instant]]
     }
   }
 
