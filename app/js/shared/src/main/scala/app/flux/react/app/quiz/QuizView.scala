@@ -70,7 +70,14 @@ final class QuizView(
         val oldSubmissionIds = oldQuizState.submissions.map(_.id).toSet
         newQuizState.submissions.filterNot(s => oldSubmissionIds.contains(s.id))
       }
-      if (oldQuizState != QuizState.nullInstance && newSubmissions.nonEmpty) {
+
+      // Don't make a sound when the curent submissions are being compared to those of a different
+      // question. This includes the case where we're coming from QuizState.nullInstance.
+      val questionChanged =
+        oldQuizState.questionIndex != newQuizState.questionIndex ||
+          oldQuizState.roundIndex != newQuizState.roundIndex
+
+      if (!questionChanged && newSubmissions.nonEmpty) {
         if (question.onlyFirstGainsPoints && newSubmissions.exists(_.isCorrectAnswer.isDefined)) {
           // An answer was given that will be immediately visible, so the sound can indicate its correctness
           val atLeastOneSubmissionIsCorrect = newSubmissions.exists(_.isCorrectAnswer == Some(true))
