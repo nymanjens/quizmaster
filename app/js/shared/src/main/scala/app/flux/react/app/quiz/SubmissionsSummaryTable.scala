@@ -201,7 +201,7 @@ final class SubmissionsSummaryTable(
     }
 
     private def hideIfZero(int: Int): String = {
-      if(int == 0) "" else int.toString
+      if (int == 0) "" else int.toString
     }
   }
 }

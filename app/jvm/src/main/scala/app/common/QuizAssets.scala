@@ -65,7 +65,8 @@ final class QuizAssets @Inject()(
         |
         |${missingRelativePaths.sorted.map(p => s"  - $p").mkString("\n")}
         |
-        |""".stripMargin)
+        |""".stripMargin
+    )
   }
 
   private def assertExists(path: Path): Path = {
