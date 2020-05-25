@@ -48,6 +48,8 @@ final class ConfigModule extends AbstractModule {
       case e: Throwable =>
         val stackTrace = Throwables.getStackTraceAsString(e)
         Logger.error(s"Error when parsing accounting-config.yml: $stackTrace")
+        // Make error output less noisy by shutting down early (instead of 20+ Guice exceptions while injecting QuizConfig)
+        System.exit(1)
         throw e
     }
   }
