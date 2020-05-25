@@ -32,6 +32,6 @@ object ResourceFiles {
 
   def canonicalizePath(pathString: String): String = {
     val pathStringWithHomeResolved = pathString.replaceFirst("^~", System.getProperty("user.home"))
-    Paths.get(pathStringWithHomeResolved).toAbsolutePath.normalize.toString
+    Paths.get(pathStringWithHomeResolved).toRealPath().toAbsolutePath.normalize.toString
   }
 }
