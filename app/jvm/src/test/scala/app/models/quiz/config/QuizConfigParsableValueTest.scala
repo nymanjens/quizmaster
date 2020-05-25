@@ -61,11 +61,13 @@ class QuizConfigParsableValueTest extends Specification {
     )
 
     parseResult mustEqual ParseResult(
-      value = QuizConfig(
-        title = Some("Demo quiz"),
-        author = Some("Jens Nyman"),
-        masterSecret = "quiz",
-        rounds = Seq(),
+      value = Some(
+        QuizConfig(
+          title = Some("Demo quiz"),
+          author = Some("Jens Nyman"),
+          masterSecret = "quiz",
+          rounds = Seq(),
+        )
       ),
       validationErrors = Seq(),
     )

@@ -11,45 +11,42 @@ import app.models.quiz.config.ValidatingYamlParser.ParsableValue.ListParsableVal
 import app.models.quiz.config.ValidatingYamlParser.ParsableValue.MapParsableValue
 import app.models.quiz.config.ValidatingYamlParser.ParsableValue.MapParsableValue.MaybeRequiredMapValue.Optional
 import app.models.quiz.config.ValidatingYamlParser.ParsableValue.MapParsableValue.MaybeRequiredMapValue.Required
+import app.models.quiz.config.ValidatingYamlParser.ParsableValue.MapParsableValue.StringMap
 import app.models.quiz.config.ValidatingYamlParser.ParsableValue.StringValue
 import app.models.quiz.config.ValidatingYamlParser.ParseResult
-import hydro.common.GuavaReplacement.Preconditions.checkNotNull
-
 import scala.collection.immutable.Seq
 
 object QuizConfigParsableValue extends MapParsableValue[QuizConfig] {
   override val supportedKeyValuePairs = Map(
-    "title" -> Optional(StringValue(defaultValue = null)),
-    "author" -> Optional(StringValue(defaultValue = null)),
-    "masterSecret" -> Optional(StringValue(defaultValue = "*")),
+    "title" -> Optional(StringValue),
+    "author" -> Optional(StringValue),
+    "masterSecret" -> Optional(StringValue),
     "rounds" -> Required(ListParsableValue(RoundValue)),
   )
 
-  override def parseFromParsedMapValues(map: Map[String, Any]) = {
-    ParseResult(
+  override def parseFromParsedMapValues(map: StringMap) = {
+    ParseResult.success(
       QuizConfig(
-        rounds = checkNotNull(map("rounds").asInstanceOf[Seq[Round]]),
-        title = Option(map("title").asInstanceOf[String]),
-        author = Option(map("author").asInstanceOf[String]),
-        masterSecret = checkNotNull(map("masterSecret").asInstanceOf[String]),
+        title = map.optional("title"),
+        author = map.optional("author"),
+        masterSecret = map.optional("masterSecret", "*"),
+        rounds = map.required[Seq[Round]]("rounds"),
       )
     )
   }
 
   private object RoundValue extends MapParsableValue[Round] {
     override val supportedKeyValuePairs = Map(
-      "name" -> Required(StringValue()),
+      "name" -> Required(StringValue),
       "questions" -> Required(ListParsableValue(QuestionValue)),
-      "expectedTimeMinutes" -> Optional(IntValue(defaultValue = -1)),
+      "expectedTimeMinutes" -> Optional(IntValue),
     )
-    override def parseFromParsedMapValues(map: Map[String, Any]) = {
-      ParseResult(
+    override def parseFromParsedMapValues(map: StringMap) = {
+      ParseResult.success(
         Round(
-          name = checkNotNull(map("name").asInstanceOf[String]),
-          questions = checkNotNull(map("questions").asInstanceOf[Seq[Question]]),
-          expectedTime =
-            if (map("expectedTimeMinutes") == -1) None
-            else Some(Duration.ofMinutes(map("expectedTimeMinutes").asInstanceOf[Int])),
+          name = map.required[String]("name"),
+          questions = map.required[Seq[Question]]("questions"),
+          expectedTime = map.optional("expectedTimeMinutes").map(Duration.ofMinutes),
         )
       )
     }
@@ -57,45 +54,42 @@ object QuizConfigParsableValue extends MapParsableValue[QuizConfig] {
 
   private object QuestionValue extends MapParsableValue[Question] {
     override val supportedKeyValuePairs = Map(
-      "type" -> Optional(StringValue(defaultValue = "single")),
-      "question" -> Required(StringValue()),
-      "questionDetail" -> Optional(StringValue(defaultValue = null)),
-      "choices" -> Optional(ListParsableValue(StringValue())),
-      "answer" -> Required(StringValue()),
-      "answerDetail" -> Optional(StringValue()),
+      "type" -> Optional(StringValue),
+      "question" -> Required(StringValue),
+      "questionDetail" -> Optional(StringValue),
+      "choices" -> Optional(ListParsableValue(StringValue)),
+      "answer" -> Required(StringValue),
+      "answerDetail" -> Optional(StringValue),
       "answerImage" -> Optional(ImageValue),
-      "masterNotes" -> Optional(StringValue()),
+      "masterNotes" -> Optional(StringValue),
       "image" -> Optional(ImageValue),
-      "audioSrc" -> Optional(StringValue(defaultValue = null)),
-      "pointsToGain" -> Optional(IntValue(defaultValue = 1)),
-      "pointsToGainOnFirstAnswer" -> Optional(IntValue(defaultValue = -9090)),
-      "pointsToGainOnWrongAnswer" -> Optional(IntValue(defaultValue = 0)),
-      "maxTimeSeconds" -> Required(IntValue()),
-      "onlyFirstGainsPoints" -> Optional(BooleanValue()),
-      "showSingleAnswerButtonToTeams" -> Optional(BooleanValue()),
+      "audioSrc" -> Optional(StringValue),
+      "pointsToGain" -> Optional(IntValue),
+      "pointsToGainOnFirstAnswer" -> Optional(IntValue),
+      "pointsToGainOnWrongAnswer" -> Optional(IntValue),
+      "maxTimeSeconds" -> Required(IntValue),
+      "onlyFirstGainsPoints" -> Optional(BooleanValue),
+      "showSingleAnswerButtonToTeams" -> Optional(BooleanValue),
     )
-    override def parseFromParsedMapValues(map: Map[String, Any]) = {
-      ParseResult(
+    override def parseFromParsedMapValues(map: StringMap) = {
+      ParseResult.success(
         QuizConfig.Question.Single(
-          question = checkNotNull(map("question").asInstanceOf[String]),
-          questionDetail = Option(map("questionDetail").asInstanceOf[String]),
-          choices = checkNotNull(map("choices").asInstanceOf[Seq[String]]) match {
-            case Seq() => None
-            case s     => Some(s)
-          },
-          answer = checkNotNull(map("answer").asInstanceOf[String]),
-          answerDetail = Option(map("answerDetail").asInstanceOf[String]),
-          answerImage = Option(map("answerImage").asInstanceOf[Image]),
-          masterNotes = Option(map("masterNotes").asInstanceOf[String]),
-          image = Option(map("image").asInstanceOf[Image]),
-          audioSrc = Option(map("audioSrc").asInstanceOf[String]),
-          pointsToGain = map("pointsToGain").asInstanceOf[Int],
-          pointsToGainOnFirstAnswer = (if (map("pointsToGainOnFirstAnswer") == -9090) map("pointsToGain")
-                                       else map("pointsToGainOnFirstAnswer")).asInstanceOf[Int],
-          pointsToGainOnWrongAnswer = map("pointsToGainOnWrongAnswer").asInstanceOf[Int],
-          maxTime = Duration.ofSeconds(map("maxTimeSeconds").asInstanceOf[Int]),
-          onlyFirstGainsPoints = map("onlyFirstGainsPoints").asInstanceOf[Boolean],
-          showSingleAnswerButtonToTeams = map("showSingleAnswerButtonToTeams").asInstanceOf[Boolean],
+          question = map.required[String]("question"),
+          questionDetail = map.optional("questionDetail"),
+          choices = map.optional("choices"),
+          answer = map.required[String]("answer"),
+          answerDetail = map.optional("answerDetail"),
+          answerImage = map.optional("answerImage"),
+          masterNotes = map.optional("masterNotes"),
+          image = map.optional("image"),
+          audioSrc = map.optional("audioSrc"),
+          pointsToGain = map.optional("pointsToGain", 1),
+          pointsToGainOnFirstAnswer =
+            map.optional("pointsToGainOnFirstAnswer") getOrElse map.optional("pointsToGain", 1),
+          pointsToGainOnWrongAnswer = map.optional("pointsToGainOnWrongAnswer", 0),
+          maxTime = Duration.ofSeconds(map.required[Int]("maxTimeSeconds")),
+          onlyFirstGainsPoints = map.optional("onlyFirstGainsPoints", false),
+          showSingleAnswerButtonToTeams = map.optional("showSingleAnswerButtonToTeams", false),
         )
       )
     }
@@ -103,14 +97,14 @@ object QuizConfigParsableValue extends MapParsableValue[QuizConfig] {
 
   private object ImageValue extends MapParsableValue[Image] {
     override val supportedKeyValuePairs = Map(
-      "src" -> Required(StringValue()),
-      "size" -> Optional(StringValue(defaultValue = "large")),
+      "src" -> Required(StringValue),
+      "size" -> Optional(StringValue),
     )
-    override def parseFromParsedMapValues(map: Map[String, Any]) = {
-      ParseResult(
+    override def parseFromParsedMapValues(map: StringMap) = {
+      ParseResult.success(
         Image(
-          src = checkNotNull(map("src").asInstanceOf[String]),
-          size = checkNotNull(map("size").asInstanceOf[String]),
+          src = map.required[String]("src"),
+          size = map.optional("size", "large"),
         )
       )
     }

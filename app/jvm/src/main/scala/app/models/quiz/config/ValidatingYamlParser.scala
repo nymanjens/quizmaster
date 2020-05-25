@@ -1,13 +1,14 @@
 package app.models.quiz.config
 
-import app.models.quiz.config.ValidatingYamlParser.ParsableValue.MapParsableValue.MaybeRequiredMapValue
-import app.models.quiz.config.ValidatingYamlParser.ParseResult.ValidationError
-
-import scala.collection.immutable.Seq
 import hydro.common.GuavaReplacement.Preconditions.checkNotNull
-import org.yaml.snakeyaml.introspector.BeanAccess
+import app.models.quiz.config.ValidatingYamlParser.ParsableValue.MapParsableValue.MaybeRequiredMapValue
+import app.models.quiz.config.ValidatingYamlParser.ParsableValue.MapParsableValue.MaybeRequiredMapValue.Optional
+import app.models.quiz.config.ValidatingYamlParser.ParsableValue.MapParsableValue.MaybeRequiredMapValue.Required
+import app.models.quiz.config.ValidatingYamlParser.ParsableValue.MapParsableValue.StringMap
+import app.models.quiz.config.ValidatingYamlParser.ParseResult.ValidationError
 import org.yaml.snakeyaml.Yaml
 
+import scala.collection.immutable.Seq
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.reflect.ClassTag
@@ -20,26 +21,21 @@ object ValidatingYamlParser {
 
   trait ParsableValue[V] {
     def parse(yamlValue: Any): ParseResult[V]
-    def defaultValue: V
   }
   object ParsableValue {
     sealed abstract class PrimitiveValue[V: ClassTag] extends ParsableValue[V] {
       override final def parse(yamlValue: Any): ParseResult[V] = {
         val clazz = implicitly[ClassTag[V]].runtimeClass
         if (clazz.isInstance(yamlValue)) {
-          ParseResult(yamlValue.asInstanceOf[V])
+          ParseResult.success(yamlValue.asInstanceOf[V])
         } else {
-          ParseResult.withoutPath(
-            defaultValue,
-            validationErrors = Seq(s"Expected ${clazz.getSimpleName} but found $yamlValue"))
+          ParseResult.onlyError(s"Expected ${clazz.getSimpleName} but found $yamlValue")
         }
       }
     }
-    case class IntValue(override val defaultValue: Int = -1) extends PrimitiveValue[Int]
-    case class StringValue(override val defaultValue: String = "") extends PrimitiveValue[String]
-    case class BooleanValue() extends PrimitiveValue[Boolean] {
-      override val defaultValue = false
-    }
+    object IntValue extends PrimitiveValue[Int]
+    object StringValue extends PrimitiveValue[String]
+    object BooleanValue extends PrimitiveValue[Boolean]
 
     case class ListParsableValue[V](itemParsableValue: ParsableValue[V]) extends ParsableValue[Seq[V]] {
       override final def parse(yamlValue: Any): ParseResult[Seq[V]] = {
@@ -57,14 +53,11 @@ object ValidatingYamlParser {
                   parsedValue
               }
             }
-          ParseResult(parsedValuesSeq, validationErrors.toVector)
+          ParseResult(Some(parsedValuesSeq.flatten), validationErrors.toVector)
         } else {
-          ParseResult.withoutPath(
-            defaultValue,
-            validationErrors = Seq(s"Expected a list but found $yamlValue"))
+          ParseResult.onlyError(s"Expected a list but found $yamlValue")
         }
       }
-      override final def defaultValue: Seq[V] = Seq()
     }
     abstract class MapParsableValue[V] extends ParsableValue[V] {
       override final def parse(yamlValue: Any): ParseResult[V] = {
@@ -77,9 +70,11 @@ object ValidatingYamlParser {
           for ((mapKey, mapValue) <- yamlMap) {
             if (supportedKeyValuePairs.contains(mapKey)) {
               supportedKeyValuePairs(mapKey).parsableValue.parse(mapValue) match {
-                case ParseResult(parsedValue, additionalValidationErrors) =>
+                case ParseResult(maybeParsedValue, additionalValidationErrors) =>
                   validationErrors.append(additionalValidationErrors.map(_.prependPath(mapKey + ".")): _*)
-                  mapWithParsedValues.put(mapKey, parsedValue)
+                  for (parsedValue <- maybeParsedValue) {
+                    mapWithParsedValues.put(mapKey, parsedValue)
+                  }
               }
             } else {
               validationErrors.append(ValidationError(s"Unknown field: $mapKey"))
@@ -87,33 +82,52 @@ object ValidatingYamlParser {
           }
 
           supportedKeyValuePairs.collect {
-            case (mapKey, MaybeRequiredMapValue.Required(_,_)) if !yamlMap.contains(mapKey) =>
+            case (mapKey, MaybeRequiredMapValue.Required(_, valueIfInvalid)) if !yamlMap.contains(mapKey) =>
               validationErrors.append(ValidationError(s"Required field: $mapKey"))
+              mapWithParsedValues.put(mapKey, valueIfInvalid)
           }
           supportedKeyValuePairs.collect {
             case (mapKey, mapValue) if !yamlMap.contains(mapKey) =>
-              mapWithParsedValues.put(mapKey, mapValue.parsableValue.defaultValue)
           }
 
-          parseFromParsedMapValues(mapWithParsedValues.toMap) match {
+          parseFromParsedMapValues(
+            StringMap(mapWithParsedValues.toMap, supportedKeyValuePairs)
+          ) match {
             case ParseResult(value, additionalValidationErrors) =>
               validationErrors.append(additionalValidationErrors: _*)
-              ParseResult(value, validationErrors.toVector)
+              ParseResult(value.asInstanceOf[Option[V]], validationErrors.toVector)
           }
         } else {
-          ParseResult.withoutPath(
-            defaultValue,
-            validationErrors = Seq(s"Expected a map but found $yamlValue"))
+          ParseResult.onlyError(s"Expected a map but found $yamlValue")
         }
-      }
-      override final def defaultValue: V = {
-        parseFromParsedMapValues(supportedKeyValuePairs.mapValues(_.parsableValue.defaultValue)).value
       }
 
       val supportedKeyValuePairs: Map[String, MaybeRequiredMapValue]
-      def parseFromParsedMapValues(map: Map[String, Any]): ParseResult[V]
+      def parseFromParsedMapValues(map: StringMap): ParseResult[V]
     }
     object MapParsableValue {
+      case class StringMap(
+          private val delegate: Map[String, Any],
+          private val supportedKeyValuePairs: Map[String, MaybeRequiredMapValue],
+      ) {
+        def required[V](mapKey: String): V = {
+          require(supportedKeyValuePairs(mapKey).isInstanceOf[Required[_]])
+          get[V](mapKey) getOrElse supportedKeyValuePairs(mapKey).asInstanceOf[Required[V]].valueIfInvalid
+        }
+        def optional[V](mapKey: String): Option[V] = {
+          require(supportedKeyValuePairs(mapKey).isInstanceOf[Optional])
+          get(mapKey)
+        }
+        def optional[V](mapKey: String, defaultValue: V): V = {
+          require(supportedKeyValuePairs(mapKey).isInstanceOf[Optional])
+          get[V](mapKey) getOrElse checkNotNull(defaultValue)
+        }
+
+        private def get[V](mapKey: String): Option[V] = {
+          delegate.get(mapKey).asInstanceOf[Option[V]].map(checkNotNull)
+        }
+      }
+
       sealed trait MaybeRequiredMapValue {
         def parsableValue: ParsableValue[_]
       }
@@ -122,8 +136,8 @@ object ValidatingYamlParser {
             extends MaybeRequiredMapValue
         object Required {
           def apply[V](v: ListParsableValue[V]): Required[Seq[V]] = Required(v, valueIfInvalid = Seq())
-          def apply(v: IntValue): Required[Int] = Required(v, valueIfInvalid = 0)
-          def apply(v: StringValue): Required[String] = Required(v, valueIfInvalid = "")
+          def apply(v: IntValue.type): Required[Int] = Required(v, valueIfInvalid = 0)
+          def apply(v: StringValue.type): Required[String] = Required(v, valueIfInvalid = "")
 
         }
         case class Optional(override val parsableValue: ParsableValue[_]) extends MaybeRequiredMapValue
@@ -132,12 +146,15 @@ object ValidatingYamlParser {
   }
 
   case class ParseResult[V](
-      value: V,
+      value: Option[V],
       validationErrors: Seq[ValidationError] = Seq(),
   )
   object ParseResult {
-    def withoutPath[V](value: V, validationErrors: Seq[String] = Seq()): ParseResult[V] = {
-      ParseResult(value, validationErrors.map(e => ValidationError(e)))
+    def onlyError[V](validationError: String): ParseResult[V] = {
+      ParseResult[V](value = None, validationErrors = Seq(ValidationError(validationError)))
+    }
+    def success[V](value: V): ParseResult[V] = {
+      ParseResult(Some(value))
     }
 
     case class ValidationError(error: String, path: String = "") {
