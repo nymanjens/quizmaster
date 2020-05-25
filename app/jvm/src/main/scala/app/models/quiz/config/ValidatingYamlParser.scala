@@ -1,6 +1,6 @@
 package app.models.quiz.config
 
-import app.models.quiz.config.ValidatingYamlParser.ParsableValue.ParsableMapValue.MaybeRequiredMapValue
+import app.models.quiz.config.ValidatingYamlParser.ParsableValue.MapParsableValue.MaybeRequiredMapValue
 import app.models.quiz.config.ValidatingYamlParser.ParseResult.ValidationError
 
 import scala.collection.immutable.Seq
@@ -37,8 +37,36 @@ object ValidatingYamlParser {
     }
     case class IntValue(override val defaultValue: Int = -1) extends PrimitiveValue[Int]
     case class StringValue(override val defaultValue: String = "") extends PrimitiveValue[String]
+    case class BooleanValue() extends PrimitiveValue[Boolean] {
+      override val defaultValue = false
+    }
 
-    abstract class ParsableMapValue[V] extends ParsableValue[V] {
+    case class ListParsableValue[V](itemParsableValue: ParsableValue[V]) extends ParsableValue[Seq[V]] {
+      override final def parse(yamlValue: Any): ParseResult[Seq[V]] = {
+        if (yamlValue.isInstanceOf[java.util.List[_]]) {
+          val yamlList = yamlValue.asInstanceOf[java.util.List[_]].asScala.toVector
+
+          val validationErrors = mutable.Buffer[ValidationError]()
+
+          val parsedValuesSeq =
+            for ((item, index) <- yamlList.zipWithIndex) yield {
+              itemParsableValue.parse(item) match {
+                case ParseResult(parsedValue, additionalValidationErrors) =>
+                  validationErrors.append(
+                    additionalValidationErrors.map(_.prependPath(index.toString + ".")): _*)
+                  parsedValue
+              }
+            }
+          ParseResult(parsedValuesSeq, validationErrors.toVector)
+        } else {
+          ParseResult.withoutPath(
+            defaultValue,
+            validationErrors = Seq(s"Expected a list but found $yamlValue"))
+        }
+      }
+      override final def defaultValue: Seq[V] = Seq()
+    }
+    abstract class MapParsableValue[V] extends ParsableValue[V] {
       override final def parse(yamlValue: Any): ParseResult[V] = {
         if (yamlValue.isInstanceOf[java.util.Map[_, _]]) {
           val yamlMap = yamlValue.asInstanceOf[java.util.Map[String, _]].asScala
@@ -59,7 +87,7 @@ object ValidatingYamlParser {
           }
 
           supportedKeyValuePairs.collect {
-            case (mapKey, MaybeRequiredMapValue.Required(_)) if !yamlMap.contains(mapKey) =>
+            case (mapKey, MaybeRequiredMapValue.Required(_,_)) if !yamlMap.contains(mapKey) =>
               validationErrors.append(ValidationError(s"Required field: $mapKey"))
           }
           supportedKeyValuePairs.collect {
@@ -85,12 +113,19 @@ object ValidatingYamlParser {
       val supportedKeyValuePairs: Map[String, MaybeRequiredMapValue]
       def parseFromParsedMapValues(map: Map[String, Any]): ParseResult[V]
     }
-    object ParsableMapValue {
+    object MapParsableValue {
       sealed trait MaybeRequiredMapValue {
         def parsableValue: ParsableValue[_]
       }
       object MaybeRequiredMapValue {
-        case class Required(override val parsableValue: ParsableValue[_]) extends MaybeRequiredMapValue
+        case class Required[V](override val parsableValue: ParsableValue[V], valueIfInvalid: V)
+            extends MaybeRequiredMapValue
+        object Required {
+          def apply[V](v: ListParsableValue[V]): Required[Seq[V]] = Required(v, valueIfInvalid = Seq())
+          def apply(v: IntValue): Required[Int] = Required(v, valueIfInvalid = 0)
+          def apply(v: StringValue): Required[String] = Required(v, valueIfInvalid = "")
+
+        }
         case class Optional(override val parsableValue: ParsableValue[_]) extends MaybeRequiredMapValue
       }
     }

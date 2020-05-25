@@ -1,4 +1,3 @@
-!!app.models.quiz.config.ParsableQuizConfig
 title: Demo quiz
 author: Jens Nyman
 masterSecret: quiz # Remove this line to allow anyone to access the master controls
@@ -6,8 +5,7 @@ masterSecret: quiz # Remove this line to allow anyone to access the master contr
 rounds:
   - name: Geography
     questions:
-      - !!app.models.quiz.config.ParsableQuizConfig$Question$Single
-        question: What is the capital of France?
+      - question: What is the capital of France?
         answer: Paris
         choices: [Paris, London, Brussels, Berlin]
         image: {src: geography/france.png, size: small}
@@ -17,23 +15,29 @@ rounds:
         maxTimeSeconds: 8
         onlyFirstGainsPoints: true
 
-      - !!app.models.quiz.config.ParsableQuizConfig$Question$Single
-        question: What is the capital of Belgium?
+      - question: What is the capital of Belgium?
         answer: Brussels
         choices: [Paris, London, Brussels, Berlin]
         maxTimeSeconds: 60
 
-      - !!app.models.quiz.config.ParsableQuizConfig$Question$Single
-        question: Who was the country Columbia named after?
+      - question: Who was the country Columbia named after?
         answer: Christoffer Columbus
         maxTimeSeconds: 8
 
   - name: Music round
     questions:
-      - !!app.models.quiz.config.ParsableQuizConfig$Question$Single
-        question: After which season is this track named?
+      - question: After which season is this track named?
         questionDetail: (Royalty Free Music from Bensound)
         answer: Summer
         answerDetail: (By Bensound)
         audioSrc: music_round/bensound-summer.mp3
         maxTimeSeconds: 15
+
+  - name: Double questions round
+    questions:
+      - type: double
+        verbalQuestion: How many sides does a rectangle have?
+        verbalAnswer: 4
+        textualQuestion: How many sides does a triangle have?
+        textualAnswer: 3
+        textualChoices: [3, 4, 5, 6]
