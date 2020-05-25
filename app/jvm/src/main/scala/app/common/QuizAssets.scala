@@ -13,9 +13,12 @@ import hydro.common.ResourceFiles
 @Singleton
 final class QuizAssets @Inject()(
     implicit playConfiguration: play.api.Configuration,
-    quizConfig: QuizConfig,
 ) {
-  validateThatAssetsExist(quizConfig)
+
+  private lazy val configPath: Path = {
+    val configLocation = playConfiguration.get[String]("app.quiz.configYamlFilePath")
+    Paths.get(ResourceFiles.canonicalizePath(configLocation)).getParent
+  }
 
   def quizImage(file: String): Path = {
     assertExists {
@@ -29,12 +32,7 @@ final class QuizAssets @Inject()(
     }
   }
 
-  private lazy val configPath: Path = {
-    val configLocation = playConfiguration.get[String]("app.quiz.configYamlFilePath")
-    Paths.get(ResourceFiles.canonicalizePath(configLocation)).getParent
-  }
-
-  private def validateThatAssetsExist(quizConfig: QuizConfig): Unit = {
+  def validateThatAssetsExist(quizConfig: QuizConfig): Unit = {
     def relativeImagePath(maybeImage: Option[Image]): Option[Path] = {
       maybeImage.map(i => Paths.get("images").resolve(i.src))
     }
