@@ -1,5 +1,6 @@
 package app.models.quiz.config;
 
+import java.nio.file.Paths
 import java.time.Duration
 
 import app.models.quiz.config.QuizConfig.Image
@@ -8,6 +9,8 @@ import app.models.quiz.config.QuizConfig.Round
 
 import scala.collection.immutable.Seq
 import app.models.quiz.config.ValidatingYamlParser.ParseResult
+import com.google.common.io.Files
+import com.google.common.io.MoreFiles
 import com.google.inject.AbstractModule
 import com.google.inject.Guice
 import com.typesafe.config.ConfigFactory
@@ -16,6 +19,8 @@ import org.specs2.runner._
 import org.specs2.mutable.Specification
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.WithApplication
+
+import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class QuizConfigParsableValueTest extends Specification {
@@ -76,7 +81,7 @@ class QuizConfigParsableValueTest extends Specification {
       QuizConfigParsableValue
     )
 
-    requireNoValidationErrors(parseResult)
+    assertNoValidationErrors(parseResult)
 
     parseResult.maybeValue mustEqual Some(
       QuizConfig(
@@ -192,7 +197,7 @@ class QuizConfigParsableValueTest extends Specification {
       QuizConfigParsableValue
     )
 
-    requireNoValidationErrors(parseResult)
+    assertNoValidationErrors(parseResult)
 
     parseResult.maybeValue mustEqual Some(
       QuizConfig(
@@ -205,21 +210,27 @@ class QuizConfigParsableValueTest extends Specification {
   }
 
   "parse demo quiz config without errors" in {
-    val injector =
-      Guice.createInjector(
-        new AbstractModule {
-          override def configure(): Unit = {
-            bind(classOf[play.api.Configuration]).toInstance(
-              play.api.Configuration("app.quiz.configYamlFilePath" -> "../../conf/demo-quiz-config.yml.old"))
-          }
-        },
-        new ConfigModule(exitOnFailure = false),
-      )
+    val knownQuizConfigs =
+      Seq("../../conf/demo-quiz-config.yml.old") ++
+        recursivelyFindYamlFiles("../../../hydro/quizmaster/conf/quiz")
 
-    injector.getInstance(classOf[QuizConfig]) mustNotEqual null
+    for (knownQuizConfig <- knownQuizConfigs) yield {
+      val injector =
+        Guice.createInjector(
+          new AbstractModule {
+            override def configure(): Unit = {
+              bind(classOf[play.api.Configuration])
+                .toInstance(play.api.Configuration("app.quiz.configYamlFilePath" -> knownQuizConfig))
+            }
+          },
+          new ConfigModule(exitOnFailure = false),
+        )
+
+      injector.getInstance(classOf[QuizConfig]) mustNotEqual null
+    }
   }
 
-  private def requireNoValidationErrors(parseResult: ParseResult[_]): Unit = {
+  private def assertNoValidationErrors(parseResult: ParseResult[_]): Unit = {
     require(
       parseResult.validationErrors.isEmpty,
       s"""Found validation errors:
@@ -229,5 +240,12 @@ class QuizConfigParsableValueTest extends Specification {
          |${parseResult.maybeValue}
          |""".stripMargin,
     )
+  }
+
+  private def recursivelyFindYamlFiles(rootPath: String): Seq[String] = {
+    for {
+      path <- MoreFiles.fileTraverser().breadthFirst(Paths.get(rootPath)).asScala.toVector
+      if MoreFiles.getFileExtension(path) == "yml"
+    } yield path.toString
   }
 }
