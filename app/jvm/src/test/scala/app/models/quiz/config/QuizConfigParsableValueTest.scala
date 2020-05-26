@@ -8,9 +8,12 @@ import app.models.quiz.config.QuizConfig.Round
 
 import scala.collection.immutable.Seq
 import app.models.quiz.config.ValidatingYamlParser.ParseResult
+import com.google.inject.Guice
 import org.junit.runner._
 import org.specs2.runner._
 import org.specs2.mutable.Specification
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.WithApplication
 
 @RunWith(classOf[JUnitRunner])
 class QuizConfigParsableValueTest extends Specification {
@@ -181,9 +184,9 @@ class QuizConfigParsableValueTest extends Specification {
   "parse minimal file" in {
     val parseResult = ValidatingYamlParser.parse(
       """
-        |title: Demo quiz
-        |rounds: []
-        |""".stripMargin,
+              |title: Demo quiz
+              |rounds: []
+              |""".stripMargin,
       QuizConfigParsableValue
     )
 
@@ -197,6 +200,15 @@ class QuizConfigParsableValueTest extends Specification {
         rounds = Seq(),
       )
     )
+  }
+
+  "parse demo quiz config without errors" in new WithApplication(
+    new GuiceApplicationBuilder()
+      .configure("app.quiz.configYamlFilePath" -> "conf/demo-quiz-config.yml")
+      .configure("play.i18n.langs" -> Seq("en"))
+      .build()
+  ) {
+    Guice.createInjector(new ConfigModule(exitOnFailure = false)).getInstance(classOf[QuizConfig])
   }
 
   private def requireNoValidationErrors(parseResult: ParseResult[_]): Unit = {
