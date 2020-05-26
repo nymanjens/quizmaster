@@ -55,7 +55,7 @@ final class ConfigModule(exitOnFailure: Boolean = true) extends AbstractModule {
         if (exitOnFailure) {
           System.exit(1)
         }
-        throw e
+        throw new RuntimeException(s"Error when parsing ${configLocation}", e)
     }
   }
 }
