@@ -60,20 +60,31 @@ class QuizConfigParsableValueTest extends Specification {
       QuizConfigParsableValue
     )
 
-    parseResult mustEqual ParseResult(
-      value = Some(
-        QuizConfig(
-          title = Some("Demo quiz"),
-          author = Some("Jens Nyman"),
-          masterSecret = "quiz",
-          rounds = Seq(),
-        )
-      ),
-      validationErrors = Seq(),
+    requireNoValidationErrors(parseResult)
+
+    parseResult.value mustEqual Some(
+      QuizConfig(
+        title = Some("Demo quiz"),
+        author = Some("Jens Nyman"),
+        masterSecret = "quiz",
+        rounds = Seq(),
+      )
     )
   }
 
   "parse minimal file" in {
     1 mustEqual 1
+  }
+
+  private def requireNoValidationErrors(parseResult: ParseResult[_]): Unit = {
+    require(
+      parseResult.validationErrors.isEmpty,
+      s"""Found validation errors:
+         |${parseResult.validationErrors.map(e => s"  - ${e.toErrorString}\n").mkString}
+         |
+         |FYI: The parsed value was:
+         |${parseResult.value}
+         |""".stripMargin,
+    )
   }
 }
