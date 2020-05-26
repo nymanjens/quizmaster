@@ -173,7 +173,7 @@ object ValidatingYamlParser {
 
     case class ValidationError(error: String, path: String = "") {
       def prependPath(pathPrefix: String): ValidationError = {
-        ValidationError(error, path = if (path.nonEmpty) s"$pathPrefix>$path" else pathPrefix)
+        ValidationError(error, path = if (path.nonEmpty) s"$pathPrefix > $path" else pathPrefix)
       }
 
       def toErrorString: String = {
