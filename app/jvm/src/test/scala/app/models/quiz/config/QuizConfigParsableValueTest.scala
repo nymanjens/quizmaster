@@ -209,7 +209,7 @@ class QuizConfigParsableValueTest extends Specification {
     )
   }
 
-  "parse demo quiz config without errors" in {
+  "parse all quiz config files without errors" in {
     val knownQuizConfigs =
       Seq("../../conf/demo-quiz-config.yml.old") ++
         recursivelyFindYamlFiles("../../../hydro/quizmaster/conf/quiz")
