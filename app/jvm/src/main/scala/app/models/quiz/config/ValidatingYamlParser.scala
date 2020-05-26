@@ -160,12 +160,12 @@ object ValidatingYamlParser {
   }
 
   case class ParseResult[V](
-      value: Option[V],
+      maybeValue: Option[V],
       validationErrors: Seq[ValidationError] = Seq(),
   )
   object ParseResult {
     def onlyError[V](validationError: String): ParseResult[V] = {
-      ParseResult[V](value = None, validationErrors = Seq(ValidationError(validationError)))
+      ParseResult[V](maybeValue = None, validationErrors = Seq(ValidationError(validationError)))
     }
     def success[V](value: V): ParseResult[V] = {
       ParseResult(Some(value))

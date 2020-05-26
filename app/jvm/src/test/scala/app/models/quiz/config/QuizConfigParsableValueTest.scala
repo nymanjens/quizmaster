@@ -62,7 +62,7 @@ class QuizConfigParsableValueTest extends Specification {
 
     requireNoValidationErrors(parseResult)
 
-    parseResult.value mustEqual Some(
+    parseResult.maybeValue mustEqual Some(
       QuizConfig(
         title = Some("Demo quiz"),
         author = Some("Jens Nyman"),
@@ -83,7 +83,7 @@ class QuizConfigParsableValueTest extends Specification {
          |${parseResult.validationErrors.map(e => s"  - ${e.toErrorString}\n").mkString}
          |
          |FYI: The parsed value was:
-         |${parseResult.value}
+         |${parseResult.maybeValue}
          |""".stripMargin,
     )
   }
