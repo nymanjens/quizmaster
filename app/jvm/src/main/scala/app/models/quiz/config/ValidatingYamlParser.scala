@@ -84,8 +84,8 @@ object ValidatingYamlParser {
           for ((mapKey, mapValue) <- yamlMap) {
             if (supportedKeyValuePairs.contains(mapKey)) {
               supportedKeyValuePairs(mapKey).parsableValue.parse(mapValue) match {
-                case ParseResult(maybeParsedValue, additionalValidationErrors) =>
-                  validationErrors.append(additionalValidationErrors.map(_.prependPath(mapKey)): _*)
+                case ParseResult(maybeParsedValue, errors) =>
+                  validationErrors.append(errors.map(_.prependPath(mapKey)): _*)
                   for (parsedValue <- maybeParsedValue) {
                     mapWithParsedValues.put(mapKey, parsedValue)
                   }
@@ -104,20 +104,19 @@ object ValidatingYamlParser {
             case (mapKey, mapValue) if !yamlMap.contains(mapKey) =>
           }
 
-          parseFromParsedMapValues(
-            StringMap(mapWithParsedValues.toMap, supportedKeyValuePairs)
-          ) match {
-            case ParseResult(value, additionalValidationErrors) =>
-              validationErrors.append(additionalValidationErrors: _*)
-              ParseResult(value.asInstanceOf[Option[V]], validationErrors.toVector)
-          }
+          val resultValue =
+            parseFromParsedMapValues(StringMap(mapWithParsedValues.toMap, supportedKeyValuePairs))
+
+          validationErrors.append(additionalValidationErrors(resultValue).map(e => ValidationError(e)): _*)
+
+          ParseResult(Some(resultValue), validationErrors.toVector)
         } else {
           ParseResult.onlyError(s"Expected a map but found $yamlValue")
         }
       }
 
       val supportedKeyValuePairs: Map[String, MaybeRequiredMapValue]
-      def parseFromParsedMapValues(map: StringMap): ParseResult[V]
+      def parseFromParsedMapValues(map: StringMap): V
       def additionalValidationErrors(parsedValue: V): Seq[String] = Seq()
     }
     object MapParsableValue {
