@@ -15,8 +15,18 @@ import scala.reflect.ClassTag
 
 object ValidatingYamlParser {
 
-  def parse[V](fileContent: String, parsableValue: ParsableValue[V]): ParseResult[V] = {
-    parsableValue.parse(new Yaml().load(fileContent))
+  def parse[V](fileContent: String, parsableValue: ParsableValue[V]): V = {
+    val result = parsableValue.parse(new Yaml().load(fileContent))
+
+    require(
+      result.validationErrors.isEmpty,
+      s"""Found validation errors:
+         |
+         |${result.validationErrors.map(e => s"  - ${e.toErrorString}\n").mkString}
+         |""".stripMargin
+    )
+
+    result.maybeValue.get
   }
 
   trait ParsableValue[V] {
