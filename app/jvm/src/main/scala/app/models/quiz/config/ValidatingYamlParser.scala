@@ -23,19 +23,43 @@ object ValidatingYamlParser {
     def parse(yamlValue: Any): ParseResult[V]
   }
   object ParsableValue {
-    sealed abstract class PrimitiveValue[V: ClassTag] extends ParsableValue[V] {
-      override final def parse(yamlValue: Any): ParseResult[V] = {
-        val clazz = implicitly[ClassTag[V]].runtimeClass
-        if (clazz.isInstance(yamlValue)) {
-          ParseResult.success(yamlValue.asInstanceOf[V])
-        } else {
-          ParseResult.onlyError(s"Expected ${clazz.getSimpleName} but found $yamlValue")
+    private def parsePrimitiveValue[V: ClassTag](yamlValue: Any): ParseResult[V] = {
+      val clazz = implicitly[ClassTag[V]].runtimeClass
+      if (clazz.isInstance(yamlValue)) {
+        ParseResult.success(yamlValue.asInstanceOf[V])
+      } else {
+        ParseResult.onlyError(s"Expected ${clazz.getSimpleName} but found $yamlValue")
+      }
+    }
+
+    object IntValue extends ParsableValue[Int] {
+      override def parse(yamlValue: Any) = {
+        yamlValue match {
+          case v: java.lang.Integer => ParseResult.success(v.toInt)
+          case v                    => parsePrimitiveValue[Int](v)
         }
       }
     }
-    object IntValue extends PrimitiveValue[Int]
-    object StringValue extends PrimitiveValue[String]
-    object BooleanValue extends PrimitiveValue[Boolean]
+    object StringValue extends ParsableValue[String] {
+      override def parse(yamlValue: Any) = {
+        yamlValue match {
+          case v: java.lang.Integer => ParseResult.success(v.toString)
+          case v: java.lang.Long    => ParseResult.success(v.toString)
+          case v: java.lang.Boolean => ParseResult.success(v.toString)
+          case v                    => parsePrimitiveValue[String](v)
+        }
+      }
+    }
+    object BooleanValue extends ParsableValue[Boolean] {
+      override def parse(yamlValue: Any) = {
+        yamlValue match {
+          case "true" | "True" | "TRUE" | "yes" | "Yes"  => ParseResult.success(true)
+          case "false" | "False" | "FALSE" | "no" | "No" => ParseResult.success(false)
+          case v: java.lang.Boolean                      => ParseResult.success[Boolean](v)
+          case v                                         => parsePrimitiveValue[Boolean](v)
+        }
+      }
+    }
 
     class ListParsableValue[V](itemParsableValue: ParsableValue[V], errorPathString: V => String)
         extends ParsableValue[Seq[V]] {
