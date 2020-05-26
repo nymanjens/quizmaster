@@ -188,9 +188,9 @@ class QuizConfigParsableValueTest extends Specification {
   "parse minimal file" in {
     val quizConfig = ValidatingYamlParser.parse(
       """
-              |title: Demo quiz
-              |rounds: []
-              |""".stripMargin,
+         |title: Demo quiz
+         |rounds: []
+         |""".stripMargin,
       QuizConfigParsableValue
     )
 

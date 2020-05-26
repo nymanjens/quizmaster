@@ -28,6 +28,10 @@ final class ConfigModule(exitOnFailure: Boolean = true) extends AbstractModule {
     var configLocation = playConfiguration.get[String]("app.quiz.configYamlFilePath")
 
     try {
+      if (!Files.exists(Paths.get(configLocation + ".old"))) {
+        return parseOldConfigFile(configLocation)(quizAssets)
+      }
+
       // Canoicalization may throw an error if something goes wrong, so has to be inside the try-catch
       configLocation = ResourceFiles.canonicalizePath(configLocation)
 
