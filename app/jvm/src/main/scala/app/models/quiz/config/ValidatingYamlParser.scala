@@ -37,7 +37,8 @@ object ValidatingYamlParser {
     object StringValue extends PrimitiveValue[String]
     object BooleanValue extends PrimitiveValue[Boolean]
 
-    case class ListParsableValue[V](itemParsableValue: ParsableValue[V]) extends ParsableValue[Seq[V]] {
+    class ListParsableValue[V](itemParsableValue: ParsableValue[V], errorPathString: V => String)
+        extends ParsableValue[Seq[V]] {
       override final def parse(yamlValue: Any): ParseResult[Seq[V]] = {
         if (yamlValue.isInstanceOf[java.util.List[_]]) {
           val yamlList = yamlValue.asInstanceOf[java.util.List[_]].asScala.toVector
@@ -48,8 +49,15 @@ object ValidatingYamlParser {
             for ((item, index) <- yamlList.zipWithIndex) yield {
               itemParsableValue.parse(item) match {
                 case ParseResult(parsedValue, additionalValidationErrors) =>
-                  validationErrors.append(
-                    additionalValidationErrors.map(_.prependPath(index.toString + ".")): _*)
+                  val pathPrefix = parsedValue match {
+                    case Some(v) =>
+                      errorPathString(v) match {
+                        case s if s.length < 20 => s
+                        case s                  => s.take(17).trim + "…"
+                      }
+                    case None => index.toString
+                  }
+                  validationErrors.append(additionalValidationErrors.map(_.prependPath(pathPrefix)): _*)
                   parsedValue
               }
             }
@@ -57,6 +65,12 @@ object ValidatingYamlParser {
         } else {
           ParseResult.onlyError(s"Expected a list but found $yamlValue")
         }
+      }
+    }
+    object ListParsableValue {
+      def apply[V](itemParsableValue: ParsableValue[V])(
+          errorPathString: V => String): ListParsableValue[V] = {
+        new ListParsableValue[V](itemParsableValue, errorPathString)
       }
     }
     abstract class MapParsableValue[V] extends ParsableValue[V] {
@@ -71,7 +85,7 @@ object ValidatingYamlParser {
             if (supportedKeyValuePairs.contains(mapKey)) {
               supportedKeyValuePairs(mapKey).parsableValue.parse(mapValue) match {
                 case ParseResult(maybeParsedValue, additionalValidationErrors) =>
-                  validationErrors.append(additionalValidationErrors.map(_.prependPath(mapKey + ".")): _*)
+                  validationErrors.append(additionalValidationErrors.map(_.prependPath(mapKey)): _*)
                   for (parsedValue <- maybeParsedValue) {
                     mapWithParsedValues.put(mapKey, parsedValue)
                   }
@@ -159,7 +173,7 @@ object ValidatingYamlParser {
 
     case class ValidationError(error: String, path: String = "") {
       def prependPath(pathPrefix: String): ValidationError = {
-        ValidationError(error, path = pathPrefix + path)
+        ValidationError(error, path = if (path.nonEmpty) s"$pathPrefix>$path" else pathPrefix)
       }
 
       def toErrorString: String = {

@@ -21,7 +21,7 @@ object QuizConfigParsableValue extends MapParsableValue[QuizConfig] {
     "title" -> Optional(StringValue),
     "author" -> Optional(StringValue),
     "masterSecret" -> Optional(StringValue),
-    "rounds" -> Required(ListParsableValue(RoundValue)),
+    "rounds" -> Required(ListParsableValue(RoundValue)(_.name)),
   )
 
   override def parseFromParsedMapValues(map: StringMap) = {
@@ -38,7 +38,7 @@ object QuizConfigParsableValue extends MapParsableValue[QuizConfig] {
   private object RoundValue extends MapParsableValue[Round] {
     override val supportedKeyValuePairs = Map(
       "name" -> Required(StringValue),
-      "questions" -> Required(ListParsableValue(QuestionValue)),
+      "questions" -> Required(ListParsableValue(QuestionValue)(_.textualQuestion)),
       "expectedTimeMinutes" -> Optional(IntValue),
     )
     override def parseFromParsedMapValues(map: StringMap) = {
@@ -57,7 +57,7 @@ object QuizConfigParsableValue extends MapParsableValue[QuizConfig] {
       "type" -> Optional(StringValue),
       "question" -> Required(StringValue),
       "questionDetail" -> Optional(StringValue),
-      "choices" -> Optional(ListParsableValue(StringValue)),
+      "choices" -> Optional(ListParsableValue(StringValue)(s => s)),
       "answer" -> Required(StringValue),
       "answerDetail" -> Optional(StringValue),
       "answerImage" -> Optional(ImageValue),
