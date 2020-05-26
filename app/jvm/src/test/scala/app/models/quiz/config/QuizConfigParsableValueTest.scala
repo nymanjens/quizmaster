@@ -49,7 +49,7 @@ class QuizConfigParsableValueTest extends Specification {
         |
         |  - name: Double questions round
         |    questions:
-        |      - type: double
+        |      - questionType: double
         |        verbalQuestion: How many sides does a rectangle have?
         |        verbalAnswer: 4
         |        textualQuestion: How many sides does a triangle have?
