@@ -206,7 +206,7 @@ class QuizConfigParsableValueTest extends Specification {
   {
     val knownQuizConfigs =
       Seq("../../conf/demo-quiz-config.yml") ++
-        recursivelyFindYamlFiles("../../../hydro/quizmaster/conf/quiz")
+        recursivelyFindYamlFiles("../../../hydro/quizmaster")
 
     for (knownQuizConfig <- knownQuizConfigs) yield {
       s"Testing known config file: $knownQuizConfig" in {
@@ -228,9 +228,10 @@ class QuizConfigParsableValueTest extends Specification {
 
   private def recursivelyFindYamlFiles(rootPath: String): Seq[String] = {
     for {
-      path <- MoreFiles.fileTraverser().breadthFirst(Paths.get(rootPath)).asScala.toVector
+      path <- MoreFiles.fileTraverser().depthFirstPreOrder(Paths.get(rootPath)).asScala.toVector
       if MoreFiles.getFileExtension(path) == "yml"
       if !(path.toString contains "/0_")
+      if !(path.toString contains "/export/")
     } yield path.toString
   }
 }
