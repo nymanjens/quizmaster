@@ -8,7 +8,9 @@ import app.models.quiz.config.QuizConfig.Round
 
 import scala.collection.immutable.Seq
 import app.models.quiz.config.ValidatingYamlParser.ParseResult
+import com.google.inject.AbstractModule
 import com.google.inject.Guice
+import com.typesafe.config.ConfigFactory
 import org.junit.runner._
 import org.specs2.runner._
 import org.specs2.mutable.Specification
@@ -202,13 +204,19 @@ class QuizConfigParsableValueTest extends Specification {
     )
   }
 
-  "parse demo quiz config without errors" in new WithApplication(
-    new GuiceApplicationBuilder()
-      .configure("app.quiz.configYamlFilePath" -> "conf/demo-quiz-config.yml")
-      .configure("play.i18n.langs" -> Seq("en"))
-      .build()
-  ) {
-    Guice.createInjector(new ConfigModule(exitOnFailure = false)).getInstance(classOf[QuizConfig])
+  "parse demo quiz config without errors" in {
+    val injector =
+      Guice.createInjector(
+        new AbstractModule {
+          override def configure(): Unit = {
+            bind(classOf[play.api.Configuration]).toInstance(
+              play.api.Configuration("app.quiz.configYamlFilePath" -> "../../conf/demo-quiz-config.yml.old"))
+          }
+        },
+        new ConfigModule(exitOnFailure = false),
+      )
+
+    injector.getInstance(classOf[QuizConfig]) mustNotEqual null
   }
 
   private def requireNoValidationErrors(parseResult: ParseResult[_]): Unit = {
