@@ -46,7 +46,7 @@ object QuizConfigParsableValue extends MapParsableValue[QuizConfig] {
       Round(
         name = map.required[String]("name"),
         questions = map.required[Seq[Question]]("questions"),
-        expectedTime = map.optional("expectedTimeMinutes").map(Duration.ofMinutes),
+        expectedTime = map.optional[Int]("expectedTimeMinutes").map(t => Duration.ofMinutes(t.toLong)),
       )
     }
   }

@@ -24,14 +24,18 @@ class QuizConfigParsableValueTest extends Specification {
         |
         |rounds:
         |  - name: Geography
+        |    expectedTimeMinutes: 2
         |    questions:
         |      - question: What is the capital of France?
         |        answer: Paris
         |        choices: [Paris, London, Brussels, Berlin]
         |        image: {src: geography/france.png, size: small}
         |        answerImage: {src: geography/france-answer.png, size: large}
+        |        masterNotes: This is a very simple question
         |        answerDetail: Image released under Creative Commons by Destination2 (www.destination2.co.uk)
         |        pointsToGain: 2
+        |        pointsToGainOnFirstAnswer: 4
+        |        pointsToGainOnWrongAnswer: -1
         |        maxTimeSeconds: 8
         |        onlyFirstGainsPoints: true
         |
@@ -43,6 +47,7 @@ class QuizConfigParsableValueTest extends Specification {
         |      - question: Who was the country Columbia named after?
         |        answer: Christoffer Columbus
         |        maxTimeSeconds: 8
+        |        showSingleAnswerButtonToTeams: true
         |
         |  - name: Music round
         |    questions:
@@ -76,6 +81,7 @@ class QuizConfigParsableValueTest extends Specification {
         rounds = Seq(
           Round(
             name = "Geography",
+            expectedTime = Some(Duration.ofMinutes(2)),
             questions = Seq(
               Question.Single(
                 question = "What is the capital of France?",
@@ -85,12 +91,12 @@ class QuizConfigParsableValueTest extends Specification {
                 answerDetail =
                   Some("Image released under Creative Commons by Destination2 (www.destination2.co.uk)"),
                 answerImage = Some(Image("geography/france-answer.png", "large")),
-                masterNotes = None,
+                masterNotes = Some("This is a very simple question"),
                 image = Some(Image("geography/france.png", "small")),
                 audioSrc = None,
                 pointsToGain = 2,
-                pointsToGainOnFirstAnswer = 2,
-                pointsToGainOnWrongAnswer = 0,
+                pointsToGainOnFirstAnswer = 4,
+                pointsToGainOnWrongAnswer = -1,
                 maxTime = Duration.ofSeconds(8),
                 onlyFirstGainsPoints = true,
                 showSingleAnswerButtonToTeams = false,
@@ -127,13 +133,13 @@ class QuizConfigParsableValueTest extends Specification {
                 pointsToGainOnWrongAnswer = 0,
                 maxTime = Duration.ofSeconds(8),
                 onlyFirstGainsPoints = false,
-                showSingleAnswerButtonToTeams = false,
+                showSingleAnswerButtonToTeams = true,
               )
             ),
-            expectedTime = None
           ),
           Round(
             name = "Music round",
+            expectedTime = None,
             questions = Seq(
               Question.Single(
                 question = "After which season is this track named?",
@@ -153,10 +159,10 @@ class QuizConfigParsableValueTest extends Specification {
                 showSingleAnswerButtonToTeams = false,
               ),
             ),
-            expectedTime = None
           ),
           Round(
             name = "Double questions round",
+            expectedTime = None,
             questions = Seq(
               Question.Double(
                 verbalQuestion = "How many sides does a rectangle have?",
@@ -167,14 +173,30 @@ class QuizConfigParsableValueTest extends Specification {
                 pointsToGain = 2,
               ),
             ),
-            expectedTime = None,
           )
         ),
       ))
   }
 
   "parse minimal file" in {
-    1 mustEqual 1
+    val parseResult = ValidatingYamlParser.parse(
+      """
+        |title: Demo quiz
+        |rounds: []
+        |""".stripMargin,
+      QuizConfigParsableValue
+    )
+
+    requireNoValidationErrors(parseResult)
+
+    parseResult.maybeValue mustEqual Some(
+      QuizConfig(
+        title = Some("Demo quiz"),
+        author = None,
+        masterSecret = "*",
+        rounds = Seq(),
+      )
+    )
   }
 
   private def requireNoValidationErrors(parseResult: ParseResult[_]): Unit = {
