@@ -109,6 +109,7 @@ object QuizConfigParsableValue extends MapParsableValue[QuizConfig] {
         showSingleAnswerButtonToTeams = map.optional("showSingleAnswerButtonToTeams", false),
       )
     }
+    override def additionalValidationErrors(v: Question.Single) = v.validationErrors()
   }
 
   private object DoubleQuestionValue extends MapParsableValue[Question.Double] {
@@ -130,6 +131,7 @@ object QuizConfigParsableValue extends MapParsableValue[QuizConfig] {
         pointsToGain = map.optional("pointsToGain", 2),
       )
     }
+    override def additionalValidationErrors(v: Question.Double) = v.validationErrors()
   }
 
   private object ImageValue extends MapParsableValue[Image] {
@@ -143,5 +145,6 @@ object QuizConfigParsableValue extends MapParsableValue[QuizConfig] {
         size = map.optional("size", "large"),
       )
     }
+    override def additionalValidationErrors(v: Image) = v.validationErrors()
   }
 }

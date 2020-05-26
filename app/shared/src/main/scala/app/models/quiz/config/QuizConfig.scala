@@ -1,10 +1,13 @@
 package app.models.quiz.config
 
+import scala.collection.immutable.Seq
 import app.models.quiz.config.QuizConfig.Round
 import java.time.Duration
 
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.Submission.SubmissionValue
+import hydro.common.CollectionUtils
+import hydro.common.CollectionUtils.conditionalOption
 
 case class QuizConfig(
     rounds: Seq[Round],
@@ -78,11 +81,17 @@ object QuizConfig {
         override val onlyFirstGainsPoints: Boolean,
         override val showSingleAnswerButtonToTeams: Boolean,
     ) extends Question {
-      if (choices.isDefined) {
-        require(choices.get.size == 4, s"There should be 4 choices, but got ${choices.get}")
-        require(
-          choices.get contains answer,
-          s"The answer should be one of the choices: <<$answer>> not in <<${choices.get}>>")
+      def validationErrors(): Seq[String] = {
+        choices match {
+          case Some(choicesSeq) =>
+            Seq(
+              conditionalOption(choicesSeq.size != 4, s"Expected 4 choices, but got $choicesSeq"),
+              conditionalOption(
+                !(choicesSeq contains answer),
+                s"The answer should be one of the choices: <<$answer>> not in <<$choicesSeq>>"),
+            ).flatten
+          case None => Seq()
+        }
       }
 
       /**
@@ -146,10 +155,14 @@ object QuizConfig {
         textualChoices: Seq[String],
         override val pointsToGain: Int,
     ) extends Question {
-      require(textualChoices.size == 4, s"Expected 4 choices, but got ${textualChoices}")
-      require(
-        textualChoices contains textualAnswer,
-        s"The answer should be one of the choices: <<$textualAnswer>> not in <<${textualChoices}>>")
+      def validationErrors(): Seq[String] = {
+        Seq(
+          conditionalOption(textualChoices.size != 4, s"Expected 4 choices, but got ${textualChoices}"),
+          conditionalOption(
+            !(textualChoices contains textualAnswer),
+            s"The answer should be one of the choices: <<$textualAnswer>> not in <<${textualChoices}>>"),
+        ).flatten
+      }
 
       override def pointsToGainOnFirstAnswer: Int = pointsToGain
       override def pointsToGainOnWrongAnswer: Int = 0
@@ -201,6 +214,12 @@ object QuizConfig {
       src: String,
       size: String,
   ) {
-    require(Seq("large", "small") contains size)
+    def validationErrors(): Seq[String] = {
+      Seq(
+        conditionalOption(
+          !(Seq("large", "small") contains size),
+          s"size: '$size' should be either 'large' or 'small'"),
+      ).flatten
+    }
   }
 }

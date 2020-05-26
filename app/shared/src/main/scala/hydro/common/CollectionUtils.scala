@@ -32,6 +32,14 @@ object CollectionUtils {
     }
   }
 
+  def conditionalOption[V](condition: Boolean, value: => V): Option[V] = {
+    if (condition) {
+      Some(value)
+    } else {
+      None
+    }
+  }
+
   /**
     * Converts the given values to a bimap that associates an integer with each value.
     *
