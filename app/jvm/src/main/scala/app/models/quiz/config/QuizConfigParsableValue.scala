@@ -75,7 +75,7 @@ object QuizConfigParsableValue extends MapParsableValue[QuizConfig] {
     }
   }
 
-  private object StandardQuestionValue extends MapParsableValue[Question] {
+  private object StandardQuestionValue extends MapParsableValue[Question.Single] {
     override val supportedKeyValuePairs = Map(
       "question" -> Required(StringValue),
       "questionDetail" -> Optional(StringValue),
@@ -118,7 +118,7 @@ object QuizConfigParsableValue extends MapParsableValue[QuizConfig] {
   }
 
 
-  private object DoubleQuestionValue extends MapParsableValue[Question] {
+  private object DoubleQuestionValue extends MapParsableValue[Question.Double] {
     override val supportedKeyValuePairs = Map(
       "verbalQuestion" -> Required(StringValue),
       "verbalAnswer" -> Required(StringValue),

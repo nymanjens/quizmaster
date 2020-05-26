@@ -118,6 +118,7 @@ object ValidatingYamlParser {
 
       val supportedKeyValuePairs: Map[String, MaybeRequiredMapValue]
       def parseFromParsedMapValues(map: StringMap): ParseResult[V]
+      def additionalValidationErrors(parsedValue: V): Seq[String] = Seq()
     }
     object MapParsableValue {
       case class StringMap(
@@ -159,7 +160,7 @@ object ValidatingYamlParser {
     }
   }
 
-  case class ParseResult[V](
+  case class ParseResult[+V](
       maybeValue: Option[V],
       validationErrors: Seq[ValidationError] = Seq(),
   )
