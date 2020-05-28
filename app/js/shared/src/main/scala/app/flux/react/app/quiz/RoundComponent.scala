@@ -43,7 +43,7 @@ final class RoundComponent(
           )
         }
       },
-      <<.ifThen(quizState.quizIsBeingSetUp) {
+      <<.ifThen(quizState.quizIsBeingSetUp && showMasterData) {
         <.div(
           ^.className := "round-help",
           i18n("app.first-round-help"),
