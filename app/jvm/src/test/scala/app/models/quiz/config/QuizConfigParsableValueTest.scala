@@ -241,7 +241,7 @@ class QuizConfigParsableValueTest extends Specification {
       path <- MoreFiles.fileTraverser().depthFirstPreOrder(Paths.get(rootPath)).asScala.toVector
       if MoreFiles.getFileExtension(path) == "yml"
       if !(path.toString contains "/0_")
-      if !(path.toString contains "/export/")
+      if !(path.toString contains "/export")
     } yield path.toString
   }
 }

@@ -29,10 +29,6 @@ final class ConfigModule(exitOnFailure: Boolean = true) extends AbstractModule {
     var configLocation = playConfiguration.get[String]("app.quiz.configYamlFilePath")
 
     try {
-      if (!Files.exists(Paths.get(configLocation + ".old"))) {
-        return parseOldConfigFile(configLocation)(quizAssets)
-      }
-
       // Canoicalization may throw an error if something goes wrong, so has to be inside the try-catch
       configLocation = ResourceFiles.canonicalizePath(configLocation)
 
@@ -43,45 +39,7 @@ final class ConfigModule(exitOnFailure: Boolean = true) extends AbstractModule {
       }
 
       // parse data
-      val quizConfig = ValidatingYamlParser.parse(stringData, quizConfigParsableValue)
-
-      val oldConfigFile = parseOldConfigFile(filePath = configLocation + ".old")(quizAssets)
-      require(oldConfigFile == quizConfig, s"$oldConfigFile\n\n!=\n\n$quizConfig")
-
-      quizConfig
-    } catch {
-      case e: Throwable =>
-        val stackTrace = Throwables.getStackTraceAsString(e)
-        Logger.error(s"Error when parsing ${configLocation}:\n\n$stackTrace")
-        // Make error output less noisy by shutting down early (instead of 20+ Guice exceptions while injecting QuizConfig)
-        if (exitOnFailure) {
-          System.exit(1)
-        }
-        throw new RuntimeException(s"Error when parsing ${configLocation}", e)
-    }
-  }
-
-  private def parseOldConfigFile(filePath: String)(implicit quizAssets: QuizAssets): QuizConfig = {
-    var configLocation = filePath
-
-    try {
-      // Canoicalization may throw an error if something goes wrong, so has to be inside the try-catch
-      configLocation = ResourceFiles.canonicalizePath(configLocation)
-
-      // get data
-      val stringData = {
-        require(Files.exists(Paths.get(configLocation)), s"Could not find $configLocation as file")
-        scala.io.Source.fromFile(configLocation).mkString
-      }
-
-      // parse data
-      val constr = new CustomClassLoaderConstructor(getClass.getClassLoader)
-      val yaml = new Yaml(constr)
-      yaml.setBeanAccess(BeanAccess.FIELD)
-      val configData = yaml.load(stringData).asInstanceOf[ParsableQuizConfig]
-
-      // convert to parsed config
-      configData.parse
+      ValidatingYamlParser.parse(stringData, quizConfigParsableValue)
     } catch {
       case e: Throwable =>
         val stackTrace = Throwables.getStackTraceAsString(e)
