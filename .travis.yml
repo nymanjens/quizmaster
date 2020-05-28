@@ -29,3 +29,7 @@ cache:
     - $HOME/.sbt/launchers
     - $HOME/.ivy2/cache
     - "node_modules"
+
+notifications:
+  email:
+    on_success: never
