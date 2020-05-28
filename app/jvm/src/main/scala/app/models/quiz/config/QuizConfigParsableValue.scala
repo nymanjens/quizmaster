@@ -2,6 +2,8 @@ package app.models.quiz.config
 
 import java.time.Duration
 
+import app.common.QuizAssets
+
 import scala.collection.JavaConverters._
 import app.models.quiz.config.QuizConfig.Image
 import app.models.quiz.config.QuizConfig.Question
@@ -16,10 +18,13 @@ import app.models.quiz.config.ValidatingYamlParser.ParsableValue.MapParsableValu
 import app.models.quiz.config.ValidatingYamlParser.ParsableValue.MapParsableValue.StringMap
 import app.models.quiz.config.ValidatingYamlParser.ParsableValue.StringValue
 import app.models.quiz.config.ValidatingYamlParser.ParseResult
+import com.google.inject.Inject
 
 import scala.collection.immutable.Seq
 
-object QuizConfigParsableValue extends MapParsableValue[QuizConfig] {
+class QuizConfigParsableValue @Inject()(
+    quizAssets: QuizAssets,
+) extends MapParsableValue[QuizConfig] {
   override val supportedKeyValuePairs = Map(
     "title" -> Optional(StringValue),
     "author" -> Optional(StringValue),

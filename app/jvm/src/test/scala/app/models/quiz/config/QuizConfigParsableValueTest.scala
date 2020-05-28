@@ -13,6 +13,7 @@ import com.google.common.io.Files
 import com.google.common.io.MoreFiles
 import com.google.inject.AbstractModule
 import com.google.inject.Guice
+import com.google.inject.Module
 import com.typesafe.config.ConfigFactory
 import org.junit.runner._
 import org.specs2.runner._
@@ -78,7 +79,7 @@ class QuizConfigParsableValueTest extends Specification {
         |        textualChoices: [3, 4, 5, 6]
         |
         |""".stripMargin,
-      QuizConfigParsableValue
+      createQuizConfigParsableValue("../../conf/demo-quiz-config.yml")
     )
 
     quizConfig mustEqual QuizConfig(
@@ -191,7 +192,7 @@ class QuizConfigParsableValueTest extends Specification {
          |title: Demo quiz
          |rounds: []
          |""".stripMargin,
-      QuizConfigParsableValue
+      createQuizConfigParsableValue("../../conf/demo-quiz-config.yml")
     )
 
     quizConfig mustEqual QuizConfig(
@@ -212,16 +213,25 @@ class QuizConfigParsableValueTest extends Specification {
       s"Testing known config file: $knownQuizConfig" in {
         val injector =
           Guice.createInjector(
-            new AbstractModule {
-              override def configure(): Unit = {
-                bind(classOf[play.api.Configuration])
-                  .toInstance(play.api.Configuration("app.quiz.configYamlFilePath" -> knownQuizConfig))
-              }
-            },
+            fakeConfigModule(knownQuizConfig),
             new ConfigModule(exitOnFailure = false),
           )
 
         injector.getInstance(classOf[QuizConfig]) mustNotEqual null
+      }
+    }
+  }
+
+  private def createQuizConfigParsableValue(configYamlFilePath: String): QuizConfigParsableValue = {
+    val injector = Guice.createInjector(fakeConfigModule(configYamlFilePath))
+    injector.getInstance(classOf[QuizConfigParsableValue])
+  }
+
+  private def fakeConfigModule(configYamlFilePath: String): Module = {
+    new AbstractModule {
+      override def configure(): Unit = {
+        bind(classOf[play.api.Configuration])
+          .toInstance(play.api.Configuration("app.quiz.configYamlFilePath" -> configYamlFilePath))
       }
     }
   }

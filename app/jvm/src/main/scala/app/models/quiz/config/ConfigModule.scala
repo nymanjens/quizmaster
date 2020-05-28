@@ -24,6 +24,7 @@ final class ConfigModule(exitOnFailure: Boolean = true) extends AbstractModule {
   private[config] def config(
       playConfiguration: play.api.Configuration,
       quizAssets: QuizAssets,
+      quizConfigParsableValue: QuizConfigParsableValue,
   ): QuizConfig = {
     var configLocation = playConfiguration.get[String]("app.quiz.configYamlFilePath")
 
@@ -42,7 +43,7 @@ final class ConfigModule(exitOnFailure: Boolean = true) extends AbstractModule {
       }
 
       // parse data
-      val quizConfig = ValidatingYamlParser.parse(stringData, QuizConfigParsableValue)
+      val quizConfig = ValidatingYamlParser.parse(stringData, quizConfigParsableValue)
 
       val oldConfigFile = parseOldConfigFile(filePath = configLocation + ".old")(quizAssets)
       require(oldConfigFile == quizConfig, s"$oldConfigFile\n\n!=\n\n$quizConfig")
