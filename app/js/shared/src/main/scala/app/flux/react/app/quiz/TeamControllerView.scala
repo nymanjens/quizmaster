@@ -88,7 +88,7 @@ final class TeamControllerView(
       override def render(props: Props, state: State): VdomElement = logExceptions {
         <.form(
           Bootstrap.FormGroup(
-            <.label(i18n("app.team-name")),
+            <.label(i18n("app.enter-team-name")),
             <.div(
               TextInput(
                 ref = teamNameInputRef,
