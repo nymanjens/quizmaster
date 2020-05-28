@@ -128,7 +128,7 @@ final class Layout(
         question <- round.questions
       } {
         question match {
-          case single: Question.Single =>
+          case single: Question.Standard =>
             for (image <- Seq() ++ single.image ++ single.answerImage) {
               val htmlImage = new HtmlImage()
               htmlImage.asInstanceOf[js.Dynamic].src = s"/quizimages/${image.src}"

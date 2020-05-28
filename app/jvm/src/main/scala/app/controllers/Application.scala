@@ -110,7 +110,7 @@ final class Application @Inject()(
       val maxMinutes = {
         val maybeZeroMinutes = questions
           .map(_ match {
-            case q: Question.Single =>
+            case q: Question.Standard =>
               if (q.maxTime > infiniteDurationThreshold) Duration.ofSeconds(30) else q.maxTime
             case _: Question.Double => Duration.ofSeconds(20)
           })
@@ -170,7 +170,7 @@ final class Application @Inject()(
       for (q <- round.questions) {
         val (textualQuestion, textualAnswer) =
           q match {
-            case question: Question.Single => (question.question, question.answer)
+            case question: Question.Standard => (question.question, question.answer)
             case question: Question.Double => (question.textualQuestion, question.textualAnswer)
           }
         val maxTime =

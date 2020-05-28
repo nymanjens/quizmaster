@@ -91,7 +91,7 @@ class QuizConfigParsableValueTest extends Specification {
           name = "Geography",
           expectedTime = Some(Duration.ofMinutes(2)),
           questions = Seq(
-            Question.Single(
+            Question.Standard(
               question = "What is the capital of France?",
               questionDetail = None,
               choices = Some(Seq("Paris", "London", "Brussels", "Berlin")),
@@ -109,7 +109,7 @@ class QuizConfigParsableValueTest extends Specification {
               onlyFirstGainsPoints = true,
               showSingleAnswerButtonToTeams = false,
             ),
-            Question.Single(
+            Question.Standard(
               question = "What is the capital of Belgium?",
               questionDetail = None,
               choices = Some(Seq("Paris", "London", "Brussels", "Berlin")),
@@ -126,7 +126,7 @@ class QuizConfigParsableValueTest extends Specification {
               onlyFirstGainsPoints = false,
               showSingleAnswerButtonToTeams = false,
             ),
-            Question.Single(
+            Question.Standard(
               question = "Who was the country Columbia named after?",
               questionDetail = None,
               choices = None,
@@ -149,7 +149,7 @@ class QuizConfigParsableValueTest extends Specification {
           name = "Music round",
           expectedTime = None,
           questions = Seq(
-            Question.Single(
+            Question.Standard(
               question = "After which season is this track named?",
               questionDetail = Some("(Royalty Free Music from Bensound)"),
               choices = None,

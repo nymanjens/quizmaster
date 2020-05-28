@@ -76,7 +76,7 @@ class QuizConfigParsableValue @Inject()(
     }
   }
 
-  private object StandardQuestionValue extends MapParsableValue[Question.Single] {
+  private object StandardQuestionValue extends MapParsableValue[Question.Standard] {
     override val supportedKeyValuePairs = Map(
       "question" -> Required(StringValue),
       "questionDetail" -> Optional(StringValue),
@@ -95,7 +95,7 @@ class QuizConfigParsableValue @Inject()(
       "showSingleAnswerButtonToTeams" -> Optional(BooleanValue),
     )
     override def parseFromParsedMapValues(map: StringMap) = {
-      Question.Single(
+      Question.Standard(
         question = map.required[String]("question"),
         questionDetail = map.optional("questionDetail"),
         choices = map.optional("choices"),
@@ -114,7 +114,7 @@ class QuizConfigParsableValue @Inject()(
         showSingleAnswerButtonToTeams = map.optional("showSingleAnswerButtonToTeams", false),
       )
     }
-    override def additionalValidationErrors(v: Question.Single) = {
+    override def additionalValidationErrors(v: Question.Standard) = {
       Seq(
         v.validationErrors(),
         v.audioSrc.flatMap(quizAssets.audioExistsOrValidationError).toSet,

@@ -83,7 +83,7 @@ final class QuestionComponent(
       <.div(
         ^.className := "question-wrapper",
         props.question match {
-          case single: Question.Single =>
+          case single: Question.Standard =>
             props.questionProgressIndex match {
               case 0 if !props.showMasterData => showPreparatoryTitle(single)
               case _                          => showSingleQuestion(single)
@@ -112,7 +112,7 @@ final class QuestionComponent(
     }
 
     private def showSingleQuestion(
-        question: Question.Single,
+                                    question: Question.Standard,
     )(
         implicit props: Props,
     ): VdomElement = {

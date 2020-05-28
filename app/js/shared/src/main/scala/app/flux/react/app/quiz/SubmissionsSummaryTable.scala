@@ -122,7 +122,7 @@ final class SubmissionsSummaryTable(
         ^.key := s"question-$roundIndex-$questionIndex",
         <.td(
           question match {
-            case question: Question.Single => s"${question.question} (${question.answer})"
+            case question: Question.Standard => s"${question.question} (${question.answer})"
             case question: Question.Double => s"${question.textualQuestion} (${question.textualAnswer})"
           },
         ), {
