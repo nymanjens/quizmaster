@@ -9,12 +9,13 @@ import com.google.common.base.Throwables
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Singleton
+import hydro.common.Annotations.visibleForTesting
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor
 import org.yaml.snakeyaml.introspector.BeanAccess
 import play.api.Logger
 
-final class ConfigModule extends AbstractModule {
+final class ConfigModule(exitOnFailure: Boolean = true) extends AbstractModule {
 
   override def configure() = {}
 
@@ -23,41 +24,31 @@ final class ConfigModule extends AbstractModule {
   private[config] def config(
       playConfiguration: play.api.Configuration,
       quizAssets: QuizAssets,
+      quizConfigParsableValue: QuizConfigParsableValue,
   ): QuizConfig = {
-    // get configLocation
-    val configLocation =
-      ResourceFiles.canonicalizePath(playConfiguration.get[String]("app.quiz.configYamlFilePath"))
+    var configLocation = playConfiguration.get[String]("app.quiz.configYamlFilePath")
 
     try {
+      // Canoicalization may throw an error if something goes wrong, so has to be inside the try-catch
+      configLocation = ResourceFiles.canonicalizePath(configLocation)
+
       // get data
       val stringData = {
-        if (Files.exists(Paths.get(configLocation))) {
-          scala.io.Source.fromFile(configLocation).mkString
-        } else {
-          require(
-            ResourceFiles.exists(configLocation),
-            s"Could not find $configLocation as file or as resource")
-          ResourceFiles.read(configLocation)
-        }
+        require(Files.exists(Paths.get(configLocation)), s"Could not find $configLocation as file")
+        scala.io.Source.fromFile(configLocation).mkString
       }
 
       // parse data
-      val constr = new CustomClassLoaderConstructor(getClass.getClassLoader)
-      val yaml = new Yaml(constr)
-      yaml.setBeanAccess(BeanAccess.FIELD)
-      val configData = yaml.load(stringData).asInstanceOf[ParsableQuizConfig]
-
-      // convert to parsed config
-      val quizConfig = configData.parse
-      quizAssets.validateThatAssetsExist(quizConfig)
-      quizConfig
+      ValidatingYamlParser.parse(stringData, quizConfigParsableValue)
     } catch {
       case e: Throwable =>
         val stackTrace = Throwables.getStackTraceAsString(e)
         Logger.error(s"Error when parsing ${configLocation}:\n\n$stackTrace")
         // Make error output less noisy by shutting down early (instead of 20+ Guice exceptions while injecting QuizConfig)
-        System.exit(1)
-        throw e
+        if (exitOnFailure) {
+          System.exit(1)
+        }
+        throw new RuntimeException(s"Error when parsing ${configLocation}", e)
     }
   }
 }

@@ -8,6 +8,7 @@ import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Image
 import app.models.quiz.config.QuizConfig.Question
 import com.google.inject._
+import hydro.common.CollectionUtils.conditionalOption
 import hydro.common.ResourceFiles
 
 @Singleton
@@ -20,50 +21,30 @@ final class QuizAssets @Inject()(
     Paths.get(ResourceFiles.canonicalizePath(configLocation)).getParent
   }
 
-  def quizImage(file: String): Path = {
+  def quizImage(relativePath: String): Path = {
     assertExists {
-      configPath.resolve("images").resolve(file)
+      configPath.resolve("images").resolve(relativePath)
     }
   }
 
-  def quizAudio(file: String): Path = {
+  def quizAudio(relativePath: String): Path = {
     assertExists {
-      configPath.resolve("audio").resolve(file)
+      configPath.resolve("audio").resolve(relativePath)
     }
   }
 
-  def validateThatAssetsExist(quizConfig: QuizConfig): Unit = {
-    def relativeImagePath(maybeImage: Option[Image]): Option[Path] = {
-      maybeImage.map(i => Paths.get("images").resolve(i.src))
-    }
-    def relativeAudioPath(maybeAudio: Option[String]): Option[Path] = {
-      maybeAudio.map(a => Paths.get("audio").resolve(a))
-    }
+  def imageExistsOrValidationError(relativePath: String): Option[String] = {
+    assetExistsOrValidationError(Paths.get("images").resolve(relativePath))
+  }
 
-    val missingRelativePaths =
-      for {
-        round <- quizConfig.rounds
-        question <- round.questions
-        relativePath <- {
-          question match {
-            case single: Question.Single =>
-              Seq() ++
-                relativeImagePath(single.image) ++
-                relativeImagePath(single.answerImage) ++
-                relativeAudioPath(single.audioSrc)
-            case double: Question.Double => Seq()
-          }
-        }
-        if !Files.exists(configPath.resolve(relativePath))
-      } yield relativePath
+  def audioExistsOrValidationError(relativePath: String): Option[String] = {
+    assetExistsOrValidationError(Paths.get("audio").resolve(relativePath))
+  }
 
-    require(
-      missingRelativePaths.isEmpty,
-      s"""Could not find the following assets:
-        |
-        |${missingRelativePaths.sorted.map(p => s"  - $p").mkString("\n")}
-        |
-        |""".stripMargin
+  private def assetExistsOrValidationError(relativePath: Path): Option[String] = {
+    conditionalOption(
+      !Files.exists(configPath.resolve(relativePath)),
+      s"Could not find the asset: $relativePath"
     )
   }
 
