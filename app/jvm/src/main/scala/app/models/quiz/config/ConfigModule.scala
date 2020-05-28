@@ -81,9 +81,7 @@ final class ConfigModule(exitOnFailure: Boolean = true) extends AbstractModule {
       val configData = yaml.load(stringData).asInstanceOf[ParsableQuizConfig]
 
       // convert to parsed config
-      val quizConfig = configData.parse
-      quizAssets.validateThatAssetsExist(quizConfig)
-      quizConfig
+      configData.parse
     } catch {
       case e: Throwable =>
         val stackTrace = Throwables.getStackTraceAsString(e)

@@ -23,7 +23,7 @@ import com.google.inject.Inject
 import scala.collection.immutable.Seq
 
 class QuizConfigParsableValue @Inject()(
-    quizAssets: QuizAssets,
+    implicit quizAssets: QuizAssets,
 ) extends MapParsableValue[QuizConfig] {
   override val supportedKeyValuePairs = Map(
     "title" -> Optional(StringValue),
@@ -114,7 +114,12 @@ class QuizConfigParsableValue @Inject()(
         showSingleAnswerButtonToTeams = map.optional("showSingleAnswerButtonToTeams", false),
       )
     }
-    override def additionalValidationErrors(v: Question.Single) = v.validationErrors()
+    override def additionalValidationErrors(v: Question.Single) = {
+      Seq(
+        v.validationErrors(),
+        v.audioSrc.flatMap(quizAssets.audioExistsOrValidationError).toSet,
+      ).flatten
+    }
   }
 
   private object DoubleQuestionValue extends MapParsableValue[Question.Double] {
@@ -150,6 +155,11 @@ class QuizConfigParsableValue @Inject()(
         size = map.optional("size", "large"),
       )
     }
-    override def additionalValidationErrors(v: Image) = v.validationErrors()
+    override def additionalValidationErrors(v: Image) = {
+      Seq(
+        v.validationErrors(),
+        quizAssets.imageExistsOrValidationError(v.src).toSet,
+      ).flatten
+    }
   }
 }
