@@ -1,5 +1,6 @@
 package app.models.quiz.config
 
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 
@@ -46,6 +47,7 @@ final class ConfigModule(exitOnFailure: Boolean = true) extends AbstractModule {
         Logger.error(s"Error when parsing ${configLocation}:\n\n$stackTrace")
         // Make error output less noisy by shutting down early (instead of 20+ Guice exceptions while injecting QuizConfig)
         if (exitOnFailure) {
+          new File("RUNNING_PID").delete()
           System.exit(1)
         }
         throw new RuntimeException(s"Error when parsing ${configLocation}", e)
