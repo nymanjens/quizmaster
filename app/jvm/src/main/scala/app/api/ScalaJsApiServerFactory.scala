@@ -234,44 +234,63 @@ final class ScalaJsApiServerFactory @Inject()(
       val allTeams = fetchAllTeams()
       val team = allTeams.find(_.id == teamId).get
 
-      require(quizState.canSubmitResponse(team), "Responses are closed")
+      val isDuplicate = {
+        // Bugfix: Two consecutive buttonpresses may have the second one result in an error while its behavior
+        // should be a no-op.
 
-      val question = quizState.maybeQuestion.get
-      val isCorrectAnswer = submissionValue match {
-        case SubmissionValue.PressedTheOneButton => None
-        case _                                   => Some(question.isCorrectAnswer(submissionValue))
+        val duplicateSubmissions =
+          for {
+            submission <- quizState.submissions
+            if submission.teamId == teamId && submission.value == submissionValue
+            submissionEntity <- Some(entityAccess.newQuerySync[SubmissionEntity]().findById(submission.id))
+            if submissionEntity.createTime > (clock.nowInstant - Duration.ofSeconds(2))
+          } yield submissionEntity
+
+        duplicateSubmissions.nonEmpty
       }
-      def teamHasSubmission(thisTeam: Team): Boolean =
-        quizState.submissions.exists(_.teamId == thisTeam.id)
-      lazy val allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
 
-      if (question.isMultipleChoice) {
-        addVerifiedSubmission(
-          Submission(
-            id = EntityModification.generateRandomId(),
-            teamId = team.id,
-            value = submissionValue,
-            isCorrectAnswer = isCorrectAnswer,
-          ),
-          resetTimer = question.isInstanceOf[Question.Double],
-          pauseTimer =
-            if (question.onlyFirstGainsPoints) isCorrectAnswer == Some(true)
-            else allOtherTeamsHaveSubmission,
-          allowMoreThanOneSubmissionPerTeam = false,
-          removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
-        )
-      } else { // Not multiple choice
-        addVerifiedSubmission(
-          Submission(
-            id = EntityModification.generateRandomId(),
-            teamId = team.id,
-            value = submissionValue,
-            isCorrectAnswer = isCorrectAnswer,
-          ),
-          pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
-          allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
-          removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
-        )
+      if (isDuplicate) {
+        // Do nothing
+      } else {
+        require(quizState.canSubmitResponse(team), "Responses are closed")
+
+        val question = quizState.maybeQuestion.get
+        val isCorrectAnswer = submissionValue match {
+          case SubmissionValue.PressedTheOneButton => None
+          case _                                   => Some(question.isCorrectAnswer(submissionValue))
+        }
+        def teamHasSubmission(thisTeam: Team): Boolean =
+          quizState.submissions.exists(_.teamId == thisTeam.id)
+        lazy val allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
+
+        if (question.isMultipleChoice) {
+          addVerifiedSubmission(
+            Submission(
+              id = EntityModification.generateRandomId(),
+              teamId = team.id,
+              value = submissionValue,
+              isCorrectAnswer = isCorrectAnswer,
+            ),
+            resetTimer = question.isInstanceOf[Question.Double],
+            pauseTimer =
+              if (question.onlyFirstGainsPoints) isCorrectAnswer == Some(true)
+              else allOtherTeamsHaveSubmission,
+            allowMoreThanOneSubmissionPerTeam = false,
+            removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
+          )
+        } else { // Not multiple choice
+          addVerifiedSubmission(
+            Submission(
+              id = EntityModification.generateRandomId(),
+              teamId = team.id,
+              value = submissionValue,
+              isCorrectAnswer = isCorrectAnswer,
+            ),
+            pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
+            allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
+            removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
+          )
+        }
       }
     }
 
