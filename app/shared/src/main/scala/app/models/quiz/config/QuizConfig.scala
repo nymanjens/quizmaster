@@ -85,7 +85,8 @@ object QuizConfig {
         choices match {
           case Some(choicesSeq) =>
             Seq(
-              conditionalOption(choicesSeq.size != 4, s"Expected 4 choices, but got $choicesSeq"),
+              conditionalOption(choicesSeq.size < 2, s"Expected at least 2 choices, but got $choicesSeq"),
+              conditionalOption(choicesSeq.size > 10, s"Expected at most 10 choices, but got $choicesSeq"),
               conditionalOption(
                 !(choicesSeq contains answer),
                 s"The answer should be one of the choices: <<$answer>> not in <<$choicesSeq>>"),

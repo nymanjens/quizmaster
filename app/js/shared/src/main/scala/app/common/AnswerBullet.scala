@@ -28,5 +28,11 @@ object AnswerBullet {
     new AnswerBullet('B', Bootstrap.FontAwesomeIcon("chevron-circle-right")),
     new AnswerBullet('C', Bootstrap.FontAwesomeIcon("chevron-circle-down")),
     new AnswerBullet('D', Bootstrap.FontAwesomeIcon("chevron-circle-left")),
+    new AnswerBullet('E', Bootstrap.FontAwesomeIcon("question-circle")),
+    new AnswerBullet('F', Bootstrap.FontAwesomeIcon("exclamation-circle")),
+    new AnswerBullet('G', Bootstrap.FontAwesomeIcon("info-circle")),
+    new AnswerBullet('H', Bootstrap.FontAwesomeIcon("check-circle")),
+    new AnswerBullet('I', Bootstrap.FontAwesomeIcon("plus-circle")),
+    new AnswerBullet('J', Bootstrap.FontAwesomeIcon("times-circle")),
   )
 }
