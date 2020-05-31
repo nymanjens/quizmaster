@@ -312,11 +312,17 @@ final class TeamControllerView(
               ^.onClick ==> { (e: ReactEventFromInput) =>
                 e.preventDefault()
                 val answer = freeTextAnswerInputRef().valueOrDefault
-                if (answer.nonEmpty) {
+                val alreadySubmittedThisValue = maybeCurrentSubmission.exists { submission =>
+                  submission.value match {
+                    case SubmissionValue.FreeTextAnswer(`answer`) => true
+                    case _                                        => false
+                  }
+                }
+                if(answer.isEmpty || alreadySubmittedThisValue) {
+                  Callback.empty
+                } else {
                   freeTextAnswerInputRef().setValue("")
                   submitResponse(SubmissionValue.FreeTextAnswer(answer))
-                } else {
-                  Callback.empty
                 }
               },
               i18n("app.submit"),
