@@ -4,6 +4,7 @@ import app.flux.stores.quiz.TeamsAndQuizStateStore
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.time.Clock
 import hydro.flux.react.HydroReactComponent
+import hydro.flux.react.ReactVdomUtils.<<
 import hydro.flux.react.ReactVdomUtils.^^
 import hydro.jsfacades.Mousetrap
 import japgolly.scalajs.react._
@@ -38,7 +39,7 @@ final class ObfuscatedAnswer(
           ^^.ifThen(state.obfuscated) {
             ^.className := "obfuscated"
           },
-          props.answer,
+          <<.nl2Br(props.answer),
         )
       )
     }

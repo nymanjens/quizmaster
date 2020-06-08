@@ -112,7 +112,7 @@ final class QuestionComponent(
     }
 
     private def showSingleQuestion(
-                                    question: Question.Standard,
+        question: Question.Standard,
     )(
         implicit props: Props,
     ): VdomElement = {
@@ -128,14 +128,14 @@ final class QuestionComponent(
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
             ^.className := "question",
-            question.question,
+            <<.nl2Br(question.question),
           )
         },
         <<.ifDefined(question.questionDetail) { questionDetail =>
           ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
             <.div(
               ^.className := "question-detail",
-              questionDetail,
+              <<.nl2Br(questionDetail),
             )
           }
         },
@@ -144,7 +144,7 @@ final class QuestionComponent(
           ifVisibleOrMaster(false) {
             <.div(
               ^.className := "master-notes",
-              masterNotes,
+              <<.nl2Br(masterNotes),
             )
           }
         },
@@ -221,7 +221,7 @@ final class QuestionComponent(
             if (answerIsVisible) {
               <.div(
                 ^.className := "answer",
-                question.answer,
+                <<.nl2Br(question.answer),
               )
             } else {
               <.div(obfuscatedAnswer(question.answer))
@@ -232,7 +232,7 @@ final class QuestionComponent(
           <<.ifDefined(question.answerDetail) { answerDetail =>
             <.div(
               ^.className := "answer-detail",
-              answerDetail,
+              <<.nl2Br(answerDetail),
             )
           }
         },
@@ -272,11 +272,11 @@ final class QuestionComponent(
           <.div(
             <.div(
               ^.className := "verbal-question",
-              question.verbalQuestion,
+              <<.nl2Br(question.verbalQuestion),
             ),
             <.div(
               ^.className := "verbal-answer",
-              question.verbalAnswer,
+              <<.nl2Br(question.verbalAnswer),
             ),
           )
         },
@@ -284,14 +284,14 @@ final class QuestionComponent(
           ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
             <.div(
               ^.className := "textual-question",
-              question.textualQuestion,
+              <<.nl2Br(question.textualQuestion),
             )
           }
         } else {
           <<.ifThen(question.questionIsVisible(progressIndex)) {
             <.div(
               ^.className := "question",
-              question.textualQuestion,
+              <<.nl2Br(question.textualQuestion),
             )
           }
         },

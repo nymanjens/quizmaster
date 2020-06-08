@@ -1,5 +1,6 @@
 package hydro.flux.react
 
+import hydro.common.GuavaReplacement.Splitter
 import japgolly.scalajs.react.vdom.TagMod
 import japgolly.scalajs.react.vdom.VdomArray
 import japgolly.scalajs.react.vdom.VdomNode
@@ -43,6 +44,17 @@ object ReactVdomUtils {
         stringF: String => VdomNode,
     ): VdomArray = {
       VdomArray.empty() ++= elems.flatMap(a => Seq(f(a), stringF(" ")))
+    }
+
+    def nl2Br(string: String): VdomNode = {
+      val parts =
+        Splitter
+          .on('\n')
+          .trimResults()
+          .split(string.trim)
+          .map(s => Seq[VdomNode](s))
+          .reduce((seq1, seq2) => Seq(seq1, Seq[VdomNode](<.br()), seq2).flatten)
+      VdomArray.apply(parts: _*)
     }
   }
 }
