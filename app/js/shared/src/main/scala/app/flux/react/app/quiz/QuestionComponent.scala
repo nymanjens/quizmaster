@@ -268,6 +268,9 @@ final class QuestionComponent(
         <<.ifThen(question.shouldShowTimer(props.questionProgressIndex)) {
           <.div(
             ^.className := "timer",
+            ^^.ifThen(props.quizState.imageIsEnlarged && !props.showMasterData) {
+                ^.className := "pull-to-top-of-page"
+            },
             syncedTimerBar(maxTime = question.maxTime),
           )
         },

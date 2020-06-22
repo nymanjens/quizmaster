@@ -429,7 +429,6 @@ table.table-bordered {
             height: 880px;
             object-fit: contain;
             background-color: white;
-            border: 5px double;
           }
           &:not(.enlarged) {
             &.indicate-enlarged {
@@ -466,7 +465,6 @@ table.table-bordered {
           height: 880px;
           object-fit: contain;
           background-color: white;
-          border: 5px double;
         }
         .video-help-placeholder {
           max-width: 100%;
@@ -556,6 +554,16 @@ table.table-bordered {
       padding-top: 25px;
       .time-left-label {
         font-size: 18px;
+      }
+      &.pull-to-top-of-page {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        padding: 0;
+        .time-left-label {
+          display: none;
+        }
       }
     }
   }
