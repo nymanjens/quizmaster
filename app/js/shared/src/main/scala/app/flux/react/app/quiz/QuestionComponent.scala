@@ -171,13 +171,15 @@ final class QuestionComponent(
           },
           <<.ifDefined(question.videoSrc) { videoSrc =>
             ifVisibleOrMaster(progressIndex > 0) {
+              val timerState = props.quizState.timerState
+              val timerIsRunning = timerState.timerRunning && !timerState.hasFinished(question.maxTime)
               <.div(
                 ^.className := "video-holder",
-                <.video(
-                  ^.controls := true,
-                  ^.width := "320",
-                  <.source(^.src := s"/quizvideo/$videoSrc"),
-                ),
+                videoPlayer(
+                  videoSrc,
+                  playing = timerIsRunning,
+                  key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
+                )
               )
             }
           },
@@ -408,6 +410,10 @@ final class QuestionComponent(
 
     private def audioPlayer(audioRelativePath: String, playing: Boolean, key: String): VdomNode = {
       RawMusicPlayer(src = "/quizaudio/" + audioRelativePath, playing = playing, key = key)
+    }
+
+    private def videoPlayer(videoRelativePath: String, playing: Boolean, key: String): VdomNode = {
+      RawVideoPlayer(src = "/quizvideo/" + videoRelativePath, playing = playing, key = key)
     }
   }
 }
