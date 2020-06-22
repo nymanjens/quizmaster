@@ -6,8 +6,8 @@ rounds:
   - name: Geography
     questions:
       - question: What is the capital of France?
-        answer: Paris
         choices: [Paris, London, Brussels, Berlin]
+        answer: Paris
         image: {src: geography/france.png, size: small}
         answerImage: {src: geography/france-answer.png, size: large}
         answerDetail: Image released under Creative Commons by Destination2 (www.destination2.co.uk)
@@ -16,13 +16,19 @@ rounds:
         onlyFirstGainsPoints: true
 
       - question: What is the capital of Belgium?
-        answer: Brussels
         choices: [Paris, London, Brussels, Berlin]
+        answer: Brussels
         maxTimeSeconds: 60
 
       - question: Who was the country Columbia named after?
         answer: Christoffer Columbus
         maxTimeSeconds: 8
+
+      - question: What city does this video from 1935 show?
+        choices: [Tokyo, Guatemala City, Mexico City, Salt Lake City]
+        answer: Guatemala City
+        video: geography/about_bananas.mp4
+        maxTimeSeconds: 120
 
   - name: Music round
     questions:
@@ -39,5 +45,5 @@ rounds:
         verbalQuestion: How many sides does a rectangle have?
         verbalAnswer: 4
         textualQuestion: How many sides does a triangle have?
-        textualAnswer: 3
         textualChoices: [3, 4, 5, 6]
+        textualAnswer: 3
