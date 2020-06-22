@@ -170,16 +170,25 @@ final class QuestionComponent(
             }
           },
           <<.ifDefined(question.videoSrc) { videoSrc =>
-            ifVisibleOrMaster(progressIndex > 0) {
+            ifVisibleOrMaster(question.submissionAreOpen(props.questionProgressIndex)) {
               val timerState = props.quizState.timerState
-              val timerIsRunning = timerState.timerRunning && !timerState.hasFinished(question.maxTime)
+              val timerIsRunning = timerState.timerRunning && !timerState
+                .hasFinished(question.maxTime) && question.submissionAreOpen(props.questionProgressIndex)
               <.div(
                 ^.className := "video-holder",
-                videoPlayer(
-                  videoSrc,
-                  playing = timerIsRunning,
-                  key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
-                )
+                if (props.showMasterData) {
+                  videoHelpPlaceholder(
+                    videoSrc,
+                    playing = timerIsRunning,
+                    imageIsEnlarged = props.quizState.imageIsEnlarged,
+                  )
+                } else {
+                  videoPlayer(
+                    videoSrc,
+                    playing = timerIsRunning,
+                    key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
+                  )
+                }
               )
             }
           },
@@ -414,6 +423,27 @@ final class QuestionComponent(
 
     private def videoPlayer(videoRelativePath: String, playing: Boolean, key: String): VdomNode = {
       RawVideoPlayer(src = "/quizvideo/" + videoRelativePath, playing = playing, key = key)
+    }
+
+    private def videoHelpPlaceholder(
+        videoRelativePath: String,
+        playing: Boolean,
+        imageIsEnlarged: Boolean,
+    ): VdomNode = {
+      val playingString = if (playing) "playing" else "paused"
+      <.div(
+        ^.className := "video-help-placeholder",
+        ^^.ifThen(imageIsEnlarged) {
+          ^.className := "indicate-enlarged"
+        },
+        s"$videoRelativePath ($playingString)",
+        <.br(),
+        "Toggle playing: spacebar",
+        <.br(),
+        "Restart: shift + r",
+        <.br(),
+        "Toggle fullscreen: alt + enter"
+      )
     }
   }
 }

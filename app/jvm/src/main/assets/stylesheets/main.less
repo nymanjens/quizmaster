@@ -453,13 +453,29 @@ table.table-bordered {
         padding-right: 50x;
         width: 500px;
         max-width: 500px;
-        &.admin-only-data {
-          img {
-            opacity: 0.3;
-          }
-        }
+
         video {
           max-width: 100%;
+        }
+        .video-help-placeholder {
+          max-width: 100%;
+          padding: 30px 13px;
+
+          text-align: center;
+          vertical-align: middle;
+
+          color: white;
+          background-color: black;
+          font-size: 30px;
+          overflow: hidden;
+
+          &.indicate-enlarged {
+            border: 5px double;
+          }
+        }
+
+        &.admin-only-data .video-help-placeholder {
+          opacity: 0.2;
         }
       }
 
