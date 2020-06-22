@@ -176,11 +176,17 @@ final class QuestionComponent(
                 .hasFinished(question.maxTime) && question.submissionAreOpen(props.questionProgressIndex)
               <.div(
                 ^.className := "video-holder",
+                ^^.ifThen(props.quizState.imageIsEnlarged) {
+                  if (props.showMasterData) {
+                    ^.className := "indicate-enlarged"
+                  } else {
+                    ^.className := "enlarged"
+                  }
+                },
                 if (props.showMasterData) {
                   videoHelpPlaceholder(
                     videoSrc,
                     playing = timerIsRunning,
-                    imageIsEnlarged = props.quizState.imageIsEnlarged,
                   )
                 } else {
                   videoPlayer(
@@ -436,14 +442,10 @@ final class QuestionComponent(
     private def videoHelpPlaceholder(
         videoRelativePath: String,
         playing: Boolean,
-        imageIsEnlarged: Boolean,
     ): VdomNode = {
       val playingString = if (playing) "playing" else "paused"
       <.div(
         ^.className := "video-help-placeholder",
-        ^^.ifThen(imageIsEnlarged) {
-          ^.className := "indicate-enlarged"
-        },
         s"$videoRelativePath ($playingString)",
         <.br(),
         "Toggle playing: spacebar",

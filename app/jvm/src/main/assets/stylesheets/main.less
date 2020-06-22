@@ -457,6 +457,17 @@ table.table-bordered {
         video {
           max-width: 100%;
         }
+        &.enlarged video {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          margin: auto;
+          height: 880px;
+          object-fit: contain;
+          background-color: white;
+          border: 5px double;
+        }
         .video-help-placeholder {
           max-width: 100%;
           padding: 30px 13px;
@@ -469,13 +480,12 @@ table.table-bordered {
           font-size: 30px;
           overflow: hidden;
 
-          &.indicate-enlarged {
-            border: 5px double;
-          }
         }
-
         &.admin-only-data .video-help-placeholder {
           opacity: 0.2;
+        }
+        &.indicate-enlarged .video-help-placeholder {
+          border: 5px double;
         }
       }
 
