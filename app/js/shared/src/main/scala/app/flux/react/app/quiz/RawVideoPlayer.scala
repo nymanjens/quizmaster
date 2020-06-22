@@ -16,13 +16,11 @@ private[quiz] object RawVideoPlayer extends HydroReactComponent.Stateless {
   def apply(
       src: String,
       playing: Boolean,
-      fullscreen: Boolean,
       key: String,
   ): VdomElement = {
     val props = Props(
       src = src,
       playing = playing,
-      fullscreen = fullscreen,
     )
     component.withKey(key).apply(props)
   }
@@ -34,7 +32,6 @@ private[quiz] object RawVideoPlayer extends HydroReactComponent.Stateless {
   protected case class Props private[RawVideoPlayer] (
       src: String,
       playing: Boolean,
-      fullscreen: Boolean,
   )
 
   protected class Backend($ : BackendScope[Props, State])
@@ -45,7 +42,6 @@ private[quiz] object RawVideoPlayer extends HydroReactComponent.Stateless {
 
     override def didMount(props: Props, state: Unit): Callback = LogExceptionsCallback {
       trySetPlaying(props.playing)
-      trySetFullscreen(props.fullscreen)
     }
 
     override def didUpdate(
@@ -56,7 +52,6 @@ private[quiz] object RawVideoPlayer extends HydroReactComponent.Stateless {
     ): Callback = LogExceptionsCallback {
       if (prevProps != currentProps) {
         trySetPlaying(currentProps.playing)
-        trySetFullscreen(currentProps.fullscreen)
       }
     }
 
@@ -76,32 +71,6 @@ private[quiz] object RawVideoPlayer extends HydroReactComponent.Stateless {
         case Some(e) if playing  => e.play()
         case Some(e) if !playing => e.pause()
         case None                =>
-      }
-    }
-    private def trySetFullscreen(fullscreen: Boolean): Unit = {
-      htmlVideoElement match {
-        case Some(e) =>
-          if (fullscreen) {
-            maybeCallDynamicMehthod(e, "requestFullscreen") orElse
-              maybeCallDynamicMehthod(e, "mozRequestFullScreen") orElse
-              maybeCallDynamicMehthod(e, "webkitRequestFullscreen") orElse
-              maybeCallDynamicMehthod(e, "msRequestFullscreen")
-          } else {
-            maybeCallDynamicMehthod(e, "exitFullscreen") orElse
-              maybeCallDynamicMehthod(e, "mozCancelFullScreen") orElse
-              maybeCallDynamicMehthod(e, "webkitExitFullscreen") orElse
-              maybeCallDynamicMehthod(e, "msExitFullscreen")
-          }
-        case None =>
-      }
-    }
-
-    private def maybeCallDynamicMehthod(obj: js.Object, method: String): Option[Unit] = {
-      if (js.isUndefined(obj.asInstanceOf[js.Dynamic].selectDynamic(method))) {
-        None
-      } else {
-        obj.asInstanceOf[js.Dynamic].applyDynamic(method)()
-        Some((): Unit)
       }
     }
   }
