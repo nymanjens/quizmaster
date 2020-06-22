@@ -445,13 +445,30 @@ table.table-bordered {
           }
         }
       }
+      .video-holder {
+        flex-grow: 1;
+        flex-shrink: 0;
+        flex-basis: 300px;
+
+        padding-right: 50x;
+        width: 500px;
+        max-width: 500px;
+        &.admin-only-data {
+          img {
+            opacity: 0.3;
+          }
+        }
+        video {
+          max-width: 100%;
+        }
+      }
 
       .choices-holder {
         flex-grow: 1;
         flex-shrink: 0;
         flex-basis: auto;
 
-        &.including-image {
+        &.including-image-or-video {
           text-align: left;
           max-width: 70%;
           padding-left: 20px;

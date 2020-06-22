@@ -169,12 +169,24 @@ final class QuestionComponent(
               )
             }
           },
+          <<.ifDefined(question.videoSrc) { videoSrc =>
+            ifVisibleOrMaster(progressIndex > 0) {
+              <.div(
+                ^.className := "video-holder",
+                <.video(
+                  ^.controls := true,
+                  ^.width := "320",
+                  <.source(^.src := s"/quizvideo/$videoSrc"),
+                ),
+              )
+            }
+          },
           <<.ifDefined(question.choices) { choices =>
             ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
               <.div(
                 ^.className := "choices-holder",
-                ^^.ifDefined(maybeImage) { _ =>
-                  ^.className := "including-image"
+                ^^.ifThen(maybeImage.isDefined || question.videoSrc.isDefined) {
+                  ^.className := "including-image-or-video"
                 },
                 <.ul(
                   ^.className := "choices",
