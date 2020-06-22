@@ -322,7 +322,7 @@ final class TeamControllerView(
                   Callback.empty
                 } else {
                   freeTextAnswerInputRef().setValue("")
-                  submitResponse(SubmissionValue.FreeTextAnswer(answer))
+                  submitResponse(SubmissionValue.FreeTextAnswer(makeWhitespaceVisible(answer)))
                 }
               },
               i18n("app.submit"),
@@ -357,6 +357,10 @@ final class TeamControllerView(
         // Show the form if the question in the right state. If this is a question where teams submitted anything,
         // it makes sense to keep showing their submission (even if this particular team didn't submit anything).
         question.submissionAreOpen(quizState.questionProgressIndex) || quizState.submissions.nonEmpty
+      }
+
+      private def makeWhitespaceVisible(s: String): String = {
+        if(s.trim.isEmpty) "<whitespace>" else s
       }
     }
   }
