@@ -123,7 +123,7 @@ final class SubmissionsSummaryTable(
         <.td(
           question match {
             case question: Question.Standard => s"${question.question} (${question.answer})"
-            case question: Question.Double => s"${question.textualQuestion} (${question.textualAnswer})"
+            case question: Question.Double   => s"${question.textualQuestion} (${question.textualAnswer})"
           },
         ), {
           for (team <- state.teams)

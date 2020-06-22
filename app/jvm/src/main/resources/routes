@@ -23,3 +23,4 @@ GET  /import/:secret/:serverDomain/    app.controllers.ExternalApi.importFromOth
 GET  /assets/*file                     controllers.Assets.versioned(path="/public", file: Asset)
 GET  /quizimages/*file                 app.controllers.Application.quizImage(file)
 GET  /quizaudio/*file                  app.controllers.Application.quizAudio(file)
+GET  /quizvideo/*file                  app.controllers.Application.quizVideo(file)

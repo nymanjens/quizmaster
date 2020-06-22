@@ -169,12 +169,41 @@ final class QuestionComponent(
               )
             }
           },
+          <<.ifDefined(question.videoSrc) { videoSrc =>
+            ifVisibleOrMaster(question.submissionAreOpen(props.questionProgressIndex)) {
+              val timerState = props.quizState.timerState
+              val timerIsRunning = timerState.timerRunning && !timerState
+                .hasFinished(question.maxTime) && question.submissionAreOpen(props.questionProgressIndex)
+              <.div(
+                ^.className := "video-holder",
+                ^^.ifThen(props.quizState.imageIsEnlarged) {
+                  if (props.showMasterData) {
+                    ^.className := "indicate-enlarged"
+                  } else {
+                    ^.className := "enlarged"
+                  }
+                },
+                if (props.showMasterData) {
+                  videoHelpPlaceholder(
+                    videoSrc,
+                    playing = timerIsRunning,
+                  )
+                } else {
+                  videoPlayer(
+                    videoSrc,
+                    playing = timerIsRunning,
+                    key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
+                  )
+                }
+              )
+            }
+          },
           <<.ifDefined(question.choices) { choices =>
             ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
               <.div(
                 ^.className := "choices-holder",
-                ^^.ifDefined(maybeImage) { _ =>
-                  ^.className := "including-image"
+                ^^.ifThen(maybeImage.isDefined || question.videoSrc.isDefined) {
+                  ^.className := "including-image-or-video"
                 },
                 <.ul(
                   ^.className := "choices",
@@ -396,6 +425,35 @@ final class QuestionComponent(
 
     private def audioPlayer(audioRelativePath: String, playing: Boolean, key: String): VdomNode = {
       RawMusicPlayer(src = "/quizaudio/" + audioRelativePath, playing = playing, key = key)
+    }
+
+    private def videoPlayer(
+        videoRelativePath: String,
+        playing: Boolean,
+        key: String,
+    ): VdomNode = {
+      RawVideoPlayer(
+        src = "/quizvideo/" + videoRelativePath,
+        playing = playing,
+        key = key,
+      )
+    }
+
+    private def videoHelpPlaceholder(
+        videoRelativePath: String,
+        playing: Boolean,
+    ): VdomNode = {
+      val playingString = if (playing) "playing" else "paused"
+      <.div(
+        ^.className := "video-help-placeholder",
+        s"$videoRelativePath ($playingString)",
+        <.br(),
+        "Toggle playing: spacebar",
+        <.br(),
+        "Restart: shift + r",
+        <.br(),
+        "Toggle fullscreen: alt + enter"
+      )
     }
   }
 }

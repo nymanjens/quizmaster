@@ -139,6 +139,9 @@ final class Layout(
               val audio = new Audio(s"/quizaudio/$audioSrc")
               preloadedAudios.append(audio)
             }
+
+          // Don't preload video because it's too large
+
           case _ =>
         }
       }
