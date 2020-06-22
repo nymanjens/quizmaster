@@ -186,6 +186,7 @@ final class QuestionComponent(
                   videoPlayer(
                     videoSrc,
                     playing = timerIsRunning,
+                    fullscreen = props.quizState.imageIsEnlarged,
                     key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
                   )
                 }
@@ -421,8 +422,18 @@ final class QuestionComponent(
       RawMusicPlayer(src = "/quizaudio/" + audioRelativePath, playing = playing, key = key)
     }
 
-    private def videoPlayer(videoRelativePath: String, playing: Boolean, key: String): VdomNode = {
-      RawVideoPlayer(src = "/quizvideo/" + videoRelativePath, playing = playing, key = key)
+    private def videoPlayer(
+        videoRelativePath: String,
+        playing: Boolean,
+        fullscreen: Boolean,
+        key: String,
+    ): VdomNode = {
+      RawVideoPlayer(
+        src = "/quizvideo/" + videoRelativePath,
+        playing = playing,
+        fullscreen = fullscreen,
+        key = key,
+      )
     }
 
     private def videoHelpPlaceholder(

@@ -8,17 +8,21 @@ import japgolly.scalajs.react.vdom.html_<^._
 import org.scalajs.dom.html
 import org.scalajs.dom.raw.HTMLVideoElement
 
+import scala.scalajs.js
+
 private[quiz] object RawVideoPlayer extends HydroReactComponent.Stateless {
 
   // **************** API ****************//
   def apply(
       src: String,
       playing: Boolean,
+      fullscreen: Boolean,
       key: String,
   ): VdomElement = {
     val props = Props(
       src = src,
       playing = playing,
+      fullscreen = fullscreen,
     )
     component.withKey(key).apply(props)
   }
@@ -30,6 +34,7 @@ private[quiz] object RawVideoPlayer extends HydroReactComponent.Stateless {
   protected case class Props private[RawVideoPlayer] (
       src: String,
       playing: Boolean,
+      fullscreen: Boolean,
   )
 
   protected class Backend($ : BackendScope[Props, State])
@@ -39,12 +44,8 @@ private[quiz] object RawVideoPlayer extends HydroReactComponent.Stateless {
     private val videoRef = Ref[html.Video]
 
     override def didMount(props: Props, state: Unit): Callback = LogExceptionsCallback {
-      if (props.playing) {
-        htmlVideoElement match {
-          case Some(e) => e.play()
-          case None    =>
-        }
-      }
+      trySetPlaying(props.playing)
+      trySetFullscreen(props.fullscreen)
     }
 
     override def didUpdate(
@@ -54,11 +55,8 @@ private[quiz] object RawVideoPlayer extends HydroReactComponent.Stateless {
         currentState: Unit,
     ): Callback = LogExceptionsCallback {
       if (prevProps != currentProps) {
-        htmlVideoElement match {
-          case Some(e) if currentProps.playing  => e.play()
-          case Some(e) if !currentProps.playing => e.pause()
-          case None                             =>
-        }
+        trySetPlaying(currentProps.playing)
+        trySetFullscreen(currentProps.fullscreen)
       }
     }
 
@@ -71,6 +69,40 @@ private[quiz] object RawVideoPlayer extends HydroReactComponent.Stateless {
       ).withRef(videoRef)
     }
 
-    def htmlVideoElement: Option[HTMLVideoElement] = videoRef.get.asCallback.runNow()
+    private def htmlVideoElement: Option[html.Video] = videoRef.get.asCallback.runNow()
+
+    private def trySetPlaying(playing: Boolean): Unit = {
+      htmlVideoElement match {
+        case Some(e) if playing  => e.play()
+        case Some(e) if !playing => e.pause()
+        case None                =>
+      }
+    }
+    private def trySetFullscreen(fullscreen: Boolean): Unit = {
+      htmlVideoElement match {
+        case Some(e) =>
+          if (fullscreen) {
+            maybeCallDynamicMehthod(e, "requestFullscreen") orElse
+              maybeCallDynamicMehthod(e, "mozRequestFullScreen") orElse
+              maybeCallDynamicMehthod(e, "webkitRequestFullscreen") orElse
+              maybeCallDynamicMehthod(e, "msRequestFullscreen")
+          } else {
+            maybeCallDynamicMehthod(e, "exitFullscreen") orElse
+              maybeCallDynamicMehthod(e, "mozCancelFullScreen") orElse
+              maybeCallDynamicMehthod(e, "webkitExitFullscreen") orElse
+              maybeCallDynamicMehthod(e, "msExitFullscreen")
+          }
+        case None =>
+      }
+    }
+
+    private def maybeCallDynamicMehthod(obj: js.Object, method: String): Option[Unit] = {
+      if (js.isUndefined(obj.asInstanceOf[js.Dynamic].selectDynamic(method))) {
+        None
+      } else {
+        obj.asInstanceOf[js.Dynamic].applyDynamic(method)()
+        Some((): Unit)
+      }
+    }
   }
 }
