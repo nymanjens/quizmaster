@@ -87,6 +87,7 @@ class QuizConfigParsableValue @Inject()(
       "masterNotes" -> Optional(StringValue),
       "image" -> Optional(ImageValue),
       "audioSrc" -> Optional(StringValue),
+      "videoSrc" -> Optional(StringValue),
       "pointsToGain" -> Optional(IntValue),
       "pointsToGainOnFirstAnswer" -> Optional(IntValue),
       "pointsToGainOnWrongAnswer" -> Optional(IntValue),
@@ -105,6 +106,7 @@ class QuizConfigParsableValue @Inject()(
         masterNotes = map.optional("masterNotes"),
         image = map.optional("image"),
         audioSrc = map.optional("audioSrc"),
+        videoSrc = map.optional("videoSrc"),
         pointsToGain = map.optional("pointsToGain", 1),
         pointsToGainOnFirstAnswer =
           map.optional("pointsToGainOnFirstAnswer") getOrElse map.optional("pointsToGain", 1),
@@ -118,6 +120,7 @@ class QuizConfigParsableValue @Inject()(
       Seq(
         v.validationErrors(),
         v.audioSrc.flatMap(quizAssets.audioExistsOrValidationError).toSet,
+        v.videoSrc.flatMap(quizAssets.videoExistsOrValidationError).toSet,
       ).flatten
     }
   }

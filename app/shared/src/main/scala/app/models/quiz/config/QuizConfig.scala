@@ -74,6 +74,8 @@ object QuizConfig {
         image: Option[Image],
         // Relative path in audio directory
         audioSrc: Option[String],
+        // Relative path in video directory
+        videoSrc: Option[String],
         override val pointsToGain: Int,
         override val pointsToGainOnFirstAnswer: Int,
         override val pointsToGainOnWrongAnswer: Int,

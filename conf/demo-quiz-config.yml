@@ -27,7 +27,7 @@ rounds:
       - question: What city does this video from 1935 show?
         choices: [Tokyo, Guatemala City, Mexico City, Salt Lake City]
         answer: Guatemala City
-        video: geography/about_bananas.mp4
+        videoSrc: geography/about_bananas.mp4
         maxTimeSeconds: 120
 
   - name: Music round

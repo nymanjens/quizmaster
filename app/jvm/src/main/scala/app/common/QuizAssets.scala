@@ -33,12 +33,22 @@ final class QuizAssets @Inject()(
     }
   }
 
+  def quizVideo(relativePath: String): Path = {
+    assertExists {
+      configPath.resolve("video").resolve(relativePath)
+    }
+  }
+
   def imageExistsOrValidationError(relativePath: String): Option[String] = {
     assetExistsOrValidationError(Paths.get("images").resolve(relativePath))
   }
 
   def audioExistsOrValidationError(relativePath: String): Option[String] = {
     assetExistsOrValidationError(Paths.get("audio").resolve(relativePath))
+  }
+
+  def videoExistsOrValidationError(relativePath: String): Option[String] = {
+    assetExistsOrValidationError(Paths.get("video").resolve(relativePath))
   }
 
   private def assetExistsOrValidationError(relativePath: Path): Option[String] = {
