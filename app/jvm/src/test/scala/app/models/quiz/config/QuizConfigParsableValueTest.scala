@@ -67,6 +67,7 @@ class QuizConfigParsableValueTest extends Specification {
         |        answer: Summer
         |        answerDetail: (By Bensound)
         |        audioSrc: music_round/bensound-summer.mp3
+        |        videoSrc: geography/about_bananas.mp4
         |        maxTimeSeconds: 15
         |
         |  - name: Double questions round
@@ -102,6 +103,7 @@ class QuizConfigParsableValueTest extends Specification {
               masterNotes = Some("This is a very simple question"),
               image = Some(Image("geography/france.png", "small")),
               audioSrc = None,
+              videoSrc = None,
               pointsToGain = 2,
               pointsToGainOnFirstAnswer = 4,
               pointsToGainOnWrongAnswer = -1,
@@ -119,6 +121,7 @@ class QuizConfigParsableValueTest extends Specification {
               masterNotes = None,
               image = None,
               audioSrc = None,
+              videoSrc = None,
               pointsToGain = 1,
               pointsToGainOnFirstAnswer = 1,
               pointsToGainOnWrongAnswer = 0,
@@ -136,6 +139,7 @@ class QuizConfigParsableValueTest extends Specification {
               masterNotes = None,
               image = None,
               audioSrc = None,
+              videoSrc = None,
               pointsToGain = 1,
               pointsToGainOnFirstAnswer = 1,
               pointsToGainOnWrongAnswer = 0,
@@ -159,6 +163,7 @@ class QuizConfigParsableValueTest extends Specification {
               masterNotes = None,
               image = None,
               audioSrc = Some("music_round/bensound-summer.mp3"),
+              videoSrc = Some("geography/about_bananas.mp4"),
               pointsToGain = 1,
               pointsToGainOnFirstAnswer = 1,
               pointsToGainOnWrongAnswer = 0,

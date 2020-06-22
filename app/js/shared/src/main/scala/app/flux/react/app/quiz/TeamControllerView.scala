@@ -318,7 +318,7 @@ final class TeamControllerView(
                     case _                                        => false
                   }
                 }
-                if(answer.isEmpty || alreadySubmittedThisValue) {
+                if (answer.isEmpty || alreadySubmittedThisValue) {
                   Callback.empty
                 } else {
                   freeTextAnswerInputRef().setValue("")
@@ -360,7 +360,7 @@ final class TeamControllerView(
       }
 
       private def makeWhitespaceVisible(s: String): String = {
-        if(s.trim.isEmpty) "<whitespace>" else s
+        if (s.trim.isEmpty) "<whitespace>" else s
       }
     }
   }

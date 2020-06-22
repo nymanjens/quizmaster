@@ -78,6 +78,10 @@ final class Application @Inject()(
     serveAsset(quizAssets.quizAudio(file))
   }
 
+  def quizVideo(file: String): Action[AnyContent] = {
+    serveAsset(quizAssets.quizVideo(file))
+  }
+
   def serveAsset(assetPath: Path): Action[AnyContent] = Action { implicit request =>
     val connection = assetPath.toFile.toURI.toURL.openConnection()
     val stream = connection.getInputStream
@@ -171,7 +175,7 @@ final class Application @Inject()(
         val (textualQuestion, textualAnswer) =
           q match {
             case question: Question.Standard => (question.question, question.answer)
-            case question: Question.Double => (question.textualQuestion, question.textualAnswer)
+            case question: Question.Double   => (question.textualQuestion, question.textualAnswer)
           }
         val maxTime =
           if (q.maxTime > infiniteDurationThreshold) "inf" else round1(q.maxTime.getSeconds / 60.0)
