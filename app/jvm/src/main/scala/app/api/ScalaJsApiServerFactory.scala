@@ -363,25 +363,6 @@ final class ScalaJsApiServerFactory @Inject()(
         ) ++ submissionsToRemove.map(s => EntityModification.Remove[SubmissionEntity](s.id))
       )
     }
-
-    private def updateSubmissionInStateAndEntity(submissionId: Long)(
-        update: SubmissionEntity => SubmissionEntity): Unit = {
-      val oldSubmissionEntity = entityAccess.newQuerySync[SubmissionEntity]().findById(submissionId)
-      val newSubmissionEntity = update(oldSubmissionEntity)
-
-      val oldQuizState = fetchQuizState()
-      val newQuizState = oldQuizState.copy(
-        submissions = oldQuizState.submissions.map {
-          case s if s.id == submissionId => newSubmissionEntity.toSubmission
-          case s                         => s
-        },
-      )
-
-      entityAccess.persistEntityModifications(
-        EntityModification.createUpdateAllFields(newQuizState),
-        EntityModification.createUpdateAllFields(newSubmissionEntity),
-      )
-    }
   }
 
   private def fetchAllTeams(): Seq[Team] = {
@@ -390,10 +371,30 @@ final class ScalaJsApiServerFactory @Inject()(
       .sort(DbQuery.Sorting.ascBy(ModelFields.Team.index))
       .data()
   }
+
   private def fetchQuizState(): QuizState = {
     entityAccess
       .newQuerySync[QuizState]()
       .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId) getOrElse QuizState.nullInstance
+  }
+
+  private def updateSubmissionInStateAndEntity(submissionId: Long)(
+      update: SubmissionEntity => SubmissionEntity): Unit = {
+    val oldSubmissionEntity = entityAccess.newQuerySync[SubmissionEntity]().findById(submissionId)
+    val newSubmissionEntity = update(oldSubmissionEntity)
+
+    val oldQuizState = fetchQuizState()
+    val newQuizState = oldQuizState.copy(
+      submissions = oldQuizState.submissions.map {
+        case s if s.id == submissionId => newSubmissionEntity.toSubmission
+        case s                         => s
+      },
+    )
+
+    entityAccess.persistEntityModifications(
+      EntityModification.createUpdateAllFields(newQuizState),
+      EntityModification.createUpdateAllFields(newSubmissionEntity),
+    )
   }
 
   private def executeInSingleThreadAndWait[R](func: => R): R = {
@@ -612,10 +613,11 @@ final class ScalaJsApiServerFactory @Inject()(
 
     private def addOrRemovePoints(quizState: QuizState): Unit = executeInSingleThreadAndWait[Unit] {
       val allTeams = fetchAllTeams()
+      val unscoredSubmissions = quizState.submissions.filter(!_.scored)
 
       entityAccess.persistEntityModifications {
         for {
-          (teamId, submissionsByTeam) <- quizState.submissions.groupBy(_.teamId).toVector
+          (teamId, submissionsByTeam) <- unscoredSubmissions.groupBy(_.teamId).toVector
           scoreDiff <- Some(submissionsByTeam.map(_.points).sum)
           if scoreDiff != 0
         } yield {
@@ -623,6 +625,10 @@ final class ScalaJsApiServerFactory @Inject()(
           val newScore = team.score + scoreDiff
           EntityModification.createUpdateAllFields(team.copy(score = newScore))
         }
+      }
+
+      for (submission <- unscoredSubmissions) {
+        updateSubmissionInStateAndEntity(submission.id)(_.copy(scored = true))
       }
     }
 
