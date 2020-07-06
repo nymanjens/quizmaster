@@ -79,6 +79,8 @@ object ModelFields {
           "isCorrectAnswer",
           _.isCorrectAnswer,
           v => _.copy(isCorrectAnswer = v))
+    case object points extends ModelField[Int, E]("points", _.points, v => _.copy(points = v))
+    case object scored extends ModelField[Boolean, E]("scored", _.scored, v => _.copy(scored = v))
   }
 
   // **************** Field numbers **************** //
@@ -106,6 +108,8 @@ object ModelFields {
         SubmissionEntity.createTime,
         SubmissionEntity.value,
         SubmissionEntity.isCorrectAnswer,
+        SubmissionEntity.points,
+        SubmissionEntity.scored,
       )
     )
   def toNumber(field: ModelField.any): Int = fieldToNumberMap.get(field)

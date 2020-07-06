@@ -196,12 +196,8 @@ final class Application @Inject()(
     Ok(result)
   }
 
-
-
-
   def versionsInfo = Action { implicit request =>
-    Ok(
-      s"""
+    Ok(s"""
         |Version: ${AppVersion.versionString}
         |Quiz config location: ${quizAssets.configPath}
         |Quiz title: ${quizConfig.title.getOrElse("-")}

@@ -1,5 +1,8 @@
 package app.flux.react.app.quiz
 
+import app.api.ScalaJsApi.TeamOrQuizStateUpdate.SetSubmissionPoints
+import app.api.ScalaJsApiClient
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import app.common.AnswerBullet
 import app.flux.react.app.quiz.TeamIcon.colorOf
@@ -31,6 +34,7 @@ import scala.scalajs.js
 final class TeamsList(
     implicit pageHeader: PageHeader,
     dispatcher: Dispatcher,
+    scalaJsApiClient: ScalaJsApiClient,
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     teamInputStore: TeamInputStore,
@@ -110,28 +114,7 @@ final class TeamsList(
                 " ",
                 TeamIcon(team),
               ),
-              <.div(
-                ^.className := "score",
-                <<.ifThen(props.showMasterControls) {
-                  Bootstrap
-                    .Button()(
-                      ^.onClick --> LogExceptionsCallback(
-                        teamsAndQuizStateStore.updateScore(team, scoreDiff = -1)).void,
-                      Bootstrap.Glyphicon("minus"),
-                    )
-                },
-                " ",
-                team.score,
-                " ",
-                <<.ifThen(props.showMasterControls) {
-                  Bootstrap
-                    .Button()(
-                      ^.onClick --> LogExceptionsCallback(
-                        teamsAndQuizStateStore.updateScore(team, scoreDiff = +1)).void,
-                      Bootstrap.Glyphicon("plus"),
-                    )
-                },
-              ),
+              scoreDiv(team, maybeSubmission, showSubmissionValue = showSubmissionValue),
               <.div(
                 ^.className := "submission",
                 maybeSubmission match {
@@ -144,6 +127,86 @@ final class TeamsList(
           }).toVdomArray
         )
       }
+    }
+
+    private def scoreDiv(
+        team: Team,
+        maybeSubmission: Option[Submission],
+        showSubmissionValue: Boolean,
+    )(
+        implicit quizState: QuizState,
+        props: Props,
+    ): VdomNode = {
+      val showSubmissionPoints = (showSubmissionValue &&
+        maybeSubmission.exists(!_.scored) &&
+        (maybeSubmission.get.points != 0 || props.showMasterControls))
+
+      val showUpdateScoreButtons = props.showMasterControls &&
+        (
+          quizState.maybeQuestion match {
+            case None =>
+              // If there is no question, there are no submissions to take up space
+              true
+            case Some(question) =>
+              (
+                // Show the update buttons at the title page of a question. At this point, there will be no
+                // submission points to take up space
+                quizState.questionProgressIndex == 0 ||
+                  // Show the update buttons once the submissions have been scored. At this point, the submission
+                  // points will be hidden
+                  quizState.questionProgressIndex == question.maxProgressIndex(includeAnswers = true)
+              )
+          }
+        )
+
+      <.div(
+        ^.className := "score",
+        if (showUpdateScoreButtons) {
+          <.span(
+            updateTeamScoreButton(team, sign = "minus", scoreDiff = -1),
+            " ",
+            team.score,
+            " ",
+            updateTeamScoreButton(team, sign = "plus", scoreDiff = +1),
+          )
+        } else {
+          team.score
+        },
+        <<.ifThen(showSubmissionPoints) {
+          val submission = maybeSubmission.get
+          <.span(
+            " ",
+            if (submission.points < 0) "-" else "+",
+            " ",
+            if (props.showMasterControls) {
+              <.span(
+                updateSubmissionPointsButton(submission, sign = "minus", diff = -1),
+                " ",
+                Math.abs(submission.points),
+                " ",
+                updateSubmissionPointsButton(submission, sign = "plus", diff = +1),
+              )
+            } else {
+              Math.abs(submission.points)
+            },
+          )
+        }
+      )
+    }
+
+    private def updateTeamScoreButton(team: Team, sign: String, scoreDiff: Int): VdomNode = {
+      Bootstrap.Button(Variant.default, Size.xs)(
+        ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.updateScore(team, scoreDiff = scoreDiff)).void,
+        Bootstrap.Glyphicon(sign),
+      )
+    }
+    private def updateSubmissionPointsButton(submission: Submission, sign: String, diff: Int): VdomNode = {
+      Bootstrap.Button(Variant.success, Size.xs)(
+        ^.onClick --> LogExceptionsCallback(
+          scalaJsApiClient.doTeamOrQuizStateUpdate(
+            SetSubmissionPoints(submission.id, points = submission.points + diff))).void,
+        Bootstrap.Glyphicon(sign),
+      )
     }
 
     private def revealingSubmissionValueNode(submission: Submission)(
