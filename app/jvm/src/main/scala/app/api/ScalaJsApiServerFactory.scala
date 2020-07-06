@@ -213,6 +213,7 @@ final class ScalaJsApiServerFactory @Inject()(
           case SetSubmissionCorrectness(submissionId: Long, isCorrectAnswer: Boolean) =>
             val oldQuizState = fetchQuizState()
 
+            // Reset pointsToGain as well because its old value is likely moot
             val pointsToGain =
               oldQuizState.pointsToGainBySubmission(
                 isCorrectAnswer = Some(isCorrectAnswer),
@@ -595,27 +596,15 @@ final class ScalaJsApiServerFactory @Inject()(
     }
 
     private def addOrRemovePoints(quizState: QuizState): Unit = executeInSingleThreadAndWait[Unit] {
-      val question = quizState.maybeQuestion.get
-      var firstCorrectAnswerSeen = false
+      val allTeams = fetchAllTeams()
+
       entityAccess.persistEntityModifications {
         for {
-          submission <- quizState.submissions
-          scoreDiff <- Some {
-            submission.isCorrectAnswer match {
-              case Some(true) =>
-                if (firstCorrectAnswerSeen) {
-                  question.pointsToGain
-                } else {
-                  firstCorrectAnswerSeen = true
-                  question.pointsToGainOnFirstAnswer
-                }
-              case Some(false) => question.pointsToGainOnWrongAnswer
-              case None        => 0
-            }
-          }
+          (teamId, submissionsByTeam) <- quizState.submissions.groupBy(_.teamId).toVector
+          scoreDiff <- Some(submissionsByTeam.map(_.points).sum)
           if scoreDiff != 0
         } yield {
-          val team = fetchAllTeams().find(_.id == submission.teamId).get
+          val team = allTeams.find(_.id == teamId).get
           val newScore = team.score + scoreDiff
           EntityModification.createUpdateAllFields(team.copy(score = newScore))
         }
