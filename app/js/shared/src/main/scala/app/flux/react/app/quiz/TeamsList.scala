@@ -135,7 +135,7 @@ final class TeamsList(
     ): VdomNode = {
       val showSubmissionPoints = (showSubmissionValue &&
         maybeSubmission.exists(!_.scored) &&
-        (maybeSubmission.get.points != 0 && props.showMasterControls))
+        (maybeSubmission.get.points != 0 || props.showMasterControls))
 
       val showUpdateScoreButtons = props.showMasterControls &&
         (
@@ -158,7 +158,7 @@ final class TeamsList(
       <.div(
         ^.className := "score",
         if (showUpdateScoreButtons) {
-          VdomArray(
+          <.span(
             Bootstrap.Button()(
               ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.updateScore(team, scoreDiff = -1)).void,
               Bootstrap.Glyphicon("minus"),
@@ -175,19 +175,12 @@ final class TeamsList(
           team.score
         },
         <<.ifThen(showSubmissionPoints) {
-          if(props.showMasterControls) {
-            VdomArray(
-              " + ",
-              maybeSubmission.get.points,
-            )
-          } else {
-            VdomArray(
+            <.span(
               " ",
               if (maybeSubmission.get.points < 0) "-" else "+",
               " ",
               Math.abs(maybeSubmission.get.points),
             )
-          }
         }
       )
     }
