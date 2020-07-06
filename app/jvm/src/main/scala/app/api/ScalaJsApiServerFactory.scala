@@ -211,30 +211,26 @@ final class ScalaJsApiServerFactory @Inject()(
             addSubmission(teamId, submissionValue)
 
           case SetSubmissionCorrectness(submissionId: Long, isCorrectAnswer: Boolean) =>
-            val oldQuizState = fetchQuizState()
+            updateSubmissionInStateAndEntity(submissionId) { oldSubmissionEntity =>
+              // Reset pointsToGain as well because its old value is likely moot
+              val pointsToGain =
+                fetchQuizState().pointsToGainBySubmission(
+                  isCorrectAnswer = Some(isCorrectAnswer),
+                  submissionId = submissionId)
 
-            // Reset pointsToGain as well because its old value is likely moot
-            val pointsToGain =
-              oldQuizState.pointsToGainBySubmission(
-                isCorrectAnswer = Some(isCorrectAnswer),
-                submissionId = submissionId)
-
-            val newQuizState = oldQuizState.copy(
-              submissions = oldQuizState.submissions.map {
-                case s if s.id == submissionId =>
-                  s.copy(isCorrectAnswer = Some(isCorrectAnswer), points = pointsToGain)
-                case s => s
-              },
-            )
-
-            val oldSubmissionEntity = entityAccess.newQuerySync[SubmissionEntity]().findById(submissionId)
-            val newSubmissionEntity =
               oldSubmissionEntity.copy(isCorrectAnswer = Some(isCorrectAnswer), points = pointsToGain)
+            }
 
-            entityAccess.persistEntityModifications(
-              EntityModification.createUpdateAllFields(newQuizState),
-              EntityModification.createUpdateAllFields(newSubmissionEntity),
-            )
+          case SetSubmissionPoints(submissionId: Long, points: Int) =>
+            updateSubmissionInStateAndEntity(submissionId) { oldSubmissionEntity =>
+              val isCorrectAnswer = points match {
+                case 0               => oldSubmissionEntity.isCorrectAnswer
+                case _ if points < 0 => Some(false)
+                case _ if points > 0 => Some(true)
+              }
+
+              oldSubmissionEntity.copy(isCorrectAnswer = isCorrectAnswer, points = points)
+            }
         }
       }
     }
@@ -365,6 +361,25 @@ final class ScalaJsApiServerFactory @Inject()(
             )
           ),
         ) ++ submissionsToRemove.map(s => EntityModification.Remove[SubmissionEntity](s.id))
+      )
+    }
+
+    private def updateSubmissionInStateAndEntity(submissionId: Long)(
+        update: SubmissionEntity => SubmissionEntity): Unit = {
+      val oldSubmissionEntity = entityAccess.newQuerySync[SubmissionEntity]().findById(submissionId)
+      val newSubmissionEntity = update(oldSubmissionEntity)
+
+      val oldQuizState = fetchQuizState()
+      val newQuizState = oldQuizState.copy(
+        submissions = oldQuizState.submissions.map {
+          case s if s.id == submissionId => newSubmissionEntity.toSubmission
+          case s                         => s
+        },
+      )
+
+      entityAccess.persistEntityModifications(
+        EntityModification.createUpdateAllFields(newQuizState),
+        EntityModification.createUpdateAllFields(newSubmissionEntity),
       )
     }
   }
