@@ -110,28 +110,7 @@ final class TeamsList(
                 " ",
                 TeamIcon(team),
               ),
-              <.div(
-                ^.className := "score",
-                <<.ifThen(props.showMasterControls) {
-                  Bootstrap
-                    .Button()(
-                      ^.onClick --> LogExceptionsCallback(
-                        teamsAndQuizStateStore.updateScore(team, scoreDiff = -1)).void,
-                      Bootstrap.Glyphicon("minus"),
-                    )
-                },
-                " ",
-                team.score,
-                " ",
-                <<.ifThen(props.showMasterControls) {
-                  Bootstrap
-                    .Button()(
-                      ^.onClick --> LogExceptionsCallback(
-                        teamsAndQuizStateStore.updateScore(team, scoreDiff = +1)).void,
-                      Bootstrap.Glyphicon("plus"),
-                    )
-                },
-              ),
+              scoreDiv(team, maybeSubmission, showSubmissionValue = showSubmissionValue),
               <.div(
                 ^.className := "submission",
                 maybeSubmission match {
@@ -144,6 +123,73 @@ final class TeamsList(
           }).toVdomArray
         )
       }
+    }
+
+    private def scoreDiv(
+        team: Team,
+        maybeSubmission: Option[Submission],
+        showSubmissionValue: Boolean,
+    )(
+        implicit quizState: QuizState,
+        props: Props,
+    ): VdomNode = {
+      val showSubmissionPoints = (showSubmissionValue &&
+        maybeSubmission.exists(!_.scored) &&
+        (maybeSubmission.get.points != 0 && props.showMasterControls))
+
+      val showUpdateScoreButtons = props.showMasterControls &&
+        (
+          quizState.maybeQuestion match {
+            case None =>
+              // If there is no question, there are no submissions to take up space
+              true
+            case Some(question) =>
+              (
+                // Show the update buttons at the title page of a question. At this point, there will be no
+                // submission points to take up space
+                quizState.questionProgressIndex == 0 ||
+                  // Show the update buttons once the submissions have been scored. At this point, the submission
+                  // points will be hidden
+                  quizState.questionProgressIndex == question.maxProgressIndex(includeAnswers = true)
+              )
+          }
+        )
+
+      <.div(
+        ^.className := "score",
+        if (showUpdateScoreButtons) {
+          VdomArray(
+            Bootstrap.Button()(
+              ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.updateScore(team, scoreDiff = -1)).void,
+              Bootstrap.Glyphicon("minus"),
+            ),
+            " ",
+            team.score,
+            " ",
+            Bootstrap.Button()(
+              ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.updateScore(team, scoreDiff = +1)).void,
+              Bootstrap.Glyphicon("plus"),
+            ),
+          )
+        } else {
+          team.score
+        },
+        <<.ifThen(showSubmissionPoints) {
+          if(props.showMasterControls) {
+            VdomArray(
+              " + ",
+              maybeSubmission.get.points,
+            )
+          } else {
+            VdomArray(
+              " ",
+              if (maybeSubmission.get.points < 0) "-" else "+",
+              " ",
+              Math.abs(maybeSubmission.get.points),
+            )
+          }
+        }
+      )
     }
 
     private def revealingSubmissionValueNode(submission: Submission)(
