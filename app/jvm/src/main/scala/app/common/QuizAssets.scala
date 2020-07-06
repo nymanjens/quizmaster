@@ -16,7 +16,7 @@ final class QuizAssets @Inject()(
     implicit playConfiguration: play.api.Configuration,
 ) {
 
-  private lazy val configPath: Path = {
+  lazy val configPath: Path = {
     val configLocation = playConfiguration.get[String]("app.quiz.configYamlFilePath")
     Paths.get(ResourceFiles.canonicalizePath(configLocation)).getParent
   }

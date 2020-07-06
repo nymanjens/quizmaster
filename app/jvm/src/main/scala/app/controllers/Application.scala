@@ -16,6 +16,7 @@ import app.models.access.JvmEntityAccess
 import app.models.quiz.QuizState
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
+import app.AppVersion
 import com.google.inject.Inject
 import hydro.common.time.Clock
 import hydro.common.ResourceFiles
@@ -193,5 +194,19 @@ final class Application @Inject()(
     }
     result += "\n"
     Ok(result)
+  }
+
+
+
+
+  def versionsInfo = Action { implicit request =>
+    Ok(
+      s"""
+        |Version: ${AppVersion.versionString}
+        |Quiz config location: ${quizAssets.configPath}
+        |Quiz title: ${quizConfig.title.getOrElse("-")}
+        |Quiz author: ${quizConfig.author.getOrElse("-")}
+        |Rounds: ${quizConfig.rounds.size}
+        |""".stripMargin.trim)
   }
 }

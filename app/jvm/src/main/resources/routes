@@ -15,7 +15,7 @@ GET  /websocket/hydropush/:updateToken/  hydro.controllers.InternalApi.hydroPush
 
 # External API
 GET  /externalapi/healthcheck/         hydro.controllers.StandardActions.healthCheck
-
+GET  /versions/                        app.controllers.Application.versionsInfo
 GET  /rounds/:secret/                  app.controllers.Application.roundsInfo(secret)
 GET  /import/:secret/:serverDomain/    app.controllers.ExternalApi.importFromOtherServer(secret, serverDomain)
 

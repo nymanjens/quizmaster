@@ -153,7 +153,8 @@ final class SbadminLayout(
 
     // **************** Private helper methods ****************//
     private def versionNavbar(): VdomNode = {
-      Bootstrap.NavbarBrand()(
+      Bootstrap.NavbarBrand(tag = <.a)(
+        ^.href := s"/versions/",
         ^.style := js.Dictionary(
           "marginRight" -> "15px",
         ),
