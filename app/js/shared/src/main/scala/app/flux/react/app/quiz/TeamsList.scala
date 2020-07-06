@@ -1,5 +1,8 @@
 package app.flux.react.app.quiz
 
+import app.api.ScalaJsApi.TeamOrQuizStateUpdate.SetSubmissionPoints
+import app.api.ScalaJsApiClient
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import app.common.AnswerBullet
 import app.flux.react.app.quiz.TeamIcon.colorOf
@@ -31,6 +34,7 @@ import scala.scalajs.js
 final class TeamsList(
     implicit pageHeader: PageHeader,
     dispatcher: Dispatcher,
+    scalaJsApiClient: ScalaJsApiClient,
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     teamInputStore: TeamInputStore,
@@ -159,29 +163,49 @@ final class TeamsList(
         ^.className := "score",
         if (showUpdateScoreButtons) {
           <.span(
-            Bootstrap.Button()(
-              ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.updateScore(team, scoreDiff = -1)).void,
-              Bootstrap.Glyphicon("minus"),
-            ),
+            updateTeamScoreButton(team, sign = "minus", scoreDiff = -1),
             " ",
             team.score,
             " ",
-            Bootstrap.Button()(
-              ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.updateScore(team, scoreDiff = +1)).void,
-              Bootstrap.Glyphicon("plus"),
-            ),
+            updateTeamScoreButton(team, sign = "plus", scoreDiff = +1),
           )
         } else {
           team.score
         },
         <<.ifThen(showSubmissionPoints) {
-            <.span(
-              " ",
-              if (maybeSubmission.get.points < 0) "-" else "+",
-              " ",
-              Math.abs(maybeSubmission.get.points),
-            )
+          val submission = maybeSubmission.get
+          <.span(
+            " ",
+            if (submission.points < 0) "-" else "+",
+            " ",
+            if (props.showMasterControls) {
+              <.span(
+                updateSubmissionPointsButton(submission, sign = "minus", diff = -1),
+                " ",
+                Math.abs(submission.points),
+                " ",
+                updateSubmissionPointsButton(submission, sign = "plus", diff = +1),
+              )
+            } else {
+              Math.abs(submission.points)
+            },
+          )
         }
+      )
+    }
+
+    private def updateTeamScoreButton(team: Team, sign: String, scoreDiff: Int): VdomNode = {
+      Bootstrap.Button(Variant.default, Size.xs)(
+        ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.updateScore(team, scoreDiff = scoreDiff)).void,
+        Bootstrap.Glyphicon(sign),
+      )
+    }
+    private def updateSubmissionPointsButton(submission: Submission, sign: String, diff: Int): VdomNode = {
+      Bootstrap.Button(Variant.success, Size.xs)(
+        ^.onClick --> LogExceptionsCallback(
+          scalaJsApiClient.doTeamOrQuizStateUpdate(
+            SetSubmissionPoints(submission.id, points = submission.points + diff))).void,
+        Bootstrap.Glyphicon(sign),
       )
     }
 
