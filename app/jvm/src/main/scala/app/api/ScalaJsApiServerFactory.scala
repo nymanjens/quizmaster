@@ -212,15 +212,24 @@ final class ScalaJsApiServerFactory @Inject()(
 
           case SetSubmissionCorrectness(submissionId: Long, isCorrectAnswer: Boolean) =>
             val oldQuizState = fetchQuizState()
+
+            val pointsToGain =
+              oldQuizState.pointsToGainBySubmission(
+                isCorrectAnswer = Some(isCorrectAnswer),
+                submissionId = submissionId)
+
             val newQuizState = oldQuizState.copy(
               submissions = oldQuizState.submissions.map {
                 case s if s.id == submissionId =>
-                  s.copy(isCorrectAnswer = Some(isCorrectAnswer))
+                  s.copy(isCorrectAnswer = Some(isCorrectAnswer), points = pointsToGain)
                 case s => s
               },
             )
+
             val oldSubmissionEntity = entityAccess.newQuerySync[SubmissionEntity]().findById(submissionId)
-            val newSubmissionEntity = oldSubmissionEntity.copy(isCorrectAnswer = Some(isCorrectAnswer))
+            val newSubmissionEntity =
+              oldSubmissionEntity.copy(isCorrectAnswer = Some(isCorrectAnswer), points = pointsToGain)
+
             entityAccess.persistEntityModifications(
               EntityModification.createUpdateAllFields(newQuizState),
               EntityModification.createUpdateAllFields(newSubmissionEntity),
@@ -265,7 +274,7 @@ final class ScalaJsApiServerFactory @Inject()(
 
         if (question.isMultipleChoice) {
           addVerifiedSubmission(
-            Submission(
+            Submission.createUnscoredFromCurrentState(
               id = EntityModification.generateRandomId(),
               teamId = team.id,
               value = submissionValue,
@@ -280,7 +289,7 @@ final class ScalaJsApiServerFactory @Inject()(
           )
         } else { // Not multiple choice
           addVerifiedSubmission(
-            Submission(
+            Submission.createUnscoredFromCurrentState(
               id = EntityModification.generateRandomId(),
               teamId = team.id,
               value = submissionValue,
@@ -350,6 +359,8 @@ final class ScalaJsApiServerFactory @Inject()(
               createTime = clock.nowInstant,
               value = submission.value,
               isCorrectAnswer = submission.isCorrectAnswer,
+              points = submission.points,
+              scored = submission.scored,
             )
           ),
         ) ++ submissionsToRemove.map(s => EntityModification.Remove[SubmissionEntity](s.id))

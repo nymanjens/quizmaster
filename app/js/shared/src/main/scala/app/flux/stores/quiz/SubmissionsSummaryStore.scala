@@ -2,26 +2,18 @@ package app.flux.stores.quiz
 
 import java.time.Duration
 
-import hydro.common.time.JavaTimeImplicits._
-import app.api.ScalaJsApi.TeamOrQuizStateUpdate._
 import app.api.ScalaJsApiClient
-import app.flux.action.AppActions
 import app.flux.stores.quiz.SubmissionsSummaryStore.QuestionIndex
 import app.flux.stores.quiz.SubmissionsSummaryStore.State
-import app.models.access.ModelFields
-import app.models.quiz.QuizState
 import app.models.quiz.Team
 import app.models.quiz.config.QuizConfig
-import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.SubmissionEntity
 import app.models.user.User
 import hydro.common.time.Clock
+import hydro.common.time.JavaTimeImplicits._
 import hydro.common.I18n
-import hydro.common.SerializingTaskQueue
 import hydro.flux.action.Dispatcher
 import hydro.flux.stores.AsyncEntityDerivedStateStore
-import hydro.models.access.DbQuery
-import hydro.models.access.DbQueryImplicits._
 import hydro.models.access.JsEntityAccess
 import hydro.models.modification.EntityModification
 
@@ -97,22 +89,8 @@ object SubmissionsSummaryStore {
       if (hasAnySubmission(roundIndex, questionIndex, teamId)) {
         val allSubmissionsForQuestion = latestSubmissionsMap(QuestionIndex(roundIndex, questionIndex))
         val submissionEntity: SubmissionEntity = allSubmissionsForQuestion(teamId)
-        val maybeFirstCorrectSubmission: Option[SubmissionEntity] =
-          allSubmissionsForQuestion.values.toVector
-            .sortBy(_.createTime)
-            .find(_.isCorrectAnswer == Some(true))
-        val question = quizConfig.rounds(roundIndex).questions(questionIndex)
 
-        submissionEntity.isCorrectAnswer match {
-          case Some(true) =>
-            if (maybeFirstCorrectSubmission == Some(submissionEntity)) {
-              question.pointsToGainOnFirstAnswer
-            } else {
-              question.pointsToGain
-            }
-          case Some(false) => question.pointsToGainOnWrongAnswer
-          case None        => 0
-        }
+        submissionEntity.points
       } else {
         0
       }

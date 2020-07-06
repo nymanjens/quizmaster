@@ -1,22 +1,15 @@
 package app.flux.react.app.quiz
 
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import scala.async.Async.async
-import scala.async.Async.await
 import app.api.ScalaJsApiClient
 import app.common.AnswerBullet
 import app.common.LocalStorageClient
 import app.flux.action.AppActions
 import app.flux.router.AppPages
-import app.flux.stores.quiz.GamepadStore.Arrow
-
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState
 import app.models.quiz.Team
 import app.models.quiz.config.QuizConfig.Question
-import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import hydro.common.I18n
 import hydro.common.JsLoggingUtils.logExceptions
@@ -25,7 +18,6 @@ import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
 import hydro.flux.react.uielements.PageHeader
 import hydro.flux.react.uielements.input.TextInput
-import hydro.flux.react.uielements.Bootstrap
 import hydro.flux.react.uielements.Bootstrap.Size
 import hydro.flux.react.uielements.Bootstrap.Variant
 import hydro.flux.react.ReactVdomUtils.<<
@@ -35,9 +27,11 @@ import hydro.flux.router.RouterContext
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
-import org.scalajs.dom
 
+import scala.async.Async.async
+import scala.async.Async.await
 import scala.concurrent.Future
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 final class TeamControllerView(
     implicit pageHeader: PageHeader,

@@ -1,10 +1,15 @@
 package app.models.quiz
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.async.Async.async
+import scala.async.Async.await
 import java.lang.Math.abs
 
 import hydro.common.time.JavaTimeImplicits._
 import java.time.Duration
 import java.time.Instant
+
+import app.models.access.ModelFields
 
 import scala.collection.immutable.Seq
 import app.models.quiz.config.QuizConfig
@@ -20,8 +25,11 @@ import hydro.common.I18n
 import hydro.models.Entity
 import hydro.models.UpdatableEntity
 import hydro.models.UpdatableEntity.LastUpdateTime
+import hydro.models.access.EntityAccess
+import hydro.models.modification.EntityModification
 import hydro.models.modification.EntityType
 
+import scala.concurrent.Future
 import scala.util.Random
 
 case class QuizState(
@@ -121,6 +129,25 @@ case class QuizState(
         canAnyTeamSubmitResponse && !blockedByEarlierSubmissionOfSameTeam
     }
   }
+
+  def pointsToGainBySubmission(
+      isCorrectAnswer: Option[Boolean],
+      submissionId: Long,
+  )(implicit quizConfig: QuizConfig): Int = {
+    val maybeFirstCorrectSubmission: Option[Submission] = submissions.find(_.isCorrectAnswer == Some(true))
+    val question = maybeQuestion.get
+
+    isCorrectAnswer match {
+      case Some(true) =>
+        maybeFirstCorrectSubmission match {
+          case Some(s) if s.id == submissionId => question.pointsToGainOnFirstAnswer
+          case None                            => question.pointsToGainOnFirstAnswer
+          case Some(otherSubmission)           => question.pointsToGain
+        }
+      case Some(false) => question.pointsToGainOnWrongAnswer
+      case None        => 0
+    }
+  }
 }
 
 object QuizState {
@@ -173,8 +200,28 @@ object QuizState {
       value: SubmissionValue,
       // If none, there is no information available to make an estimation of correctness
       isCorrectAnswer: Option[Boolean],
+      // The points that this submission will gain / gained.
+      points: Int,
+      // If true, the `points` were added to the team score
+      scored: Boolean,
   )
   object Submission {
+    def createUnscoredFromCurrentState(
+        id: Long,
+        teamId: Long,
+        value: SubmissionValue,
+        isCorrectAnswer: Option[Boolean],
+    )(implicit quizState: QuizState, quizConfig: QuizConfig): Submission = {
+      Submission(
+        id = EntityModification.generateRandomId(),
+        teamId = teamId,
+        value = value,
+        isCorrectAnswer = isCorrectAnswer,
+        points = quizState.pointsToGainBySubmission(isCorrectAnswer = isCorrectAnswer, submissionId = id),
+        scored = false,
+      )
+    }
+
     sealed abstract class SubmissionValue
     object SubmissionValue {
       case object PressedTheOneButton extends SubmissionValue

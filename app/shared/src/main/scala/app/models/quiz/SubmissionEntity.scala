@@ -4,6 +4,8 @@ import java.time.Instant
 
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.Submission.SubmissionValue
+import app.models.quiz.config.QuizConfig
+import app.models.quiz.config.QuizConfig.Question
 import hydro.models.Entity
 import hydro.models.UpdatableEntity
 import hydro.models.UpdatableEntity.LastUpdateTime
@@ -17,6 +19,10 @@ case class SubmissionEntity(
     value: SubmissionValue,
     // If none, there is no information available to make an estimation of correctness
     isCorrectAnswer: Option[Boolean],
+    // The points that this submission will gain / gained.
+    points: Int,
+    // If true, the `points` were added to the team score
+    scored: Boolean,
     override val idOption: Option[Long] = None,
     override val lastUpdateTime: LastUpdateTime = LastUpdateTime.neverUpdated,
 ) extends UpdatableEntity {
@@ -30,7 +36,13 @@ case class SubmissionEntity(
       teamId = teamId,
       value = value,
       isCorrectAnswer = isCorrectAnswer,
+      points = points,
+      scored = scored,
     )
+  }
+
+  def question(implicit quizConfig: QuizConfig): Question = {
+    quizConfig.rounds(roundIndex).questions(questionIndex)
   }
 }
 object SubmissionEntity {
