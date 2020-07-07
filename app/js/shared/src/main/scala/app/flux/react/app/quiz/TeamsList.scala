@@ -5,6 +5,7 @@ import app.api.ScalaJsApiClient
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import app.common.AnswerBullet
+import app.common.FixedPointNumber
 import app.flux.react.app.quiz.TeamIcon.colorOf
 import hydro.flux.react.ReactVdomUtils.^^
 import app.flux.stores.quiz.GamepadStore.GamepadState
@@ -180,11 +181,11 @@ final class TeamsList(
             " ",
             if (props.showMasterControls) {
               <.span(
-                updateSubmissionPointsButton(submission, sign = "minus", diff = -1),
+                updateSubmissionPointsButton(submission, sign = "minus", diff = FixedPointNumber(-1)),
                 " ",
                 Math.abs(submission.points),
                 " ",
-                updateSubmissionPointsButton(submission, sign = "plus", diff = +1),
+                updateSubmissionPointsButton(submission, sign = "plus", diff = FixedPointNumber(+1)),
               )
             } else {
               Math.abs(submission.points)
@@ -194,13 +195,14 @@ final class TeamsList(
       )
     }
 
-    private def updateTeamScoreButton(team: Team, sign: String, scoreDiff: Int): VdomNode = {
+    private def updateTeamScoreButton(team: Team, sign: String, scoreDiff: FixedPointNumber): VdomNode = {
       Bootstrap.Button(Variant.default, Size.xs)(
         ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.updateScore(team, scoreDiff = scoreDiff)).void,
         Bootstrap.Glyphicon(sign),
       )
     }
-    private def updateSubmissionPointsButton(submission: Submission, sign: String, diff: Int): VdomNode = {
+    private def updateSubmissionPointsButton(submission: Submission, sign: String, diff: FixedPointNumber
+                                            ): VdomNode = {
       Bootstrap.Button(Variant.success, Size.xs)(
         ^.onClick --> LogExceptionsCallback(
           scalaJsApiClient.doTeamOrQuizStateUpdate(
