@@ -2,6 +2,7 @@ package app.flux.react.app.quiz
 
 import scala.collection.immutable.Seq
 import app.common.AnswerBullet
+import app.common.FixedPointNumber
 import app.flux.stores.quiz.GamepadStore.GamepadState
 import app.flux.stores.quiz.SubmissionsSummaryStore
 import app.flux.stores.quiz.TeamInputStore
@@ -163,7 +164,7 @@ final class SubmissionsSummaryTable(
                       ^^.ifThen(props.selectedTeamId == Some(team.id)) {
                         ^.className := "info"
                       },
-                      state.submissionsSummaryState.totalPoints(team)
+                      state.submissionsSummaryState.totalPoints(team).toString
                     )
               }.toVdomArray
             ),
@@ -193,15 +194,15 @@ final class SubmissionsSummaryTable(
                   ^^.ifThen(props.selectedTeamId == Some(team.id)) {
                     ^.className := "info"
                   },
-                  team.score,
+                  team.score.toString,
                 )
           }.toVdomArray
         ),
       )
     }
 
-    private def hideIfZero(int: Int): String = {
-      if (int == 0) "" else int.toString
+    private def hideIfZero(fpn: FixedPointNumber): String = {
+      if (fpn == 0) "" else fpn.toString
     }
   }
 }

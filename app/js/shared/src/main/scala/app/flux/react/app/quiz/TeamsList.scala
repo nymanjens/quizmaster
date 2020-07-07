@@ -166,12 +166,12 @@ final class TeamsList(
           <.span(
             updateTeamScoreButton(team, sign = "minus", scoreDiff = -1),
             " ",
-            team.score,
+            team.score.toString,
             " ",
             updateTeamScoreButton(team, sign = "plus", scoreDiff = +1),
           )
         } else {
-          team.score
+          team.score.toString
         },
         <<.ifThen(showSubmissionPoints) {
           val submission = maybeSubmission.get
@@ -181,28 +181,27 @@ final class TeamsList(
             " ",
             if (props.showMasterControls) {
               <.span(
-                updateSubmissionPointsButton(submission, sign = "minus", diff = FixedPointNumber(-1)),
+                updateSubmissionPointsButton(submission, sign = "minus", diff = -1),
                 " ",
-                Math.abs(submission.points),
+                submission.points.abs.toString,
                 " ",
-                updateSubmissionPointsButton(submission, sign = "plus", diff = FixedPointNumber(+1)),
+                updateSubmissionPointsButton(submission, sign = "plus", diff = +1),
               )
             } else {
-              Math.abs(submission.points)
+              submission.points.abs.toString
             },
           )
         }
       )
     }
 
-    private def updateTeamScoreButton(team: Team, sign: String, scoreDiff: FixedPointNumber): VdomNode = {
+    private def updateTeamScoreButton(team: Team, sign: String, scoreDiff: Int): VdomNode = {
       Bootstrap.Button(Variant.default, Size.xs)(
-        ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.updateScore(team, scoreDiff = scoreDiff)).void,
+        ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.updateScore(team, scoreDiff = FixedPointNumber(scoreDiff))).void,
         Bootstrap.Glyphicon(sign),
       )
     }
-    private def updateSubmissionPointsButton(submission: Submission, sign: String, diff: FixedPointNumber
-                                            ): VdomNode = {
+    private def updateSubmissionPointsButton(submission: Submission, sign: String, diff: Int                                            ): VdomNode = {
       Bootstrap.Button(Variant.success, Size.xs)(
         ^.onClick --> LogExceptionsCallback(
           scalaJsApiClient.doTeamOrQuizStateUpdate(

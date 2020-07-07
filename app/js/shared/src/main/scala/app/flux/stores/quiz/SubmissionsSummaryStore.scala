@@ -3,6 +3,7 @@ package app.flux.stores.quiz
 import java.time.Duration
 
 import app.api.ScalaJsApiClient
+import app.common.FixedPointNumber
 import app.flux.stores.quiz.SubmissionsSummaryStore.QuestionIndex
 import app.flux.stores.quiz.SubmissionsSummaryStore.State
 import app.models.quiz.Team
@@ -85,18 +86,18 @@ object SubmissionsSummaryStore {
       roundToTimeEstimateMap: Map[RoundIndex, Duration],
       totalQuizTimeEstimate: Duration,
   ) {
-    def points(roundIndex: Int, questionIndex: Int, teamId: Long)(implicit quizConfig: QuizConfig): Int = {
+    def points(roundIndex: Int, questionIndex: Int, teamId: Long)(implicit quizConfig: QuizConfig): FixedPointNumber = {
       if (hasAnySubmission(roundIndex, questionIndex, teamId)) {
         val allSubmissionsForQuestion = latestSubmissionsMap(QuestionIndex(roundIndex, questionIndex))
         val submissionEntity: SubmissionEntity = allSubmissionsForQuestion(teamId)
 
         submissionEntity.points
       } else {
-        0
+        FixedPointNumber(0)
       }
     }
 
-    def totalPoints(team: Team)(implicit quizConfig: QuizConfig): Int = {
+    def totalPoints(team: Team)(implicit quizConfig: QuizConfig): FixedPointNumber = {
       {
         for (QuestionIndex(roundIndex, questionIndex) <- latestSubmissionsMap.keysIterator)
           yield points(roundIndex, questionIndex, team.id)

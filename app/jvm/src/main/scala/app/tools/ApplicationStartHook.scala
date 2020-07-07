@@ -5,6 +5,7 @@ import java.nio.file.Paths
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
+import app.common.FixedPointNumber
 import app.models.access.JvmEntityAccess
 import app.models.access.ModelFields
 import app.models.quiz.Team
@@ -47,28 +48,28 @@ final class ApplicationStartHook @Inject()(
       EntityModification.createAddWithRandomId(
         Team(
           name = "Team A",
-          score = 0,
+          score = FixedPointNumber(0),
           index = 0,
         ),
       ),
       EntityModification.createAddWithRandomId(
         Team(
           name = "Team B",
-          score = 0,
+          score = FixedPointNumber(0),
           index = 1,
         ),
       ),
       EntityModification.createAddWithRandomId(
         Team(
           name = "Team C",
-          score = 0,
+          score = FixedPointNumber(0),
           index = 2,
         ),
       ),
       EntityModification.createAddWithRandomId(
         Team(
           name = "Team D",
-          score = 0,
+          score = FixedPointNumber(0),
           index = 3,
         ),
       ),
