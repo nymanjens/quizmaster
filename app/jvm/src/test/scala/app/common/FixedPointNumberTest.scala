@@ -35,4 +35,33 @@ class FixedPointNumberTest extends Specification {
     FixedPointNumber(2) < FixedPointNumber(-1.1) mustEqual false
     FixedPointNumber(2) > FixedPointNumber(-1.1) mustEqual true
   }
+
+  "==  int" in {
+    FixedPointNumber(1.0) == 1 mustEqual true
+    FixedPointNumber(1.1) == 1 mustEqual false
+    FixedPointNumber(0) == 0 mustEqual true
+
+    FixedPointNumber(0) != 0 mustEqual false
+    FixedPointNumber(0) != 1 mustEqual true
+  }
+
+  "sum" in {
+    Seq(FixedPointNumber(1), FixedPointNumber(1.2)).sum mustEqual FixedPointNumber(2.2)
+  }
+
+  "unapply" in {
+    (
+      FixedPointNumber(1) match {
+        case FixedPointNumber(1) => true
+        case _                   => false
+      }
+    ) mustEqual true
+
+    (
+      FixedPointNumber(1.1) match {
+        case FixedPointNumber(1) => false
+        case _                   => true
+      }
+    ) mustEqual true
+  }
 }
