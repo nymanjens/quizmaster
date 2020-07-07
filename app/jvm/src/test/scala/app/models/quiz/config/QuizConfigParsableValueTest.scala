@@ -45,9 +45,9 @@ class QuizConfigParsableValueTest extends Specification {
         |        answerImage: {src: geography/france-answer.png, size: large}
         |        masterNotes: This is a very simple question
         |        answerDetail: Image released under Creative Commons by Destination2 (www.destination2.co.uk)
-        |        pointsToGain: 2
-        |        pointsToGainOnFirstAnswer: 4
-        |        pointsToGainOnWrongAnswer: -1
+        |        pointsToGain: 2.1
+        |        pointsToGainOnFirstAnswer: 4.2
+        |        pointsToGainOnWrongAnswer: -1.3
         |        maxTimeSeconds: 8
         |        onlyFirstGainsPoints: true
         |
@@ -105,9 +105,9 @@ class QuizConfigParsableValueTest extends Specification {
               image = Some(Image("geography/france.png", "small")),
               audioSrc = None,
               videoSrc = None,
-              pointsToGain = FixedPointNumber(2),
-              pointsToGainOnFirstAnswer = FixedPointNumber(4),
-              pointsToGainOnWrongAnswer = FixedPointNumber(-1),
+              pointsToGain = FixedPointNumber(2.1),
+              pointsToGainOnFirstAnswer = FixedPointNumber(4.2),
+              pointsToGainOnWrongAnswer = FixedPointNumber(-1.3),
               maxTime = Duration.ofSeconds(8),
               onlyFirstGainsPoints = true,
               showSingleAnswerButtonToTeams = false,
