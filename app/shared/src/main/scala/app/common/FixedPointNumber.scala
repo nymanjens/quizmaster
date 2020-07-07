@@ -25,12 +25,18 @@ class FixedPointNumber private (
   def +(that: Int): FixedPointNumber = this + FixedPointNumber(that)
   def -(that: FixedPointNumber): FixedPointNumber = FixedPointNumberNumeric.minus(this, that)
   def -(that: Int): FixedPointNumber = this - FixedPointNumber(that)
+
+  def *(that: Int): FixedPointNumber = new FixedPointNumber(this.numberWithoutPoint * that)
+  def /(that: Int): FixedPointNumber = new FixedPointNumber(this.numberWithoutPoint / that)
+
   def >(that: FixedPointNumber): Boolean = FixedPointNumberNumeric.gt(this, that)
   def >(that: Int): Boolean = this > FixedPointNumber(that)
   def <(that: FixedPointNumber): Boolean = FixedPointNumberNumeric.lt(this, that)
   def <(that: Int): Boolean = this < FixedPointNumber(that)
+
   def ==(that: Int): Boolean = this == FixedPointNumber(that)
   def !=(that: Int): Boolean = this != FixedPointNumber(that)
+
   def toDouble: Double = numberWithoutPoint / 10.0
 }
 
@@ -58,9 +64,7 @@ object FixedPointNumber {
     override def minus(x: FixedPointNumber, y: FixedPointNumber): FixedPointNumber = {
       new FixedPointNumber(x.numberWithoutPoint - y.numberWithoutPoint)
     }
-    override def times(x: FixedPointNumber, y: FixedPointNumber): FixedPointNumber = {
-      FixedPointNumber(x.toDouble * y.toDouble / 10.0)
-    }
+    override def times(x: FixedPointNumber, y: FixedPointNumber): FixedPointNumber = ???
     override def negate(x: FixedPointNumber): FixedPointNumber = {
       new FixedPointNumber(-x.numberWithoutPoint)
     }
