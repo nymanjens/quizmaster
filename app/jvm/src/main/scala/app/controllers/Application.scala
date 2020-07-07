@@ -129,14 +129,14 @@ final class Application @Inject()(
       val maxPoints = questions.map(_.pointsToGainOnFirstAnswer).sum
       val avgPoints4PerfectTeams = questions.map { q =>
         if (q.onlyFirstGainsPoints) {
-          q.pointsToGainOnFirstAnswer / 4.0
+          q.pointsToGainOnFirstAnswer.toDouble / 4.0
         } else {
-          (q.pointsToGainOnFirstAnswer + 3 * q.pointsToGain) / 4.0
+          (q.pointsToGainOnFirstAnswer + (q.pointsToGain * 3)).toDouble / 4.0
         }
       }.sum
-      val showMax = avgPoints4PerfectTeams.round != maxPoints
+      val showMax = avgPoints4PerfectTeams.round != maxPoints.toDouble.round
       val maxString =
-        s", max: ${indent(3, maxPoints)} (${indent(3, round1(maxPoints / expectedMinutes))} per min)"
+        s", max: ${indent(3, maxPoints)} (${indent(3, round1(maxPoints.toDouble / expectedMinutes))} per min)"
 
       s"${indent(3, questions.size)} questions; " +
         s"Time: {expected: ${indent(3, expectedMinutes.round)} min, max ${indent(3, maxMinutes.round)} min};    " +
@@ -181,8 +181,8 @@ final class Application @Inject()(
         val maxTime =
           if (q.maxTime > infiniteDurationThreshold) "inf" else round1(q.maxTime.getSeconds / 60.0)
 
-        result += s"    - toGain: ${indent(2, q.pointsToGain)};  " +
-          s"first: ${indent(2, q.pointsToGainOnFirstAnswer)};   " +
+        result += s"    - toGain: ${indent(3, q.pointsToGain)};  " +
+          s"first: ${indent(3, q.pointsToGainOnFirstAnswer)};   " +
           s"onlyFirst: ${indent(5, q.onlyFirstGainsPoints)}; " +
           s"${indent(5, maxTime)} min; " +
           s"${indent(50, textualQuestion)}; " +

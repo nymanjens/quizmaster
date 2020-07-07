@@ -3,6 +3,7 @@ package app.models.quiz.config;
 import java.nio.file.Paths
 import java.time.Duration
 
+import app.common.FixedPointNumber
 import app.models.quiz.config.QuizConfig.Image
 import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.config.QuizConfig.Round
@@ -44,9 +45,9 @@ class QuizConfigParsableValueTest extends Specification {
         |        answerImage: {src: geography/france-answer.png, size: large}
         |        masterNotes: This is a very simple question
         |        answerDetail: Image released under Creative Commons by Destination2 (www.destination2.co.uk)
-        |        pointsToGain: 2
-        |        pointsToGainOnFirstAnswer: 4
-        |        pointsToGainOnWrongAnswer: -1
+        |        pointsToGain: 2.1
+        |        pointsToGainOnFirstAnswer: 4.2
+        |        pointsToGainOnWrongAnswer: -1.3
         |        maxTimeSeconds: 8
         |        onlyFirstGainsPoints: true
         |
@@ -104,9 +105,9 @@ class QuizConfigParsableValueTest extends Specification {
               image = Some(Image("geography/france.png", "small")),
               audioSrc = None,
               videoSrc = None,
-              pointsToGain = 2,
-              pointsToGainOnFirstAnswer = 4,
-              pointsToGainOnWrongAnswer = -1,
+              pointsToGain = FixedPointNumber(2.1),
+              pointsToGainOnFirstAnswer = FixedPointNumber(4.2),
+              pointsToGainOnWrongAnswer = FixedPointNumber(-1.3),
               maxTime = Duration.ofSeconds(8),
               onlyFirstGainsPoints = true,
               showSingleAnswerButtonToTeams = false,
@@ -122,9 +123,9 @@ class QuizConfigParsableValueTest extends Specification {
               image = None,
               audioSrc = None,
               videoSrc = None,
-              pointsToGain = 1,
-              pointsToGainOnFirstAnswer = 1,
-              pointsToGainOnWrongAnswer = 0,
+              pointsToGain = FixedPointNumber(1),
+              pointsToGainOnFirstAnswer = FixedPointNumber(1),
+              pointsToGainOnWrongAnswer = FixedPointNumber(0),
               maxTime = Duration.ofSeconds(60),
               onlyFirstGainsPoints = false,
               showSingleAnswerButtonToTeams = false,
@@ -140,9 +141,9 @@ class QuizConfigParsableValueTest extends Specification {
               image = None,
               audioSrc = None,
               videoSrc = None,
-              pointsToGain = 1,
-              pointsToGainOnFirstAnswer = 1,
-              pointsToGainOnWrongAnswer = 0,
+              pointsToGain = FixedPointNumber(1),
+              pointsToGainOnFirstAnswer = FixedPointNumber(1),
+              pointsToGainOnWrongAnswer = FixedPointNumber(0),
               maxTime = Duration.ofSeconds(8),
               onlyFirstGainsPoints = false,
               showSingleAnswerButtonToTeams = true,
@@ -164,9 +165,9 @@ class QuizConfigParsableValueTest extends Specification {
               image = None,
               audioSrc = Some("music_round/bensound-summer.mp3"),
               videoSrc = Some("geography/about_bananas.mp4"),
-              pointsToGain = 1,
-              pointsToGainOnFirstAnswer = 1,
-              pointsToGainOnWrongAnswer = 0,
+              pointsToGain = FixedPointNumber(1),
+              pointsToGainOnFirstAnswer = FixedPointNumber(1),
+              pointsToGainOnWrongAnswer = FixedPointNumber(0),
               maxTime = Duration.ofSeconds(15),
               onlyFirstGainsPoints = false,
               showSingleAnswerButtonToTeams = false,
@@ -183,7 +184,7 @@ class QuizConfigParsableValueTest extends Specification {
               textualQuestion = "How many sides does a triangle have?",
               textualAnswer = "3",
               textualChoices = Seq("3", "4", "5", "6"),
-              pointsToGain = 2,
+              pointsToGain = FixedPointNumber(2),
             ),
           ),
         )

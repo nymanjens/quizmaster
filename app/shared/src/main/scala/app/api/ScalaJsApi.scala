@@ -3,6 +3,7 @@ package app.api
 import java.time.Duration
 
 import app.api.ScalaJsApi._
+import app.common.FixedPointNumber
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.QuizState.Submission.SubmissionValue
@@ -70,7 +71,7 @@ object ScalaJsApi {
   object TeamOrQuizStateUpdate {
     case class ReplaceAllEntitiesByImportString(importString: String) extends TeamOrQuizStateUpdate
     case class UpdateName(teamId: Long, newName: String) extends TeamOrQuizStateUpdate
-    case class UpdateScore(teamId: Long, scoreDiff: Int) extends TeamOrQuizStateUpdate
+    case class UpdateScore(teamId: Long, scoreDiff: FixedPointNumber) extends TeamOrQuizStateUpdate
     case class DeleteTeam(teamId: Long) extends TeamOrQuizStateUpdate
     case class GoToPreviousStep() extends TeamOrQuizStateUpdate
     case class GoToNextStep() extends TeamOrQuizStateUpdate
@@ -103,6 +104,6 @@ object ScalaJsApi {
         extends TeamOrQuizStateUpdate
 
     /** If the given points are non-zero, the correctness is also updated based on the sign of the given points. */
-    case class SetSubmissionPoints(submissionId: Long, points: Int) extends TeamOrQuizStateUpdate
+    case class SetSubmissionPoints(submissionId: Long, points: FixedPointNumber) extends TeamOrQuizStateUpdate
   }
 }

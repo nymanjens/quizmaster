@@ -2,6 +2,7 @@ package app.models.quiz
 
 import java.time.Instant
 
+import app.common.FixedPointNumber
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.config.QuizConfig
@@ -20,7 +21,7 @@ case class SubmissionEntity(
     // If none, there is no information available to make an estimation of correctness
     isCorrectAnswer: Option[Boolean],
     // The points that this submission will gain / gained.
-    points: Int,
+    points: FixedPointNumber,
     // If true, the `points` were added to the team score
     scored: Boolean,
     override val idOption: Option[Long] = None,

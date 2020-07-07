@@ -1,5 +1,6 @@
 package app.flux.react.app
 
+import app.common.FixedPointNumber
 import app.flux.react.app.quiz.TeamsList
 import app.flux.router.AppPages
 import app.flux.stores.quiz.TeamsAndQuizStateStore
@@ -115,8 +116,12 @@ final class Layout(
 
       // Give points
       for ((teamIndex, shortkey) <- (0 to 10) zip ((1 to 9) :+ 0)) {
-        bind(s"$shortkey", () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = +1))
-        bind(s"shift+$shortkey", () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = -1))
+        bind(
+          s"$shortkey",
+          () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = FixedPointNumber(+1)))
+        bind(
+          s"shift+$shortkey",
+          () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = FixedPointNumber(-1)))
       }
     }
 

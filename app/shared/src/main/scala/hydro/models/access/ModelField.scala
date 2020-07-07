@@ -2,6 +2,7 @@ package hydro.models.access
 
 import java.time.Instant
 
+import app.common.FixedPointNumber
 import app.models.quiz.QuizState.GeneralQuizSettings
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.Submission.SubmissionValue
@@ -52,6 +53,7 @@ object ModelField {
     implicit case object GeneralQuizSettingsType extends FieldType[GeneralQuizSettings]
     implicit case object InstantType extends FieldType[Instant]
     implicit case object SubmissionValueType extends FieldType[SubmissionValue]
+    implicit case object FixedPointNumberValueType extends FieldType[FixedPointNumber]
   }
 
   abstract class IdModelField[E <: Entity]
