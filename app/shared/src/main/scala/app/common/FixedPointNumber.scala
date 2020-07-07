@@ -18,6 +18,19 @@ class FixedPointNumber private (
     case _                      => false
   }
   override def hashCode(): Int = numberWithoutPoint
+
+  def +(that: FixedPointNumber): FixedPointNumber = {
+    new FixedPointNumber(this.numberWithoutPoint + that.numberWithoutPoint)
+  }
+  def +(that: Int): FixedPointNumber = {
+    this + FixedPointNumber(that)
+  }
+  def -(that: FixedPointNumber): FixedPointNumber = {
+    new FixedPointNumber(this.numberWithoutPoint - that.numberWithoutPoint)
+  }
+  def -(that: Int): FixedPointNumber = {
+    this - FixedPointNumber(that)
+  }
 }
 
 object FixedPointNumber {

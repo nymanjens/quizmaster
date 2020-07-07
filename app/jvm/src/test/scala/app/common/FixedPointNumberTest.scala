@@ -20,4 +20,12 @@ class FixedPointNumberTest extends Specification {
     FixedPointNumber(1.06).toString mustEqual "1.1"
     FixedPointNumber(1).toString mustEqual "1"
   }
+
+  "+ and -" in {
+    FixedPointNumber(1.2) + FixedPointNumber(2) mustEqual FixedPointNumber(3.2)
+    FixedPointNumber(1.2) + 2 mustEqual FixedPointNumber(3.2)
+
+    FixedPointNumber(1.2) - FixedPointNumber(2) mustEqual FixedPointNumber(-0.8)
+    FixedPointNumber(1.2) - 2 mustEqual FixedPointNumber(-0.8)
+  }
 }
