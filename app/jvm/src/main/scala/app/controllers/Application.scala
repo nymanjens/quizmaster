@@ -134,7 +134,7 @@ final class Application @Inject()(
           (q.pointsToGainOnFirstAnswer + (q.pointsToGain * 3)).toDouble / 4.0
         }
       }.sum
-      val showMax = avgPoints4PerfectTeams.round != maxPoints
+      val showMax = avgPoints4PerfectTeams.round != maxPoints.toDouble.round
       val maxString =
         s", max: ${indent(3, maxPoints)} (${indent(3, round1(maxPoints.toDouble / expectedMinutes))} per min)"
 

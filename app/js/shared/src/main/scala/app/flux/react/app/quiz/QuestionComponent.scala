@@ -408,7 +408,7 @@ final class QuestionComponent(
         <<.ifThen(question.pointsToGainOnWrongAnswer != 0) {
           ". " + (
             if (question.pointsToGainOnWrongAnswer == -1) i18n("app.wrong-answer-loses-1-point")
-            else i18n("app.wrong-answer-loses-n-points", -question.pointsToGainOnWrongAnswer)
+            else i18n("app.wrong-answer-loses-n-points", question.pointsToGainOnWrongAnswer.negate)
           ) + "."
         }
       )
