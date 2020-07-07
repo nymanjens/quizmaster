@@ -32,6 +32,11 @@ class FixedPointNumberTest extends Specification {
     FixedPointNumber(1.6).abs mustEqual FixedPointNumber(1.6)
   }
 
+  "negate" in {
+    FixedPointNumber(-1).negate mustEqual FixedPointNumber(1)
+    FixedPointNumber(1.6).negate mustEqual FixedPointNumber(-1.6)
+  }
+
   "+ and -" in {
     FixedPointNumber(1.2) + FixedPointNumber(2) mustEqual FixedPointNumber(3.2)
     FixedPointNumber(1.2) + 2 mustEqual FixedPointNumber(3.2)
