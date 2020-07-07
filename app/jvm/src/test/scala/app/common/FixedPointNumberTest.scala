@@ -28,4 +28,11 @@ class FixedPointNumberTest extends Specification {
     FixedPointNumber(1.2) - FixedPointNumber(2) mustEqual FixedPointNumber(-0.8)
     FixedPointNumber(1.2) - 2 mustEqual FixedPointNumber(-0.8)
   }
+
+  "> and <" in {
+    FixedPointNumber(1.2) < FixedPointNumber(2) mustEqual true
+    FixedPointNumber(1.2) > FixedPointNumber(2) mustEqual false
+    FixedPointNumber(2) < FixedPointNumber(-1.1) mustEqual false
+    FixedPointNumber(2) > FixedPointNumber(-1.1) mustEqual true
+  }
 }

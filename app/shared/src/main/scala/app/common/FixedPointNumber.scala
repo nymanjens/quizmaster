@@ -31,6 +31,18 @@ class FixedPointNumber private (
   def -(that: Int): FixedPointNumber = {
     this - FixedPointNumber(that)
   }
+  def >(that: FixedPointNumber): Boolean = {
+    this.numberWithoutPoint > that.numberWithoutPoint
+  }
+  def >(that: Int): Boolean = {
+    this > FixedPointNumber(that)
+  }
+  def <(that: FixedPointNumber): Boolean = {
+    this.numberWithoutPoint < that.numberWithoutPoint
+  }
+  def <(that: Int): Boolean = {
+    this < FixedPointNumber(that)
+  }
 }
 
 object FixedPointNumber {
