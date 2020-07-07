@@ -21,6 +21,9 @@ class FixedPointNumber private (
   }
   override def hashCode(): Int = numberWithoutPoint
 
+  def toDouble: Double = numberWithoutPoint / 10.0
+  def abs: FixedPointNumber = new FixedPointNumber(Math.abs(numberWithoutPoint))
+
   def +(that: FixedPointNumber): FixedPointNumber = FixedPointNumberNumeric.plus(this, that)
   def +(that: Int): FixedPointNumber = this + FixedPointNumber(that)
   def -(that: FixedPointNumber): FixedPointNumber = FixedPointNumberNumeric.minus(this, that)
@@ -36,8 +39,6 @@ class FixedPointNumber private (
 
   def ==(that: Int): Boolean = this == FixedPointNumber(that)
   def !=(that: Int): Boolean = this != FixedPointNumber(that)
-
-  def toDouble: Double = numberWithoutPoint / 10.0
 }
 
 object FixedPointNumber {
