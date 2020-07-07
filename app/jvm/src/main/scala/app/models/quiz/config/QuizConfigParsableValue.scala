@@ -110,7 +110,8 @@ class QuizConfigParsableValue @Inject()(
         videoSrc = map.optional("videoSrc"),
         pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
         pointsToGainOnFirstAnswer =
-          map.optional("pointsToGainOnFirstAnswer") getOrElse map.optional("pointsToGain", FixedPointNumber(1)),
+          map.optional("pointsToGainOnFirstAnswer") getOrElse map
+            .optional("pointsToGain", FixedPointNumber(1)),
         pointsToGainOnWrongAnswer = map.optional("pointsToGainOnWrongAnswer", FixedPointNumber(0)),
         maxTime = Duration.ofSeconds(map.required[Int]("maxTimeSeconds")),
         onlyFirstGainsPoints = map.optional("onlyFirstGainsPoints", false),

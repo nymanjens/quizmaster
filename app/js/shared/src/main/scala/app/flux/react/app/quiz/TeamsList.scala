@@ -197,11 +197,12 @@ final class TeamsList(
 
     private def updateTeamScoreButton(team: Team, sign: String, scoreDiff: Int): VdomNode = {
       Bootstrap.Button(Variant.default, Size.xs)(
-        ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.updateScore(team, scoreDiff = FixedPointNumber(scoreDiff))).void,
+        ^.onClick --> LogExceptionsCallback(
+          teamsAndQuizStateStore.updateScore(team, scoreDiff = FixedPointNumber(scoreDiff))).void,
         Bootstrap.Glyphicon(sign),
       )
     }
-    private def updateSubmissionPointsButton(submission: Submission, sign: String, diff: Int                                            ): VdomNode = {
+    private def updateSubmissionPointsButton(submission: Submission, sign: String, diff: Int): VdomNode = {
       Bootstrap.Button(Variant.success, Size.xs)(
         ^.onClick --> LogExceptionsCallback(
           scalaJsApiClient.doTeamOrQuizStateUpdate(

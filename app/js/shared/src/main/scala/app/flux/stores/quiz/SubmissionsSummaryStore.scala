@@ -86,7 +86,8 @@ object SubmissionsSummaryStore {
       roundToTimeEstimateMap: Map[RoundIndex, Duration],
       totalQuizTimeEstimate: Duration,
   ) {
-    def points(roundIndex: Int, questionIndex: Int, teamId: Long)(implicit quizConfig: QuizConfig): FixedPointNumber = {
+    def points(roundIndex: Int, questionIndex: Int, teamId: Long)(
+        implicit quizConfig: QuizConfig): FixedPointNumber = {
       if (hasAnySubmission(roundIndex, questionIndex, teamId)) {
         val allSubmissionsForQuestion = latestSubmissionsMap(QuestionIndex(roundIndex, questionIndex))
         val submissionEntity: SubmissionEntity = allSubmissionsForQuestion(teamId)
