@@ -1,5 +1,7 @@
 package app.common
 
+import app.common.FixedPointNumber.FixedPointNumberNumeric
+
 /** Number with a single decimal digit after the point. This is used for representing points/sores. */
 class FixedPointNumber private (
     private[FixedPointNumber] val numberWithoutPoint: Int,
@@ -19,38 +21,21 @@ class FixedPointNumber private (
   }
   override def hashCode(): Int = numberWithoutPoint
 
-  def +(that: FixedPointNumber): FixedPointNumber = {
-    new FixedPointNumber(this.numberWithoutPoint + that.numberWithoutPoint)
-  }
-  def +(that: Int): FixedPointNumber = {
-    this + FixedPointNumber(that)
-  }
-  def -(that: FixedPointNumber): FixedPointNumber = {
-    new FixedPointNumber(this.numberWithoutPoint - that.numberWithoutPoint)
-  }
-  def -(that: Int): FixedPointNumber = {
-    this - FixedPointNumber(that)
-  }
-  def >(that: FixedPointNumber): Boolean = {
-    this.numberWithoutPoint > that.numberWithoutPoint
-  }
-  def >(that: Int): Boolean = {
-    this > FixedPointNumber(that)
-  }
-  def <(that: FixedPointNumber): Boolean = {
-    this.numberWithoutPoint < that.numberWithoutPoint
-  }
-  def <(that: Int): Boolean = {
-    this < FixedPointNumber(that)
-  }
+  def +(that: FixedPointNumber): FixedPointNumber = FixedPointNumberNumeric.plus(this, that)
+  def +(that: Int): FixedPointNumber = this + FixedPointNumber(that)
+  def -(that: FixedPointNumber): FixedPointNumber = FixedPointNumberNumeric.minus(this, that)
+  def -(that: Int): FixedPointNumber = this - FixedPointNumber(that)
 
-  def ==(that: Int): Boolean = {
-    this == FixedPointNumber(that)
-  }
+  def *(that: Int): FixedPointNumber = new FixedPointNumber(this.numberWithoutPoint * that)
+  def /(that: Int): FixedPointNumber = new FixedPointNumber(this.numberWithoutPoint / that)
 
-  def !=(that: Int): Boolean = {
-    this != FixedPointNumber(that)
-  }
+  def >(that: FixedPointNumber): Boolean = FixedPointNumberNumeric.gt(this, that)
+  def >(that: Int): Boolean = this > FixedPointNumber(that)
+  def <(that: FixedPointNumber): Boolean = FixedPointNumberNumeric.lt(this, that)
+  def <(that: Int): Boolean = this < FixedPointNumber(that)
+
+  def ==(that: Int): Boolean = this == FixedPointNumber(that)
+  def !=(that: Int): Boolean = this != FixedPointNumber(that)
 
   def toDouble: Double = numberWithoutPoint / 10.0
 }
@@ -73,15 +58,27 @@ object FixedPointNumber {
   }
 
   implicit object FixedPointNumberNumeric extends Numeric[FixedPointNumber] {
-    override def plus(x: FixedPointNumber, y: FixedPointNumber): FixedPointNumber = x + y
-    override def minus(x: FixedPointNumber, y: FixedPointNumber): FixedPointNumber = x - y
+    override def plus(x: FixedPointNumber, y: FixedPointNumber): FixedPointNumber = {
+      new FixedPointNumber(x.numberWithoutPoint + y.numberWithoutPoint)
+    }
+    override def minus(x: FixedPointNumber, y: FixedPointNumber): FixedPointNumber = {
+      new FixedPointNumber(x.numberWithoutPoint - y.numberWithoutPoint)
+    }
     override def times(x: FixedPointNumber, y: FixedPointNumber): FixedPointNumber = ???
-    override def negate(x: FixedPointNumber): FixedPointNumber = FixedPointNumber(0) - x
-    override def fromInt(x: Int): FixedPointNumber = FixedPointNumber(x)
+    override def negate(x: FixedPointNumber): FixedPointNumber = {
+      new FixedPointNumber(-x.numberWithoutPoint)
+    }
+    override def fromInt(x: Int): FixedPointNumber = {
+      FixedPointNumber(x)
+    }
     override def toInt(x: FixedPointNumber): Int = ???
     override def toLong(x: FixedPointNumber): Long = ???
     override def toFloat(x: FixedPointNumber): Float = ???
-    override def toDouble(x: FixedPointNumber): Double = x.toDouble
-    override def compare(x: FixedPointNumber, y: FixedPointNumber): Int = x.numberWithoutPoint compare y.numberWithoutPoint
+    override def toDouble(x: FixedPointNumber): Double = {
+      x.toDouble
+    }
+    override def compare(x: FixedPointNumber, y: FixedPointNumber): Int = {
+      x.numberWithoutPoint compare y.numberWithoutPoint
+    }
   }
 }
