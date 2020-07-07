@@ -43,6 +43,8 @@ class FixedPointNumber private (
   def <(that: Int): Boolean = {
     this < FixedPointNumber(that)
   }
+
+  def toDouble: Double = numberWithoutPoint / 10.0
 }
 
 object FixedPointNumber {

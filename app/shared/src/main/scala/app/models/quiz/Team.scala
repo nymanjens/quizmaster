@@ -1,5 +1,6 @@
 package app.models.quiz
 
+import app.common.FixedPointNumber
 import hydro.models.Entity
 import hydro.models.UpdatableEntity
 import hydro.models.UpdatableEntity.LastUpdateTime
@@ -7,7 +8,7 @@ import hydro.models.modification.EntityType
 
 case class Team(
     name: String,
-    score: Int,
+    score: FixedPointNumber,
     /** Index in teams list. */
     index: Int,
     override val idOption: Option[Long] = None,

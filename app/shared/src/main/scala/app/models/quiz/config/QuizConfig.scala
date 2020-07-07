@@ -4,6 +4,7 @@ import scala.collection.immutable.Seq
 import app.models.quiz.config.QuizConfig.Round
 import java.time.Duration
 
+import app.common.FixedPointNumber
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import hydro.common.CollectionUtils
@@ -26,9 +27,9 @@ object QuizConfig {
 
   sealed trait Question {
 
-    def pointsToGain: Int
-    def pointsToGainOnFirstAnswer: Int
-    def pointsToGainOnWrongAnswer: Int
+    def pointsToGain: FixedPointNumber
+    def pointsToGainOnFirstAnswer: FixedPointNumber
+    def pointsToGainOnWrongAnswer: FixedPointNumber
 
     def onlyFirstGainsPoints: Boolean
     def showSingleAnswerButtonToTeams: Boolean
@@ -76,9 +77,9 @@ object QuizConfig {
         audioSrc: Option[String],
         // Relative path in video directory
         videoSrc: Option[String],
-        override val pointsToGain: Int,
-        override val pointsToGainOnFirstAnswer: Int,
-        override val pointsToGainOnWrongAnswer: Int,
+        override val pointsToGain: FixedPointNumber,
+        override val pointsToGainOnFirstAnswer: FixedPointNumber,
+        override val pointsToGainOnWrongAnswer: FixedPointNumber,
         override val maxTime: Duration,
         override val onlyFirstGainsPoints: Boolean,
         override val showSingleAnswerButtonToTeams: Boolean,
@@ -156,7 +157,7 @@ object QuizConfig {
         override val textualQuestion: String,
         textualAnswer: String,
         textualChoices: Seq[String],
-        override val pointsToGain: Int,
+        override val pointsToGain: FixedPointNumber,
     ) extends Question {
       def validationErrors(): Seq[String] = {
         Seq(
@@ -167,8 +168,8 @@ object QuizConfig {
         ).flatten
       }
 
-      override def pointsToGainOnFirstAnswer: Int = pointsToGain
-      override def pointsToGainOnWrongAnswer: Int = 0
+      override def pointsToGainOnFirstAnswer: FixedPointNumber = pointsToGain
+      override def pointsToGainOnWrongAnswer: FixedPointNumber = FixedPointNumber(0)
 
       override def onlyFirstGainsPoints: Boolean = true
       override def showSingleAnswerButtonToTeams: Boolean = false

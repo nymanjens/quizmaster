@@ -2,6 +2,7 @@ package app.models.access
 
 import java.time.Instant
 
+import app.common.FixedPointNumber
 import app.models.access.ModelFields.QuizState.E
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.GeneralQuizSettings
@@ -34,7 +35,7 @@ object ModelFields {
 
     case object id extends IdModelField[E]
     case object name extends ModelField[String, E]("name", _.name, v => _.copy(name = v))
-    case object score extends ModelField[Int, E]("score", _.score, v => _.copy(score = v))
+    case object score extends ModelField[FixedPointNumber, E]("score", _.score, v => _.copy(score = v))
     case object index extends ModelField[Int, E]("index", _.index, v => _.copy(index = v))
   }
 
@@ -79,7 +80,7 @@ object ModelFields {
           "isCorrectAnswer",
           _.isCorrectAnswer,
           v => _.copy(isCorrectAnswer = v))
-    case object points extends ModelField[Int, E]("points", _.points, v => _.copy(points = v))
+    case object points extends ModelField[FixedPointNumber, E]("points", _.points, v => _.copy(points = v))
     case object scored extends ModelField[Boolean, E]("scored", _.scored, v => _.copy(scored = v))
   }
 

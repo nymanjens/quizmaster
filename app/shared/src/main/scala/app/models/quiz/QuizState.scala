@@ -9,6 +9,7 @@ import hydro.common.time.JavaTimeImplicits._
 import java.time.Duration
 import java.time.Instant
 
+import app.common.FixedPointNumber
 import app.models.access.ModelFields
 
 import scala.collection.immutable.Seq
@@ -133,7 +134,7 @@ case class QuizState(
   def pointsToGainBySubmission(
       isCorrectAnswer: Option[Boolean],
       submissionId: Long,
-  )(implicit quizConfig: QuizConfig): Int = {
+  )(implicit quizConfig: QuizConfig): FixedPointNumber = {
     val maybeFirstCorrectSubmission: Option[Submission] = submissions.find(_.isCorrectAnswer == Some(true))
     val question = maybeQuestion.get
 
@@ -145,7 +146,7 @@ case class QuizState(
           case Some(otherSubmission)           => question.pointsToGain
         }
       case Some(false) => question.pointsToGainOnWrongAnswer
-      case None        => 0
+      case None        => FixedPointNumber(0)
     }
   }
 }
@@ -201,7 +202,7 @@ object QuizState {
       // If none, there is no information available to make an estimation of correctness
       isCorrectAnswer: Option[Boolean],
       // The points that this submission will gain / gained.
-      points: Int,
+      points: FixedPointNumber,
       // If true, the `points` were added to the team score
       scored: Boolean,
   )

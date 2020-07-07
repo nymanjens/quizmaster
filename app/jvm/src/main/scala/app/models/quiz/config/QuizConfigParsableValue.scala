@@ -2,6 +2,7 @@ package app.models.quiz.config
 
 import java.time.Duration
 
+import app.common.FixedPointNumber
 import app.common.QuizAssets
 
 import scala.collection.JavaConverters._
@@ -88,9 +89,9 @@ class QuizConfigParsableValue @Inject()(
       "image" -> Optional(ImageValue),
       "audioSrc" -> Optional(StringValue),
       "videoSrc" -> Optional(StringValue),
-      "pointsToGain" -> Optional(IntValue),
-      "pointsToGainOnFirstAnswer" -> Optional(IntValue),
-      "pointsToGainOnWrongAnswer" -> Optional(IntValue),
+      "pointsToGain" -> Optional(FixedPointNumberValue),
+      "pointsToGainOnFirstAnswer" -> Optional(FixedPointNumberValue),
+      "pointsToGainOnWrongAnswer" -> Optional(FixedPointNumberValue),
       "maxTimeSeconds" -> Required(IntValue),
       "onlyFirstGainsPoints" -> Optional(BooleanValue),
       "showSingleAnswerButtonToTeams" -> Optional(BooleanValue),
@@ -107,10 +108,10 @@ class QuizConfigParsableValue @Inject()(
         image = map.optional("image"),
         audioSrc = map.optional("audioSrc"),
         videoSrc = map.optional("videoSrc"),
-        pointsToGain = map.optional("pointsToGain", 1),
+        pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
         pointsToGainOnFirstAnswer =
-          map.optional("pointsToGainOnFirstAnswer") getOrElse map.optional("pointsToGain", 1),
-        pointsToGainOnWrongAnswer = map.optional("pointsToGainOnWrongAnswer", 0),
+          map.optional("pointsToGainOnFirstAnswer") getOrElse map.optional("pointsToGain", FixedPointNumber(1)),
+        pointsToGainOnWrongAnswer = map.optional("pointsToGainOnWrongAnswer", FixedPointNumber(0)),
         maxTime = Duration.ofSeconds(map.required[Int]("maxTimeSeconds")),
         onlyFirstGainsPoints = map.optional("onlyFirstGainsPoints", false),
         showSingleAnswerButtonToTeams = map.optional("showSingleAnswerButtonToTeams", false),
@@ -132,7 +133,7 @@ class QuizConfigParsableValue @Inject()(
       "textualQuestion" -> Required(StringValue),
       "textualAnswer" -> Required(StringValue),
       "textualChoices" -> Required(ListParsableValue(StringValue)(s => s)),
-      "pointsToGain" -> Optional(IntValue),
+      "pointsToGain" -> Optional(FixedPointNumberValue),
     )
     override def parseFromParsedMapValues(map: StringMap) = {
       Question.Double(
@@ -141,7 +142,7 @@ class QuizConfigParsableValue @Inject()(
         textualQuestion = map.required[String]("textualQuestion"),
         textualAnswer = map.required[String]("textualAnswer"),
         textualChoices = map.required[Seq[String]]("textualChoices"),
-        pointsToGain = map.optional("pointsToGain", 2),
+        pointsToGain = map.optional("pointsToGain", FixedPointNumber(2)),
       )
     }
     override def additionalValidationErrors(v: Question.Double) = v.validationErrors()
@@ -163,6 +164,17 @@ class QuizConfigParsableValue @Inject()(
         v.validationErrors(),
         quizAssets.imageExistsOrValidationError(v.src).toSet,
       ).flatten
+    }
+  }
+
+  object FixedPointNumberValue extends ParsableValue[FixedPointNumber] {
+    override def parse(yamlValue: Any) = {
+      yamlValue match {
+        case v: java.lang.Integer => ParseResult.success(FixedPointNumber(v.toInt))
+        case v: java.lang.Long    => ParseResult.success(FixedPointNumber(v.toInt))
+        case v: java.lang.Double  => ParseResult.success(FixedPointNumber(v.toDouble))
+        case _                    => ParseResult.onlyError(s"Expected number but found $yamlValue")
+      }
     }
   }
 }

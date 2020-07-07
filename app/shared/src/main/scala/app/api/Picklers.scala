@@ -1,5 +1,6 @@
 package app.api
 
+import app.common.FixedPointNumber
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.QuizState.Submission.SubmissionValue
@@ -10,6 +11,11 @@ import hydro.api.StandardPicklers
 import hydro.models.Entity
 
 object Picklers extends StandardPicklers {
+
+  implicit object FixedPointNumberPickler extends Pickler[FixedPointNumber] {
+    override def pickle(obj: FixedPointNumber)(implicit state: PickleState): Unit = state.pickle(obj.toDouble)
+    override def unpickle(implicit state: UnpickleState): FixedPointNumber = FixedPointNumber(state.unpickle[Double])
+  }
 
   implicit val answerBulletTypePickler: Pickler[AnswerBulletType] = compositePickler[AnswerBulletType]
     .addConcreteType[AnswerBulletType.Arrows.type]
