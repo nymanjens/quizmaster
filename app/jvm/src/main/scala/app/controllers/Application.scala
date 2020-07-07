@@ -181,8 +181,8 @@ final class Application @Inject()(
         val maxTime =
           if (q.maxTime > infiniteDurationThreshold) "inf" else round1(q.maxTime.getSeconds / 60.0)
 
-        result += s"    - toGain: ${indent(2, q.pointsToGain)};  " +
-          s"first: ${indent(2, q.pointsToGainOnFirstAnswer)};   " +
+        result += s"    - toGain: ${indent(3, q.pointsToGain)};  " +
+          s"first: ${indent(3, q.pointsToGainOnFirstAnswer)};   " +
           s"onlyFirst: ${indent(5, q.onlyFirstGainsPoints)}; " +
           s"${indent(5, maxTime)} min; " +
           s"${indent(50, textualQuestion)}; " +
