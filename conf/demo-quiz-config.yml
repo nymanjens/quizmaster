@@ -18,6 +18,9 @@ rounds:
       - question: What is the capital of Belgium?
         choices: [Paris, London, Brussels, Berlin]
         answer: Brussels
+        pointsToGainOnFirstAnswer: 1.5
+        pointsToGain: 1.2
+        pointsToGainOnWrongAnswer: -0.5
         maxTimeSeconds: 60
 
       - question: Who was the country Columbia named after?
