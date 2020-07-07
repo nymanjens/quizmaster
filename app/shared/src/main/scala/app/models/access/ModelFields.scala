@@ -3,7 +3,6 @@ package app.models.access
 import java.time.Instant
 
 import app.common.FixedPointNumber
-import app.models.access.ModelFields.QuizState.E
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.GeneralQuizSettings
 import app.models.quiz.QuizState.Submission

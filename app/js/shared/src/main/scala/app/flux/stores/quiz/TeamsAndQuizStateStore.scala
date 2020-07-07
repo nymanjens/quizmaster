@@ -4,6 +4,7 @@ import java.time.Duration
 
 import app.api.ScalaJsApi.TeamOrQuizStateUpdate._
 import app.api.ScalaJsApiClient
+import app.common.FixedPointNumber
 import app.flux.action.AppActions
 import app.flux.stores.quiz.TeamsAndQuizStateStore.State
 import app.models.access.ModelFields
@@ -76,7 +77,7 @@ final class TeamsAndQuizStateStore(
     val modification = EntityModification.createAddWithRandomId(
       Team(
         name = name,
-        score = 0,
+        score = FixedPointNumber(0),
         index = maxIndex + 1,
       ))
     await(entityAccess.persistModifications(modification))
@@ -89,10 +90,10 @@ final class TeamsAndQuizStateStore(
   def updateName(team: Team, newName: String): Future[Unit] = {
     scalaJsApiClient.doTeamOrQuizStateUpdate(UpdateName(team.id, newName))
   }
-  def updateScore(team: Team, scoreDiff: Int): Future[Unit] = {
+  def updateScore(team: Team, scoreDiff: FixedPointNumber): Future[Unit] = {
     scalaJsApiClient.doTeamOrQuizStateUpdate(UpdateScore(teamId = team.id, scoreDiff))
   }
-  def updateScore(teamIndex: Int, scoreDiff: Int): Future[Unit] = async {
+  def updateScore(teamIndex: Int, scoreDiff: FixedPointNumber): Future[Unit] = async {
     val team = await(stateFuture).teams(teamIndex)
     await(updateScore(team, scoreDiff))
   }

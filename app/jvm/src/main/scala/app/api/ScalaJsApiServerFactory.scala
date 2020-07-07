@@ -8,6 +8,8 @@ import java.util.concurrent.Executors
 
 import app.api.ScalaJsApi._
 import app.api.ScalaJsApi.TeamOrQuizStateUpdate._
+import app.common.FixedPointNumber
+import app.common.FixedPointNumber
 import app.models.access.JvmEntityAccess
 import app.models.access.ModelFields
 import app.models.quiz.config.QuizConfig
@@ -120,7 +122,7 @@ final class ScalaJsApiServerFactory @Inject()(
             entityAccess.persistEntityModifications(
               EntityModification.createUpdateAllFields(team.copy(name = newName)))
 
-          case UpdateScore(teamId: Long, scoreDiff: Int) =>
+          case UpdateScore(teamId: Long, scoreDiff: FixedPointNumber) =>
             if (scoreDiff != 0) {
               val team = fetchAllTeams().find(_.id == teamId).get
               val oldScore = team.score
@@ -221,12 +223,12 @@ final class ScalaJsApiServerFactory @Inject()(
               oldSubmissionEntity.copy(isCorrectAnswer = Some(isCorrectAnswer), points = pointsToGain)
             }
 
-          case SetSubmissionPoints(submissionId: Long, points: Int) =>
+          case SetSubmissionPoints(submissionId: Long, points: FixedPointNumber) =>
             updateSubmissionInStateAndEntity(submissionId) { oldSubmissionEntity =>
               val isCorrectAnswer = points match {
-                case 0               => oldSubmissionEntity.isCorrectAnswer
-                case _ if points < 0 => Some(false)
-                case _ if points > 0 => Some(true)
+                case FixedPointNumber(0) => oldSubmissionEntity.isCorrectAnswer
+                case _ if points < 0     => Some(false)
+                case _ if points > 0     => Some(true)
               }
 
               oldSubmissionEntity.copy(isCorrectAnswer = isCorrectAnswer, points = points)

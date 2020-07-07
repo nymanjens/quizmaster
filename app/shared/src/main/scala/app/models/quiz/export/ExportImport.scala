@@ -1,5 +1,6 @@
 package app.models.quiz.export
 
+import app.common.FixedPointNumber
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.GeneralQuizSettings
 import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
@@ -47,7 +48,7 @@ object ExportImport {
   }
 
   private def importTeams(teamsString: String): Seq[Team] = {
-    val exportRegex: Regex = """_~_(.+?)_~_(-?\d+)""".r
+    val exportRegex: Regex = """_~_(.+?)_~_(-?[\d\.]+)""".r
 
     for ((teamString, index) <- teamsString.split("=~=").toVector.zipWithIndex)
       yield
@@ -55,7 +56,7 @@ object ExportImport {
           case exportRegex(name, score) =>
             Team(
               name = name,
-              score = score.toInt,
+              score = FixedPointNumber(score.toDouble),
               index = index,
             )
         }
