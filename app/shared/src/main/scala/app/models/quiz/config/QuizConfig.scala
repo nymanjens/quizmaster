@@ -1,14 +1,14 @@
 package app.models.quiz.config
 
-import scala.collection.immutable.Seq
-import app.models.quiz.config.QuizConfig.Round
 import java.time.Duration
 
 import app.common.FixedPointNumber
+import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.Submission.SubmissionValue
-import hydro.common.CollectionUtils
 import hydro.common.CollectionUtils.conditionalOption
+
+import scala.collection.immutable.Seq
 
 case class QuizConfig(
     rounds: Seq[Round],
@@ -210,6 +210,54 @@ object QuizConfig {
       override def answerIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
       }
+    }
+
+    case class Ordering(
+        question: String,
+        questionDetail: Option[String],
+        orderedItemsThatWillBePresentedInAlphabeticalOrder: Seq[String],
+        override val pointsToGain: FixedPointNumber,
+        override val maxTime: Duration,
+    ) extends Question {
+      def validationErrors(): Seq[String] = {
+        val orderedItems = orderedItemsThatWillBePresentedInAlphabeticalOrder
+        Seq(
+          conditionalOption(orderedItems.size < 2, s"Expected at least 2 items, but got $orderedItems"),
+          conditionalOption(orderedItems.size > 10, s"Expected at most 10 items, but got $orderedItems"),
+        ).flatten
+      }
+
+      override def pointsToGainOnFirstAnswer: FixedPointNumber = pointsToGain
+      override def pointsToGainOnWrongAnswer: FixedPointNumber = FixedPointNumber(0)
+      override def onlyFirstGainsPoints: Boolean = false
+      override def showSingleAnswerButtonToTeams: Boolean = false
+
+      /**
+        * Steps:
+        * 0- Show preparatory title: "Question 2"
+        * 1- Show question: "This is the question, do you know the answer?"
+        * 2- Show answer
+        * 3- Show answer and give points
+        */
+      override def progressStepsCount(includeAnswers: Boolean): Int = {
+        if(includeAnswers) 2 else 4
+      }
+
+      override def shouldShowTimer(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex == 1
+      }
+
+      override def submissionAreOpen(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex == 1
+      }
+      override def isMultipleChoice: Boolean = false
+
+      override def answerIsVisible(questionProgressIndex: Int): Boolean = {
+          questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
+      }
+      override def textualQuestion: String = question
+      override def maybeTextualChoices: Option[Seq[String]] = None
+      override def isCorrectAnswer(submissionValue: SubmissionValue): Boolean = ???
     }
   }
 
