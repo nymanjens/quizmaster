@@ -11,7 +11,7 @@ rounds:
         image: {src: geography/france.png, size: small}
         answerImage: {src: geography/france-answer.png, size: large}
         answerDetail: Image released under Creative Commons by Destination2 (www.destination2.co.uk)
-        pointsToGain: 2
+        pointsToGain: 0
         maxTimeSeconds: 8
         onlyFirstGainsPoints: true
 
