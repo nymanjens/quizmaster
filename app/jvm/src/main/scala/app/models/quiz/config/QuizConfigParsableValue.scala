@@ -66,10 +66,10 @@ class QuizConfigParsableValue @Inject()(
         yamlMap.get("questionType") match {
           case None | Some("standard") => StandardQuestionValue.parse(yamlMapWithoutQuestionType)
           case Some("double")          => DoubleQuestionValue.parse(yamlMapWithoutQuestionType)
-          case Some("ordering")        => OrderingQuestionValue.parse(yamlMapWithoutQuestionType)
+          case Some("orderItems")        => OrderItemsQuestionValue.parse(yamlMapWithoutQuestionType)
           case Some(other) =>
             ParseResult.onlyError(
-              s"questionType expected to be one of these: [unset, 'standard', 'double', 'ordering'], but found $other")
+              s"questionType expected to be one of these: [unset, 'standard', 'double', 'orderItems'], but found $other")
         }
 
       } else {
@@ -150,7 +150,7 @@ class QuizConfigParsableValue @Inject()(
     override def additionalValidationErrors(v: Question.Double) = v.validationErrors()
   }
 
-  private object OrderingQuestionValue extends MapParsableValue[Question.Ordering] {
+  private object OrderItemsQuestionValue extends MapParsableValue[Question.OrderItems] {
     override val supportedKeyValuePairs = Map(
       "question" -> Required(StringValue),
       "questionDetail" -> Optional(StringValue),
@@ -160,7 +160,7 @@ class QuizConfigParsableValue @Inject()(
       "maxTimeSeconds" -> Required(IntValue),
     )
     override def parseFromParsedMapValues(map: StringMap) = {
-      Question.Ordering(
+      Question.OrderItems(
         question = map.required[String]("question"),
         questionDetail = map.optional("questionDetail"),
         orderedItemsThatWillBePresentedInAlphabeticalOrder =
@@ -169,7 +169,7 @@ class QuizConfigParsableValue @Inject()(
         maxTime = Duration.ofSeconds(map.required[Int]("maxTimeSeconds")),
       )
     }
-    override def additionalValidationErrors(v: Question.Ordering) = v.validationErrors()
+    override def additionalValidationErrors(v: Question.OrderItems) = v.validationErrors()
   }
 
   private object ImageValue extends MapParsableValue[Image] {

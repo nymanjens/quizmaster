@@ -212,7 +212,7 @@ object QuizConfig {
       }
     }
 
-    case class Ordering(
+    case class OrderItems(
         question: String,
         questionDetail: Option[String],
         orderedItemsThatWillBePresentedInAlphabeticalOrder: Seq[String],
