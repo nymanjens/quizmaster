@@ -94,6 +94,12 @@ final class QuestionComponent(
               case 0 if !props.showMasterData => showPreparatoryTitle(double)
               case _                          => showDoubleQuestion(double)
             }
+
+          case orderItems: Question.OrderItems =>
+            props.questionProgressIndex match {
+              case 0 if !props.showMasterData => showPreparatoryTitle(orderItems)
+              case _                          => showOrderItemsQuestion(orderItems)
+            }
         },
       )
     }
@@ -373,6 +379,14 @@ final class QuestionComponent(
           )
         }
       )
+    }
+
+    private def showOrderItemsQuestion(
+        question: Question.OrderItems,
+    )(
+        implicit props: Props,
+    ): VdomElement = {
+      ???
     }
 
     private def ifVisibleOrMaster(isVisible: Boolean)(vdomTag: VdomTag)(implicit props: Props): VdomNode = {
