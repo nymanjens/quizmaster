@@ -114,9 +114,9 @@ final class Application @Inject()(
     def questionsInfo(questions: Iterable[Question], expectedTime: Option[Duration]): String = {
       val maxMinutes = {
         val maybeZeroMinutes = questions
-          .map(_ match {
-            case q: Question.Standard =>
-              if (q.maxTime > infiniteDurationThreshold) Duration.ofSeconds(30) else q.maxTime
+          .map(question => question match {
+            case _: Question.Standard | _ : Question.OrderItems =>
+              if (question.maxTime > infiniteDurationThreshold) Duration.ofSeconds(30) else question.maxTime
             case _: Question.Double => Duration.ofSeconds(20)
           })
           .sum
@@ -173,10 +173,11 @@ final class Application @Inject()(
       result += s"- ${round.name}\n"
 
       for (q <- round.questions) {
-        val (textualQuestion, textualAnswer) =
+        val textualAnswer =
           q match {
-            case question: Question.Standard => (question.question, question.answer)
-            case question: Question.Double   => (question.textualQuestion, question.textualAnswer)
+            case question: Question.Standard => question.answer
+            case question: Question.Double   =>  question.textualAnswer
+            case question: Question.OrderItems => question.answerAsString
           }
         val maxTime =
           if (q.maxTime > infiniteDurationThreshold) "inf" else round1(q.maxTime.getSeconds / 60.0)
@@ -185,7 +186,7 @@ final class Application @Inject()(
           s"first: ${indent(3, q.pointsToGainOnFirstAnswer)};   " +
           s"onlyFirst: ${indent(5, q.onlyFirstGainsPoints)}; " +
           s"${indent(5, maxTime)} min; " +
-          s"${indent(50, textualQuestion)}; " +
+          s"${indent(50, q.textualQuestion)}; " +
           s"${indent(40, textualAnswer)}\n"
       }
 

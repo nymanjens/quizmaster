@@ -258,6 +258,8 @@ object QuizConfig {
       override def textualQuestion: String = question
       override def maybeTextualChoices: Option[Seq[String]] = None
       override def isCorrectAnswer(submissionValue: SubmissionValue): Boolean = ???
+
+      def answerAsString: String = ???
     }
   }
 
