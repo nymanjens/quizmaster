@@ -7,8 +7,11 @@ import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import hydro.common.CollectionUtils.conditionalOption
+import hydro.common.GuavaReplacement.ImmutableBiMap
+import hydro.common.GuavaReplacement.Splitter
 
 import scala.collection.immutable.Seq
+import scala.collection.mutable
 
 case class QuizConfig(
     rounds: Seq[Round],
@@ -237,6 +240,7 @@ object QuizConfig {
 
       override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
         (submissionValue: @unchecked) match {
+          case SubmissionValue.PressedTheOneButton => None
           case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
             Some(textualChoices.apply(answerIndex) == textualAnswer)
         }
@@ -303,9 +307,48 @@ object QuizConfig {
       }
       override def textualQuestion: String = question
       override def maybeTextualChoices: Option[Seq[String]] = None
-      override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = ???
+      override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
+        (submissionValue: @unchecked) match {
+          case SubmissionValue.PressedTheOneButton => None
+          case SubmissionValue.FreeTextAnswer(a) =>
+            if(a == answerAsString) {
+              Some(true)
+            } else if (a == answerAsString.reverse) {
+              Some(false)
+            } else {
+              None
+            }
+        }
+      }
 
-      def answerAsString: String = ???
+      def answerAsString: String = {
+        orderedItemsThatWillBePresentedInAlphabeticalOrder.map(toCharacterCode).mkString
+      }
+
+      lazy val itemsInAlphabeticalOrder: Seq[String] = {
+        orderedItemsThatWillBePresentedInAlphabeticalOrder.sorted
+      }
+
+      private lazy val itemToCharacterBimap: ImmutableBiMap[String, Char] = {
+        val resultBuilder = ImmutableBiMap.builder[String, Char]()
+
+        for (item <- itemsInAlphabeticalOrder) {
+          val usedCharacters = mutable.Set[Char]()
+          val words = Splitter.on(' ').trimResults().omitEmptyStrings().split(item)
+          val candidatesFromWords = words.map(_.apply(0)).filter(_.isLetterOrDigit).map(_.toUpper)
+          val candidates = candidatesFromWords ++ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+          val char = candidates.find(c => !usedCharacters.contains(c)).get
+
+          usedCharacters.add(char)
+          resultBuilder.put(item, char)
+        }
+
+        resultBuilder.build
+      }
+
+      def toCharacterCode(item: String): Char = {
+        itemToCharacterBimap.get(item)
+      }
     }
   }
 
