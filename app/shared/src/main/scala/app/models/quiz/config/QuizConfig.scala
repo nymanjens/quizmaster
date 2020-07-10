@@ -262,6 +262,7 @@ object QuizConfig {
         question: String,
         questionDetail: Option[String],
         orderedItemsThatWillBePresentedInAlphabeticalOrder: Seq[String],
+        answerDetail: Option[String],
         pointsToGain: FixedPointNumber,
         override val maxTime: Duration,
     ) extends Question {

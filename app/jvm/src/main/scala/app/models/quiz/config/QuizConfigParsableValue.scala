@@ -156,6 +156,7 @@ class QuizConfigParsableValue @Inject()(
       "questionDetail" -> Optional(StringValue),
       "orderedItemsThatWillBePresentedInAlphabeticalOrder" -> Required(
         ListParsableValue(StringValue)(s => s)),
+      "answerDetail" -> Optional(StringValue),
       "pointsToGain" -> Optional(FixedPointNumberValue),
       "maxTimeSeconds" -> Required(IntValue),
     )
@@ -165,6 +166,7 @@ class QuizConfigParsableValue @Inject()(
         questionDetail = map.optional("questionDetail"),
         orderedItemsThatWillBePresentedInAlphabeticalOrder =
           map.required[Seq[String]]("orderedItemsThatWillBePresentedInAlphabeticalOrder"),
+        answerDetail = map.optional("answerDetail"),
         pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
         maxTime = Duration.ofSeconds(map.required[Int]("maxTimeSeconds")),
       )

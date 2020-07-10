@@ -61,6 +61,14 @@ class QuizConfigParsableValueTest extends Specification {
         |        maxTimeSeconds: 8
         |        showSingleAnswerButtonToTeams: true
         |
+        |      - questionType: orderItems
+        |        question: Order these cities from small to large
+        |        questionDetail: Population according to Google on July 2020
+        |        orderedItemsThatWillBePresentedInAlphabeticalOrder: [Riga, Stockholm, Berlin, London]
+        |        answerDetail: "Riga: ~600k, Stockholm: ~1M, Berlin: ~4M, London: ~9M"
+        |        pointsToGain: 2
+        |        maxTimeSeconds: 180
+        |
         |  - name: Music round
         |    questions:
         |      - question: After which season is this track named?
@@ -147,7 +155,16 @@ class QuizConfigParsableValueTest extends Specification {
               maxTime = Duration.ofSeconds(8),
               onlyFirstGainsPoints = false,
               showSingleAnswerButtonToTeams = true,
-            )
+            ),
+            Question.OrderItems(
+              question = "Order these cities from small to large",
+              questionDetail = Some("Population according to Google on July 2020"),
+              orderedItemsThatWillBePresentedInAlphabeticalOrder =
+                Seq("Riga", "Stockholm", "Berlin", "London"),
+              answerDetail = Some("Riga: ~600k, Stockholm: ~1M, Berlin: ~4M, London: ~9M"),
+              pointsToGain = FixedPointNumber(2),
+              maxTime = Duration.ofSeconds(180),
+            ),
           ),
         ),
         Round(

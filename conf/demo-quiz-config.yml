@@ -12,7 +12,7 @@ rounds:
         answerImage: {src: geography/france-answer.png, size: large}
         answerDetail: Image released under Creative Commons by Destination2 (www.destination2.co.uk)
         pointsToGain: 0
-        maxTimeSeconds: 8
+        maxTimeSeconds: 180
         onlyFirstGainsPoints: true
 
       - question: What is the capital of Belgium?
@@ -21,17 +21,25 @@ rounds:
         pointsToGainOnFirstAnswer: 1.5
         pointsToGain: 1.2
         pointsToGainOnWrongAnswer: -0.5
-        maxTimeSeconds: 60
+        maxTimeSeconds: 180
 
       - question: Who was the country Columbia named after?
         answer: Christoffer Columbus
-        maxTimeSeconds: 8
+        maxTimeSeconds: 180
 
       - question: What city does this video from 1935 show?
         choices: [Tokyo, Guatemala City, Mexico City, Salt Lake City]
         answer: Guatemala City
         videoSrc: geography/about_bananas.mp4
-        maxTimeSeconds: 120
+        maxTimeSeconds: 180
+
+      - questionType: orderItems
+        question: Order these cities from small to large
+        questionDetail: Population according to Google on July 2020
+        orderedItemsThatWillBePresentedInAlphabeticalOrder: [Riga, Stockholm, Berlin, London]
+        answerDetail: "Riga: ~600k, Stockholm: ~1M, Berlin: ~4M, London: ~9M"
+        pointsToGain: 2
+        maxTimeSeconds: 180
 
   - name: Music round
     questions:
@@ -40,7 +48,7 @@ rounds:
         answer: Summer
         answerDetail: (By Bensound)
         audioSrc: music_round/bensound-summer.mp3
-        maxTimeSeconds: 15
+        maxTimeSeconds: 180
 
   - name: Double questions round
     questions:
