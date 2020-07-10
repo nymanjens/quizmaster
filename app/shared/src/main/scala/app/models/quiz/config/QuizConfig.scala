@@ -294,15 +294,15 @@ object QuizConfig {
       private def getCorrectnessPercentage(answer: String): Double = {
         val N = itemsInAlphabeticalOrder.size
         val maxNumberOfPairwiseSwaps = ((N - 1) * N) / 2
-          val charactersInCorrectOrder = answerAsString
+        val charactersInCorrectOrder = answerAsString
 
-        if(answer.length != N || answer.toSet != itemToCharacterBimap.inverse().keySet) {
+        if (answer.length != N || answer.toSet != itemToCharacterBimap.inverse().keySet) {
           0.0 // Return early because the answer cannot be parsed
         } else {
           var numSwaps = 0
           var remainingAnswerString = answer
 
-          for(char <- charactersInCorrectOrder) {
+          for (char <- charactersInCorrectOrder) {
             numSwaps += remainingAnswerString.indexOf(char)
             remainingAnswerString = remainingAnswerString.filter(_ != char)
           }
