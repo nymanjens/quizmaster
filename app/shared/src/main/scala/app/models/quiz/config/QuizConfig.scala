@@ -325,7 +325,7 @@ object QuizConfig {
         * 3- Show answer and give points
         */
       override def progressStepsCount(includeAnswers: Boolean): Int = {
-        if (includeAnswers) 2 else 4
+        if (includeAnswers) 4 else 2
       }
 
       override def shouldShowTimer(questionProgressIndex: Int): Boolean = {
