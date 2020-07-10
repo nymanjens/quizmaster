@@ -89,7 +89,7 @@ final class QuestionComponent(
               case _                          => showSingleQuestion(single)
             }
 
-          case double: Question.Double =>
+          case double: Question.DoubleQ =>
             props.questionProgressIndex match {
               case 0 if !props.showMasterData => showPreparatoryTitle(double)
               case _                          => showDoubleQuestion(double)
@@ -296,7 +296,7 @@ final class QuestionComponent(
     }
 
     private def showDoubleQuestion(
-        question: Question.Double,
+        question: Question.DoubleQ,
     )(
         implicit props: Props,
     ): VdomElement = {

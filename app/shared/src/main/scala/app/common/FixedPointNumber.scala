@@ -31,6 +31,7 @@ class FixedPointNumber private (
   def -(that: Int): FixedPointNumber = this - FixedPointNumber(that)
 
   def *(that: Int): FixedPointNumber = new FixedPointNumber(this.numberWithoutPoint * that)
+  def *(that: Double): FixedPointNumber = FixedPointNumber(this.toDouble * that)
   def /(that: Int): FixedPointNumber = new FixedPointNumber(this.numberWithoutPoint / that)
 
   def >(that: FixedPointNumber): Boolean = FixedPointNumberNumeric.gt(this, that)

@@ -178,7 +178,7 @@ class QuizConfigParsableValueTest extends Specification {
           name = "Double questions round",
           expectedTime = None,
           questions = Seq(
-            Question.Double(
+            Question.DoubleQ(
               verbalQuestion = "How many sides does a rectangle have?",
               verbalAnswer = "4",
               textualQuestion = "How many sides does a triangle have?",

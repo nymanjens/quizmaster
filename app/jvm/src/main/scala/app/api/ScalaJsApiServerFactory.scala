@@ -276,7 +276,7 @@ final class ScalaJsApiServerFactory @Inject()(
               value = submissionValue,
               isCorrectAnswer = isCorrectAnswer,
             ),
-            resetTimer = question.isInstanceOf[Question.Double],
+            resetTimer = question.isInstanceOf[Question.DoubleQ],
             pauseTimer =
               if (question.onlyFirstGainsPoints) isCorrectAnswer == Some(true)
               else allOtherTeamsHaveSubmission,

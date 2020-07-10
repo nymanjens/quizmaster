@@ -185,7 +185,8 @@ object QuizConfig {
       }
     }
 
-    case class Double(
+    // This cannot be "Double" because that conflicts with the scala native type
+    case class DoubleQ(
         verbalQuestion: String,
         verbalAnswer: String,
         override val textualQuestion: String,
@@ -277,8 +278,30 @@ object QuizConfig {
           isCorrect: Option[Boolean],
           previousCorrectSubmissionsExist: Boolean,
       ): FixedPointNumber = {
-        ???
+        isCorrect match {
+          case None =>
+            (submissionValue: @unchecked) match {
+              case None                                      => FixedPointNumber(0)
+              case Some(SubmissionValue.PressedTheOneButton) => FixedPointNumber(0)
+              case Some(SubmissionValue.FreeTextAnswer(a))   => pointsToGain * getCorrectnessPercentage(a)
+
+            }
+          case Some(true)  => pointsToGain
+          case Some(false) => FixedPointNumber(0)
+        }
       }
+
+      private def getCorrectnessPercentage(answer: String): Double = {
+        val N = itemsInAlphabeticalOrder.size
+        val maxNumberOfPairwiseSwaps = ((N - 1) * N) / 2
+
+        if(answer.length != N || answer.toSet != itemToCharacterBimap.inverse().keySet) {
+          0.0 // Return early because the answer cannot be parsed
+        } else {
+          ???
+        }
+      }
+
       override def onlyFirstGainsPoints: Boolean = false
       override def showSingleAnswerButtonToTeams: Boolean = false
 
@@ -311,7 +334,7 @@ object QuizConfig {
         (submissionValue: @unchecked) match {
           case SubmissionValue.PressedTheOneButton => None
           case SubmissionValue.FreeTextAnswer(a) =>
-            if(a == answerAsString) {
+            if (a == answerAsString) {
               Some(true)
             } else if (a == answerAsString.reverse) {
               Some(false)

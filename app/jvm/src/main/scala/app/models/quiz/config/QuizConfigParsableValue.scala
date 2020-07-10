@@ -128,7 +128,7 @@ class QuizConfigParsableValue @Inject()(
     }
   }
 
-  private object DoubleQuestionValue extends MapParsableValue[Question.Double] {
+  private object DoubleQuestionValue extends MapParsableValue[Question.DoubleQ] {
     override val supportedKeyValuePairs = Map(
       "verbalQuestion" -> Required(StringValue),
       "verbalAnswer" -> Required(StringValue),
@@ -138,7 +138,7 @@ class QuizConfigParsableValue @Inject()(
       "pointsToGain" -> Optional(FixedPointNumberValue),
     )
     override def parseFromParsedMapValues(map: StringMap) = {
-      Question.Double(
+      Question.DoubleQ(
         verbalQuestion = map.required[String]("verbalQuestion"),
         verbalAnswer = map.required[String]("verbalAnswer"),
         textualQuestion = map.required[String]("textualQuestion"),
@@ -147,7 +147,7 @@ class QuizConfigParsableValue @Inject()(
         pointsToGain = map.optional("pointsToGain", FixedPointNumber(2)),
       )
     }
-    override def additionalValidationErrors(v: Question.Double) = v.validationErrors()
+    override def additionalValidationErrors(v: Question.DoubleQ) = v.validationErrors()
   }
 
   private object OrderItemsQuestionValue extends MapParsableValue[Question.OrderItems] {

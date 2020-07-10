@@ -118,7 +118,7 @@ final class Application @Inject()(
             question match {
               case _: Question.Standard | _: Question.OrderItems =>
                 if (question.maxTime > infiniteDurationThreshold) Duration.ofSeconds(30) else question.maxTime
-              case _: Question.Double => Duration.ofSeconds(20)
+              case _: Question.DoubleQ => Duration.ofSeconds(20)
           })
           .sum
           .toMinutes
@@ -179,7 +179,7 @@ final class Application @Inject()(
         val textualAnswer =
           q match {
             case question: Question.Standard   => question.answer
-            case question: Question.Double     => question.textualAnswer
+            case question: Question.DoubleQ    => question.textualAnswer
             case question: Question.OrderItems => question.answerAsString
           }
         val maxTime =

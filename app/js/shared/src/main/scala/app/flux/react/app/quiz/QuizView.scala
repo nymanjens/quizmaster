@@ -86,7 +86,7 @@ final class QuizView(
           soundEffectController.playNewSubmission()
         }
 
-        if (question.isInstanceOf[Question.Double]) {
+        if (question.isInstanceOf[Question.DoubleQ]) {
           for (submission <- newSubmissions) {
             if (submission.isCorrectAnswer == Some(true)) {
               teamInputStore.alertTeam(submission.teamId)
