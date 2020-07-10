@@ -284,7 +284,14 @@ object QuizConfig {
             (submissionValue: @unchecked) match {
               case None                                      => FixedPointNumber(0)
               case Some(SubmissionValue.PressedTheOneButton) => FixedPointNumber(0)
-              case Some(SubmissionValue.FreeTextAnswer(a))   => pointsToGain * getCorrectnessPercentage(a)
+              case Some(SubmissionValue.FreeTextAnswer(a)) =>
+                val correctness = getCorrectnessPercentage(a)
+                if (correctness < 1 && pointsToGain * correctness == pointsToGain) {
+                  // Ensure that non-perfect answers have at least 0.1 difference with correct answers
+                  pointsToGain - FixedPointNumber(0.1)
+                } else {
+                  pointsToGain * correctness
+                }
 
             }
           case Some(true)  => pointsToGain
@@ -349,9 +356,9 @@ object QuizConfig {
         (submissionValue: @unchecked) match {
           case SubmissionValue.PressedTheOneButton => None
           case SubmissionValue.FreeTextAnswer(a) =>
-            if (a == answerAsString) {
+            if (getCorrectnessPercentage(a) == 1.0) {
               Some(true)
-            } else if (a == answerAsString.reverse) {
+            } else if (getCorrectnessPercentage(a) == 0.0) {
               Some(false)
             } else {
               None
