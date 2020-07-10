@@ -389,7 +389,89 @@ final class QuestionComponent(
     )(
         implicit props: Props,
     ): VdomElement = {
-      ???
+      implicit val _ = props.quizState
+      val progressIndex = props.questionProgressIndex
+      val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
+
+      <.div(
+        ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
+          <.div(
+            ^.className := "question",
+            <<.nl2Br(question.question),
+          )
+        },
+        <<.ifDefined(question.questionDetail) { questionDetail =>
+          ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
+            <.div(
+              ^.className := "question-detail",
+              <<.nl2Br(questionDetail),
+            )
+          }
+        },
+        pointsMetadata(question),
+        ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
+          <.div(
+            ^.className := "image-and-choices-row",
+            <.div(
+              ^.className := "choices-holder",
+              <.ul(
+                ^.className := "choices",
+                if (answerIsVisible) {
+                  (for (item <- question.orderedItemsThatWillBePresentedInAlphabeticalOrder)
+                    yield {
+                      <.li(
+                        ^.key := s"Answer-$item",
+                        <.span(
+                          ^.className := "correct",
+                          s"${question.toCharacterCode(item)}/ $item",
+                        ),
+                      )
+                    }).toVdomArray
+                } else {
+                  (for (item <- question.itemsInAlphabeticalOrder)
+                    yield {
+                      <.li(
+                        ^.key := item,
+                        s"${question.toCharacterCode(item)}/ $item",
+                      )
+                    }).toVdomArray
+                },
+              ),
+            ),
+          )
+        },
+        <.div(
+          ^.className := "submissions-without-choices",
+          showSubmissions(props.quizState.submissions)
+        ),
+        ifVisibleOrMaster(answerIsVisible) {
+          if (answerIsVisible) {
+            <.div(
+              ^.className := "answer",
+              <<.nl2Br(question.answerAsString),
+            )
+          } else {
+            <.div(obfuscatedAnswer(question.answerAsString))
+          }
+        },
+        <<.ifThen(answerIsVisible) {
+          <<.ifDefined(question.answerDetail) { answerDetail =>
+            <.div(
+              ^.className := "answer-detail",
+              <<.nl2Br(answerDetail),
+            )
+          }
+        },
+        <<.ifThen(question.shouldShowTimer(props.questionProgressIndex)) {
+          <.div(
+            ^.className := "timer",
+            ^^.ifThen(props.quizState.imageIsEnlarged && !props.showMasterData) {
+              ^.className := "pull-to-top-of-page"
+            },
+            syncedTimerBar(maxTime = question.maxTime),
+          )
+        },
+      )
     }
 
     private def ifVisibleOrMaster(isVisible: Boolean)(vdomTag: VdomTag)(implicit props: Props): VdomNode = {

@@ -337,6 +337,9 @@ object QuizConfig {
       }
       override def isMultipleChoice: Boolean = false
 
+      def questionIsVisible(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex >= 1
+      }
       override def answerIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
       }
