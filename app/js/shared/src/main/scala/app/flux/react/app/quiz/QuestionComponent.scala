@@ -403,29 +403,33 @@ final class QuestionComponent(
     }
 
     private def pointsMetadata(question: Question): VdomElement = {
+      val pointsToGainOnFirstAnswer = question.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = true)
+      val pointsToGain = question.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false)
       <.div(
         ^.className := "points-metadata",
         if (question.onlyFirstGainsPoints) {
-          if (question.pointsToGain == 1) i18n("app.first-right-answer-gains-1-point")
-          else i18n("app.first-right-answer-gains-n-points", question.pointsToGain)
-        } else if (question.pointsToGainOnFirstAnswer != question.pointsToGain) {
-          val gainN = {
-            if (question.pointsToGainOnFirstAnswer == 1) i18n("app.first-right-answer-gains-1-point")
-            else i18n("app.first-right-answer-gains-n-points", question.pointsToGainOnFirstAnswer)
-          }
-          val gainM = {
-            if (question.pointsToGain == 1) i18n("app.others-gain-1-point")
-            else i18n("app.others-gain-m-points", question.pointsToGain)
-          }
-          s"$gainN, $gainM"
+          if (pointsToGain == 1) i18n("app.first-right-answer-gains-1-point")
+          else i18n("app.first-right-answer-gains-n-points", pointsToGain)
         } else {
-          if (question.pointsToGain == 1) i18n("app.all-right-answers-gain-1-point")
-          else i18n("app.all-right-answers-gain-n-points", question.pointsToGain)
+          if (pointsToGainOnFirstAnswer != pointsToGain) {
+            val gainN = {
+              if (pointsToGainOnFirstAnswer == 1) i18n("app.first-right-answer-gains-1-point")
+              else i18n("app.first-right-answer-gains-n-points", pointsToGainOnFirstAnswer)
+            }
+            val gainM = {
+              if (pointsToGain == 1) i18n("app.others-gain-1-point")
+              else i18n("app.others-gain-m-points", pointsToGain)
+            }
+            s"$gainN, $gainM"
+          } else {
+            if (pointsToGain == 1) i18n("app.all-right-answers-gain-1-point")
+            else i18n("app.all-right-answers-gain-n-points", pointsToGain)
+          }
         },
-        <<.ifThen(question.pointsToGainOnWrongAnswer != 0) {
+        <<.ifThen(question.defaultPointsToGainOnWrongAnswer != 0) {
           ". " + (
-            if (question.pointsToGainOnWrongAnswer == -1) i18n("app.wrong-answer-loses-1-point")
-            else i18n("app.wrong-answer-loses-n-points", question.pointsToGainOnWrongAnswer.negate)
+            if (question.defaultPointsToGainOnWrongAnswer == -1) i18n("app.wrong-answer-loses-1-point")
+            else i18n("app.wrong-answer-loses-n-points", question.defaultPointsToGainOnWrongAnswer.negate)
           ) + "."
         }
       )

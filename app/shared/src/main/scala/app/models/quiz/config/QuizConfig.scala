@@ -27,9 +27,25 @@ object QuizConfig {
 
   sealed trait Question {
 
-    def pointsToGain: FixedPointNumber
-    def pointsToGainOnFirstAnswer: FixedPointNumber
-    def pointsToGainOnWrongAnswer: FixedPointNumber
+    def getPointsToGain(
+        submissionValue: Option[SubmissionValue],
+        isCorrect: Option[Boolean],
+        previousCorrectSubmissionsExist: Boolean,
+    ): FixedPointNumber
+    final def defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer: Boolean): FixedPointNumber = {
+      getPointsToGain(
+        submissionValue = None,
+        isCorrect = Some(true),
+        previousCorrectSubmissionsExist = !isFirstCorrectAnswer,
+      )
+    }
+    final def defaultPointsToGainOnWrongAnswer: FixedPointNumber = {
+      getPointsToGain(
+        submissionValue = None,
+        isCorrect = Some(false),
+        previousCorrectSubmissionsExist = false,
+      )
+    }
 
     def onlyFirstGainsPoints: Boolean
     def showSingleAnswerButtonToTeams: Boolean
@@ -77,13 +93,14 @@ object QuizConfig {
         audioSrc: Option[String],
         // Relative path in video directory
         videoSrc: Option[String],
-        override val pointsToGain: FixedPointNumber,
-        override val pointsToGainOnFirstAnswer: FixedPointNumber,
-        override val pointsToGainOnWrongAnswer: FixedPointNumber,
+        pointsToGain: FixedPointNumber,
+        pointsToGainOnFirstAnswer: FixedPointNumber,
+        pointsToGainOnWrongAnswer: FixedPointNumber,
         override val maxTime: Duration,
         override val onlyFirstGainsPoints: Boolean,
         override val showSingleAnswerButtonToTeams: Boolean,
     ) extends Question {
+
       def validationErrors(): Seq[String] = {
         choices match {
           case Some(choicesSeq) =>
@@ -95,6 +112,19 @@ object QuizConfig {
                 s"The answer should be one of the choices: <<$answer>> not in <<$choicesSeq>>"),
             ).flatten
           case None => Seq()
+        }
+      }
+
+      override def getPointsToGain(
+          submissionValue: Option[SubmissionValue],
+          isCorrect: Option[Boolean],
+          previousCorrectSubmissionsExist: Boolean,
+      ): FixedPointNumber = {
+        isCorrect match {
+          case None                                           => FixedPointNumber(0)
+          case Some(true) if !previousCorrectSubmissionsExist => pointsToGainOnFirstAnswer
+          case Some(true) if previousCorrectSubmissionsExist  => pointsToGain
+          case Some(false)                                    => pointsToGainOnWrongAnswer
         }
       }
 
@@ -158,8 +188,9 @@ object QuizConfig {
         override val textualQuestion: String,
         textualAnswer: String,
         textualChoices: Seq[String],
-        override val pointsToGain: FixedPointNumber,
+        pointsToGain: FixedPointNumber,
     ) extends Question {
+
       def validationErrors(): Seq[String] = {
         Seq(
           conditionalOption(textualChoices.size != 4, s"Expected 4 choices, but got ${textualChoices}"),
@@ -169,8 +200,17 @@ object QuizConfig {
         ).flatten
       }
 
-      override def pointsToGainOnFirstAnswer: FixedPointNumber = pointsToGain
-      override def pointsToGainOnWrongAnswer: FixedPointNumber = FixedPointNumber(0)
+      override def getPointsToGain(
+          submissionValue: Option[SubmissionValue],
+          isCorrect: Option[Boolean],
+          previousCorrectSubmissionsExist: Boolean,
+      ): FixedPointNumber = {
+        isCorrect match {
+          case None        => FixedPointNumber(0)
+          case Some(true)  => pointsToGain
+          case Some(false) => FixedPointNumber(0)
+        }
+      }
 
       override def onlyFirstGainsPoints: Boolean = true
       override def showSingleAnswerButtonToTeams: Boolean = false
@@ -217,7 +257,7 @@ object QuizConfig {
         question: String,
         questionDetail: Option[String],
         orderedItemsThatWillBePresentedInAlphabeticalOrder: Seq[String],
-        override val pointsToGain: FixedPointNumber,
+        pointsToGain: FixedPointNumber,
         override val maxTime: Duration,
     ) extends Question {
       def validationErrors(): Seq[String] = {
@@ -228,8 +268,13 @@ object QuizConfig {
         ).flatten
       }
 
-      override def pointsToGainOnFirstAnswer: FixedPointNumber = pointsToGain
-      override def pointsToGainOnWrongAnswer: FixedPointNumber = FixedPointNumber(0)
+      override def getPointsToGain(
+          submissionValue: Option[SubmissionValue],
+          isCorrect: Option[Boolean],
+          previousCorrectSubmissionsExist: Boolean,
+      ): FixedPointNumber = {
+        ???
+      }
       override def onlyFirstGainsPoints: Boolean = false
       override def showSingleAnswerButtonToTeams: Boolean = false
 
