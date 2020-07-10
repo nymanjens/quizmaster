@@ -295,7 +295,7 @@ object QuizConfig {
         val N = itemsInAlphabeticalOrder.size
         val maxNumberOfPairwiseSwaps = ((N - 1) * N) / 2
 
-        if(answer.length != N || answer.toSet != itemToCharacterBimap.inverse().keySet) {
+        if (answer.length != N || answer.toSet != itemToCharacterBimap.inverse().keySet) {
           0.0 // Return early because the answer cannot be parsed
         } else {
           ???
