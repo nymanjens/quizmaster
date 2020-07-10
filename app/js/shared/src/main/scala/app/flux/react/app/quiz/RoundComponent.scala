@@ -32,7 +32,7 @@ final class RoundComponent(
       <<.ifThen(showMasterData && round.questions.nonEmpty) {
         <.div(
           ^.className := "round-metadata",
-          s"${i18n("app.max-points-to-gain")}: ${round.questions.map(_.pointsToGainOnFirstAnswer).sum}",
+          s"${i18n("app.max-points-to-gain")}: ${round.questions.map(_.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = true)).sum}",
         )
       },
       <<.ifThen(quizState.quizIsBeingSetUp) {

@@ -252,7 +252,8 @@ final class TeamControllerView(
             yield {
               val thisChoiceSubmissionValue = SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex)
               val thisChoiceWasChosen = maybeCurrentSubmissionValue == Some(thisChoiceSubmissionValue)
-              val thisChoiceIsCorrectAnswer = question.isCorrectAnswer(thisChoiceSubmissionValue)
+              val thisChoiceIsCorrectAnswer = question.isCorrectAnswer(thisChoiceSubmissionValue) ==
+                Some(true)
 
               <.li(
                 ^.key := choice,

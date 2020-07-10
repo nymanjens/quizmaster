@@ -123,8 +123,9 @@ final class SubmissionsSummaryTable(
         ^.key := s"question-$roundIndex-$questionIndex",
         <.td(
           question match {
-            case question: Question.Standard => s"${question.question} (${question.answer})"
-            case question: Question.Double   => s"${question.textualQuestion} (${question.textualAnswer})"
+            case question: Question.Standard   => s"${question.question} (${question.answer})"
+            case question: Question.DoubleQ    => s"${question.textualQuestion} (${question.textualAnswer})"
+            case question: Question.OrderItems => s"${question.question} (${question.answerAsString})"
           },
         ), {
           for (team <- state.teams)

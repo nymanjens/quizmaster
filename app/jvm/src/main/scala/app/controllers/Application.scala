@@ -114,10 +114,11 @@ final class Application @Inject()(
     def questionsInfo(questions: Iterable[Question], expectedTime: Option[Duration]): String = {
       val maxMinutes = {
         val maybeZeroMinutes = questions
-          .map(_ match {
-            case q: Question.Standard =>
-              if (q.maxTime > infiniteDurationThreshold) Duration.ofSeconds(30) else q.maxTime
-            case _: Question.Double => Duration.ofSeconds(20)
+          .map(question =>
+            question match {
+              case _: Question.Standard | _: Question.OrderItems =>
+                if (question.maxTime > infiniteDurationThreshold) Duration.ofSeconds(30) else question.maxTime
+              case _: Question.DoubleQ => Duration.ofSeconds(20)
           })
           .sum
           .toMinutes
@@ -126,12 +127,14 @@ final class Application @Inject()(
       }
       val expectedMinutes = expectedTime.map(_.toMinutes.toDouble) getOrElse maxMinutes
 
-      val maxPoints = questions.map(_.pointsToGainOnFirstAnswer).sum
+      val maxPoints = questions.map(_.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = true)).sum
       val avgPoints4PerfectTeams = questions.map { q =>
+        val pointsToGainOnFirstAnswer = q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = true)
+        val pointsToGain = q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false)
         if (q.onlyFirstGainsPoints) {
-          q.pointsToGainOnFirstAnswer.toDouble / 4.0
+          pointsToGainOnFirstAnswer.toDouble / 4.0
         } else {
-          (q.pointsToGainOnFirstAnswer + (q.pointsToGain * 3)).toDouble / 4.0
+          (pointsToGainOnFirstAnswer + (pointsToGain * 3)).toDouble / 4.0
         }
       }.sum
       val showMax = avgPoints4PerfectTeams.round != maxPoints.toDouble.round
@@ -173,19 +176,20 @@ final class Application @Inject()(
       result += s"- ${round.name}\n"
 
       for (q <- round.questions) {
-        val (textualQuestion, textualAnswer) =
+        val textualAnswer =
           q match {
-            case question: Question.Standard => (question.question, question.answer)
-            case question: Question.Double   => (question.textualQuestion, question.textualAnswer)
+            case question: Question.Standard   => question.answer
+            case question: Question.DoubleQ    => question.textualAnswer
+            case question: Question.OrderItems => question.answerAsString
           }
         val maxTime =
           if (q.maxTime > infiniteDurationThreshold) "inf" else round1(q.maxTime.getSeconds / 60.0)
 
-        result += s"    - toGain: ${indent(3, q.pointsToGain)};  " +
-          s"first: ${indent(3, q.pointsToGainOnFirstAnswer)};   " +
+        result += s"    - toGain: ${indent(3, q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false))};  " +
+          s"first: ${indent(3, q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = true))};   " +
           s"onlyFirst: ${indent(5, q.onlyFirstGainsPoints)}; " +
           s"${indent(5, maxTime)} min; " +
-          s"${indent(50, textualQuestion)}; " +
+          s"${indent(50, q.textualQuestion)}; " +
           s"${indent(40, textualAnswer)}\n"
       }
 

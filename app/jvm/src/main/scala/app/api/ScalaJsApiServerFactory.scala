@@ -218,7 +218,9 @@ final class ScalaJsApiServerFactory @Inject()(
               val pointsToGain =
                 fetchQuizState().pointsToGainBySubmission(
                   isCorrectAnswer = Some(isCorrectAnswer),
-                  submissionId = submissionId)
+                  submissionId = submissionId,
+                  submissionValue = oldSubmissionEntity.value,
+                )
 
               oldSubmissionEntity.copy(isCorrectAnswer = Some(isCorrectAnswer), points = pointsToGain)
             }
@@ -263,10 +265,7 @@ final class ScalaJsApiServerFactory @Inject()(
         require(quizState.canSubmitResponse(team), "Responses are closed")
 
         val question = quizState.maybeQuestion.get
-        val isCorrectAnswer = submissionValue match {
-          case SubmissionValue.PressedTheOneButton => None
-          case _                                   => Some(question.isCorrectAnswer(submissionValue))
-        }
+        val isCorrectAnswer = question.isCorrectAnswer(submissionValue)
         def teamHasSubmission(thisTeam: Team): Boolean =
           quizState.submissions.exists(_.teamId == thisTeam.id)
         lazy val allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
@@ -279,7 +278,7 @@ final class ScalaJsApiServerFactory @Inject()(
               value = submissionValue,
               isCorrectAnswer = isCorrectAnswer,
             ),
-            resetTimer = question.isInstanceOf[Question.Double],
+            resetTimer = question.isInstanceOf[Question.DoubleQ],
             pauseTimer =
               if (question.onlyFirstGainsPoints) isCorrectAnswer == Some(true)
               else allOtherTeamsHaveSubmission,

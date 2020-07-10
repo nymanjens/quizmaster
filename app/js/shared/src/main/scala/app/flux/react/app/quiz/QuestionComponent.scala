@@ -89,10 +89,16 @@ final class QuestionComponent(
               case _                          => showSingleQuestion(single)
             }
 
-          case double: Question.Double =>
+          case double: Question.DoubleQ =>
             props.questionProgressIndex match {
               case 0 if !props.showMasterData => showPreparatoryTitle(double)
               case _                          => showDoubleQuestion(double)
+            }
+
+          case orderItems: Question.OrderItems =>
+            props.questionProgressIndex match {
+              case 0 if !props.showMasterData => showPreparatoryTitle(orderItems)
+              case _                          => showOrderItemsQuestion(orderItems)
             }
         },
       )
@@ -214,8 +220,9 @@ final class QuestionComponent(
                           props.quizState.submissions.filter(
                             _.value == SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
                         else Seq()
-                      val isCorrectAnswer = question.isCorrectAnswer(
-                        SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
+                      val isCorrectAnswer =
+                        question.isCorrectAnswer(
+                          SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex)) == Some(true)
                       <.li(
                         ^.key := choice,
                         answerBullet.toVdomNode,
@@ -289,7 +296,7 @@ final class QuestionComponent(
     }
 
     private def showDoubleQuestion(
-        question: Question.Double,
+        question: Question.DoubleQ,
     )(
         implicit props: Props,
     ): VdomElement = {
@@ -341,7 +348,9 @@ final class QuestionComponent(
                       props.quizState.submissions.filter(
                         _.value == SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
                     val isCorrectAnswer =
-                      question.isCorrectAnswer(SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
+                      question
+                        .isCorrectAnswer(SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex)) ==
+                        Some(true)
                     <.li(
                       ^.key := choice,
                       answerBullet.toVdomNode,
@@ -375,6 +384,96 @@ final class QuestionComponent(
       )
     }
 
+    private def showOrderItemsQuestion(
+        question: Question.OrderItems,
+    )(
+        implicit props: Props,
+    ): VdomElement = {
+      implicit val _ = props.quizState
+      val progressIndex = props.questionProgressIndex
+      val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
+
+      <.div(
+        ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
+          <.div(
+            ^.className := "question",
+            <<.nl2Br(question.question),
+          )
+        },
+        <<.ifDefined(question.questionDetail) { questionDetail =>
+          ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
+            <.div(
+              ^.className := "question-detail",
+              <<.nl2Br(questionDetail),
+            )
+          }
+        },
+        pointsMetadata(question),
+        ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
+          <.div(
+            ^.className := "image-and-choices-row",
+            <.div(
+              ^.className := "choices-holder",
+              <.ul(
+                ^.className := "choices",
+                if (answerIsVisible) {
+                  (for (item <- question.orderedItemsThatWillBePresentedInAlphabeticalOrder)
+                    yield {
+                      <.li(
+                        ^.key := s"Answer-$item",
+                        <.span(
+                          ^.className := "correct",
+                          s"${question.toCharacterCode(item)}/ $item",
+                        ),
+                      )
+                    }).toVdomArray
+                } else {
+                  (for (item <- question.itemsInAlphabeticalOrder)
+                    yield {
+                      <.li(
+                        ^.key := item,
+                        s"${question.toCharacterCode(item)}/ $item",
+                      )
+                    }).toVdomArray
+                },
+              ),
+            ),
+          )
+        },
+        <.div(
+          ^.className := "submissions-without-choices",
+          showSubmissions(props.quizState.submissions)
+        ),
+        ifVisibleOrMaster(answerIsVisible) {
+          if (answerIsVisible) {
+            <.div(
+              ^.className := "answer",
+              <<.nl2Br(question.answerAsString),
+            )
+          } else {
+            <.div(obfuscatedAnswer(question.answerAsString))
+          }
+        },
+        <<.ifThen(answerIsVisible) {
+          <<.ifDefined(question.answerDetail) { answerDetail =>
+            <.div(
+              ^.className := "answer-detail",
+              <<.nl2Br(answerDetail),
+            )
+          }
+        },
+        <<.ifThen(question.shouldShowTimer(props.questionProgressIndex)) {
+          <.div(
+            ^.className := "timer",
+            ^^.ifThen(props.quizState.imageIsEnlarged && !props.showMasterData) {
+              ^.className := "pull-to-top-of-page"
+            },
+            syncedTimerBar(maxTime = question.maxTime),
+          )
+        },
+      )
+    }
+
     private def ifVisibleOrMaster(isVisible: Boolean)(vdomTag: VdomTag)(implicit props: Props): VdomNode = {
       if (isVisible) {
         vdomTag
@@ -386,29 +485,33 @@ final class QuestionComponent(
     }
 
     private def pointsMetadata(question: Question): VdomElement = {
+      val pointsToGainOnFirstAnswer = question.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = true)
+      val pointsToGain = question.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false)
       <.div(
         ^.className := "points-metadata",
         if (question.onlyFirstGainsPoints) {
-          if (question.pointsToGain == 1) i18n("app.first-right-answer-gains-1-point")
-          else i18n("app.first-right-answer-gains-n-points", question.pointsToGain)
-        } else if (question.pointsToGainOnFirstAnswer != question.pointsToGain) {
-          val gainN = {
-            if (question.pointsToGainOnFirstAnswer == 1) i18n("app.first-right-answer-gains-1-point")
-            else i18n("app.first-right-answer-gains-n-points", question.pointsToGainOnFirstAnswer)
-          }
-          val gainM = {
-            if (question.pointsToGain == 1) i18n("app.others-gain-1-point")
-            else i18n("app.others-gain-m-points", question.pointsToGain)
-          }
-          s"$gainN, $gainM"
+          if (pointsToGain == 1) i18n("app.first-right-answer-gains-1-point")
+          else i18n("app.first-right-answer-gains-n-points", pointsToGain)
         } else {
-          if (question.pointsToGain == 1) i18n("app.all-right-answers-gain-1-point")
-          else i18n("app.all-right-answers-gain-n-points", question.pointsToGain)
+          if (pointsToGainOnFirstAnswer != pointsToGain) {
+            val gainN = {
+              if (pointsToGainOnFirstAnswer == 1) i18n("app.first-right-answer-gains-1-point")
+              else i18n("app.first-right-answer-gains-n-points", pointsToGainOnFirstAnswer)
+            }
+            val gainM = {
+              if (pointsToGain == 1) i18n("app.others-gain-1-point")
+              else i18n("app.others-gain-m-points", pointsToGain)
+            }
+            s"$gainN, $gainM"
+          } else {
+            if (pointsToGain == 1) i18n("app.all-right-answers-gain-1-point")
+            else i18n("app.all-right-answers-gain-n-points", pointsToGain)
+          }
         },
-        <<.ifThen(question.pointsToGainOnWrongAnswer != 0) {
+        <<.ifThen(question.defaultPointsToGainOnWrongAnswer != 0) {
           ". " + (
-            if (question.pointsToGainOnWrongAnswer == -1) i18n("app.wrong-answer-loses-1-point")
-            else i18n("app.wrong-answer-loses-n-points", question.pointsToGainOnWrongAnswer.negate)
+            if (question.defaultPointsToGainOnWrongAnswer == -1) i18n("app.wrong-answer-loses-1-point")
+            else i18n("app.wrong-answer-loses-n-points", question.defaultPointsToGainOnWrongAnswer.negate)
           ) + "."
         }
       )

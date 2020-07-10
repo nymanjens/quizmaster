@@ -1,18 +1,10 @@
 package app.models.quiz
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.async.Async.async
-import scala.async.Async.await
 import java.lang.Math.abs
-
-import hydro.common.time.JavaTimeImplicits._
 import java.time.Duration
 import java.time.Instant
 
 import app.common.FixedPointNumber
-import app.models.access.ModelFields
-
-import scala.collection.immutable.Seq
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.config.QuizConfig.Round
@@ -22,15 +14,15 @@ import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.QuizState.TimerState
 import hydro.common.time.Clock
+import hydro.common.time.JavaTimeImplicits._
 import hydro.common.I18n
 import hydro.models.Entity
 import hydro.models.UpdatableEntity
 import hydro.models.UpdatableEntity.LastUpdateTime
-import hydro.models.access.EntityAccess
 import hydro.models.modification.EntityModification
 import hydro.models.modification.EntityType
 
-import scala.concurrent.Future
+import scala.collection.immutable.Seq
 import scala.util.Random
 
 case class QuizState(
@@ -134,20 +126,17 @@ case class QuizState(
   def pointsToGainBySubmission(
       isCorrectAnswer: Option[Boolean],
       submissionId: Long,
+      submissionValue: SubmissionValue,
   )(implicit quizConfig: QuizConfig): FixedPointNumber = {
-    val maybeFirstCorrectSubmission: Option[Submission] = submissions.find(_.isCorrectAnswer == Some(true))
+    val previousCorrectSubmissionsExist =
+      submissions.takeWhile(_.id != submissionId).exists(_.isCorrectAnswer == Some(true))
     val question = maybeQuestion.get
 
-    isCorrectAnswer match {
-      case Some(true) =>
-        maybeFirstCorrectSubmission match {
-          case Some(s) if s.id == submissionId => question.pointsToGainOnFirstAnswer
-          case None                            => question.pointsToGainOnFirstAnswer
-          case Some(otherSubmission)           => question.pointsToGain
-        }
-      case Some(false) => question.pointsToGainOnWrongAnswer
-      case None        => FixedPointNumber(0)
-    }
+    question.getPointsToGain(
+      submissionValue = Some(submissionValue),
+      isCorrect = isCorrectAnswer,
+      previousCorrectSubmissionsExist = previousCorrectSubmissionsExist,
+    )
   }
 }
 
@@ -218,7 +207,11 @@ object QuizState {
         teamId = teamId,
         value = value,
         isCorrectAnswer = isCorrectAnswer,
-        points = quizState.pointsToGainBySubmission(isCorrectAnswer = isCorrectAnswer, submissionId = id),
+        points = quizState.pointsToGainBySubmission(
+          isCorrectAnswer = isCorrectAnswer,
+          submissionId = id,
+          submissionValue = value,
+        ),
         scored = false,
       )
     }

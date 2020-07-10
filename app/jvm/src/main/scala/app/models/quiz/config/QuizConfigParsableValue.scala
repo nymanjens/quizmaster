@@ -66,9 +66,10 @@ class QuizConfigParsableValue @Inject()(
         yamlMap.get("questionType") match {
           case None | Some("standard") => StandardQuestionValue.parse(yamlMapWithoutQuestionType)
           case Some("double")          => DoubleQuestionValue.parse(yamlMapWithoutQuestionType)
+          case Some("orderItems")      => OrderItemsQuestionValue.parse(yamlMapWithoutQuestionType)
           case Some(other) =>
             ParseResult.onlyError(
-              s"questionType expected to be one of these: [unset, 'standard', 'double'], but found $other")
+              s"questionType expected to be one of these: [unset, 'standard', 'double', 'orderItems'], but found $other")
         }
 
       } else {
@@ -127,7 +128,7 @@ class QuizConfigParsableValue @Inject()(
     }
   }
 
-  private object DoubleQuestionValue extends MapParsableValue[Question.Double] {
+  private object DoubleQuestionValue extends MapParsableValue[Question.DoubleQ] {
     override val supportedKeyValuePairs = Map(
       "verbalQuestion" -> Required(StringValue),
       "verbalAnswer" -> Required(StringValue),
@@ -137,7 +138,7 @@ class QuizConfigParsableValue @Inject()(
       "pointsToGain" -> Optional(FixedPointNumberValue),
     )
     override def parseFromParsedMapValues(map: StringMap) = {
-      Question.Double(
+      Question.DoubleQ(
         verbalQuestion = map.required[String]("verbalQuestion"),
         verbalAnswer = map.required[String]("verbalAnswer"),
         textualQuestion = map.required[String]("textualQuestion"),
@@ -146,7 +147,31 @@ class QuizConfigParsableValue @Inject()(
         pointsToGain = map.optional("pointsToGain", FixedPointNumber(2)),
       )
     }
-    override def additionalValidationErrors(v: Question.Double) = v.validationErrors()
+    override def additionalValidationErrors(v: Question.DoubleQ) = v.validationErrors()
+  }
+
+  private object OrderItemsQuestionValue extends MapParsableValue[Question.OrderItems] {
+    override val supportedKeyValuePairs = Map(
+      "question" -> Required(StringValue),
+      "questionDetail" -> Optional(StringValue),
+      "orderedItemsThatWillBePresentedInAlphabeticalOrder" -> Required(
+        ListParsableValue(StringValue)(s => s)),
+      "answerDetail" -> Optional(StringValue),
+      "pointsToGain" -> Optional(FixedPointNumberValue),
+      "maxTimeSeconds" -> Required(IntValue),
+    )
+    override def parseFromParsedMapValues(map: StringMap) = {
+      Question.OrderItems(
+        question = map.required[String]("question"),
+        questionDetail = map.optional("questionDetail"),
+        orderedItemsThatWillBePresentedInAlphabeticalOrder =
+          map.required[Seq[String]]("orderedItemsThatWillBePresentedInAlphabeticalOrder"),
+        answerDetail = map.optional("answerDetail"),
+        pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
+        maxTime = Duration.ofSeconds(map.required[Int]("maxTimeSeconds")),
+      )
+    }
+    override def additionalValidationErrors(v: Question.OrderItems) = v.validationErrors()
   }
 
   private object ImageValue extends MapParsableValue[Image] {

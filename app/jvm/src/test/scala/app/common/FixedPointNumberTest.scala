@@ -47,6 +47,8 @@ class FixedPointNumberTest extends Specification {
 
   "* and /" in {
     FixedPointNumber(1.2) * -2 mustEqual FixedPointNumber(-2.4)
+    FixedPointNumber(1.2) * -2.0 mustEqual FixedPointNumber(-2.4)
+    FixedPointNumber(1.2) * 0.5 mustEqual FixedPointNumber(0.6)
 
     FixedPointNumber(-1.2) / 2 mustEqual FixedPointNumber(-0.6)
   }

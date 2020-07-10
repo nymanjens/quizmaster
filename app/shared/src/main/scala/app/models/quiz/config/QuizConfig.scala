@@ -1,14 +1,17 @@
 package app.models.quiz.config
 
-import scala.collection.immutable.Seq
-import app.models.quiz.config.QuizConfig.Round
 import java.time.Duration
 
 import app.common.FixedPointNumber
+import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.Submission.SubmissionValue
-import hydro.common.CollectionUtils
 import hydro.common.CollectionUtils.conditionalOption
+import hydro.common.GuavaReplacement.ImmutableBiMap
+import hydro.common.GuavaReplacement.Splitter
+
+import scala.collection.immutable.Seq
+import scala.collection.mutable
 
 case class QuizConfig(
     rounds: Seq[Round],
@@ -27,9 +30,25 @@ object QuizConfig {
 
   sealed trait Question {
 
-    def pointsToGain: FixedPointNumber
-    def pointsToGainOnFirstAnswer: FixedPointNumber
-    def pointsToGainOnWrongAnswer: FixedPointNumber
+    def getPointsToGain(
+        submissionValue: Option[SubmissionValue],
+        isCorrect: Option[Boolean],
+        previousCorrectSubmissionsExist: Boolean,
+    ): FixedPointNumber
+    final def defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer: Boolean): FixedPointNumber = {
+      getPointsToGain(
+        submissionValue = None,
+        isCorrect = Some(true),
+        previousCorrectSubmissionsExist = !isFirstCorrectAnswer,
+      )
+    }
+    final def defaultPointsToGainOnWrongAnswer: FixedPointNumber = {
+      getPointsToGain(
+        submissionValue = None,
+        isCorrect = Some(false),
+        previousCorrectSubmissionsExist = false,
+      )
+    }
 
     def onlyFirstGainsPoints: Boolean
     def showSingleAnswerButtonToTeams: Boolean
@@ -60,7 +79,7 @@ object QuizConfig {
       *
       * Always returns false if the given value is not scorable.
       */
-    def isCorrectAnswer(submissionValue: SubmissionValue): Boolean
+    def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean]
   }
 
   object Question {
@@ -77,13 +96,14 @@ object QuizConfig {
         audioSrc: Option[String],
         // Relative path in video directory
         videoSrc: Option[String],
-        override val pointsToGain: FixedPointNumber,
-        override val pointsToGainOnFirstAnswer: FixedPointNumber,
-        override val pointsToGainOnWrongAnswer: FixedPointNumber,
+        pointsToGain: FixedPointNumber,
+        pointsToGainOnFirstAnswer: FixedPointNumber,
+        pointsToGainOnWrongAnswer: FixedPointNumber,
         override val maxTime: Duration,
         override val onlyFirstGainsPoints: Boolean,
         override val showSingleAnswerButtonToTeams: Boolean,
     ) extends Question {
+
       def validationErrors(): Seq[String] = {
         choices match {
           case Some(choicesSeq) =>
@@ -95,6 +115,19 @@ object QuizConfig {
                 s"The answer should be one of the choices: <<$answer>> not in <<$choicesSeq>>"),
             ).flatten
           case None => Seq()
+        }
+      }
+
+      override def getPointsToGain(
+          submissionValue: Option[SubmissionValue],
+          isCorrect: Option[Boolean],
+          previousCorrectSubmissionsExist: Boolean,
+      ): FixedPointNumber = {
+        isCorrect match {
+          case None                                           => FixedPointNumber(0)
+          case Some(true) if !previousCorrectSubmissionsExist => pointsToGainOnFirstAnswer
+          case Some(true) if previousCorrectSubmissionsExist  => pointsToGain
+          case Some(false)                                    => pointsToGainOnWrongAnswer
         }
       }
 
@@ -124,15 +157,16 @@ object QuizConfig {
       override def textualQuestion: String = question
       override def maybeTextualChoices: Option[Seq[String]] = choices
 
-      override def isCorrectAnswer(submissionValue: SubmissionValue): Boolean = {
+      override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
         submissionValue match {
-          case SubmissionValue.PressedTheOneButton               => false
-          case SubmissionValue.MultipleChoiceAnswer(answerIndex) => choices.get.apply(answerIndex) == answer
+          case SubmissionValue.PressedTheOneButton => None
+          case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
+            Some(choices.get.apply(answerIndex) == answer)
           case SubmissionValue.FreeTextAnswer(freeTextAnswer) =>
             def normalizeTextForComparison(s: String): String = {
               s.replace(" ", "").replace(".", "").replace("-", "").toLowerCase
             }
-            normalizeTextForComparison(answer) == normalizeTextForComparison(freeTextAnswer)
+            Some(normalizeTextForComparison(answer) == normalizeTextForComparison(freeTextAnswer))
         }
       }
 
@@ -151,14 +185,16 @@ object QuizConfig {
       }
     }
 
-    case class Double(
+    // This cannot be "Double" because that conflicts with the scala native type
+    case class DoubleQ(
         verbalQuestion: String,
         verbalAnswer: String,
         override val textualQuestion: String,
         textualAnswer: String,
         textualChoices: Seq[String],
-        override val pointsToGain: FixedPointNumber,
+        pointsToGain: FixedPointNumber,
     ) extends Question {
+
       def validationErrors(): Seq[String] = {
         Seq(
           conditionalOption(textualChoices.size != 4, s"Expected 4 choices, but got ${textualChoices}"),
@@ -168,8 +204,17 @@ object QuizConfig {
         ).flatten
       }
 
-      override def pointsToGainOnFirstAnswer: FixedPointNumber = pointsToGain
-      override def pointsToGainOnWrongAnswer: FixedPointNumber = FixedPointNumber(0)
+      override def getPointsToGain(
+          submissionValue: Option[SubmissionValue],
+          isCorrect: Option[Boolean],
+          previousCorrectSubmissionsExist: Boolean,
+      ): FixedPointNumber = {
+        isCorrect match {
+          case None        => FixedPointNumber(0)
+          case Some(true)  => pointsToGain
+          case Some(false) => FixedPointNumber(0)
+        }
+      }
 
       override def onlyFirstGainsPoints: Boolean = true
       override def showSingleAnswerButtonToTeams: Boolean = false
@@ -194,10 +239,11 @@ object QuizConfig {
       override def isMultipleChoice: Boolean = true
       override def maybeTextualChoices: Option[Seq[String]] = Some(textualChoices)
 
-      override def isCorrectAnswer(submissionValue: SubmissionValue): Boolean = {
+      override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
         (submissionValue: @unchecked) match {
+          case SubmissionValue.PressedTheOneButton => None
           case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
-            textualChoices.apply(answerIndex) == textualAnswer
+            Some(textualChoices.apply(answerIndex) == textualAnswer)
         }
       }
 
@@ -209,6 +255,144 @@ object QuizConfig {
       }
       override def answerIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
+      }
+    }
+
+    case class OrderItems(
+        question: String,
+        questionDetail: Option[String],
+        orderedItemsThatWillBePresentedInAlphabeticalOrder: Seq[String],
+        answerDetail: Option[String],
+        pointsToGain: FixedPointNumber,
+        override val maxTime: Duration,
+    ) extends Question {
+      def validationErrors(): Seq[String] = {
+        val orderedItems = orderedItemsThatWillBePresentedInAlphabeticalOrder
+        Seq(
+          conditionalOption(orderedItems.size < 2, s"Expected at least 2 items, but got $orderedItems"),
+          conditionalOption(orderedItems.size > 10, s"Expected at most 10 items, but got $orderedItems"),
+        ).flatten
+      }
+
+      override def getPointsToGain(
+          submissionValue: Option[SubmissionValue],
+          isCorrect: Option[Boolean],
+          previousCorrectSubmissionsExist: Boolean,
+      ): FixedPointNumber = {
+        isCorrect match {
+          case None =>
+            (submissionValue: @unchecked) match {
+              case None                                      => FixedPointNumber(0)
+              case Some(SubmissionValue.PressedTheOneButton) => FixedPointNumber(0)
+              case Some(SubmissionValue.FreeTextAnswer(a)) =>
+                val correctness = getCorrectnessPercentage(a)
+                if (correctness < 1 && pointsToGain * correctness == pointsToGain) {
+                  // Ensure that non-perfect answers have at least 0.1 difference with correct answers
+                  pointsToGain - FixedPointNumber(0.1)
+                } else {
+                  pointsToGain * correctness
+                }
+
+            }
+          case Some(true)  => pointsToGain
+          case Some(false) => FixedPointNumber(0)
+        }
+      }
+
+      private def getCorrectnessPercentage(answer: String): Double = {
+        val N = itemsInAlphabeticalOrder.size
+        val maxNumberOfPairwiseSwaps = ((N - 1) * N) / 2
+        val charactersInCorrectOrder = answerAsString
+
+        if (answer.length != N || answer.toSet != itemToCharacterBimap.inverse().keySet) {
+          0.0 // Return early because the answer cannot be parsed
+        } else {
+          var numSwaps = 0
+          var remainingAnswerString = answer
+
+          for (char <- charactersInCorrectOrder) {
+            numSwaps += remainingAnswerString.indexOf(char)
+            remainingAnswerString = remainingAnswerString.filter(_ != char)
+          }
+
+          require(numSwaps <= maxNumberOfPairwiseSwaps)
+
+          1 - (numSwaps * 1.0 / maxNumberOfPairwiseSwaps)
+        }
+      }
+
+      override def onlyFirstGainsPoints: Boolean = false
+      override def showSingleAnswerButtonToTeams: Boolean = false
+
+      /**
+        * Steps:
+        * 0- Show preparatory title: "Question 2"
+        * 1- Show question: "This is the question, do you know the answer?"
+        * 2- Show answer
+        * 3- Show answer and give points
+        */
+      override def progressStepsCount(includeAnswers: Boolean): Int = {
+        if (includeAnswers) 4 else 2
+      }
+
+      override def shouldShowTimer(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex == 1
+      }
+
+      override def submissionAreOpen(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex == 1
+      }
+      override def isMultipleChoice: Boolean = false
+
+      def questionIsVisible(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex >= 1
+      }
+      override def answerIsVisible(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
+      }
+      override def textualQuestion: String = question
+      override def maybeTextualChoices: Option[Seq[String]] = None
+      override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
+        (submissionValue: @unchecked) match {
+          case SubmissionValue.PressedTheOneButton => None
+          case SubmissionValue.FreeTextAnswer(a) =>
+            if (getCorrectnessPercentage(a) == 1.0) {
+              Some(true)
+            } else if (getCorrectnessPercentage(a) == 0.0) {
+              Some(false)
+            } else {
+              None
+            }
+        }
+      }
+
+      def answerAsString: String = {
+        orderedItemsThatWillBePresentedInAlphabeticalOrder.map(toCharacterCode).mkString
+      }
+
+      lazy val itemsInAlphabeticalOrder: Seq[String] = {
+        orderedItemsThatWillBePresentedInAlphabeticalOrder.sorted
+      }
+
+      private lazy val itemToCharacterBimap: ImmutableBiMap[String, Char] = {
+        val resultBuilder = ImmutableBiMap.builder[String, Char]()
+        val usedCharacters = mutable.Set[Char]()
+
+        for (item <- itemsInAlphabeticalOrder) {
+          val words = Splitter.on(' ').trimResults().omitEmptyStrings().split(item)
+          val candidatesFromWords = words.map(_.apply(0)).filter(_.isLetterOrDigit).map(_.toUpper)
+          val candidates = candidatesFromWords ++ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+          val char = candidates.find(c => !usedCharacters.contains(c)).get
+
+          usedCharacters.add(char)
+          resultBuilder.put(item, char)
+        }
+
+        resultBuilder.build
+      }
+
+      def toCharacterCode(item: String): Char = {
+        itemToCharacterBimap.get(item)
       }
     }
   }
