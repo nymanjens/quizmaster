@@ -263,10 +263,7 @@ final class ScalaJsApiServerFactory @Inject()(
         require(quizState.canSubmitResponse(team), "Responses are closed")
 
         val question = quizState.maybeQuestion.get
-        val isCorrectAnswer = submissionValue match {
-          case SubmissionValue.PressedTheOneButton => None
-          case _                                   => Some(question.isCorrectAnswer(submissionValue))
-        }
+        val isCorrectAnswer = question.isCorrectAnswer(submissionValue)
         def teamHasSubmission(thisTeam: Team): Boolean =
           quizState.submissions.exists(_.teamId == thisTeam.id)
         lazy val allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)

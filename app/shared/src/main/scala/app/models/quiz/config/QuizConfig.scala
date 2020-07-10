@@ -60,7 +60,7 @@ object QuizConfig {
       *
       * Always returns false if the given value is not scorable.
       */
-    def isCorrectAnswer(submissionValue: SubmissionValue): Boolean
+    def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean]
   }
 
   object Question {
@@ -124,15 +124,16 @@ object QuizConfig {
       override def textualQuestion: String = question
       override def maybeTextualChoices: Option[Seq[String]] = choices
 
-      override def isCorrectAnswer(submissionValue: SubmissionValue): Boolean = {
+      override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
         submissionValue match {
-          case SubmissionValue.PressedTheOneButton               => false
-          case SubmissionValue.MultipleChoiceAnswer(answerIndex) => choices.get.apply(answerIndex) == answer
+          case SubmissionValue.PressedTheOneButton => None
+          case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
+            Some(choices.get.apply(answerIndex) == answer)
           case SubmissionValue.FreeTextAnswer(freeTextAnswer) =>
             def normalizeTextForComparison(s: String): String = {
               s.replace(" ", "").replace(".", "").replace("-", "").toLowerCase
             }
-            normalizeTextForComparison(answer) == normalizeTextForComparison(freeTextAnswer)
+            Some(normalizeTextForComparison(answer) == normalizeTextForComparison(freeTextAnswer))
         }
       }
 
@@ -194,10 +195,10 @@ object QuizConfig {
       override def isMultipleChoice: Boolean = true
       override def maybeTextualChoices: Option[Seq[String]] = Some(textualChoices)
 
-      override def isCorrectAnswer(submissionValue: SubmissionValue): Boolean = {
+      override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
         (submissionValue: @unchecked) match {
           case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
-            textualChoices.apply(answerIndex) == textualAnswer
+            Some(textualChoices.apply(answerIndex) == textualAnswer)
         }
       }
 
@@ -240,7 +241,7 @@ object QuizConfig {
         * 3- Show answer and give points
         */
       override def progressStepsCount(includeAnswers: Boolean): Int = {
-        if(includeAnswers) 2 else 4
+        if (includeAnswers) 2 else 4
       }
 
       override def shouldShowTimer(questionProgressIndex: Int): Boolean = {
@@ -253,11 +254,11 @@ object QuizConfig {
       override def isMultipleChoice: Boolean = false
 
       override def answerIsVisible(questionProgressIndex: Int): Boolean = {
-          questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
+        questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
       }
       override def textualQuestion: String = question
       override def maybeTextualChoices: Option[Seq[String]] = None
-      override def isCorrectAnswer(submissionValue: SubmissionValue): Boolean = ???
+      override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = ???
 
       def answerAsString: String = ???
     }

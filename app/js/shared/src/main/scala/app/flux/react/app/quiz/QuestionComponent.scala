@@ -220,8 +220,9 @@ final class QuestionComponent(
                           props.quizState.submissions.filter(
                             _.value == SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
                         else Seq()
-                      val isCorrectAnswer = question.isCorrectAnswer(
-                        SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
+                      val isCorrectAnswer =
+                        question.isCorrectAnswer(
+                          SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex)) == Some(true)
                       <.li(
                         ^.key := choice,
                         answerBullet.toVdomNode,
@@ -347,7 +348,9 @@ final class QuestionComponent(
                       props.quizState.submissions.filter(
                         _.value == SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
                     val isCorrectAnswer =
-                      question.isCorrectAnswer(SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
+                      question
+                        .isCorrectAnswer(SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex)) ==
+                        Some(true)
                     <.li(
                       ^.key := choice,
                       answerBullet.toVdomNode,
