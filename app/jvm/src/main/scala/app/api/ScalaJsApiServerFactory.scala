@@ -218,7 +218,9 @@ final class ScalaJsApiServerFactory @Inject()(
               val pointsToGain =
                 fetchQuizState().pointsToGainBySubmission(
                   isCorrectAnswer = Some(isCorrectAnswer),
-                  submissionId = submissionId)
+                  submissionId = submissionId,
+                  submissionValue = oldSubmissionEntity.value,
+                )
 
               oldSubmissionEntity.copy(isCorrectAnswer = Some(isCorrectAnswer), points = pointsToGain)
             }

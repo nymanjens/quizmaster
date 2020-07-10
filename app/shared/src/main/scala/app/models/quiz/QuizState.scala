@@ -126,14 +126,14 @@ case class QuizState(
   def pointsToGainBySubmission(
       isCorrectAnswer: Option[Boolean],
       submissionId: Long,
+      submissionValue: SubmissionValue,
   )(implicit quizConfig: QuizConfig): FixedPointNumber = {
-    val thisSubmission = submissions.find(_.id == submissionId).get
     val previousCorrectSubmissionsExist =
       submissions.takeWhile(_.id != submissionId).exists(_.isCorrectAnswer == Some(true))
     val question = maybeQuestion.get
 
     question.getPointsToGain(
-      submissionValue = Some(thisSubmission.value),
+      submissionValue = Some(submissionValue),
       isCorrect = isCorrectAnswer,
       previousCorrectSubmissionsExist = previousCorrectSubmissionsExist,
     )
@@ -207,7 +207,11 @@ object QuizState {
         teamId = teamId,
         value = value,
         isCorrectAnswer = isCorrectAnswer,
-        points = quizState.pointsToGainBySubmission(isCorrectAnswer = isCorrectAnswer, submissionId = id),
+        points = quizState.pointsToGainBySubmission(
+          isCorrectAnswer = isCorrectAnswer,
+          submissionId = id,
+          submissionValue = value,
+        ),
         scored = false,
       )
     }
