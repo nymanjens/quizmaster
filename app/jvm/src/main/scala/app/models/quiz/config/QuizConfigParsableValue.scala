@@ -66,7 +66,7 @@ class QuizConfigParsableValue @Inject()(
         yamlMap.get("questionType") match {
           case None | Some("standard") => StandardQuestionValue.parse(yamlMapWithoutQuestionType)
           case Some("double")          => DoubleQuestionValue.parse(yamlMapWithoutQuestionType)
-          case Some("orderItems")        => OrderItemsQuestionValue.parse(yamlMapWithoutQuestionType)
+          case Some("orderItems")      => OrderItemsQuestionValue.parse(yamlMapWithoutQuestionType)
           case Some(other) =>
             ParseResult.onlyError(
               s"questionType expected to be one of these: [unset, 'standard', 'double', 'orderItems'], but found $other")
