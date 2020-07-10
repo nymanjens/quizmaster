@@ -369,9 +369,9 @@ object QuizConfig {
 
       private lazy val itemToCharacterBimap: ImmutableBiMap[String, Char] = {
         val resultBuilder = ImmutableBiMap.builder[String, Char]()
+        val usedCharacters = mutable.Set[Char]()
 
         for (item <- itemsInAlphabeticalOrder) {
-          val usedCharacters = mutable.Set[Char]()
           val words = Splitter.on(' ').trimResults().omitEmptyStrings().split(item)
           val candidatesFromWords = words.map(_.apply(0)).filter(_.isLetterOrDigit).map(_.toUpper)
           val candidates = candidatesFromWords ++ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
