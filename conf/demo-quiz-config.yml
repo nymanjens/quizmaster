@@ -8,7 +8,6 @@ rounds:
       # Standard textual question
       - question: Who was the country Columbia named after?
         answer: Christoffer Columbus
-        maxTimeSeconds: 180
 
       # Standard multiple-choice question
       - question: What is the capital of Belgium?
@@ -17,7 +16,6 @@ rounds:
         pointsToGainOnFirstAnswer: 1.5
         pointsToGain: 1.2
         pointsToGainOnWrongAnswer: -0.5
-        maxTimeSeconds: 180
 
       # Multiple-choice question - only the first right answer gets points
       - question: What is the capital of France?
@@ -27,14 +25,13 @@ rounds:
         answerImage: {src: geography/france-answer.png, size: large}
         answerDetail: Image released under Creative Commons by Destination2 (www.destination2.co.uk)
         pointsToGain: 0
-        maxTimeSeconds: 180
+        maxTimeSeconds: 120
         onlyFirstGainsPoints: true
 
       # Question to be answered verbally (with video) - only the first right answer gets points, players can stop the timer to attempt an answer
       - question: What city does this video from 1935 show?
         answer: Guatemala City
         videoSrc: geography/about_bananas.mp4
-        maxTimeSeconds: 180
         onlyFirstGainsPoints: true
         showSingleAnswerButtonToTeams: true # Show a button to stop the timer
 
@@ -48,7 +45,6 @@ rounds:
          - {item: Berlin, answerDetail: ~4M}
          - {item: London, answerDetail: ~9M}
         pointsToGain: 2
-        maxTimeSeconds: 180
 
   - name: Music round
     questions:
@@ -58,7 +54,6 @@ rounds:
         answer: Summer
         answerDetail: (By Bensound)
         audioSrc: music_round/bensound-summer.mp3
-        maxTimeSeconds: 180
 
   - name: Double questions round
     questions:
