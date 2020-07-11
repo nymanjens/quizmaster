@@ -94,7 +94,7 @@ class QuizConfigParsableValue @Inject()(
       "pointsToGain" -> Optional(FixedPointNumberValue),
       "pointsToGainOnFirstAnswer" -> Optional(FixedPointNumberValue),
       "pointsToGainOnWrongAnswer" -> Optional(FixedPointNumberValue),
-      "maxTimeSeconds" -> Required(IntValue),
+      "maxTimeSeconds" -> Optional(IntValue),
       "onlyFirstGainsPoints" -> Optional(BooleanValue),
       "showSingleAnswerButtonToTeams" -> Optional(BooleanValue),
     )
@@ -115,7 +115,7 @@ class QuizConfigParsableValue @Inject()(
           map.optional("pointsToGainOnFirstAnswer") getOrElse map
             .optional("pointsToGain", FixedPointNumber(1)),
         pointsToGainOnWrongAnswer = map.optional("pointsToGainOnWrongAnswer", FixedPointNumber(0)),
-        maxTime = Duration.ofSeconds(map.required[Int]("maxTimeSeconds")),
+        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", 180)),
         onlyFirstGainsPoints = map.optional("onlyFirstGainsPoints", false),
         showSingleAnswerButtonToTeams = map.optional("showSingleAnswerButtonToTeams", false),
       )
@@ -161,7 +161,7 @@ class QuizConfigParsableValue @Inject()(
         ListParsableValue(OrderItemValue)(_.item)),
       "answerDetail" -> Optional(StringValue),
       "pointsToGain" -> Optional(FixedPointNumberValue),
-      "maxTimeSeconds" -> Required(IntValue),
+      "maxTimeSeconds" -> Optional(IntValue),
     )
     override def parseFromParsedMapValues(map: StringMap) = {
       Question.OrderItems(
@@ -171,7 +171,7 @@ class QuizConfigParsableValue @Inject()(
           map.required[Seq[Question.OrderItems.Item]]("orderedItemsThatWillBePresentedInAlphabeticalOrder"),
         answerDetail = map.optional("answerDetail"),
         pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
-        maxTime = Duration.ofSeconds(map.required[Int]("maxTimeSeconds")),
+        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", 180)),
       )
     }
     override def additionalValidationErrors(v: Question.OrderItems) = v.validationErrors()

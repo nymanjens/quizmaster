@@ -76,7 +76,6 @@ class QuizConfigParsableValueTest extends Specification {
         |         - {item: Stockholm, answerDetail: ~1M}
         |         - {item: Berlin, answerDetail: ~4M}
         |         - {item: London, answerDetail: ~9M}
-        |        maxTimeSeconds: 180
         |
         |  - name: Music round
         |    questions:
