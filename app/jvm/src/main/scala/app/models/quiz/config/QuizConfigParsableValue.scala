@@ -123,6 +123,8 @@ class QuizConfigParsableValue @Inject()(
     override def additionalValidationErrors(v: Question.Standard) = {
       Seq(
         v.validationErrors(),
+        v.image.map(_.src).flatMap(quizAssets.imageExistsOrValidationError).toSet,
+        v.answerImage.map(_.src).flatMap(quizAssets.imageExistsOrValidationError).toSet,
         v.audioSrc.flatMap(quizAssets.audioExistsOrValidationError).toSet,
         v.videoSrc.flatMap(quizAssets.videoExistsOrValidationError).toSet,
       ).flatten
