@@ -231,7 +231,7 @@ final class ScalaJsApiServerFactory @Inject()(
                 oldSubmissionEntity.question.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false)
               val isCorrectAnswer = points match {
                 case _ if points < 0                      => Some(false)
-                case _ if points < pointsForCorrectAnswer => oldSubmissionEntity.isCorrectAnswer
+                case _ if points < pointsForCorrectAnswer => None
                 case _                                    => Some(true)
               }
 
