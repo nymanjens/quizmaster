@@ -69,6 +69,15 @@ class QuizConfigParsableValueTest extends Specification {
         |        pointsToGain: 2
         |        maxTimeSeconds: 180
         |
+        |      - questionType: orderItems
+        |        question: Order these cities from small to large
+        |        orderedItemsThatWillBePresentedInAlphabeticalOrder:
+        |         - {item: Riga, answerDetail: ~600k}
+        |         - {item: Stockholm, answerDetail: ~1M}
+        |         - {item: Berlin, answerDetail: ~4M}
+        |         - {item: London, answerDetail: ~9M}
+        |        maxTimeSeconds: 180
+        |
         |  - name: Music round
         |    questions:
         |      - question: After which season is this track named?
@@ -159,10 +168,27 @@ class QuizConfigParsableValueTest extends Specification {
             Question.OrderItems(
               question = "Order these cities from small to large",
               questionDetail = Some("Population according to Google on July 2020"),
-              orderedItemsThatWillBePresentedInAlphabeticalOrder =
-                Seq("Riga", "Stockholm", "Berlin", "London"),
+              orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
+                Question.OrderItems.Item(item = "Riga", answerDetail = None),
+                Question.OrderItems.Item(item = "Stockholm", answerDetail = None),
+                Question.OrderItems.Item(item = "Berlin", answerDetail = None),
+                Question.OrderItems.Item(item = "London", answerDetail = None),
+              ),
               answerDetail = Some("Riga: ~600k, Stockholm: ~1M, Berlin: ~4M, London: ~9M"),
               pointsToGain = FixedPointNumber(2),
+              maxTime = Duration.ofSeconds(180),
+            ),
+            Question.OrderItems(
+              question = "Order these cities from small to large",
+              questionDetail = None,
+              orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
+                Question.OrderItems.Item(item = "Riga", answerDetail = Some("~600k")),
+                Question.OrderItems.Item(item = "Stockholm", answerDetail = Some("~1M")),
+                Question.OrderItems.Item(item = "Berlin", answerDetail = Some("~4M")),
+                Question.OrderItems.Item(item = "London", answerDetail = Some("~9M")),
+              ),
+              answerDetail = None,
+              pointsToGain = FixedPointNumber(1),
               maxTime = Duration.ofSeconds(180),
             ),
           ),

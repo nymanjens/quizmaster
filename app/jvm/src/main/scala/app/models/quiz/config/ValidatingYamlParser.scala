@@ -71,6 +71,24 @@ object ValidatingYamlParser {
       }
     }
 
+    class WithStringSimplification[V](delegate: ParsableValue[V], stringToValue: String => V)
+        extends ParsableValue[V] {
+      override def parse(yamlValue: Any): ParseResult[V] = {
+        yamlValue match {
+          case v: java.lang.Integer => ParseResult.success(stringToValue(v.toString))
+          case v: java.lang.Long    => ParseResult.success(stringToValue(v.toString))
+          case v: java.lang.Boolean => ParseResult.success(stringToValue(v.toString))
+          case v: java.lang.String  => ParseResult.success(stringToValue(v.toString))
+          case _                    => delegate.parse(yamlValue)
+        }
+      }
+    }
+    object WithStringSimplification {
+      def apply[V](delegate: ParsableValue[V])(stringToValue: String => V): ParsableValue[V] = {
+        new WithStringSimplification[V](delegate, stringToValue)
+      }
+    }
+
     class ListParsableValue[V](itemParsableValue: ParsableValue[V], errorPathString: V => String)
         extends ParsableValue[Seq[V]] {
       override final def parse(yamlValue: Any): ParseResult[Seq[V]] = {

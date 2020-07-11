@@ -261,7 +261,7 @@ object QuizConfig {
     case class OrderItems(
         question: String,
         questionDetail: Option[String],
-        orderedItemsThatWillBePresentedInAlphabeticalOrder: Seq[String],
+        orderedItemsThatWillBePresentedInAlphabeticalOrder: Seq[OrderItems.Item],
         answerDetail: Option[String],
         pointsToGain: FixedPointNumber,
         override val maxTime: Duration,
@@ -367,19 +367,19 @@ object QuizConfig {
       }
 
       def answerAsString: String = {
-        orderedItemsThatWillBePresentedInAlphabeticalOrder.map(toCharacterCode).mkString
+        orderedItemsThatWillBePresentedInAlphabeticalOrder.map(i => toCharacterCode(i)).mkString
       }
 
-      lazy val itemsInAlphabeticalOrder: Seq[String] = {
-        orderedItemsThatWillBePresentedInAlphabeticalOrder.sorted
+      lazy val itemsInAlphabeticalOrder: Seq[OrderItems.Item] = {
+        orderedItemsThatWillBePresentedInAlphabeticalOrder.sortBy(_.item)
       }
 
-      private lazy val itemToCharacterBimap: ImmutableBiMap[String, Char] = {
-        val resultBuilder = ImmutableBiMap.builder[String, Char]()
+      private lazy val itemToCharacterBimap: ImmutableBiMap[OrderItems.Item, Char] = {
+        val resultBuilder = ImmutableBiMap.builder[OrderItems.Item, Char]()
         val usedCharacters = mutable.Set[Char]()
 
         for (item <- itemsInAlphabeticalOrder) {
-          val words = Splitter.on(' ').trimResults().omitEmptyStrings().split(item)
+          val words = Splitter.on(' ').trimResults().omitEmptyStrings().split(item.item)
           val candidatesFromWords = words.map(_.apply(0)).filter(_.isLetterOrDigit).map(_.toUpper)
           val candidates = candidatesFromWords ++ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
           val char = candidates.find(c => !usedCharacters.contains(c)).get
@@ -391,9 +391,15 @@ object QuizConfig {
         resultBuilder.build
       }
 
-      def toCharacterCode(item: String): Char = {
+      def toCharacterCode(item: OrderItems.Item): Char = {
         itemToCharacterBimap.get(item)
       }
+    }
+    object OrderItems {
+      case class Item(
+          item: String,
+          answerDetail: Option[String],
+      )
     }
   }
 

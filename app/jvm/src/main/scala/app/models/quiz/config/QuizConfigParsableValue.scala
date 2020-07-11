@@ -18,6 +18,7 @@ import app.models.quiz.config.ValidatingYamlParser.ParsableValue.MapParsableValu
 import app.models.quiz.config.ValidatingYamlParser.ParsableValue.MapParsableValue.MaybeRequiredMapValue.Required
 import app.models.quiz.config.ValidatingYamlParser.ParsableValue.MapParsableValue.StringMap
 import app.models.quiz.config.ValidatingYamlParser.ParsableValue.StringValue
+import app.models.quiz.config.ValidatingYamlParser.ParsableValue.WithStringSimplification
 import app.models.quiz.config.ValidatingYamlParser.ParseResult
 import com.google.inject.Inject
 
@@ -155,7 +156,13 @@ class QuizConfigParsableValue @Inject()(
       "question" -> Required(StringValue),
       "questionDetail" -> Optional(StringValue),
       "orderedItemsThatWillBePresentedInAlphabeticalOrder" -> Required(
-        ListParsableValue(StringValue)(s => s)),
+        ListParsableValue(
+          WithStringSimplification(OrderItemValue)(
+            stringToValue = s =>
+              Question.OrderItems.Item(
+                item = s,
+                answerDetail = None,
+            )))(_.item)),
       "answerDetail" -> Optional(StringValue),
       "pointsToGain" -> Optional(FixedPointNumberValue),
       "maxTimeSeconds" -> Required(IntValue),
@@ -165,13 +172,26 @@ class QuizConfigParsableValue @Inject()(
         question = map.required[String]("question"),
         questionDetail = map.optional("questionDetail"),
         orderedItemsThatWillBePresentedInAlphabeticalOrder =
-          map.required[Seq[String]]("orderedItemsThatWillBePresentedInAlphabeticalOrder"),
+          map.required[Seq[Question.OrderItems.Item]]("orderedItemsThatWillBePresentedInAlphabeticalOrder"),
         answerDetail = map.optional("answerDetail"),
         pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
         maxTime = Duration.ofSeconds(map.required[Int]("maxTimeSeconds")),
       )
     }
     override def additionalValidationErrors(v: Question.OrderItems) = v.validationErrors()
+  }
+
+  private object OrderItemValue extends MapParsableValue[Question.OrderItems.Item] {
+    override val supportedKeyValuePairs = Map(
+      "item" -> Required(StringValue),
+      "answerDetail" -> Optional(StringValue),
+    )
+    override def parseFromParsedMapValues(map: StringMap) = {
+      Question.OrderItems.Item(
+        item = map.required[String]("item"),
+        answerDetail = map.optional("answerDetail"),
+      )
+    }
   }
 
   private object ImageValue extends MapParsableValue[Image] {

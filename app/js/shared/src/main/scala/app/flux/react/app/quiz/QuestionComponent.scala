@@ -420,10 +420,10 @@ final class QuestionComponent(
                   (for (item <- question.orderedItemsThatWillBePresentedInAlphabeticalOrder)
                     yield {
                       <.li(
-                        ^.key := s"Answer-$item",
+                        ^.key := s"Answer-${item.item}",
                         <.span(
                           ^.className := "correct",
-                          s"${question.toCharacterCode(item)}/ $item",
+                          s"${question.toCharacterCode(item)}/ ${item.item}",
                         ),
                       )
                     }).toVdomArray
@@ -431,8 +431,8 @@ final class QuestionComponent(
                   (for (item <- question.itemsInAlphabeticalOrder)
                     yield {
                       <.li(
-                        ^.key := item,
-                        s"${question.toCharacterCode(item)}/ $item",
+                        ^.key := s"Solution-${item.item}",
+                        s"${question.toCharacterCode(item)}/ ${item.item}",
                       )
                     }).toVdomArray
                 },

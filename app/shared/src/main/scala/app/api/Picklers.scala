@@ -6,7 +6,9 @@ import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.SubmissionEntity
 import app.models.quiz.Team
+import app.models.quiz.config.QuizConfig.Question
 import boopickle.Default._
+import boopickle.DefaultBasic.PicklerGenerator
 import hydro.api.StandardPicklers
 import hydro.models.Entity
 
@@ -17,6 +19,11 @@ object Picklers extends StandardPicklers {
     override def unpickle(implicit state: UnpickleState): FixedPointNumber =
       FixedPointNumber(state.unpickle[Double])
   }
+
+  implicit val questionPickler: Pickler[Question] = compositePickler[Question]
+    .addConcreteType[Question.Standard]
+    .addConcreteType[Question.DoubleQ]
+    .addConcreteType[Question.OrderItems]
 
   implicit val answerBulletTypePickler: Pickler[AnswerBulletType] = compositePickler[AnswerBulletType]
     .addConcreteType[AnswerBulletType.Arrows.type]
@@ -31,4 +38,5 @@ object Picklers extends StandardPicklers {
     .addConcreteType[Team]
     .addConcreteType[QuizState]
     .addConcreteType[SubmissionEntity]
+
 }
