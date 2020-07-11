@@ -43,7 +43,13 @@ final class SoundEffectController(
       this.currentPage = currentPage
   }
 
-  private def canPlaySoundEffectsOnThisPage: Boolean = currentPage == AppPages.Quiz
+  private def canPlaySoundEffectsOnThisPage: Boolean = {
+    currentPage match {
+      case AppPages.Quiz              => true
+      case _: AppPages.TeamController => true
+      case _                          => false
+    }
+  }
 
   private def playSoundEffect(
       soundEffect: SoundEffect,

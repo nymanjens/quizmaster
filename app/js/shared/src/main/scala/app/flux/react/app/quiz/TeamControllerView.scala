@@ -4,6 +4,7 @@ import app.api.ScalaJsApiClient
 import app.common.AnswerBullet
 import app.common.LocalStorageClient
 import app.flux.action.AppActions
+import app.flux.controllers.SoundEffectController
 import app.flux.router.AppPages
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
@@ -27,11 +28,13 @@ import hydro.flux.router.RouterContext
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
+import org.scalajs.dom
 
 import scala.async.Async.async
 import scala.async.Async.await
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.scalajs.js
 
 final class TeamControllerView(
     implicit pageHeader: PageHeader,
@@ -39,6 +42,7 @@ final class TeamControllerView(
     dispatcher: Dispatcher,
     clock: Clock,
     quizConfig: QuizConfig,
+    soundEffectController: SoundEffectController,
     scalaJsApiClient: ScalaJsApiClient,
     teamEditor: TeamEditor,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
@@ -136,14 +140,65 @@ final class TeamControllerView(
         .withStateStoresDependencyFromProps { props =>
           StateStoresDependency(
             teamsAndQuizStateStore,
-            state =>
-              state.copy(
+            oldState => {
+              makeSoundsAndAlert(
+                oldQuizState = oldState.quizState,
+                newQuizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
+                thisTeamId = props.teamId,
+              )
+              oldState.copy(
                 quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
                 teams = teamsAndQuizStateStore.stateOrEmpty.teams,
                 maybeTeam = teamsAndQuizStateStore.stateOrEmpty.teams.find(_.id == props.teamId),
-            )
+              )
+            }
           )
         }
+
+    // **************** Private helper methods ****************//
+    private def makeSoundsAndAlert(
+        oldQuizState: QuizState,
+        newQuizState: QuizState,
+        thisTeamId: Long,
+    ): Unit = {
+      val newSubmissionsByThisTeam = {
+        val oldSubmissionIds = oldQuizState.submissions.map(_.id).toSet
+        newQuizState.submissions
+          .filterNot(s => oldSubmissionIds.contains(s.id))
+          .filter(_.teamId == thisTeamId)
+      }
+
+      // Don't make a sound when the curent submissions are being compared to those of a different
+      // question. This includes the case where we're coming from QuizState.nullInstance.
+      val questionChanged = oldQuizState.questionIndex != newQuizState.questionIndex ||
+        oldQuizState.roundIndex != newQuizState.roundIndex
+
+      // Make sound and alert for new submissions
+      for {
+        question <- newQuizState.maybeQuestion
+        if !questionChanged
+        // Only process the most recent submission by this team
+        submission <- newSubmissionsByThisTeam.lastOption
+      } {
+        if (question.isInstanceOf[Question.DoubleQ]) {
+          val isCorrect = submission.isCorrectAnswer == Some(true)
+          soundEffectController.playRevealingSubmission(correct = isCorrect)
+          if (isCorrect) {
+            doVibrate()
+          }
+        } else {
+          if (question.onlyFirstGainsPoints && submission.value == SubmissionValue.PressedTheOneButton) {
+            // Stopped the timer
+            soundEffectController.playNewSubmission()
+            doVibrate()
+          }
+        }
+      }
+    }
+
+    private def doVibrate(): Unit = {
+      dom.window.navigator.asInstanceOf[js.Dynamic].vibrate(400)
+    }
 
     // **************** Implementation of HydroReactComponent types ****************//
     protected case class Props(
