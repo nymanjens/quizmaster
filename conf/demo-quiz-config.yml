@@ -36,8 +36,11 @@ rounds:
       - questionType: orderItems
         question: Order these cities from small to large
         questionDetail: Population according to Google on July 2020
-        orderedItemsThatWillBePresentedInAlphabeticalOrder: [Riga, Stockholm, Berlin, London]
-        answerDetail: "Riga: ~600k, Stockholm: ~1M, Berlin: ~4M, London: ~9M"
+        orderedItemsThatWillBePresentedInAlphabeticalOrder:
+         - {item: Riga, answerDetail: ~600k}
+         - {item: Stockholm, answerDetail: ~1M}
+         - {item: Berlin, answerDetail: ~4M}
+         - {item: London, answerDetail: ~9M}
         pointsToGain: 2
         maxTimeSeconds: 180
 
