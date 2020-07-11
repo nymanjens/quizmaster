@@ -208,11 +208,23 @@ object QuizState {
         teamId = teamId,
         value = value,
         isCorrectAnswer = isCorrectAnswer,
-        points = quizState.pointsToGainBySubmission(
-          isCorrectAnswer = isCorrectAnswer,
-          submissionId = id,
-          submissionValue = value,
-        ),
+        points = {
+          if (value == SubmissionValue.PressedTheOneButton) {
+            // PressedTheOneButton is not automatically scoable, so this would always be zero. However in some
+            // cases where answers are found incrementally, it is useful to keep the old points so that they
+            // can be further augmented.
+            quizState.submissions
+              .filter(_.teamId == teamId)
+              .lastOption
+              .map(_.points) getOrElse FixedPointNumber(0)
+          } else {
+            quizState.pointsToGainBySubmission(
+              isCorrectAnswer = isCorrectAnswer,
+              submissionId = id,
+              submissionValue = value,
+            )
+          }
+        },
         scored = false,
       )
     }
