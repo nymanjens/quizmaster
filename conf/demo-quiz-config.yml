@@ -32,6 +32,7 @@ rounds:
       - question: What city does this video from 1935 show?
         answer: Guatemala City
         videoSrc: geography/about_bananas.mp4
+        pointsToGain: 2
         onlyFirstGainsPoints: true
         showSingleAnswerButtonToTeams: true # Show a button to stop the timer
 

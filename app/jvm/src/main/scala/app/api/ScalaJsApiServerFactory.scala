@@ -227,10 +227,12 @@ final class ScalaJsApiServerFactory @Inject()(
 
           case SetSubmissionPoints(submissionId: Long, points: FixedPointNumber) =>
             updateSubmissionInStateAndEntity(submissionId) { oldSubmissionEntity =>
+              val pointsForCorrectAnswer =
+                oldSubmissionEntity.question.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false)
               val isCorrectAnswer = points match {
-                case FixedPointNumber(0) => oldSubmissionEntity.isCorrectAnswer
-                case _ if points < 0     => Some(false)
-                case _ if points > 0     => Some(true)
+                case _ if points < 0                      => Some(false)
+                case _ if points < pointsForCorrectAnswer => oldSubmissionEntity.isCorrectAnswer
+                case _                                    => Some(true)
               }
 
               oldSubmissionEntity.copy(isCorrectAnswer = isCorrectAnswer, points = points)
