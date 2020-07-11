@@ -108,12 +108,13 @@ case class QuizState(
             }
           } else { // Not multiple choice
             if (question.onlyFirstGainsPoints) {
-              // Allow multiple guesses while the timer is running, but not the same team twice in a row
-              val blockedBecauseAdjacentSubmission = submissions.lastOption.exists(_.teamId == team.id)
-              blockedBecauseAdjacentSubmission
+              // // Allow multiple guesses while the timer is running, but not the same team twice in a row
+              // val blockedBecauseAdjacentSubmission = submissions.lastOption.exists(_.teamId == team.id)
+              // blockedBecauseAdjacentSubmission
+              false
             } else {
-              // Allow teams to change their minds while the timer is running if they filled in a free-text answer.
-              // Teams that pressed a button to indicate that they are done, can only do so once.
+              // Allow teams to change their minds while the timer is running if they filled in a free-text
+              // answer. Teams that pressed a button to indicate that they are done, can only do so once.
               earlierTeamSubmission.exists(_.value == SubmissionValue.PressedTheOneButton)
             }
           }
