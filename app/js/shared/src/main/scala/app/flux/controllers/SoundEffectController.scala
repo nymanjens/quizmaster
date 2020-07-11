@@ -2,6 +2,7 @@ package app.flux.controllers
 
 import scala.concurrent.duration._
 import app.flux.router.AppPages
+import app.flux.ClientApp.HtmlImage
 import app.models.access.ModelFields
 import app.models.quiz.Team
 import hydro.common.JsLoggingUtils.logExceptions
@@ -22,8 +23,11 @@ final class SoundEffectController(
 ) {
   private var currentPage: Page = _
   private val soundsPlaying: mutable.Set[SoundEffect] = mutable.Set()
+  // Keep a reference to preloaded media to avoid garbage collection cleaning it up
+  private val preloadedAudios: mutable.Buffer[Audio] = mutable.Buffer()
 
   dispatcher.registerPartialSync(dispatcherListener)
+  preloadMedia()
 
   // **************** Public API ****************//
   def playNewSubmission(): Unit = playSoundEffect(SoundEffect.NewSubmission)
@@ -77,8 +81,19 @@ final class SoundEffectController(
     }
   }
 
+  def preloadMedia(): Unit = {
+    println(s"  Preloading sound effects...")
+    for (soundEffect <- SoundEffect.all) {
+      val audio = new Audio(soundEffect.filepath)
+      preloadedAudios.append(audio)
+    }
+  }
+
   private sealed abstract class SoundEffect(val filepath: String)
   private object SoundEffect {
+    def all: Seq[SoundEffect] =
+      Seq(NewSubmission, CorrectSubmission, IncorrectSubmission, ScoreIncreased, TimerRunsOut)
+
     case object NewSubmission extends SoundEffect("/assets/soundeffects/new_submission.mp3")
     case object CorrectSubmission extends SoundEffect("/assets/soundeffects/correct_submission.mp3")
     case object IncorrectSubmission extends SoundEffect("/assets/soundeffects/incorrect_submission.mp3")
