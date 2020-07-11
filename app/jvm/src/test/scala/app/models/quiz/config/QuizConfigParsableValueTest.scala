@@ -42,7 +42,7 @@ class QuizConfigParsableValueTest extends Specification {
         |        answer: Paris
         |        choices: [Paris, London, Brussels, Berlin]
         |        image: {src: geography/france.png, size: small}
-        |        answerImage: {src: geography/france-answer.png, size: large}
+        |        answerImage: geography/france-answer.png
         |        masterNotes: This is a very simple question
         |        answerDetail: Image released under Creative Commons by Destination2 (www.destination2.co.uk)
         |        pointsToGain: 2.1

@@ -156,13 +156,7 @@ class QuizConfigParsableValue @Inject()(
       "question" -> Required(StringValue),
       "questionDetail" -> Optional(StringValue),
       "orderedItemsThatWillBePresentedInAlphabeticalOrder" -> Required(
-        ListParsableValue(
-          WithStringSimplification(OrderItemValue)(
-            stringToValue = s =>
-              Question.OrderItems.Item(
-                item = s,
-                answerDetail = None,
-            )))(_.item)),
+        ListParsableValue(OrderItemValue)(_.item)),
       "answerDetail" -> Optional(StringValue),
       "pointsToGain" -> Optional(FixedPointNumberValue),
       "maxTimeSeconds" -> Required(IntValue),
@@ -181,7 +175,16 @@ class QuizConfigParsableValue @Inject()(
     override def additionalValidationErrors(v: Question.OrderItems) = v.validationErrors()
   }
 
-  private object OrderItemValue extends MapParsableValue[Question.OrderItems.Item] {
+  private val OrderItemValue: ParsableValue[Question.OrderItems.Item] = {
+    WithStringSimplification(RawOrderItemValue)(
+      stringToValue = s =>
+        Question.OrderItems.Item(
+          item = s,
+          answerDetail = None,
+      ))
+  }
+
+  private object RawOrderItemValue extends MapParsableValue[Question.OrderItems.Item] {
     override val supportedKeyValuePairs = Map(
       "item" -> Required(StringValue),
       "answerDetail" -> Optional(StringValue),
@@ -194,7 +197,16 @@ class QuizConfigParsableValue @Inject()(
     }
   }
 
-  private object ImageValue extends MapParsableValue[Image] {
+  private val ImageValue: ParsableValue[Image] = {
+    WithStringSimplification(RawImageValue)(
+      stringToValue = s =>
+        Image(
+          src = s,
+          size = "large",
+      ))
+  }
+
+  private object RawImageValue extends MapParsableValue[Image] {
     override val supportedKeyValuePairs = Map(
       "src" -> Required(StringValue),
       "size" -> Optional(StringValue),
