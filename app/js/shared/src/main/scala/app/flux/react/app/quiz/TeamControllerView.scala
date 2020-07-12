@@ -332,7 +332,12 @@ final class TeamControllerView(
         )
       }
 
-      private def freeTextAnswerForm(question: Question, textAlwaysDisabled: Boolean = false)(
+      private def freeTextAnswerForm(
+          question: Question,
+          defaultValue: String = "",
+          textAlwaysDisabled: Boolean = false,
+          clearTextAfterSubmit: Boolean = true,
+      )(
           implicit team: Team,
           quizState: QuizState,
       ): VdomNode = {
@@ -354,6 +359,7 @@ final class TeamControllerView(
               TextInput(
                 ref = freeTextAnswerInputRef,
                 name = "answer",
+                defaultValue = defaultValue,
                 focusOnMount = true,
                 disabled = !canSubmitResponse || textAlwaysDisabled,
                 listener = { newValue =>
@@ -377,7 +383,9 @@ final class TeamControllerView(
                 if (answer.isEmpty || alreadySubmittedThisValue) {
                   Callback.empty
                 } else {
-                  freeTextAnswerInputRef().setValue("")
+                  if (clearTextAfterSubmit) {
+                    freeTextAnswerInputRef().setValue("")
+                  }
                   submitResponse(SubmissionValue.FreeTextAnswer(makeWhitespaceVisible(answer)))
                 }
               },
@@ -409,7 +417,12 @@ final class TeamControllerView(
         val items = orderItemsFromTextInput(question)
 
         <.div(
-          freeTextAnswerForm(question, textAlwaysDisabled = true),
+          freeTextAnswerForm(
+            question,
+            defaultValue = items.map(question.toCharacterCode).mkString,
+            textAlwaysDisabled = true,
+            clearTextAfterSubmit = false,
+          ),
           <<.ifThen(canSubmitResponse) {
             ReactBeautifulDnd.DragDropContext(onDragEndHandler = onDragEndHandler(items, question))(
               ReactBeautifulDnd.Droppable(droppableId = "droppable") {
