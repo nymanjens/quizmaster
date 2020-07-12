@@ -416,6 +416,13 @@ final class TeamControllerView(
         val canSubmitResponse = quizState.canSubmitResponse(team)
         val items = orderItemsFromTextInput(question)
 
+        val maybeCurrentSubmission = quizState.submissions.filter(_.teamId == team.id).lastOption
+        val maybeCurrentSubmissionText =
+          maybeCurrentSubmission.map(_.value).flatMap {
+            case SubmissionValue.FreeTextAnswer(a) => Some(a)
+            case _                                 => None
+          }
+
         <.div(
           freeTextAnswerForm(
             question,
@@ -423,33 +430,55 @@ final class TeamControllerView(
             textAlwaysDisabled = true,
             clearTextAfterSubmit = false,
           ),
-          ReactBeautifulDnd.DragDropContext(onDragEndHandler = onDragEndHandler(items, question))(
-            ReactBeautifulDnd.Droppable(droppableId = "droppable") { (provided, snapshot) =>
-              <.ul(
-                ^.className := "order-items-answer-buttons",
-                rawTagMod("ref", provided.innerRef),
-                (for ((item, index) <- items.zipWithIndex)
-                  yield {
-                    ReactBeautifulDnd.Draggable(
-                      key = s"draggable-${item.item}",
-                      draggableId = item.item,
-                      index = index,
-                    ) { (provided, snapshot) =>
-                      <.li(toTagMods(provided.draggableProps) ++ toTagMods(provided.dragHandleProps): _*)(
+          if (canSubmitResponse) {
+            ReactBeautifulDnd.DragDropContext(onDragEndHandler = onDragEndHandler(items, question))(
+              ReactBeautifulDnd.Droppable(droppableId = "droppable") {
+                (provided, snapshot) =>
+                  <.ul(
+                    ^.className := "order-items-answer-buttons",
+                    rawTagMod("ref", provided.innerRef),
+                    (for ((item, index) <- items.zipWithIndex)
+                      yield {
+                        ReactBeautifulDnd.Draggable(
+                          key = s"draggable-${item.item}",
+                          draggableId = item.item,
+                          index = index,
+                        ) { (provided, snapshot) =>
+                          <.li(toTagMods(provided.draggableProps) ++ toTagMods(provided.dragHandleProps): _*)(
+                            ^.key := s"item-${item.item}",
+                            rawTagMod("ref", provided.innerRef),
+                            <.div(
+                              ^.className := "draggable-button",
+                              Bootstrap.FontAwesomeIcon("arrows-v"),
+                              " ",
+                              s"${question.toCharacterCode(item)}/ ${item.item}",
+                            )
+                          )
+                        }
+                      }).toVdomArray
+                  )
+              }
+            )
+          } else {
+            <<.ifDefined(maybeCurrentSubmissionText) {
+              submissionText =>
+                val submittedItems = submissionText.map(question.itemFromCharacterCode)
+                <.ul(
+                  ^.className := "order-items-answer-buttons",
+                  (for (item <- submittedItems)
+                    yield
+                      <.li(
                         ^.key := s"item-${item.item}",
-                        rawTagMod("ref", provided.innerRef),
                         <.div(
-                          ^.className := "draggable-button",
+                          ^.className := "draggable-button disabled",
                           Bootstrap.FontAwesomeIcon("arrows-v"),
                           " ",
                           s"${question.toCharacterCode(item)}/ ${item.item}",
                         )
-                      )
-                    }
-                  }).toVdomArray
-              )
+                      )).toVdomArray
+                )
             }
-          ),
+          }
         )
       }
       private def onDragEndHandler(
