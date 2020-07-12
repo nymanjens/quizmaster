@@ -450,13 +450,8 @@ final class TeamControllerView(
 
           val newItems = {
             val resultBuilder = items.toBuffer
-            if(sourceIndex < destinationIndex){
-              resultBuilder.insert(destinationIndex, items(sourceIndex))
-              resultBuilder.remove(sourceIndex)
-            } else {
-              resultBuilder.remove(sourceIndex)
-              resultBuilder.insert(destinationIndex, items(sourceIndex))
-            }
+            resultBuilder.remove(sourceIndex)
+            resultBuilder.insert(destinationIndex, items(sourceIndex))
             resultBuilder.toVector
           }
 
