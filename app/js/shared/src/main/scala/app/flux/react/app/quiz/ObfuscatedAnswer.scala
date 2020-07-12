@@ -39,7 +39,7 @@ final class ObfuscatedAnswer(
           ^^.ifThen(state.obfuscated) {
             ^.className := "obfuscated"
           },
-          <<.nl2Br(props.answer),
+          <<.nl2BrBlock(props.answer),
         )
       )
     }

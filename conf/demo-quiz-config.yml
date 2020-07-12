@@ -23,7 +23,9 @@ rounds:
         answer: Paris
         image: {src: geography/france.png, size: small}
         answerImage: {src: geography/france-answer.png, size: large}
-        answerDetail: Image released under Creative Commons by Destination2 (www.destination2.co.uk)
+        answerDetail: |
+          Image released under Creative Commons by Destination2
+          (www.destination2.co.uk)
         pointsToGain: 0
         maxTimeSeconds: 120
         onlyFirstGainsPoints: true

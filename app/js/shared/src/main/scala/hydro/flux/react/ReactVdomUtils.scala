@@ -7,6 +7,7 @@ import japgolly.scalajs.react.vdom.VdomNode
 import japgolly.scalajs.react.vdom.html_<^._
 
 import scala.collection.immutable.Seq
+import scala.scalajs.js
 
 object ReactVdomUtils {
   object ^^ {
@@ -55,6 +56,16 @@ object ReactVdomUtils {
           .map(s => Seq[VdomNode](s))
           .reduce((seq1, seq2) => Seq(seq1, Seq[VdomNode](<.br()), seq2).flatten)
       VdomArray.apply(parts: _*)
+    }
+
+    def nl2BrBlock(string: String): VdomNode = {
+      <.div(
+        ^.style := js.Dictionary(
+          "display" -> "inline-block",
+          "textAlign" -> "left",
+        ),
+        nl2Br(string),
+      )
     }
   }
 }

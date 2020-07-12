@@ -134,14 +134,14 @@ final class QuestionComponent(
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
             ^.className := "question",
-            <<.nl2Br(question.question),
+            <<.nl2BrBlock(question.question),
           )
         },
         <<.ifDefined(question.questionDetail) { questionDetail =>
           ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
             <.div(
               ^.className := "question-detail",
-              <<.nl2Br(questionDetail),
+              <<.nl2BrBlock(questionDetail),
             )
           }
         },
@@ -150,7 +150,7 @@ final class QuestionComponent(
           ifVisibleOrMaster(false) {
             <.div(
               ^.className := "master-notes",
-              <<.nl2Br(masterNotes),
+              <<.nl2BrBlock(masterNotes),
             )
           }
         },
@@ -257,7 +257,7 @@ final class QuestionComponent(
             if (answerIsVisible) {
               <.div(
                 ^.className := "answer",
-                <<.nl2Br(question.answer),
+                <<.nl2BrBlock(question.answer),
               )
             } else {
               <.div(obfuscatedAnswer(question.answer))
@@ -268,7 +268,7 @@ final class QuestionComponent(
           <<.ifDefined(question.answerDetail) { answerDetail =>
             <.div(
               ^.className := "answer-detail",
-              <<.nl2Br(answerDetail),
+              <<.nl2BrBlock(answerDetail),
             )
           }
         },
@@ -311,11 +311,11 @@ final class QuestionComponent(
           <.div(
             <.div(
               ^.className := "verbal-question",
-              <<.nl2Br(question.verbalQuestion),
+              <<.nl2BrBlock(question.verbalQuestion),
             ),
             <.div(
               ^.className := "verbal-answer",
-              <<.nl2Br(question.verbalAnswer),
+              <<.nl2BrBlock(question.verbalAnswer),
             ),
           )
         },
@@ -323,14 +323,14 @@ final class QuestionComponent(
           ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
             <.div(
               ^.className := "textual-question",
-              <<.nl2Br(question.textualQuestion),
+              <<.nl2BrBlock(question.textualQuestion),
             )
           }
         } else {
           <<.ifThen(question.questionIsVisible(progressIndex)) {
             <.div(
               ^.className := "question",
-              <<.nl2Br(question.textualQuestion),
+              <<.nl2BrBlock(question.textualQuestion),
             )
           }
         },
@@ -397,14 +397,14 @@ final class QuestionComponent(
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
             ^.className := "question",
-            <<.nl2Br(question.question),
+            <<.nl2BrBlock(question.question),
           )
         },
         <<.ifDefined(question.questionDetail) { questionDetail =>
           ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
             <.div(
               ^.className := "question-detail",
-              <<.nl2Br(questionDetail),
+              <<.nl2BrBlock(questionDetail),
             )
           }
         },
@@ -424,7 +424,7 @@ final class QuestionComponent(
                         <.span(
                           ^.className := "correct",
                           s"${question.toCharacterCode(item)}/ ${item.item}",
-                          <<.ifDefined(item.answerDetail) {answerDetail =>
+                          <<.ifDefined(item.answerDetail) { answerDetail =>
                             s" ($answerDetail)"
                           }
                         ),
@@ -451,7 +451,7 @@ final class QuestionComponent(
           if (answerIsVisible) {
             <.div(
               ^.className := "answer",
-              <<.nl2Br(question.answerAsString),
+              <<.nl2BrBlock(question.answerAsString),
             )
           } else {
             <.div(obfuscatedAnswer(question.answerAsString))
@@ -461,7 +461,7 @@ final class QuestionComponent(
           <<.ifDefined(question.answerDetail) { answerDetail =>
             <.div(
               ^.className := "answer-detail",
-              <<.nl2Br(answerDetail),
+              <<.nl2BrBlock(answerDetail),
             )
           }
         },
