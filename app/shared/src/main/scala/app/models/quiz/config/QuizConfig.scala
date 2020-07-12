@@ -304,7 +304,7 @@ object QuizConfig {
         val maxNumberOfPairwiseSwaps = ((N - 1) * N) / 2
         val charactersInCorrectOrder = answerAsString
 
-        if (answer.length != N || answer.toSet != itemToCharacterBimap.inverse().keySet) {
+        if (!isValidAnswerString(answer)) {
           0.0 // Return early because the answer cannot be parsed
         } else {
           var numSwaps = 0
@@ -393,6 +393,15 @@ object QuizConfig {
 
       def toCharacterCode(item: OrderItems.Item): Char = {
         itemToCharacterBimap.get(item)
+      }
+
+      def itemFromCharacterCode(char: Char): OrderItems.Item = {
+        itemToCharacterBimap.inverse().get(char)
+      }
+
+      def isValidAnswerString(answer: String): Boolean = {
+        answer.length == itemsInAlphabeticalOrder.size &&
+        answer.toSet == itemToCharacterBimap.inverse().keySet
       }
     }
     object OrderItems {

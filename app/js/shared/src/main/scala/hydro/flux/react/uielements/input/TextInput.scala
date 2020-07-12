@@ -1,5 +1,6 @@
 package hydro.flux.react.uielements.input
 
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import hydro.common.JsLoggingUtils.LogExceptionsCallback
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.flux.react.HydroReactComponent
@@ -20,6 +21,7 @@ import org.scalajs.dom.console
 import org.scalajs.dom.html
 
 import scala.collection.immutable.Seq
+import scala.concurrent.Future
 
 object TextInput extends HydroReactComponent {
 
@@ -32,6 +34,7 @@ object TextInput extends HydroReactComponent {
       focusOnMount: Boolean = false,
       disabled: Boolean = false,
       defaultValue: String = "",
+      listener: String => Unit = _ => (): Unit,
   ): VdomElement = {
     val props = Props(
       name = name,
@@ -40,6 +43,7 @@ object TextInput extends HydroReactComponent {
       focusOnMount = focusOnMount,
       disabled = disabled,
       defaultValue = defaultValue,
+      listener = listener,
     )
     ref.mutableRef.component(props)
   }
@@ -67,6 +71,7 @@ object TextInput extends HydroReactComponent {
       focusOnMount: Boolean,
       disabled: Boolean,
       defaultValue: String,
+      listener: String => Unit,
   )
   protected case class State(value: String) {
     def withValue(newValue: String): State = copy(value = newValue)
@@ -84,6 +89,7 @@ object TextInput extends HydroReactComponent {
     override def valueOrDefault = value getOrElse ""
     override def setValue(newValue: String) = {
       component.modState(_.withValue(newValue))
+      Future(component.props.listener(newValue))
       newValue
     }
 
@@ -113,6 +119,8 @@ object TextInput extends HydroReactComponent {
           LogExceptionsCallback {
             val newString = e.target.value
             $.modState(_.withValue(newString)).runNow()
+            Future(props.listener(newString))
+            (): Unit
           }
         },
         ^.autoFocus := props.focusOnMount,

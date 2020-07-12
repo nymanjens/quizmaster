@@ -239,13 +239,12 @@ final class TeamControllerView(
             case Some(question) if showSubmissionForm(question) =>
               <.span(
                 <.div(^.className := "question", question.textualQuestion),
-                if (question.showSingleAnswerButtonToTeams) {
-                  singleAnswerButton(question)
-                } else if (question.isMultipleChoice) {
-                  multipleChoiceAnswerButtons(question)
-                } else {
-                  freeTextAnswerForm(question)
-                }
+                question match {
+                  case q: Question.OrderItems                      => orderItemsButtons(q)
+                  case _ if question.showSingleAnswerButtonToTeams => singleAnswerButton(question)
+                  case _ if question.isMultipleChoice              => multipleChoiceAnswerButtons(question)
+                  case _                                           => freeTextAnswerForm(question)
+                },
               )
             case _ if quizState.quizHasEnded =>
               submissionsSummaryTable(selectedTeamId = Some(team.id))
@@ -329,6 +328,7 @@ final class TeamControllerView(
             }).toVdomArray
         )
       }
+
       private def freeTextAnswerForm(question: Question)(
           implicit team: Team,
           quizState: QuizState,
@@ -353,6 +353,9 @@ final class TeamControllerView(
                 name = "answer",
                 focusOnMount = true,
                 disabled = !canSubmitResponse,
+                listener = { newValue =>
+                  $.forceUpdate.runNow() // To update OrderItem buttons
+                }
               ),
             ),
           ),
@@ -393,6 +396,43 @@ final class TeamControllerView(
             )
           },
         )
+      }
+
+      private def orderItemsButtons(question: Question.OrderItems)(
+          implicit team: Team,
+          quizState: QuizState,
+      ): VdomNode = {
+        val canSubmitResponse = quizState.canSubmitResponse(team)
+
+        <.div(
+          freeTextAnswerForm(question),
+          <.ul(
+            ^.className := "multiple-choice-answer-buttons",
+            (for (item <- orderItemsFromTextInput(question))
+              yield {
+                <.li(
+                  ^.key := s"item-${item.item}",
+                  Bootstrap.Button()(
+                    ^.disabled := !canSubmitResponse,
+                    Bootstrap.FontAwesomeIcon("arrows-v")(
+                      ^.style := js.Dictionary("marginRight" -> "6px"),
+                    ),
+                    " ",
+                    s"${question.toCharacterCode(item)}/ ${item.item}",
+                  )
+                )
+              }).toVdomArray
+          ),
+        )
+      }
+
+      private def orderItemsFromTextInput(question: Question.OrderItems): Seq[Question.OrderItems.Item] = {
+        val answerString = freeTextAnswerInputRef.apply().valueOrDefault
+        if (answerString != null && question.isValidAnswerString(answerString)) {
+          answerString.map(question.itemFromCharacterCode)
+        } else {
+          question.itemsInAlphabeticalOrder
+        }
       }
 
       private def submitResponse(submissionValue: SubmissionValue)(implicit team: Team): Callback = {
