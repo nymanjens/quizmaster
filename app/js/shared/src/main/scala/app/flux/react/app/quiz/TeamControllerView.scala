@@ -1,5 +1,7 @@
 package app.flux.react.app.quiz
 
+import hydro.jsfacades.ReactBeautifulDnd
+import hydro.jsfacades.ReactBeautifulDnd.OnDragEndHandler
 import app.api.ScalaJsApiClient
 import app.common.AnswerBullet
 import app.common.LocalStorageClient
@@ -32,6 +34,7 @@ import org.scalajs.dom
 
 import scala.async.Async.async
 import scala.async.Async.await
+import scala.collection.mutable
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js
@@ -240,7 +243,7 @@ final class TeamControllerView(
               <.span(
                 <.div(^.className := "question", question.textualQuestion),
                 question match {
-                  case q: Question.OrderItems                      => orderItemsButtons(q)
+                  case q: Question.OrderItems                      => orderItemsForm(q)
                   case _ if question.showSingleAnswerButtonToTeams => singleAnswerButton(question)
                   case _ if question.isMultipleChoice              => multipleChoiceAnswerButtons(question)
                   case _                                           => freeTextAnswerForm(question)
@@ -398,7 +401,7 @@ final class TeamControllerView(
         )
       }
 
-      private def orderItemsButtons(question: Question.OrderItems)(
+      private def orderItemsForm(question: Question.OrderItems)(
           implicit team: Team,
           quizState: QuizState,
       ): VdomNode = {
@@ -406,25 +409,51 @@ final class TeamControllerView(
 
         <.div(
           freeTextAnswerForm(question),
-          <.ul(
-            ^.className := "multiple-choice-answer-buttons",
-            (for (item <- orderItemsFromTextInput(question))
-              yield {
-                <.li(
-                  ^.key := s"item-${item.item}",
-                  Bootstrap.Button()(
-                    ^.disabled := !canSubmitResponse,
-                    Bootstrap.FontAwesomeIcon("arrows-v")(
-                      ^.style := js.Dictionary("marginRight" -> "6px"),
-                    ),
-                    " ",
-                    s"${question.toCharacterCode(item)}/ ${item.item}",
+          <<.ifThen(canSubmitResponse) {
+            ReactBeautifulDnd.DragDropContext(onDragEndHandler = onDragEndHandler())(
+              ReactBeautifulDnd.Droppable(droppableId = "droppable") {
+                (provided, snapshot) =>
+                  <.ul(
+                    ^.className := "order-items-answer-buttons",
+                    rawTagMod("ref", provided.innerRef),
+                    (for ((item, index) <- orderItemsFromTextInput(question).zipWithIndex)
+                      yield {
+                        ReactBeautifulDnd
+                          .Draggable(key = s"draggable-${item.item}", draggableId = item.item, index = index) {
+                            (provided, snapshot) =>
+                              <.li(
+                                toTagMods(provided.draggableProps) ++ toTagMods(provided.dragHandleProps): _*)(
+                                ^.key := s"item-${item.item}",
+                                rawTagMod("ref", provided.innerRef),
+                                <.div(
+                                 ^.className := "draggable-button",
+                                Bootstrap.FontAwesomeIcon("arrows-v"),
+                                " ",
+                                s"${question.toCharacterCode(item)}/ ${item.item}",
+                                )
+                              )
+                          }
+                      }).toVdomArray
                   )
-                )
-              }).toVdomArray
-          ),
+              }
+            )
+          },
         )
       }
+      private def onDragEndHandler(): OnDragEndHandler = { (sourceIndex, maybeDestinationIndex) =>
+        if (maybeDestinationIndex.isDefined) {
+          val destinationIndex = maybeDestinationIndex.get
+          //
+          println(s"!!! sourceIndex = $sourceIndex  --- destinationIndex = $destinationIndex")
+        }
+      }
+
+      private def toTagMods(props: js.Dictionary[js.Object]): Seq[TagMod] = {
+        val scalaProps: mutable.Map[String, js.Object] = props
+        for ((name, value) <- scalaProps.toVector) yield rawTagMod(name, value)
+      }
+
+      private def rawTagMod(name: String, value: js.Object): TagMod = TagMod.fn(_.addAttr(name, value))
 
       private def orderItemsFromTextInput(question: Question.OrderItems): Seq[Question.OrderItems.Item] = {
         val answerString = freeTextAnswerInputRef.apply().valueOrDefault

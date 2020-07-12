@@ -290,7 +290,7 @@ table.table-bordered {
     word-wrap: break-word !important;
   }
 
-  .multiple-choice-answer-buttons {
+  .multiple-choice-answer-buttons, .order-items-answer-buttons {
     list-style: none;
     padding-left: 0px;
 
@@ -315,6 +315,27 @@ table.table-bordered {
 
         .choice-arrow {
           padding-right: 10px;
+        }
+      }
+    }
+
+    &.order-items-answer-buttons {
+      li {
+        .draggable-button {
+          color: #333;
+          border: 1px solid #ccc;
+          border-radius: 3px;
+          padding: 3px 10px;
+
+          width: 100%;
+          max-width: 400px;
+          text-align: left;
+          white-space: normal !important;
+          word-wrap: break-word !important;
+
+          .fa-arrows-v {
+            padding-right: 10px;
+          }
         }
       }
     }
