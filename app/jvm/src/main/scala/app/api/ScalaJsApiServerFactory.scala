@@ -621,11 +621,11 @@ final class ScalaJsApiServerFactory @Inject()(
       entityAccess.persistEntityModifications {
         for {
           (teamId, submissionsByTeam) <- unscoredSubmissions.groupBy(_.teamId).toVector
-          scoreDiff <- Some(submissionsByTeam.map(_.points).sum)
-          if scoreDiff != 0
+          lastSubmission <- submissionsByTeam.lastOption
+          if lastSubmission.points != 0
         } yield {
           val team = allTeams.find(_.id == teamId).get
-          val newScore = team.score + scoreDiff
+          val newScore = team.score + lastSubmission.points
           EntityModification.createUpdateAllFields(team.copy(score = newScore))
         }
       }
