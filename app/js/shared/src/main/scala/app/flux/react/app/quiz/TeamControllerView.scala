@@ -423,35 +423,33 @@ final class TeamControllerView(
             textAlwaysDisabled = true,
             clearTextAfterSubmit = false,
           ),
-          <<.ifThen(canSubmitResponse) {
-            ReactBeautifulDnd.DragDropContext(onDragEndHandler = onDragEndHandler(items, question))(
-              ReactBeautifulDnd.Droppable(droppableId = "droppable") {
-                (provided, snapshot) =>
-                  <.ul(
-                    ^.className := "order-items-answer-buttons",
-                    rawTagMod("ref", provided.innerRef),
-                    (for ((item, index) <- items.zipWithIndex)
-                      yield {
-                        ReactBeautifulDnd
-                          .Draggable(key = s"draggable-${item.item}", draggableId = item.item, index = index) {
-                            (provided, snapshot) =>
-                              <.li(
-                                toTagMods(provided.draggableProps) ++ toTagMods(provided.dragHandleProps): _*)(
-                                ^.key := s"item-${item.item}",
-                                rawTagMod("ref", provided.innerRef),
-                                <.div(
-                                  ^.className := "draggable-button",
-                                  Bootstrap.FontAwesomeIcon("arrows-v"),
-                                  " ",
-                                  s"${question.toCharacterCode(item)}/ ${item.item}",
-                                )
-                              )
-                          }
-                      }).toVdomArray
-                  )
-              }
-            )
-          },
+          ReactBeautifulDnd.DragDropContext(onDragEndHandler = onDragEndHandler(items, question))(
+            ReactBeautifulDnd.Droppable(droppableId = "droppable") { (provided, snapshot) =>
+              <.ul(
+                ^.className := "order-items-answer-buttons",
+                rawTagMod("ref", provided.innerRef),
+                (for ((item, index) <- items.zipWithIndex)
+                  yield {
+                    ReactBeautifulDnd.Draggable(
+                      key = s"draggable-${item.item}",
+                      draggableId = item.item,
+                      index = index,
+                    ) { (provided, snapshot) =>
+                      <.li(toTagMods(provided.draggableProps) ++ toTagMods(provided.dragHandleProps): _*)(
+                        ^.key := s"item-${item.item}",
+                        rawTagMod("ref", provided.innerRef),
+                        <.div(
+                          ^.className := "draggable-button",
+                          Bootstrap.FontAwesomeIcon("arrows-v"),
+                          " ",
+                          s"${question.toCharacterCode(item)}/ ${item.item}",
+                        )
+                      )
+                    }
+                  }).toVdomArray
+              )
+            }
+          ),
         )
       }
       private def onDragEndHandler(

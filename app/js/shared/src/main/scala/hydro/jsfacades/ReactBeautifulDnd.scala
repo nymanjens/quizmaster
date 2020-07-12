@@ -37,7 +37,12 @@ object ReactBeautifulDnd {
 
     val component = JsComponent[js.Object, Children.None, Null](DraggableComponent)
     component(
-      js.Dynamic.literal(key = key.toString, draggableId = draggableId, index = index, children = jsChildren))
+      js.Dynamic.literal(
+        key = key.toString,
+        draggableId = draggableId,
+        index = index,
+        children = jsChildren,
+      ))
   }
 
   // **************** Public inner types ****************//
