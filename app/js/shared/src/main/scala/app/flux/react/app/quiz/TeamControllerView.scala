@@ -332,7 +332,7 @@ final class TeamControllerView(
         )
       }
 
-      private def freeTextAnswerForm(question: Question)(
+      private def freeTextAnswerForm(question: Question, textAlwaysDisabled: Boolean = false)(
           implicit team: Team,
           quizState: QuizState,
       ): VdomNode = {
@@ -355,7 +355,7 @@ final class TeamControllerView(
                 ref = freeTextAnswerInputRef,
                 name = "answer",
                 focusOnMount = true,
-                disabled = !canSubmitResponse,
+                disabled = !canSubmitResponse || textAlwaysDisabled,
                 listener = { newValue =>
                   $.forceUpdate.runNow() // To update OrderItem buttons
                 }
@@ -406,17 +406,18 @@ final class TeamControllerView(
           quizState: QuizState,
       ): VdomNode = {
         val canSubmitResponse = quizState.canSubmitResponse(team)
+        val items = orderItemsFromTextInput(question)
 
         <.div(
-          freeTextAnswerForm(question),
+          freeTextAnswerForm(question, textAlwaysDisabled = true),
           <<.ifThen(canSubmitResponse) {
-            ReactBeautifulDnd.DragDropContext(onDragEndHandler = onDragEndHandler())(
+            ReactBeautifulDnd.DragDropContext(onDragEndHandler = onDragEndHandler(items, question))(
               ReactBeautifulDnd.Droppable(droppableId = "droppable") {
                 (provided, snapshot) =>
                   <.ul(
                     ^.className := "order-items-answer-buttons",
                     rawTagMod("ref", provided.innerRef),
-                    (for ((item, index) <- orderItemsFromTextInput(question).zipWithIndex)
+                    (for ((item, index) <- items.zipWithIndex)
                       yield {
                         ReactBeautifulDnd
                           .Draggable(key = s"draggable-${item.item}", draggableId = item.item, index = index) {
@@ -426,10 +427,10 @@ final class TeamControllerView(
                                 ^.key := s"item-${item.item}",
                                 rawTagMod("ref", provided.innerRef),
                                 <.div(
-                                 ^.className := "draggable-button",
-                                Bootstrap.FontAwesomeIcon("arrows-v"),
-                                " ",
-                                s"${question.toCharacterCode(item)}/ ${item.item}",
+                                  ^.className := "draggable-button",
+                                  Bootstrap.FontAwesomeIcon("arrows-v"),
+                                  " ",
+                                  s"${question.toCharacterCode(item)}/ ${item.item}",
                                 )
                               )
                           }
@@ -440,20 +441,29 @@ final class TeamControllerView(
           },
         )
       }
-      private def onDragEndHandler(): OnDragEndHandler = { (sourceIndex, maybeDestinationIndex) =>
+      private def onDragEndHandler(
+          items: Seq[Question.OrderItems.Item],
+          question: Question.OrderItems,
+      ): OnDragEndHandler = { (sourceIndex, maybeDestinationIndex) =>
         if (maybeDestinationIndex.isDefined) {
           val destinationIndex = maybeDestinationIndex.get
-          //
-          println(s"!!! sourceIndex = $sourceIndex  --- destinationIndex = $destinationIndex")
+
+          val newItems = {
+            val resultBuilder = items.toBuffer
+            if(sourceIndex < destinationIndex){
+              resultBuilder.insert(destinationIndex, items(sourceIndex))
+              resultBuilder.remove(sourceIndex)
+            } else {
+              resultBuilder.remove(sourceIndex)
+              resultBuilder.insert(destinationIndex, items(sourceIndex))
+            }
+            resultBuilder.toVector
+          }
+
+          val newAnswerString = newItems.map(question.toCharacterCode).mkString
+          freeTextAnswerInputRef.apply().setValue(newAnswerString)
         }
       }
-
-      private def toTagMods(props: js.Dictionary[js.Object]): Seq[TagMod] = {
-        val scalaProps: mutable.Map[String, js.Object] = props
-        for ((name, value) <- scalaProps.toVector) yield rawTagMod(name, value)
-      }
-
-      private def rawTagMod(name: String, value: js.Object): TagMod = TagMod.fn(_.addAttr(name, value))
 
       private def orderItemsFromTextInput(question: Question.OrderItems): Seq[Question.OrderItems.Item] = {
         val answerString = freeTextAnswerInputRef.apply().valueOrDefault
@@ -481,6 +491,13 @@ final class TeamControllerView(
       private def makeWhitespaceVisible(s: String): String = {
         if (s.trim.isEmpty) "<whitespace>" else s
       }
+
+      private def toTagMods(props: js.Dictionary[js.Object]): Seq[TagMod] = {
+        val scalaProps: mutable.Map[String, js.Object] = props
+        for ((name, value) <- scalaProps.toVector) yield rawTagMod(name, value)
+      }
+
+      private def rawTagMod(name: String, value: js.Object): TagMod = TagMod.fn(_.addAttr(name, value))
     }
   }
 }
