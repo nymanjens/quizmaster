@@ -103,7 +103,7 @@ final class Application @Inject()(
     val infiniteDurationThreshold = Duration.ofMinutes(900)
     def round1(double: Double): String = "%,.1f".format(double)
     def indent(width: Int, any: Any): String = {
-      val string = any.toString
+      val string = any.toString.replace('\n', ' ')
       if (width > 5 && string.length > width) { // If string is too long
         string.substring(0, width - 2) + ".."
       } else {
