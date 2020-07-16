@@ -34,7 +34,7 @@ Follow these steps to host a quiz:
 - Make your own quiz by editing `conf/quiz/quiz-config.yml`. You can test your quiz by starting a
   local server with it (see the installation section above)
 - Host the server somewhere accessible to all players
-- During a quiz, share the link to your server with all players (e.g. http://localhost:9000). You
+- During a quiz, share the link to your server with all players. You
   can go to the same page and unlock the master controls via the padlock icon (if you configured a
   `masterSecret` in `quiz-config.yml`). The important pages during the quiz:
     - The player's answer submission page: This is what players use to input their answers.
