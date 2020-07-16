@@ -3,7 +3,7 @@ Quizmaster
 
 [![Build Status](https://travis-ci.org/nymanjens/quizmaster.svg?branch=master)](https://travis-ci.org/nymanjens/quizmaster)
 
-This is a web-app to run locally while conducting a quiz (in real life) with about 4 groups.
+A web-app for conducting a quiz, including a page for players to enter their answers.
 
 ## Screenshot
 
@@ -23,24 +23,25 @@ This is a web-app to run locally while conducting a quiz (in real life) with abo
     - `app.development.loadDummyData`: If this is true: Start with 4 teams already configured (Team A, Team B, Team C, Team D)
 
 - `conf/quiz/quiz-config.yml`:<br>
-  Add your questions and answers here.
+  Configure your quiz here (questions, choices, answers, images, ...)
 
 ## Play
 
-### Game modes
+### How to set up
 
-This quiz can be played in different ways, which will inform the quiz settings (http://localhost:9000/app/quizsettings).
+Follow these steps to host a quiz:
 
-- With every team using a phone/tablet/laptop connected to `http://<your-ip-address>:9000/app/teamcontroller`
-    - To choose from multiple-choice questions. Note that these are automatically scored.
-    - To fill in textual answers. Note that these are automatically scored.
-- With up to 4 physical game controllers
-    - To choose from multiple-choice questions (in the quiz settings, choose "Answer bullet type" = Arrows). Note that these are automatically scored.
-    - To stop the timer and give an answer
-    - To indicate that a team has written down the answer on a paper so the quizmaster can continue to the answer when every team has done so
-- Via an external form, e.g. Google Forms (in the quiz settings, choose "Answer bullet type" = Characters)
-    - Go trough the round(s) first with "Show answers" = No (in the quiz settings)
-    - When everyone has submitted their answer, go back and repeate with "Show answers" = Yes
+- Make your own quiz by editing `conf/quiz/quiz-config.yml`. You can test your quiz by starting a
+  local server with it (see the installation section above)
+- Host the server somewhere accessible to all players
+- During a quiz, share the link to your server with all players (e.g. http://localhost:9000). You
+  can go to the same page and unlock the master controls via the padlock icon (if you configured a
+  `masterSecret` in `quiz-config.yml`). The important pages during the quiz:
+    - The player's answer submission page: This is what players use to input their answers.
+    - The quiz page: This is the screen to show to all players. It shows the questions, player
+      scores and plays audio and video.
+    - The master page: This is a screen only for the quizmaster. It allows you to score player
+      answers and generally control the quiz flow.
 
 ### Shortcuts
 
