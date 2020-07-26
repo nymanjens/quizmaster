@@ -100,6 +100,15 @@ final class TeamsList(
               ^.style := js.Dictionary("borderColor" -> TeamIcon.colorOf(team)),
               <.div(
                 ^.className := "name",
+                // If this is the first player and not everyone has the same score
+                <<.ifThen(
+                  team.score == state.teams.map(_.score).max && state.teams.map(_.score).distinct.size > 1) {
+                  <.span(
+                    ^.className := "first-player",
+                    Bootstrap.FontAwesomeIcon("trophy"),
+                    " ",
+                  )
+                },
                 team.name,
                 " ",
                 <<.ifDefined(state.teamIdToGamepadState.get(team.id)) { gamepadState =>
