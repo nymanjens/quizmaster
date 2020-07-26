@@ -414,14 +414,16 @@ final class TeamControllerView(
           quizState: QuizState,
       ): VdomNode = {
         val canSubmitResponse = quizState.canSubmitResponse(team)
-        val items = orderItemsFromTextInput(question)
-
         val maybeCurrentSubmission = quizState.submissions.filter(_.teamId == team.id).lastOption
         val maybeCurrentSubmissionText =
           maybeCurrentSubmission.map(_.value).flatMap {
             case SubmissionValue.FreeTextAnswer(a) => Some(a)
             case _                                 => None
           }
+        val items =
+          maybeOrderItemsFromTextInput(question) orElse
+            maybeCurrentSubmissionText.map(_.map(question.itemFromCharacterCode)) getOrElse
+            question.itemsInAlphabeticalOrder
 
         <.div(
           freeTextAnswerForm(
@@ -500,12 +502,13 @@ final class TeamControllerView(
         }
       }
 
-      private def orderItemsFromTextInput(question: Question.OrderItems): Seq[Question.OrderItems.Item] = {
+      private def maybeOrderItemsFromTextInput(
+          question: Question.OrderItems): Option[Seq[Question.OrderItems.Item]] = {
         val answerString = freeTextAnswerInputRef.apply().valueOrDefault
         if (answerString != null && question.isValidAnswerString(answerString)) {
-          answerString.map(question.itemFromCharacterCode)
+          Some(answerString.map(question.itemFromCharacterCode))
         } else {
-          question.itemsInAlphabeticalOrder
+          None
         }
       }
 
