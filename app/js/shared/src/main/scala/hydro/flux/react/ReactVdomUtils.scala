@@ -59,13 +59,17 @@ object ReactVdomUtils {
     }
 
     def nl2BrBlock(string: String): VdomNode = {
-      <.div(
-        ^.style := js.Dictionary(
-          "display" -> "inline-block",
-          "textAlign" -> "left",
-        ),
-        nl2Br(string),
-      )
+      if (string contains '\n') {
+        <.div(
+          ^.style := js.Dictionary(
+            "display" -> "inline-block",
+            "textAlign" -> "left",
+          ),
+          nl2Br(string),
+        )
+      } else {
+        string
+      }
     }
   }
 }
