@@ -13,6 +13,7 @@ import app.models.access.JvmEntityAccess
 import app.models.user.User
 import app.models.user.User.onlyUser
 import app.AppVersion
+import app.api.ScalaJsApi
 import boopickle.Default._
 import com.google.inject.Inject
 import com.google.inject.Singleton
@@ -111,7 +112,7 @@ final class InternalApi @Inject()(
 
     val data: Array[Byte] = Array.ofDim[Byte](responseBuffer.remaining())
     responseBuffer.get(data)
-    data
+    data.map(b => (b ^ ScalaJsApi.xorEncryptionByte).toByte)
   }
 }
 object InternalApi {

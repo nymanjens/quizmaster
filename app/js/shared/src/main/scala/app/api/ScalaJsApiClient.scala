@@ -66,6 +66,12 @@ object ScalaJsApiClient {
         .call()
     }
 
+    private def decryptXor(byteBuffer: ByteBuffer): ByteBuffer = {
+      val byteArray: Array[Byte] = Array.ofDim[Byte](byteBuffer.remaining())
+      byteBuffer.get(byteArray)
+      ByteBuffer.wrap(byteArray.map(b => (b ^ ScalaJsApi.xorEncryptionByte).toByte))
+    }
+
     private object HttpPostAutowireClient extends autowire.Client[ByteBuffer, Pickler, Pickler] {
       override def doCall(req: Request): Future[ByteBuffer] = {
         dom.ext.Ajax
@@ -75,7 +81,7 @@ object ScalaJsApiClient {
             responseType = "arraybuffer",
             headers = Map("Content-Type" -> "application/octet-stream")
           )
-          .map(r => TypedArrayBuffer.wrap(r.response.asInstanceOf[ArrayBuffer]))
+          .map(r => decryptXor(TypedArrayBuffer.wrap(r.response.asInstanceOf[ArrayBuffer])))
       }
 
       override def read[Result: Pickler](p: ByteBuffer) = Unpickle[Result].fromBytes(p)
@@ -91,7 +97,7 @@ object ScalaJsApiClient {
             responseType = "arraybuffer",
             headers = Map("Content-Type" -> "application/octet-stream")
           )
-          .map(r => TypedArrayBuffer.wrap(r.response.asInstanceOf[ArrayBuffer]))
+          .map(r => decryptXor(TypedArrayBuffer.wrap(r.response.asInstanceOf[ArrayBuffer])))
       }
 
       override def read[Result: Pickler](p: ByteBuffer) = Unpickle[Result].fromBytes(p)

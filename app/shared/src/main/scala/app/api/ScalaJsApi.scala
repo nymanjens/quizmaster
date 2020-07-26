@@ -37,6 +37,9 @@ trait ScalaJsApi {
 object ScalaJsApi {
   type UpdateToken = String
 
+  // Encrypts the server response for all regular ScalaJsApi calls
+  val xorEncryptionByte: Byte =  0xbd.toByte
+
   /**
     * @param i18nMessages Maps key to the message with placeholders.
     * @param nextUpdateToken An update token for all changes since this call
