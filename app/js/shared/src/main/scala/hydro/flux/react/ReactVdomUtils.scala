@@ -1,5 +1,7 @@
 package hydro.flux.react
 
+import java.util.concurrent.atomic.AtomicLong
+
 import hydro.common.GuavaReplacement.Splitter
 import japgolly.scalajs.react.vdom.TagMod
 import japgolly.scalajs.react.vdom.VdomArray
@@ -48,13 +50,15 @@ object ReactVdomUtils {
     }
 
     def nl2Br(string: String): VdomNode = {
+      val brKeyCounter = new AtomicLong()
       val parts =
         Splitter
           .on('\n')
           .trimResults()
           .split(string.trim)
           .map(s => Seq[VdomNode](s))
-          .reduce((seq1, seq2) => Seq(seq1, Seq[VdomNode](<.br()), seq2).flatten)
+          .reduce((seq1, seq2) =>
+            Seq(seq1, Seq[VdomNode](<.br(^.key := brKeyCounter.getAndIncrement())), seq2).flatten)
       VdomArray.apply(parts: _*)
     }
 
