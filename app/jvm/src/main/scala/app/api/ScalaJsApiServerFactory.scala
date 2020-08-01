@@ -123,13 +123,7 @@ final class ScalaJsApiServerFactory @Inject()(
               EntityModification.createUpdateAllFields(team.copy(name = newName)))
 
           case UpdateScore(teamId: Long, scoreDiff: FixedPointNumber) =>
-            if (scoreDiff != 0) {
-              val team = fetchAllTeams().find(_.id == teamId).get
-              val oldScore = team.score
-              val newScore = oldScore + scoreDiff
-              entityAccess.persistEntityModifications(
-                EntityModification.createUpdateAllFields(team.copy(score = newScore)))
-            }
+            updateScore(teamId, scoreDiff)
 
           case DeleteTeam(teamId: Long) =>
             for {
@@ -213,29 +207,39 @@ final class ScalaJsApiServerFactory @Inject()(
             addSubmission(teamId, submissionValue)
 
           case SetSubmissionCorrectness(submissionId: Long, isCorrectAnswer: Boolean) =>
-            updateSubmissionInStateAndEntity(submissionId) { oldSubmissionEntity =>
+            updateSubmissionInStateAndEntity(submissionId) { oldSubmission =>
               // Reset pointsToGain as well because its old value is likely moot
               val pointsToGain =
                 fetchQuizState().pointsToGainBySubmission(
                   isCorrectAnswer = Some(isCorrectAnswer),
                   submissionId = submissionId,
-                  submissionValue = oldSubmissionEntity.value,
+                  submissionValue = oldSubmission.value,
                 )
 
-              oldSubmissionEntity.copy(isCorrectAnswer = Some(isCorrectAnswer), points = pointsToGain)
+              if (oldSubmission.scored) {
+                // If scoring already happened, the current team score has to be updated
+                updateScore(oldSubmission.teamId, scoreDiff = pointsToGain - oldSubmission.points)
+              }
+
+              oldSubmission.copy(isCorrectAnswer = Some(isCorrectAnswer), points = pointsToGain)
             }
 
           case SetSubmissionPoints(submissionId: Long, points: FixedPointNumber) =>
-            updateSubmissionInStateAndEntity(submissionId) { oldSubmissionEntity =>
+            updateSubmissionInStateAndEntity(submissionId) { oldSubmission =>
               val pointsForCorrectAnswer =
-                oldSubmissionEntity.question.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false)
+                oldSubmission.question.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false)
               val isCorrectAnswer = points match {
                 case _ if points < 0                      => Some(false)
                 case _ if points < pointsForCorrectAnswer => None
                 case _                                    => Some(true)
               }
 
-              oldSubmissionEntity.copy(isCorrectAnswer = isCorrectAnswer, points = points)
+              if (oldSubmission.scored) {
+                // If scoring already happened, the current team score has to be updated
+                updateScore(oldSubmission.teamId, scoreDiff = points - oldSubmission.points)
+              }
+
+              oldSubmission.copy(isCorrectAnswer = isCorrectAnswer, points = points)
             }
         }
       }
@@ -376,6 +380,16 @@ final class ScalaJsApiServerFactory @Inject()(
     entityAccess
       .newQuerySync[QuizState]()
       .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId) getOrElse QuizState.nullInstance
+  }
+
+  private def updateScore(teamId: Long, scoreDiff: FixedPointNumber): Unit = {
+    if (scoreDiff != 0) {
+      val team = fetchAllTeams().find(_.id == teamId).get
+      val oldScore = team.score
+      val newScore = oldScore + scoreDiff
+      entityAccess.persistEntityModifications(
+        EntityModification.createUpdateAllFields(team.copy(score = newScore)))
+    }
   }
 
   private def updateSubmissionInStateAndEntity(submissionId: Long)(

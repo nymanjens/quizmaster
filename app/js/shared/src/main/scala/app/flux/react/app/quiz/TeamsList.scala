@@ -147,9 +147,10 @@ final class TeamsList(
         implicit quizState: QuizState,
         props: Props,
     ): VdomNode = {
-      val showSubmissionPoints = (showSubmissionValue &&
-        maybeSubmission.exists(!_.scored) &&
-        (maybeSubmission.get.points != 0 || props.showMasterControls))
+      val showSubmissionPoints = showSubmissionValue && (
+        (!props.showMasterControls && maybeSubmission.exists(!_.scored) && maybeSubmission.get.points != 0) ||
+          (props.showMasterControls && maybeSubmission.isDefined)
+      )
 
       val showUpdateScoreButtons = props.showMasterControls &&
         (
