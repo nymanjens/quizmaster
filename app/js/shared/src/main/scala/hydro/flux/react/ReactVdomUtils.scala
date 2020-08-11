@@ -1,5 +1,6 @@
 package hydro.flux.react
 
+import scala.util.matching.Regex
 import java.util.concurrent.atomic.AtomicLong
 
 import hydro.common.GuavaReplacement.Splitter
@@ -49,30 +50,39 @@ object ReactVdomUtils {
       VdomArray.empty() ++= elems.flatMap(a => Seq(f(a), stringF(" ")))
     }
 
-    def nl2Br(string: String): VdomNode = {
-      val brKeyCounter = new AtomicLong()
-      val parts =
-        Splitter
-          .on('\n')
-          .trimResults()
-          .split(string.trim)
-          .map(s => Seq[VdomNode](s))
-          .reduce((seq1, seq2) =>
-            Seq(seq1, Seq[VdomNode](<.br(^.key := brKeyCounter.getAndIncrement())), seq2).flatten)
-      VdomArray.apply(parts: _*)
-    }
-
-    def nl2BrBlock(string: String): VdomNode = {
+    def nl2BrBlockWithLinks(string: String): VdomNode = {
       if (string.trim contains '\n') {
         <.div(
           ^.style := js.Dictionary(
             "display" -> "inline-block",
             "textAlign" -> "left",
           ),
-          nl2Br(string),
+          nl2BrWithLinks(string),
         )
       } else {
-        string
+        maybeConvertToLink(string)
+      }
+    }
+
+    private val urlRegex: Regex = raw"https?:\/\/[^\s/$$.?#].[^\s\)]*".r
+
+    private def nl2BrWithLinks(string: String): VdomNode = {
+      val brKeyCounter = new AtomicLong()
+      val parts =
+        Splitter
+          .on('\n')
+          .trimResults()
+          .split(string.trim)
+          .map(s => Seq(maybeConvertToLink(s)))
+          .reduce((seq1, seq2) =>
+            Seq(seq1, Seq[VdomNode](<.br(^.key := brKeyCounter.getAndIncrement())), seq2).flatten)
+      VdomArray.apply(parts: _*)
+    }
+
+    private def maybeConvertToLink(string: String): VdomNode = {
+      string.trim match {
+        case s @ urlRegex() => <.a(^.href := s, s)
+        case _              => string
       }
     }
   }

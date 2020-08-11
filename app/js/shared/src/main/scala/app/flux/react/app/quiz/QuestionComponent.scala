@@ -134,14 +134,14 @@ final class QuestionComponent(
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
             ^.className := "question",
-            <<.nl2BrBlock(question.question),
+            <<.nl2BrBlockWithLinks(question.question),
           )
         },
         <<.ifDefined(question.questionDetail) { questionDetail =>
           ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
             <.div(
               ^.className := "question-detail",
-              <<.nl2BrBlock(questionDetail),
+              <<.nl2BrBlockWithLinks(questionDetail),
             )
           }
         },
@@ -150,7 +150,7 @@ final class QuestionComponent(
           ifVisibleOrMaster(false) {
             <.div(
               ^.className := "master-notes",
-              <<.nl2BrBlock(masterNotes),
+              <<.nl2BrBlockWithLinks(masterNotes),
             )
           }
         },
@@ -257,7 +257,7 @@ final class QuestionComponent(
             if (answerIsVisible) {
               <.div(
                 ^.className := "answer",
-                <<.nl2BrBlock(question.answer),
+                <<.nl2BrBlockWithLinks(question.answer),
               )
             } else {
               <.div(obfuscatedAnswer(question.answer))
@@ -268,7 +268,7 @@ final class QuestionComponent(
           <<.ifDefined(question.answerDetail) { answerDetail =>
             <.div(
               ^.className := "answer-detail",
-              <<.nl2BrBlock(answerDetail),
+              <<.nl2BrBlockWithLinks(answerDetail),
             )
           }
         },
@@ -311,11 +311,11 @@ final class QuestionComponent(
           <.div(
             <.div(
               ^.className := "verbal-question",
-              <<.nl2BrBlock(question.verbalQuestion),
+              <<.nl2BrBlockWithLinks(question.verbalQuestion),
             ),
             <.div(
               ^.className := "verbal-answer",
-              <<.nl2BrBlock(question.verbalAnswer),
+              <<.nl2BrBlockWithLinks(question.verbalAnswer),
             ),
           )
         },
@@ -323,14 +323,14 @@ final class QuestionComponent(
           ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
             <.div(
               ^.className := "textual-question",
-              <<.nl2BrBlock(question.textualQuestion),
+              <<.nl2BrBlockWithLinks(question.textualQuestion),
             )
           }
         } else {
           <<.ifThen(question.questionIsVisible(progressIndex)) {
             <.div(
               ^.className := "question",
-              <<.nl2BrBlock(question.textualQuestion),
+              <<.nl2BrBlockWithLinks(question.textualQuestion),
             )
           }
         },
@@ -397,14 +397,14 @@ final class QuestionComponent(
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
             ^.className := "question",
-            <<.nl2BrBlock(question.question),
+            <<.nl2BrBlockWithLinks(question.question),
           )
         },
         <<.ifDefined(question.questionDetail) { questionDetail =>
           ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
             <.div(
               ^.className := "question-detail",
-              <<.nl2BrBlock(questionDetail),
+              <<.nl2BrBlockWithLinks(questionDetail),
             )
           }
         },
@@ -451,7 +451,7 @@ final class QuestionComponent(
           if (answerIsVisible) {
             <.div(
               ^.className := "answer",
-              <<.nl2BrBlock(question.answerAsString),
+              <<.nl2BrBlockWithLinks(question.answerAsString),
             )
           } else {
             <.div(obfuscatedAnswer(question.answerAsString))
@@ -461,7 +461,7 @@ final class QuestionComponent(
           <<.ifDefined(question.answerDetail) { answerDetail =>
             <.div(
               ^.className := "answer-detail",
-              <<.nl2BrBlock(answerDetail),
+              <<.nl2BrBlockWithLinks(answerDetail),
             )
           }
         },
