@@ -63,7 +63,7 @@ object ReactVdomUtils {
     }
 
     def nl2BrBlock(string: String): VdomNode = {
-      if (string contains '\n') {
+      if (string.trim contains '\n') {
         <.div(
           ^.style := js.Dictionary(
             "display" -> "inline-block",
