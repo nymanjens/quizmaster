@@ -252,8 +252,8 @@ final class TeamControllerView(
               )
             case _ if quizState.quizHasEnded =>
               <.div(
-              submissionsSummaryChart(selectedTeamId = Some(team.id)),
-              submissionsSummaryTable(selectedTeamId = Some(team.id)),
+                submissionsSummaryChart(selectedTeamId = Some(team.id)),
+                submissionsSummaryTable(selectedTeamId = Some(team.id)),
               )
             case _ =>
               <.span(i18n("app.waiting-for-the-next-question"))

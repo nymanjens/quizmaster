@@ -56,26 +56,25 @@ final class SubmissionsSummaryChart(
       implicit val __ = state
       <.div(
         ^.style := js.Dictionary("maxWidth" -> "1300px"),
-
-      Recharts.ResponsiveContainer(width = "100%", height = 350)(
-        Recharts.LineChart(
-          data = assembleData(),
-          margin = Recharts.Margin(top = 5, right = 20, left = 0, bottom = 35),
-        )(
-          Recharts.CartesianGrid(strokeDasharray = "3 3", vertical = false),
-          Recharts.XAxis(dataKey = "name"),
-          Recharts.YAxis(),
-          Recharts.Tooltip(),
-          Recharts.Legend(),
-          (for (team <- state.teams)
-            yield
-              Recharts.Line(
-                tpe = "linear",
-                dataKey = team.name,
-                stroke = TeamIcon.colorOf(team),
-              )).toVdomArray,
-        ),
-      )
+        Recharts.ResponsiveContainer(width = "100%", height = 350)(
+          Recharts.LineChart(
+            data = assembleData(),
+            margin = Recharts.Margin(top = 5, right = 20, left = 0, bottom = 35),
+          )(
+            Recharts.CartesianGrid(strokeDasharray = "3 3", vertical = false),
+            Recharts.XAxis(dataKey = "name"),
+            Recharts.YAxis(),
+            Recharts.Tooltip(),
+            Recharts.Legend(),
+            (for (team <- state.teams)
+              yield
+                Recharts.Line(
+                  tpe = "linear",
+                  dataKey = team.name,
+                  stroke = TeamIcon.colorOf(team),
+                )).toVdomArray,
+          ),
+        )
       )
     }
 

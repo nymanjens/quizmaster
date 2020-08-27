@@ -52,9 +52,9 @@ final class RoundComponent(
       },
       <<.ifThen(quizState.quizHasEnded) {
         <.div(
-                submissionsSummaryChart(selectedTeamId = None),
-                submissionsSummaryTable(selectedTeamId = None),
-              )
+          submissionsSummaryChart(selectedTeamId = None),
+          submissionsSummaryTable(selectedTeamId = None),
+        )
       },
     )
   }
