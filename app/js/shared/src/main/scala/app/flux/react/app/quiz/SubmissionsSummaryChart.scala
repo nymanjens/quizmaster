@@ -19,6 +19,7 @@ import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
 
 import scala.collection.immutable.Seq
+import scala.collection.mutable
 
 final class SubmissionsSummaryChart(
     implicit quizConfig: QuizConfig,
@@ -69,6 +70,7 @@ final class SubmissionsSummaryChart(
             (for (team <- state.teams)
               yield
                 Recharts.Line(
+                  key = team.name,
                   tpe = "linear",
                   dataKey = team.name,
                   stroke = TeamIcon.colorOf(team),
@@ -79,11 +81,18 @@ final class SubmissionsSummaryChart(
     }
 
     private def assembleData()(implicit state: State): Seq[Map[String, js.Any]] = {
+      val cumulativePoints: mutable.Map[Team, FixedPointNumber] = mutable.Map()
+
       for {
         (round, roundIndex) <- quizConfig.rounds.zipWithIndex
         (question, questionIndex) <- round.questions.zipWithIndex
       } yield {
-        val teamsScores: Map[String, js.Any] = state.teams.map(t => t.name -> (0: js.Any)).toMap
+        for(team <- state.teams) {
+          val newPoints = cumulativePoints.getOrElse(team, FixedPointNumber(0)) + state.submissionsSummaryState.points(roundIndex, questionIndex, team.id)
+          cumulativePoints.put(team, newPoints)
+        }
+
+        val teamsScores = state.teams.map(t => t.name -> (cumulativePoints(t).toDouble: js.Any)).toMap
         Map[String, js.Any]("name" -> s"${roundIndex + 1}.${questionIndex + 1}") ++ teamsScores
       }
     }

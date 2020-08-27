@@ -37,12 +37,13 @@ object Recharts {
   }
 
   def Line(
+      key: String,
       tpe: String,
       dataKey: String,
       stroke: String,
   ) = {
     val component = JsComponent[js.Object, Children.None, Null](LineComponent)
-    component(
+    component.withKey(key).apply(
       js.Dynamic.literal(
         `type` = tpe,
         dataKey = dataKey,
