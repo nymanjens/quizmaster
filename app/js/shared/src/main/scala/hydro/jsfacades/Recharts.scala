@@ -48,6 +48,7 @@ object Recharts {
         `type` = tpe,
         dataKey = dataKey,
         stroke = stroke,
+        isAnimationActive = false,
       ))
   }
 
