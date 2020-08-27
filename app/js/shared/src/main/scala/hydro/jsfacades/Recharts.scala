@@ -25,16 +25,12 @@ object Recharts {
   }
 
   def LineChart(
-      width: Int,
-      height: Int,
       data: Seq[Map[String, js.Any]],
       margin: Margin,
   )(children: VdomNode*) = {
     val component = JsComponent[js.Object, Children.Varargs, Null](LineChartComponent)
     component(
       js.Dynamic.literal(
-        width = width,
-        height = height,
         data = data.map(_.toJSDictionary).toJSArray,
         margin = margin.toJsObject,
       ))(children: _*)

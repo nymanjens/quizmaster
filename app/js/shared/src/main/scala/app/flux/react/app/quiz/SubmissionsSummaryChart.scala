@@ -1,5 +1,6 @@
 package app.flux.react.app.quiz
 
+import scala.scalajs.js
 import app.common.FixedPointNumber
 import app.flux.stores.quiz.SubmissionsSummaryStore
 import app.flux.stores.quiz.TeamsAndQuizStateStore
@@ -53,38 +54,39 @@ final class SubmissionsSummaryChart(
     override def render(props: Props, state: State): VdomNode = logExceptions {
       implicit val _ = props
       implicit val __ = state
-      Recharts.ResponsiveContainer(width = "100%", height = 500)(
+      <.div(
+        ^.style := js.Dictionary("maxWidth" -> "1300px"),
+
+      Recharts.ResponsiveContainer(width = "100%", height = 350)(
         Recharts.LineChart(
-          width = 500,
-          height = 500,
-          data = Seq(
-            Map("name" -> "Page A", "uv" -> 4000, "pv" -> 2400, "amt" -> 2400),
-            Map("name" -> "Page B", "uv" -> 3000, "pv" -> 1398, "amt" -> 2210),
-            Map("name" -> "Page C", "uv" -> 2000, "pv" -> 9800, "amt" -> 2290),
-            Map("name" -> "Page D", "uv" -> 2780, "pv" -> 3908, "amt" -> 2000),
-            Map("name" -> "Page E", "uv" -> 1890, "pv" -> 4800, "amt" -> 2181),
-            Map("name" -> "Page F", "uv" -> 2390, "pv" -> 3800, "amt" -> 2500),
-            Map("name" -> "Page G", "uv" -> 3490, "pv" -> 4300, "amt" -> 2100),
-          ),
-          margin = Recharts.Margin(top = 5, right = 30, left = 20, bottom = 5),
+          data = assembleData(),
+          margin = Recharts.Margin(top = 5, right = 20, left = 0, bottom = 35),
         )(
           Recharts.CartesianGrid(strokeDasharray = "3 3", vertical = false),
           Recharts.XAxis(dataKey = "name"),
           Recharts.YAxis(),
           Recharts.Tooltip(),
           Recharts.Legend(),
-          Recharts.Line(
-            tpe = "linear",
-            dataKey = "pv",
-            stroke = "blue",
-          ),
-          Recharts.Line(
-            tpe = "linear",
-            dataKey = "uv",
-            stroke = "green",
-          ),
+          (for (team <- state.teams)
+            yield
+              Recharts.Line(
+                tpe = "linear",
+                dataKey = team.name,
+                stroke = TeamIcon.colorOf(team),
+              )).toVdomArray,
         ),
       )
+      )
+    }
+
+    private def assembleData()(implicit state: State): Seq[Map[String, js.Any]] = {
+      for {
+        (round, roundIndex) <- quizConfig.rounds.zipWithIndex
+        (question, questionIndex) <- round.questions.zipWithIndex
+      } yield {
+        val teamsScores: Map[String, js.Any] = state.teams.map(t => t.name -> (0: js.Any)).toMap
+        Map[String, js.Any]("name" -> s"${roundIndex + 1}.${questionIndex + 1}") ++ teamsScores
+      }
     }
   }
 }
