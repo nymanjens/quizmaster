@@ -81,18 +81,25 @@ final class SubmissionsSummaryChart(
     }
 
     private def assembleData()(implicit state: State): Seq[Map[String, js.Any]] = {
-      val cumulativePoints: mutable.Map[Team, FixedPointNumber] = mutable.Map()
+      val cumulativePoints: mutable.Map[Team, Double] = mutable.Map()
+      val discretionaryPoints: Map[Team, Double] =
+        state.teams.map(t => t -> (t.score - state.submissionsSummaryState.totalPoints(t)).toDouble).toMap
+      val numberOfQuestions = quizConfig.rounds.flatMap(_.questions).size
 
       for {
         (round, roundIndex) <- quizConfig.rounds.zipWithIndex
         (question, questionIndex) <- round.questions.zipWithIndex
       } yield {
-        for(team <- state.teams) {
-          val newPoints = cumulativePoints.getOrElse(team, FixedPointNumber(0)) + state.submissionsSummaryState.points(roundIndex, questionIndex, team.id)
+        for (team <- state.teams) {
+          val newPoints =
+            cumulativePoints.getOrElse(team, 0.0) +
+              state.submissionsSummaryState.points(roundIndex, questionIndex, team.id).toDouble +
+              (discretionaryPoints(team) / numberOfQuestions)
           cumulativePoints.put(team, newPoints)
         }
 
-        val teamsScores = state.teams.map(t => t.name -> (cumulativePoints(t).toDouble: js.Any)).toMap
+        val teamsScores =
+          state.teams.map(t => t.name -> (FixedPointNumber(cumulativePoints(t)).toDouble: js.Any)).toMap
         Map[String, js.Any]("name" -> s"${roundIndex + 1}.${questionIndex + 1}") ++ teamsScores
       }
     }
