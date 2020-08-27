@@ -38,7 +38,7 @@ object ScalaJsApi {
   type UpdateToken = String
 
   // Encrypts the server response for all regular ScalaJsApi calls
-  val xorEncryptionByte: Byte =  0xbd.toByte
+  val xorEncryptionByte: Byte = 0xbd.toByte
 
   /**
     * @param i18nMessages Maps key to the message with placeholders.

@@ -11,9 +11,11 @@ import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
 import hydro.flux.react.uielements.PageHeader
 import hydro.flux.router.RouterContext
+import hydro.jsfacades.Recharts
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
+import scala.collection.immutable.Seq
 
 final class SubmissionsSummaryView(
     implicit pageHeader: PageHeader,
@@ -21,6 +23,7 @@ final class SubmissionsSummaryView(
     quizConfig: QuizConfig,
     i18n: I18n,
     getInitialDataResponse: GetInitialDataResponse,
+    submissionsSummaryChart: SubmissionsSummaryChart,
     submissionsSummaryTable: SubmissionsSummaryTable,
 ) extends HydroReactComponent.Stateless {
 
@@ -42,6 +45,7 @@ final class SubmissionsSummaryView(
 
       <.span(
         pageHeader(router.currentPage),
+        submissionsSummaryChart(selectedTeamId = None),
         submissionsSummaryTable(selectedTeamId = None),
       )
     }

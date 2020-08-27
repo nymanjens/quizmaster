@@ -51,6 +51,7 @@ final class TeamControllerView(
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     quizProgressIndicator: QuizProgressIndicator,
     questionComponent: QuestionComponent,
+    submissionsSummaryChart: SubmissionsSummaryChart,
     submissionsSummaryTable: SubmissionsSummaryTable,
 ) {
 
@@ -250,7 +251,10 @@ final class TeamControllerView(
                 },
               )
             case _ if quizState.quizHasEnded =>
-              submissionsSummaryTable(selectedTeamId = Some(team.id))
+              <.div(
+                submissionsSummaryChart(selectedTeamId = Some(team.id)),
+                submissionsSummaryTable(selectedTeamId = Some(team.id)),
+              )
             case _ =>
               <.span(i18n("app.waiting-for-the-next-question"))
           },

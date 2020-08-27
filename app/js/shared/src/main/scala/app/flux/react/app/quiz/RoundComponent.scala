@@ -12,6 +12,7 @@ final class RoundComponent(
     quizConfig: QuizConfig,
     i18n: I18n,
     submissionsSummaryTable: SubmissionsSummaryTable,
+    submissionsSummaryChart: SubmissionsSummaryChart,
 ) {
   def apply(round: QuizConfig.Round, showMasterData: Boolean = false)(
       implicit quizState: QuizState): VdomElement = {
@@ -50,7 +51,10 @@ final class RoundComponent(
         )
       },
       <<.ifThen(quizState.quizHasEnded) {
-        submissionsSummaryTable(selectedTeamId = None)
+        <.div(
+          submissionsSummaryChart(selectedTeamId = None),
+          submissionsSummaryTable(selectedTeamId = None),
+        )
       },
     )
   }
