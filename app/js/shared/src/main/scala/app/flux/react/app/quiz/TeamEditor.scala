@@ -145,7 +145,7 @@ final class TeamEditor(
     }
 
     private def doAdd()(implicit state: State): Callback = LogExceptionsCallback {
-      teamsAndQuizStateStore.addTeam(name = "")
+      teamsAndQuizStateStore.addOrGetTeam(name = "")
     }
 
     private def doUpdateName(team: Team, newName: String): Callback = LogExceptionsCallback {

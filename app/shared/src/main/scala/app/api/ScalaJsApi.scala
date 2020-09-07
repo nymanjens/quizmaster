@@ -73,7 +73,11 @@ object ScalaJsApi {
   sealed trait TeamOrQuizStateUpdate
   object TeamOrQuizStateUpdate {
     case class ReplaceAllEntitiesByImportString(importString: String) extends TeamOrQuizStateUpdate
+
+    /** Adds a team with the given name if its name is not already taken. */
+    case class MaybeAddTeam(uniqueName: String) extends TeamOrQuizStateUpdate
     case class UpdateName(teamId: Long, newName: String) extends TeamOrQuizStateUpdate
+
     case class UpdateScore(teamId: Long, scoreDiff: FixedPointNumber) extends TeamOrQuizStateUpdate
     case class DeleteTeam(teamId: Long) extends TeamOrQuizStateUpdate
     case class GoToPreviousStep() extends TeamOrQuizStateUpdate

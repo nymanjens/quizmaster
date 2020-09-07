@@ -71,17 +71,11 @@ final class TeamsAndQuizStateStore(
   def stateOrEmpty: State = state getOrElse State.nullInstance
 
   // **************** Additional public API: Write methods **************** //
-  def addTeam(name: String): Future[Team] = async {
-    val teams = await(stateFuture).teams
-    val maxIndex = if (teams.nonEmpty) teams.map(_.index).max else -1
-    val modification = EntityModification.createAddWithRandomId(
-      Team(
-        name = name,
-        score = FixedPointNumber(0),
-        index = maxIndex + 1,
-      ))
-    await(entityAccess.persistModifications(modification))
-    modification.entity
+  def addOrGetTeam(name: String): Future[Team] = async {
+    await(scalaJsApiClient.doTeamOrQuizStateUpdate(MaybeAddTeam(uniqueName = name)))
+    await(entityAccess.newQuery[Team]().data())
+      .find(t => Team.areEquivalentTeamNames(t.name, name))
+      .get
   }
 
   def replaceAllEntitiesByImportString(importString: String): Future[Unit] = {

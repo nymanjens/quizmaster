@@ -117,6 +117,20 @@ final class ScalaJsApiServerFactory @Inject()(
             entityAccess.persistEntityModifications(
               deleteExistingTeams ++ importTeams ++ addOrUpdateQuizState)
 
+          case MaybeAddTeam(uniqueName) =>
+            val teams = fetchAllTeams()
+
+            if (!teams.exists(t => Team.areEquivalentTeamNames(t.name, uniqueName))) {
+              val maxIndex = if (teams.nonEmpty) teams.map(_.index).max else -1
+              val modification = EntityModification.createAddWithRandomId(
+                Team(
+                  name = uniqueName,
+                  score = FixedPointNumber(0),
+                  index = maxIndex + 1,
+                ))
+              entityAccess.persistEntityModifications(modification)
+            }
+
           case UpdateName(teamId: Long, newName: String) =>
             val team = fetchAllTeams().find(_.id == teamId).get
             entityAccess.persistEntityModifications(
