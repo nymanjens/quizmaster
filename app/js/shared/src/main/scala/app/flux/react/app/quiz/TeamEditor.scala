@@ -1,5 +1,6 @@
 package app.flux.react.app.quiz
 
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState
@@ -22,6 +23,7 @@ import japgolly.scalajs.react.vdom.html_<^.<
 import org.scalajs.dom
 
 import scala.collection.immutable.Seq
+import scala.util.Random
 
 final class TeamEditor(
     implicit pageHeader: PageHeader,
@@ -144,12 +146,24 @@ final class TeamEditor(
       )
     }
 
-    private def doAdd()(implicit state: State): Callback = LogExceptionsCallback {
-      teamsAndQuizStateStore.addTeam(name = "")
+    private def doAdd()(implicit state: State): Callback = {
+      def isUniqueTeamName(teamName: String): Boolean = {
+        !state.teams.exists(t => Team.areEquivalentTeamNames(t.name, teamName))
+      }
+
+      val uniqueTeamName = {
+        val suffixStream =
+          ('A' to 'Z').map(_.toString).toStream ++ Stream.continually(Random.nextInt(1000).toString)
+        suffixStream.map(suffix => s"Team $suffix").filter(isUniqueTeamName).head
+      }
+
+      val resultFuture = teamsAndQuizStateStore.addOrGetTeam(name = uniqueTeamName)
+      Callback.future(resultFuture.map(_ => Callback.empty))
     }
 
-    private def doUpdateName(team: Team, newName: String): Callback = LogExceptionsCallback {
-      teamsAndQuizStateStore.updateName(team, newName)
+    private def doUpdateName(team: Team, newName: String): Callback = {
+      val resultFuture = teamsAndQuizStateStore.maybeUpdateTeamName(team, newName)
+      Callback.future(resultFuture.map(_ => Callback.empty))
     }
 
     private def doDelete(team: Team): Callback = LogExceptionsCallback {

@@ -23,4 +23,11 @@ object Team {
   implicit val Type: EntityType[Team] = EntityType()
 
   def tupled = (this.apply _).tupled
+
+  def areEquivalentTeamNames(name1: String, name2: String): Boolean = {
+    def normalizeTextForComparison(s: String): String = {
+      s.replace(" ", "").replace(".", "").replace("-", "").toLowerCase
+    }
+    normalizeTextForComparison(name1) == normalizeTextForComparison(name2)
+  }
 }
