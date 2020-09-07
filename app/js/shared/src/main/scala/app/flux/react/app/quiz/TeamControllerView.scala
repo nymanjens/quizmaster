@@ -123,11 +123,8 @@ final class TeamControllerView(
         )
       }
 
-      private def getOrCreateTeam(name: String): Future[Team] = async {
-        await(teamsAndQuizStateStore.stateFuture).teams.find(_.name == name) match {
-          case None       => await(teamsAndQuizStateStore.addOrGetTeam(name = name))
-          case Some(team) => team
-        }
+      private def getOrCreateTeam(name: String): Future[Team] = {
+        teamsAndQuizStateStore.addOrGetTeam(name = name)
       }
     }
   }
