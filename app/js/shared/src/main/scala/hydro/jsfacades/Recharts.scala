@@ -43,13 +43,15 @@ object Recharts {
       stroke: String,
   ) = {
     val component = JsComponent[js.Object, Children.None, Null](LineComponent)
-    component.withKey(key).apply(
-      js.Dynamic.literal(
-        `type` = tpe,
-        dataKey = dataKey,
-        stroke = stroke,
-        isAnimationActive = false,
-      ))
+    component
+      .withKey(key)
+      .apply(
+        js.Dynamic.literal(
+          `type` = tpe,
+          dataKey = dataKey,
+          stroke = stroke,
+          isAnimationActive = false,
+        ))
   }
 
   def CartesianGrid(strokeDasharray: String, vertical: Boolean) = {
