@@ -131,10 +131,14 @@ final class ScalaJsApiServerFactory @Inject()(
               entityAccess.persistEntityModifications(modification)
             }
 
-          case UpdateName(teamId: Long, newName: String) =>
-            val team = fetchAllTeams().find(_.id == teamId).get
-            entityAccess.persistEntityModifications(
-              EntityModification.createUpdateAllFields(team.copy(name = newName)))
+          case MaybeUpdateTeamName(teamId: Long, newName: String) =>
+            val teams = fetchAllTeams()
+
+            if (!teams.filter(_.id != teamId).exists(t => Team.areEquivalentTeamNames(t.name, newName))) {
+              val team = teams.find(_.id == teamId).get
+              entityAccess.persistEntityModifications(
+                EntityModification.createUpdateAllFields(team.copy(name = newName)))
+            }
 
           case UpdateScore(teamId: Long, scoreDiff: FixedPointNumber) =>
             updateScore(teamId, scoreDiff)

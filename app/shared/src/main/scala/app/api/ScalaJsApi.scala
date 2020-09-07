@@ -76,7 +76,9 @@ object ScalaJsApi {
 
     /** Adds a team with the given name if its name is not already taken. */
     case class MaybeAddTeam(uniqueName: String) extends TeamOrQuizStateUpdate
-    case class UpdateName(teamId: Long, newName: String) extends TeamOrQuizStateUpdate
+
+    /** Updates the team name unless its name is already taken. */
+    case class MaybeUpdateTeamName(teamId: Long, newName: String) extends TeamOrQuizStateUpdate
 
     case class UpdateScore(teamId: Long, scoreDiff: FixedPointNumber) extends TeamOrQuizStateUpdate
     case class DeleteTeam(teamId: Long) extends TeamOrQuizStateUpdate

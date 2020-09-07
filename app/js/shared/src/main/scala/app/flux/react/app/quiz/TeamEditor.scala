@@ -149,7 +149,7 @@ final class TeamEditor(
     }
 
     private def doUpdateName(team: Team, newName: String): Callback = LogExceptionsCallback {
-      teamsAndQuizStateStore.updateName(team, newName)
+      teamsAndQuizStateStore.maybeUpdateTeamName(team, newName)
     }
 
     private def doDelete(team: Team): Callback = LogExceptionsCallback {

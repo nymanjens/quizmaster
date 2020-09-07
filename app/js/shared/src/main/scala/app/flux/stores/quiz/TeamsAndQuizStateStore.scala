@@ -81,8 +81,8 @@ final class TeamsAndQuizStateStore(
   def replaceAllEntitiesByImportString(importString: String): Future[Unit] = {
     scalaJsApiClient.doTeamOrQuizStateUpdate(ReplaceAllEntitiesByImportString(importString))
   }
-  def updateName(team: Team, newName: String): Future[Unit] = {
-    scalaJsApiClient.doTeamOrQuizStateUpdate(UpdateName(team.id, newName))
+  def maybeUpdateTeamName(team: Team, newName: String): Future[Unit] = {
+    scalaJsApiClient.doTeamOrQuizStateUpdate(MaybeUpdateTeamName(team.id, newName))
   }
   def updateScore(team: Team, scoreDiff: FixedPointNumber): Future[Unit] = {
     scalaJsApiClient.doTeamOrQuizStateUpdate(UpdateScore(teamId = team.id, scoreDiff))
