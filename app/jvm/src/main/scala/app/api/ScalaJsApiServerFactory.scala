@@ -45,8 +45,8 @@ import scala.concurrent.Future
 import scala.util.Random
 
 @Singleton
-final class ScalaJsApiServerFactory @Inject()(
-    implicit clock: Clock,
+final class ScalaJsApiServerFactory @Inject() (implicit
+    clock: Clock,
     entityAccess: JvmEntityAccess,
     i18n: PlayI18n,
     quizConfig: QuizConfig,
@@ -115,7 +115,8 @@ final class ScalaJsApiServerFactory @Inject()(
               EntityModification.createUpdateAllFields(quizStateToImport),
             )
             entityAccess.persistEntityModifications(
-              deleteExistingTeams ++ importTeams ++ addOrUpdateQuizState)
+              deleteExistingTeams ++ importTeams ++ addOrUpdateQuizState
+            )
 
           case MaybeAddTeam(uniqueName) =>
             val teams = fetchAllTeams()
@@ -127,7 +128,8 @@ final class ScalaJsApiServerFactory @Inject()(
                   name = uniqueName,
                   score = FixedPointNumber(0),
                   index = maxIndex + 1,
-                ))
+                )
+              )
               entityAccess.persistEntityModifications(modification)
             }
 
@@ -137,7 +139,8 @@ final class ScalaJsApiServerFactory @Inject()(
             if (!teams.filter(_.id != teamId).exists(t => Team.areEquivalentTeamNames(t.name, newName))) {
               val team = teams.find(_.id == teamId).get
               entityAccess.persistEntityModifications(
-                EntityModification.createUpdateAllFields(team.copy(name = newName)))
+                EntityModification.createUpdateAllFields(team.copy(name = newName))
+              )
             }
 
           case UpdateScore(teamId: Long, scoreDiff: FixedPointNumber) =>
@@ -169,9 +172,11 @@ final class ScalaJsApiServerFactory @Inject()(
           case ResetCurrentQuestion() =>
             val oldQuizState = fetchQuizState()
             StateUpsertHelper.doQuizStateUpsert(
-              _.copy(timerState = TimerState.createStarted(), submissions = Seq()))
+              _.copy(timerState = TimerState.createStarted(), submissions = Seq())
+            )
             entityAccess.persistEntityModifications(
-              oldQuizState.submissions.map(s => EntityModification.Remove[SubmissionEntity](s.id)))
+              oldQuizState.submissions.map(s => EntityModification.Remove[SubmissionEntity](s.id))
+            )
 
           case ToggleImageIsEnlarged() =>
             StateUpsertHelper.doQuizStateUpsert { oldState =>
@@ -181,13 +186,15 @@ final class ScalaJsApiServerFactory @Inject()(
           case SetShowAnswers(showAnswers: Boolean) =>
             StateUpsertHelper.doQuizStateUpsert { oldState =>
               oldState.copy(
-                generalQuizSettings = oldState.generalQuizSettings.copy(showAnswers = showAnswers))
+                generalQuizSettings = oldState.generalQuizSettings.copy(showAnswers = showAnswers)
+              )
             }
 
           case SetAnswerBulletType(answerBulletType: AnswerBulletType) =>
             StateUpsertHelper.doQuizStateUpsert { oldState =>
               oldState.copy(
-                generalQuizSettings = oldState.generalQuizSettings.copy(answerBulletType = answerBulletType))
+                generalQuizSettings = oldState.generalQuizSettings.copy(answerBulletType = answerBulletType)
+              )
             }
 
           case ToggleTimerPaused(timerRunningValue: Option[Boolean]) =>
@@ -199,7 +206,8 @@ final class ScalaJsApiServerFactory @Inject()(
                   lastSnapshotElapsedTime = timerState.elapsedTime(),
                   timerRunning = timerRunningValue getOrElse (!timerState.timerRunning),
                   uniqueIdOfMediaPlaying = timerState.uniqueIdOfMediaPlaying,
-                ))
+                )
+              )
             }
 
           case AddTimeToTimer(duration: Duration) =>
@@ -211,13 +219,14 @@ final class ScalaJsApiServerFactory @Inject()(
                   lastSnapshotElapsedTime = Seq(Duration.ZERO, timerState.elapsedTime() - duration).max,
                   timerRunning = timerState.timerRunning,
                   uniqueIdOfMediaPlaying = timerState.uniqueIdOfMediaPlaying,
-                ))
+                )
+              )
             }
 
           case RestartMedia() =>
             StateUpsertHelper.doQuizStateUpsert { state =>
               state.copy(
-                timerState = state.timerState.copy(uniqueIdOfMediaPlaying = abs(Random.nextLong)),
+                timerState = state.timerState.copy(uniqueIdOfMediaPlaying = abs(Random.nextLong))
               )
             }
 
@@ -347,7 +356,8 @@ final class ScalaJsApiServerFactory @Inject()(
 
           require(
             !submissionAlreadyExists || allowMoreThanOneSubmissionPerTeam,
-            s"Could not add submission $submission because this team already has a submission")
+            s"Could not add submission $submission because this team already has a submission",
+          )
           filteredOldSubmissions :+ submission
         }
 
@@ -380,7 +390,7 @@ final class ScalaJsApiServerFactory @Inject()(
               isCorrectAnswer = submission.isCorrectAnswer,
               points = submission.points,
               scored = submission.scored,
-            )
+            ),
           ),
         ) ++ submissionsToRemove.map(s => EntityModification.Remove[SubmissionEntity](s.id))
       )
@@ -406,12 +416,14 @@ final class ScalaJsApiServerFactory @Inject()(
       val oldScore = team.score
       val newScore = oldScore + scoreDiff
       entityAccess.persistEntityModifications(
-        EntityModification.createUpdateAllFields(team.copy(score = newScore)))
+        EntityModification.createUpdateAllFields(team.copy(score = newScore))
+      )
     }
   }
 
-  private def updateSubmissionInStateAndEntity(submissionId: Long)(
-      update: SubmissionEntity => SubmissionEntity): Unit = {
+  private def updateSubmissionInStateAndEntity(
+      submissionId: Long
+  )(update: SubmissionEntity => SubmissionEntity): Unit = {
     val oldSubmissionEntity = entityAccess.newQuerySync[SubmissionEntity]().findById(submissionId)
     val newSubmissionEntity = update(oldSubmissionEntity)
 
@@ -420,7 +432,7 @@ final class ScalaJsApiServerFactory @Inject()(
       submissions = oldQuizState.submissions.map {
         case s if s.id == submissionId => newSubmissionEntity.toSubmission
         case s                         => s
-      },
+      }
     )
 
     entityAccess.persistEntityModifications(
@@ -476,20 +488,21 @@ final class ScalaJsApiServerFactory @Inject()(
                   timerState = TimerState.createStarted(),
                   submissions = Seq(),
                   imageIsEnlarged = false,
-                ))
+                )
+              )
             case Some(question) if quizState.questionProgressIndex == 0 =>
               // Go to the end of the previous question
               val newQuestionIndex = quizState.questionIndex - 1
               recoverSubmissions(
                 quizState.copy(
                   questionIndex = newQuestionIndex,
-                  questionProgressIndex =
-                    maybeGet(quizState.round.questions, newQuestionIndex)
-                      .map(_.maxProgressIndex) getOrElse 0,
+                  questionProgressIndex = maybeGet(quizState.round.questions, newQuestionIndex)
+                    .map(_.maxProgressIndex) getOrElse 0,
                   timerState = TimerState.createStarted(),
                   submissions = Seq(),
                   imageIsEnlarged = false,
-                ))
+                )
+              )
             case Some(question) if quizState.questionProgressIndex > 0 =>
               // Decrement questionProgressIndex
               quizState.copy(
@@ -543,7 +556,8 @@ final class ScalaJsApiServerFactory @Inject()(
                   timerState = TimerState.createStarted(),
                   submissions = Seq(),
                   imageIsEnlarged = false,
-                ))
+                )
+              )
             case Some(question) if quizState.questionProgressIndex == 0 =>
               // Go to the start of the previous question
               val newQuestionIndex = quizState.questionIndex - 1
@@ -554,7 +568,8 @@ final class ScalaJsApiServerFactory @Inject()(
                   timerState = TimerState.createStarted(),
                   submissions = Seq(),
                   imageIsEnlarged = false,
-                ))
+                )
+              )
             case Some(question) if quizState.questionProgressIndex > 0 =>
               // Go to the start of the question
               quizState.copy(
@@ -581,7 +596,8 @@ final class ScalaJsApiServerFactory @Inject()(
                 timerState = TimerState.createStarted(),
                 submissions = Seq(),
                 imageIsEnlarged = false,
-              ))
+              )
+            )
           }
         case Some(question) =>
           if (quizState.questionIndex == quizState.round.questions.size - 1) {
@@ -596,7 +612,8 @@ final class ScalaJsApiServerFactory @Inject()(
                 timerState = TimerState.createStarted(),
                 submissions = Seq(),
                 imageIsEnlarged = false,
-              ))
+              )
+            )
           }
       }
     }

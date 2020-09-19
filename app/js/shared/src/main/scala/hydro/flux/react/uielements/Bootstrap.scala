@@ -115,8 +115,8 @@ object Bootstrap {
         ^.aria.valueMin := 0,
         ^.aria.valueMax := 100,
         ^.style := js.Dictionary("width" -> s"$percentage%"),
-        label
-      )
+        label,
+      ),
     )
   }
 

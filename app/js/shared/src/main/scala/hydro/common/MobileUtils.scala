@@ -17,7 +17,8 @@ object MobileUtils {
 
     stringContainsAnyOf(
       haystack = stringToTest,
-      needles = Seq("android", "blackberry", "iphone", "ipad", "ipod", "opera mini", "iemobile", "wpdesktop"))
+      needles = Seq("android", "blackberry", "iphone", "ipad", "ipod", "opera mini", "iemobile", "wpdesktop"),
+    )
   }
 
   private def stringContainsAnyOf(haystack: String, needles: Seq[String]): Boolean = {

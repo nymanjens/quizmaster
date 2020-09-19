@@ -22,8 +22,8 @@ import org.scalajs.dom
 
 import scala.scalajs.js
 
-final class SbadminLayout(
-    implicit globalMessages: GlobalMessages,
+final class SbadminLayout(implicit
+    globalMessages: GlobalMessages,
     pageLoadingSpinner: PageLoadingSpinner,
     applicationDisconnectedIcon: ApplicationDisconnectedIcon,
     pendingModificationsCounter: PendingModificationsCounter,
@@ -36,8 +36,9 @@ final class SbadminLayout(
 ) extends HydroReactComponent {
 
   // **************** API ****************//
-  def apply(title: TagMod, leftMenu: VdomElement, pageContent: VdomElement)(
-      implicit router: RouterContext): VdomElement = {
+  def apply(title: TagMod, leftMenu: VdomElement, pageContent: VdomElement)(implicit
+      router: RouterContext
+  ): VdomElement = {
     component(Props(title, leftMenu, pageContent, router))
   }
 
@@ -48,7 +49,7 @@ final class SbadminLayout(
   protected case class State(
       isQuizMaster: Boolean = {
         LocalStorageClient.getMasterSecret() == Some(quizConfig.masterSecret)
-      },
+      }
   )
   protected case class Props(
       title: TagMod,
@@ -71,7 +72,7 @@ final class SbadminLayout(
             ^.className := "navbar-header",
             Bootstrap.NavbarBrand(tag = router.anchorWithHrefTo(StandardPages.Root))(props.title),
             " ",
-            pageLoadingSpinner()
+            pageLoadingSpinner(),
           ),
           if (state.isQuizMaster) {
             <.ul(
@@ -86,7 +87,7 @@ final class SbadminLayout(
                 <.a(
                   ^.href := s"/rounds/${quizConfig.masterSecret}/",
                   Bootstrap.FontAwesomeIcon("bar-chart-o", fixedWidth = true),
-                ),
+                )
               ),
               <.li(linkToPage(AppPages.SubmissionsSummary)),
               <.li(linkToPage(AppPages.Gamepad)),
@@ -102,7 +103,7 @@ final class SbadminLayout(
                     }
                   },
                   Bootstrap.FontAwesomeIcon("lock", fixedWidth = true),
-                ),
+                )
               ),
             )
           } else {
@@ -127,7 +128,7 @@ final class SbadminLayout(
                     }
                   },
                   Bootstrap.FontAwesomeIcon("unlock", fixedWidth = true),
-                ),
+                )
               ),
             )
           },
@@ -140,14 +141,14 @@ final class SbadminLayout(
             Bootstrap.Row(
               Bootstrap.Col(lg = 12)(
                 ^.style := js.Dictionary(
-                  "padding" -> "0px",
+                  "padding" -> "0px"
                 ),
                 globalMessages(),
                 props.pageContent,
               )
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     }
 
@@ -156,7 +157,7 @@ final class SbadminLayout(
       Bootstrap.NavbarBrand(tag = <.a)(
         ^.href := s"/versions/",
         ^.style := js.Dictionary(
-          "marginRight" -> "15px",
+          "marginRight" -> "15px"
         ),
         s"v${AppVersion.versionString}",
       )
@@ -168,7 +169,7 @@ final class SbadminLayout(
           ^.className := "selected"
         },
         <.i(
-          ^.className := page.iconClass,
+          ^.className := page.iconClass
         ),
       )
     }

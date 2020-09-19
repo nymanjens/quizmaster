@@ -23,7 +23,7 @@ object ValidatingYamlParser {
       s"""Found validation errors:
          |
          |${result.validationErrors.map(e => s"  - ${e.toErrorString}\n").mkString}
-         |""".stripMargin
+         |""".stripMargin,
     )
 
     result.maybeValue.get
@@ -120,8 +120,9 @@ object ValidatingYamlParser {
       }
     }
     object ListParsableValue {
-      def apply[V](itemParsableValue: ParsableValue[V])(
-          errorPathString: V => String): ListParsableValue[V] = {
+      def apply[V](
+          itemParsableValue: ParsableValue[V]
+      )(errorPathString: V => String): ListParsableValue[V] = {
         new ListParsableValue[V](itemParsableValue, errorPathString)
       }
     }

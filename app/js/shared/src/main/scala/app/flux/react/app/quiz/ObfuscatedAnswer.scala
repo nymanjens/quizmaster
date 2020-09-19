@@ -10,8 +10,8 @@ import hydro.jsfacades.Mousetrap
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 
-final class ObfuscatedAnswer(
-    implicit clock: Clock,
+final class ObfuscatedAnswer(implicit
+    clock: Clock,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
 ) extends HydroReactComponent {
 
@@ -40,7 +40,7 @@ final class ObfuscatedAnswer(
             ^.className := "obfuscated"
           },
           <<.nl2BrBlockWithLinks(props.answer),
-        )
+        ),
       )
     }
 
@@ -51,10 +51,13 @@ final class ObfuscatedAnswer(
 
     private def bindShortcuts(): Unit = {
       def bind(shortcut: String, runnable: () => Unit): Unit = {
-        Mousetrap.bind(shortcut, e => {
-          e.preventDefault()
-          runnable()
-        })
+        Mousetrap.bind(
+          shortcut,
+          e => {
+            e.preventDefault()
+            runnable()
+          },
+        )
       }
       bind("a", () => toggleObfuscated())
     }

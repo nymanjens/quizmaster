@@ -21,7 +21,8 @@ object Recharts {
       js.Dynamic.literal(
         width = width,
         height = height,
-      ))(children: _*)
+      )
+    )(children: _*)
   }
 
   def LineChart(
@@ -33,7 +34,8 @@ object Recharts {
       js.Dynamic.literal(
         data = data.map(_.toJSDictionary).toJSArray,
         margin = margin.toJsObject,
-      ))(children: _*)
+      )
+    )(children: _*)
   }
 
   def Line(
@@ -51,7 +53,8 @@ object Recharts {
           dataKey = dataKey,
           stroke = stroke,
           isAnimationActive = false,
-        ))
+        )
+      )
   }
 
   def CartesianGrid(strokeDasharray: String, vertical: Boolean) = {
@@ -60,15 +63,17 @@ object Recharts {
       js.Dynamic.literal(
         strokeDasharray = strokeDasharray,
         vertical = vertical,
-      ))
+      )
+    )
   }
 
   def XAxis(dataKey: String) = {
     val component = JsComponent[js.Object, Children.None, Null](XAxisComponent)
     component(
       js.Dynamic.literal(
-        dataKey = dataKey,
-      ))
+        dataKey = dataKey
+      )
+    )
   }
 
   def YAxis() = {

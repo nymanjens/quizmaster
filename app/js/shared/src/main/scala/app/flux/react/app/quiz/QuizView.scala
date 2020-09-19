@@ -19,8 +19,8 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
 
-final class QuizView(
-    implicit pageHeader: PageHeader,
+final class QuizView(implicit
+    pageHeader: PageHeader,
     i18n: I18n,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
@@ -54,7 +54,7 @@ final class QuizView(
           teams = teamsAndQuizStateStore.stateOrEmpty.teams,
           quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
         )
-      }
+      },
     )
 
   // **************** Private helper methods ****************//

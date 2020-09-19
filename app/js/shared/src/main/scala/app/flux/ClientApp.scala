@@ -68,8 +68,8 @@ object ClientApp {
           "video/webm",
           "GkXfo0AgQoaBAUL3gQFC8oEEQvOBCEKCQAR3ZWJtQoeBAkKFgQIYU4BnQI0VSalmQCgq17FAAw9CQE2AQAZ3aGFtbXlXQUAGd" +
             "2hhbW15RIlACECPQAAAAAAAFlSua0AxrkAu14EBY8WBAZyBACK1nEADdW5khkAFVl9WUDglhohAA1ZQOIOBAeBABrCBCLqB" +
-            "CB9DtnVAIueBAKNAHIEAAIAwAQCdASoIAAgAAUAmJaQAA3AA/vz0AAA="
-        )
+            "CB9DtnVAIueBAKNAHIEAAIAwAQCdASoIAAgAAUAmJaQAA3AA/vz0AAA=",
+        ),
       )
       addSourceToVideo(
         video,
@@ -87,8 +87,8 @@ object ClientApp {
             "0AAAGwAQAAAbWJEwAAAQAAAAEgAMSNiB9FAEQBFGMAAAGyTGF2YzUyLjg3LjQGAQIAAAAYc3R0cwAAAAAAAAABAAAAAQAAA" +
             "AAAAAAcc3RzYwAAAAAAAAABAAAAAQAAAAEAAAABAAAAFHN0c3oAAAAAAAAAEwAAAAEAAAAUc3RjbwAAAAAAAAABAAAALAAA" +
             "AGB1ZHRhAAAAWG1ldGEAAAAAAAAAIWhkbHIAAAAAAAAAAG1kaXJhcHBsAAAAAAAAAAAAAAAAK2lsc3QAAAAjqXRvbwAAABt" +
-            "kYXRhAAAAAQAAAABMYXZmNTIuNzguMw=="
-        )
+            "kYXRhAAAAAQAAAABMYXZmNTIuNzguMw==",
+        ),
       )
 
       video.play()
@@ -103,8 +103,11 @@ object ClientApp {
 
   private def setUpGamepad(): Unit = {
     // This is probably superfluous, but on Mac OS X this may cause the controller API to be enabled.
-    dom.window.addEventListener("gamepadconnected", (event: Event) => {
-      println("  A gamepad was connected!")
-    })
+    dom.window.addEventListener(
+      "gamepadconnected",
+      (event: Event) => {
+        println("  A gamepad was connected!")
+      },
+    )
   }
 }

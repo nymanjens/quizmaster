@@ -32,8 +32,8 @@ import japgolly.scalajs.react.vdom.html_<^.<
 
 import scala.scalajs.js
 
-final class TeamsList(
-    implicit pageHeader: PageHeader,
+final class TeamsList(implicit
+    pageHeader: PageHeader,
     dispatcher: Dispatcher,
     scalaJsApiClient: ScalaJsApiClient,
     quizConfig: QuizConfig,
@@ -55,10 +55,12 @@ final class TeamsList(
         _.copy(
           quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
           teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-        ))
+        ),
+      )
       .withStateStoresDependency(
         teamInputStore,
-        _.copy(teamIdToGamepadState = teamInputStore.state.teamIdToGamepadState))
+        _.copy(teamIdToGamepadState = teamInputStore.state.teamIdToGamepadState),
+      )
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(showMasterControls: Boolean)
@@ -102,7 +104,8 @@ final class TeamsList(
                 ^.className := "name",
                 // If this is the first player and not everyone has the same score
                 <<.ifThen(
-                  team.score == state.teams.map(_.score).max && state.teams.map(_.score).distinct.size > 1) {
+                  team.score == state.teams.map(_.score).max && state.teams.map(_.score).distinct.size > 1
+                ) {
                   <.span(
                     ^.className := "first-player",
                     Bootstrap.FontAwesomeIcon("trophy"),
@@ -134,7 +137,7 @@ final class TeamsList(
                 },
               ),
             )
-          }).toVdomArray
+          }).toVdomArray,
         )
       }
     }
@@ -143,8 +146,8 @@ final class TeamsList(
         team: Team,
         maybeSubmission: Option[Submission],
         showSubmissionValue: Boolean,
-    )(
-        implicit quizState: QuizState,
+    )(implicit
+        quizState: QuizState,
         props: Props,
     ): VdomNode = {
       val showSubmissionPoints = showSubmissionValue && (
@@ -201,14 +204,15 @@ final class TeamsList(
               submission.points.abs.toString
             },
           )
-        }
+        },
       )
     }
 
     private def updateTeamScoreButton(team: Team, sign: String, scoreDiff: Int): VdomNode = {
       Bootstrap.Button(Variant.default, Size.xs)(
         ^.onClick --> LogExceptionsCallback(
-          teamsAndQuizStateStore.updateScore(team, scoreDiff = FixedPointNumber(scoreDiff))).void,
+          teamsAndQuizStateStore.updateScore(team, scoreDiff = FixedPointNumber(scoreDiff))
+        ).void,
         Bootstrap.Glyphicon(sign),
       )
     }
@@ -216,13 +220,15 @@ final class TeamsList(
       Bootstrap.Button(Variant.success, Size.xs)(
         ^.onClick --> LogExceptionsCallback(
           scalaJsApiClient.doTeamOrQuizStateUpdate(
-            SetSubmissionPoints(submission.id, points = submission.points + diff))).void,
+            SetSubmissionPoints(submission.id, points = submission.points + diff)
+          )
+        ).void,
         Bootstrap.Glyphicon(sign),
       )
     }
 
-    private def revealingSubmissionValueNode(submission: Submission)(
-        implicit quizState: QuizState,
+    private def revealingSubmissionValueNode(submission: Submission)(implicit
+        quizState: QuizState,
         props: Props,
     ): VdomNode = {
       val correctnessClass = submission.isCorrectAnswer match {
@@ -235,27 +241,26 @@ final class TeamsList(
       <.span(
         submission.value match {
           case SubmissionValue.PressedTheOneButton =>
-            <<.ifDefined(quizState.maybeQuestion) {
-              question =>
+            <<.ifDefined(quizState.maybeQuestion) { question =>
+              <.span(
+                <<.ifThen(if (question.onlyFirstGainsPoints) isMostRecentSubmission else true) {
+                  maybeMasterSubmissionControls(submission)
+                },
                 <.span(
-                  <<.ifThen(if (question.onlyFirstGainsPoints) isMostRecentSubmission else true) {
-                    maybeMasterSubmissionControls(submission)
+                  ^.className := correctnessClass,
+                  Bootstrap.FontAwesomeIcon("circle"),
+                  <<.ifThen(question.onlyFirstGainsPoints && isMostRecentSubmission) {
+                    <.span(
+                      " ",
+                      submission.isCorrectAnswer match {
+                        case Some(true)  => i18n("app.correct")
+                        case Some(false) => i18n("app.incorrect")
+                        case _           => i18n("app.give-your-answer")
+                      },
+                    )
                   },
-                  <.span(
-                    ^.className := correctnessClass,
-                    Bootstrap.FontAwesomeIcon("circle"),
-                    <<.ifThen(question.onlyFirstGainsPoints && isMostRecentSubmission) {
-                      <.span(
-                        " ",
-                        submission.isCorrectAnswer match {
-                          case Some(true)  => i18n("app.correct")
-                          case Some(false) => i18n("app.incorrect")
-                          case _           => i18n("app.give-your-answer")
-                        },
-                      )
-                    },
-                  ),
-                )
+                ),
+              )
             }
           case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
             AnswerBullet.all(answerIndex).toVdomNode.apply(^.className := correctnessClass)
@@ -267,13 +272,13 @@ final class TeamsList(
                 answerString,
               ),
             )
-        },
+        }
       )
     }
   }
 
-  private def maybeMasterSubmissionControls(submission: Submission)(
-      implicit quizState: QuizState,
+  private def maybeMasterSubmissionControls(submission: Submission)(implicit
+      quizState: QuizState,
       props: Props,
   ): VdomNode = {
     <<.ifThen(props.showMasterControls) {
@@ -284,7 +289,8 @@ final class TeamsList(
             .future(
               teamsAndQuizStateStore
                 .setSubmissionCorrectness(submission.id, isCorrectAnswer = false)
-                .map(_ => Callback.empty)),
+                .map(_ => Callback.empty)
+            ),
           Bootstrap.FontAwesomeIcon("times"),
         ),
         Bootstrap.Button()(
@@ -293,7 +299,8 @@ final class TeamsList(
             .future(
               teamsAndQuizStateStore
                 .setSubmissionCorrectness(submission.id, isCorrectAnswer = true)
-                .map(_ => Callback.empty)),
+                .map(_ => Callback.empty)
+            ),
           Bootstrap.FontAwesomeIcon("check"),
         ),
       )

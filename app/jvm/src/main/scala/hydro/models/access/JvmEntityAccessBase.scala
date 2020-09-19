@@ -27,7 +27,7 @@ abstract class JvmEntityAccessBase(implicit clock: Clock) extends EntityAccess {
     entitiesFetcher = new InMemoryEntityDatabase.EntitiesFetcher {
       override def fetch[E <: Entity](entityType: EntityType[E]): Seq[E] = Seq()
     },
-    sortings = sortings
+    sortings = sortings,
   )
 
   private val entityModificationPublisher_ : TriggerablePublisher[EntityModificationsWithToken] =
@@ -54,8 +54,9 @@ abstract class JvmEntityAccessBase(implicit clock: Clock) extends EntityAccess {
     Await.ready(persistEntityModificationsAsync(modifications), scala.concurrent.duration.Duration.Inf)
   }
 
-  def persistEntityModificationsAsync(modifications: Seq[EntityModification])(
-      implicit user: User): Future[Unit] = {
+  def persistEntityModificationsAsync(
+      modifications: Seq[EntityModification]
+  )(implicit user: User): Future[Unit] = {
     EntityModificationAsyncProcessor.processAsync(modifications)
   }
 
@@ -71,7 +72,8 @@ abstract class JvmEntityAccessBase(implicit clock: Clock) extends EntityAccess {
       this.synchronized {
         val uniqueModifications = modifications.filterNot(alreadySeenAddsAndRemoves)
         alreadySeenAddsAndRemoves ++= uniqueModifications.filter(m =>
-          m.isInstanceOf[EntityModification.Add[_]] || m.isInstanceOf[EntityModification.Remove[_]])
+          m.isInstanceOf[EntityModification.Add[_]] || m.isInstanceOf[EntityModification.Remove[_]]
+        )
         Future(processSync(uniqueModifications))(singleThreadedExecutor)
       }
 
@@ -107,7 +109,7 @@ abstract class JvmEntityAccessBase(implicit clock: Clock) extends EntityAccess {
         val modificationBundler = new ModificationBundler(
           triggerEveryNAdditions = 20,
           triggerFunction = modifications =>
-            entityModificationPublisher_.trigger(EntityModificationsWithToken(modifications, nextUpdateToken))
+            entityModificationPublisher_.trigger(EntityModificationsWithToken(modifications, nextUpdateToken)),
         )
 
         for (modification <- modifications) {

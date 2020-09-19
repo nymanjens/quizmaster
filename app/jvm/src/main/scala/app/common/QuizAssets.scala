@@ -12,8 +12,8 @@ import hydro.common.CollectionUtils.conditionalOption
 import hydro.common.ResourceFiles
 
 @Singleton
-final class QuizAssets @Inject()(
-    implicit playConfiguration: play.api.Configuration,
+final class QuizAssets @Inject() (implicit
+    playConfiguration: play.api.Configuration
 ) {
 
   lazy val configPath: Path = {
@@ -54,7 +54,7 @@ final class QuizAssets @Inject()(
   private def assetExistsOrValidationError(relativePath: Path): Option[String] = {
     conditionalOption(
       !Files.exists(configPath.resolve(relativePath)),
-      s"Could not find the asset: $relativePath"
+      s"Could not find the asset: $relativePath",
     )
   }
 

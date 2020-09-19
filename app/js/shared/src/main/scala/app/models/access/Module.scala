@@ -16,8 +16,8 @@ import hydro.models.access.LocalDatabase
 import scala.concurrent.Future
 import scala.concurrent.Promise
 
-final class Module(
-    implicit user: User,
+final class Module(implicit
+    user: User,
     clock: Clock,
     scalaJsApiClient: ScalaJsApiClient,
     getInitialDataResponse: GetInitialDataResponse,

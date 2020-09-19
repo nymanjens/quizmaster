@@ -21,8 +21,8 @@ import org.scalajs.dom
 
 import scala.concurrent.Future
 
-final class SyncedTimerBar(
-    implicit clock: Clock,
+final class SyncedTimerBar(implicit
+    clock: Clock,
     soundEffectController: SoundEffectController,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     scalaJsApiClient: ScalaJsApiClient,
@@ -38,7 +38,8 @@ final class SyncedTimerBar(
     ComponentConfig(backendConstructor = new Backend(_), initialState = State())
       .withStateStoresDependency(
         teamsAndQuizStateStore,
-        _.copy(timerState = teamsAndQuizStateStore.stateOrEmpty.quizState.timerState))
+        _.copy(timerState = teamsAndQuizStateStore.stateOrEmpty.quizState.timerState),
+      )
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(maxTime: Duration)
@@ -61,7 +62,7 @@ final class SyncedTimerBar(
       <.div(
         <.div(
           ^.className := "time-left-label",
-          s"${formatDuration(timeRemaining)} / ${formatDuration(props.maxTime)}"
+          s"${formatDuration(timeRemaining)} / ${formatDuration(props.maxTime)}",
         ),
         Bootstrap.ProgressBar(
           fraction = timeRemainingFraction,
@@ -73,7 +74,7 @@ final class SyncedTimerBar(
             }
           },
           striped = !state.timerState.timerRunning,
-        )
+        ),
       )
     }
 
@@ -92,7 +93,7 @@ final class SyncedTimerBar(
               state.copy(elapsedTime = newElapsedTime)
             }.runNow()
           },
-          /* timeout in millis */ 10
+          /* timeout in millis */ 10,
         )
       )
 
@@ -105,10 +106,13 @@ final class SyncedTimerBar(
 
     private def bindShortcuts(): Unit = {
       def bind(shortcut: String, runnable: () => Unit): Unit = {
-        Mousetrap.bind(shortcut, e => {
-          e.preventDefault()
-          runnable()
-        })
+        Mousetrap.bind(
+          shortcut,
+          e => {
+            e.preventDefault()
+            runnable()
+          },
+        )
       }
       bind("space", () => scalaJsApiClient.doTeamOrQuizStateUpdate(ToggleTimerPaused()))
       bind("shift+r", () => scalaJsApiClient.doTeamOrQuizStateUpdate(RestartMedia()))

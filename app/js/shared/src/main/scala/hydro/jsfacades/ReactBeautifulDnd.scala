@@ -16,7 +16,8 @@ object ReactBeautifulDnd {
     val onDragEnd: js.Function1[Result, Unit] = result => {
       onDragEndHandler(
         sourceIndex = result.source.index,
-        destinationIndex = Option(result.destination) map (_.index))
+        destinationIndex = Option(result.destination) map (_.index),
+      )
     }
 
     val component = JsComponent[js.Object, Children.Varargs, Null](DragDropContextComponent)
@@ -42,7 +43,8 @@ object ReactBeautifulDnd {
         draggableId = draggableId,
         index = index,
         children = jsChildren,
-      ))
+      )
+    )
   }
 
   // **************** Public inner types ****************//

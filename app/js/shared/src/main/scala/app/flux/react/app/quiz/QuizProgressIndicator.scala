@@ -14,8 +14,8 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
 
-final class QuizProgressIndicator(
-    implicit pageHeader: PageHeader,
+final class QuizProgressIndicator(implicit
+    pageHeader: PageHeader,
     i18n: I18n,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
@@ -28,7 +28,8 @@ final class QuizProgressIndicator(
       Props(
         quizState = quizState,
         showMasterData = showMasterData,
-      ))
+      )
+    )
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//
@@ -76,7 +77,7 @@ final class QuizProgressIndicator(
                 }
               },
             )
-        }
+        },
       )
     }
   }

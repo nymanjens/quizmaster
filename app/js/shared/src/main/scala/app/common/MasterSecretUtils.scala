@@ -19,7 +19,8 @@ object MasterSecretUtils {
     } else {
       println(
         s"  Redirecting to TeamController because stored master secret " +
-          s"(${LocalStorageClient.getMasterSecret()}) is different from the required one")
+          s"(${LocalStorageClient.getMasterSecret()}) is different from the required one"
+      )
       router.setPage(AppPages.TeamSelection)
       <.span()
     }

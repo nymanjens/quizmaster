@@ -112,7 +112,8 @@ object QuizConfig {
               conditionalOption(choicesSeq.size > 10, s"Expected at most 10 choices, but got $choicesSeq"),
               conditionalOption(
                 !(choicesSeq contains answer),
-                s"The answer should be one of the choices: <<$answer>> not in <<$choicesSeq>>"),
+                s"The answer should be one of the choices: <<$answer>> not in <<$choicesSeq>>",
+              ),
             ).flatten
           case None => Seq()
         }
@@ -200,7 +201,8 @@ object QuizConfig {
           conditionalOption(textualChoices.size != 4, s"Expected 4 choices, but got ${textualChoices}"),
           conditionalOption(
             !(textualChoices contains textualAnswer),
-            s"The answer should be one of the choices: <<$textualAnswer>> not in <<${textualChoices}>>"),
+            s"The answer should be one of the choices: <<$textualAnswer>> not in <<${textualChoices}>>",
+          ),
         ).flatten
       }
 
@@ -421,7 +423,8 @@ object QuizConfig {
       Seq(
         conditionalOption(
           !(Seq("large", "small") contains size),
-          s"size: '$size' should be either 'large' or 'small'"),
+          s"size: '$size' should be either 'large' or 'small'",
+        )
       ).flatten
     }
   }

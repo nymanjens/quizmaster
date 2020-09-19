@@ -25,8 +25,8 @@ import org.scalajs.dom
 import scala.collection.immutable.Seq
 import scala.util.Random
 
-final class TeamEditor(
-    implicit pageHeader: PageHeader,
+final class TeamEditor(implicit
+    pageHeader: PageHeader,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
@@ -43,8 +43,9 @@ final class TeamEditor(
     .withStateStoresDependency(
       teamsAndQuizStateStore,
       _.copy(
-        teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-      ))
+        teams = teamsAndQuizStateStore.stateOrEmpty.teams
+      ),
+    )
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props()
@@ -76,11 +77,11 @@ final class TeamEditor(
                 tableClasses = Seq("table-teams"),
                 tableHeaders = Seq(
                   <.th("Name"),
-                  <.th()
+                  <.th(),
                 ),
-                tableRowDatas = tableRowDatas(state)
+                tableRowDatas = tableRowDatas(state),
               ),
-              addButton(state)
+              addButton(state),
             )
           }
         )
@@ -106,16 +107,17 @@ final class TeamEditor(
                       val newString = e.target.value
                       $.modState(_.withNameInput(team, newString))
                     }
-                  }
+                  },
                 ),
                 " ",
-                updateNameButton(team)
+                updateNameButton(team),
               )
             ),
             <.td(
               deleteButton(team)
-            )
-          ))
+            ),
+          )
+        )
       }
     }
 
@@ -124,7 +126,7 @@ final class TeamEditor(
         Bootstrap.FontAwesomeIcon("plus"),
         " ",
         "Create new team",
-        ^.onClick --> doAdd()
+        ^.onClick --> doAdd(),
       )
     }
 
@@ -135,14 +137,14 @@ final class TeamEditor(
         ^.onClick ==> { (e: ReactEventFromInput) =>
           e.preventDefault()
           doUpdateName(team, state.nameInput(team))
-        }
+        },
       )
     }
 
     private def deleteButton(team: Team)(implicit state: State): VdomNode = {
       Bootstrap.Button(Variant.info, Size.xs, tag = <.a)(
         Bootstrap.FontAwesomeIcon("times"),
-        ^.onClick --> doDelete(team)
+        ^.onClick --> doDelete(team),
       )
     }
 

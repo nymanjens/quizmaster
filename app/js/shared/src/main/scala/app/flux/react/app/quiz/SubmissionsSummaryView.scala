@@ -17,8 +17,8 @@ import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
 import scala.collection.immutable.Seq
 
-final class SubmissionsSummaryView(
-    implicit pageHeader: PageHeader,
+final class SubmissionsSummaryView(implicit
+    pageHeader: PageHeader,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
     i18n: I18n,

@@ -49,7 +49,8 @@ object ModelFields {
         extends ModelField[Int, E](
           "questionProgressIndex",
           _.questionProgressIndex,
-          v => _.copy(questionProgressIndex = v))
+          v => _.copy(questionProgressIndex = v),
+        )
     case object timerState
         extends ModelField[TimerState, E]("timerState", _.timerState, v => _.copy(timerState = v))
     case object submissions
@@ -60,7 +61,8 @@ object ModelFields {
         extends ModelField[GeneralQuizSettings, E](
           "generalQuizSettings",
           _.generalQuizSettings,
-          v => _.copy(generalQuizSettings = v))
+          v => _.copy(generalQuizSettings = v),
+        )
   }
 
   object SubmissionEntity {
@@ -78,7 +80,8 @@ object ModelFields {
         extends ModelField[Option[Boolean], E](
           "isCorrectAnswer",
           _.isCorrectAnswer,
-          v => _.copy(isCorrectAnswer = v))
+          v => _.copy(isCorrectAnswer = v),
+        )
     case object points extends ModelField[FixedPointNumber, E]("points", _.points, v => _.copy(points = v))
     case object scored extends ModelField[Boolean, E]("scored", _.scored, v => _.copy(scored = v))
   }
@@ -110,7 +113,7 @@ object ModelFields {
         SubmissionEntity.isCorrectAnswer,
         SubmissionEntity.points,
         SubmissionEntity.scored,
-      )
+      ),
     )
   def toNumber(field: ModelField.any): Int = fieldToNumberMap.get(field)
   def fromNumber(number: Int): ModelField.any = fieldToNumberMap.inverse().get(number)

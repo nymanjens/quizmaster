@@ -43,8 +43,8 @@ object ReactVdomUtils {
       ifThen(option.isDefined)(thenElement(option.get))
     }
 
-    def joinWithSpaces[A](elems: TraversableOnce[A])(
-        implicit f: A => VdomNode,
+    def joinWithSpaces[A](elems: TraversableOnce[A])(implicit
+        f: A => VdomNode,
         stringF: String => VdomNode,
     ): VdomArray = {
       VdomArray.empty() ++= elems.flatMap(a => Seq(f(a), stringF(" ")))
@@ -75,7 +75,8 @@ object ReactVdomUtils {
           .split(string.trim)
           .map(s => Seq(maybeConvertToLink(s)))
           .reduce((seq1, seq2) =>
-            Seq(seq1, Seq[VdomNode](<.br(^.key := brKeyCounter.getAndIncrement())), seq2).flatten)
+            Seq(seq1, Seq[VdomNode](<.br(^.key := brKeyCounter.getAndIncrement())), seq2).flatten
+          )
       VdomArray.apply(parts: _*)
     }
 

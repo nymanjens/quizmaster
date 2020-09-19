@@ -39,8 +39,8 @@ import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js
 
-final class TeamControllerView(
-    implicit pageHeader: PageHeader,
+final class TeamControllerView(implicit
+    pageHeader: PageHeader,
     i18n: I18n,
     dispatcher: Dispatcher,
     clock: Clock,
@@ -62,7 +62,7 @@ final class TeamControllerView(
       teamId match {
         case -1     => CreateTeamForm(router)
         case teamId => Controller(teamId, router)
-      }
+      },
     )
   }
 
@@ -97,7 +97,7 @@ final class TeamControllerView(
                 name = "team-name",
                 focusOnMount = true,
                 defaultValue = LocalStorageClient.getCurrentTeamName() getOrElse "",
-              ),
+              )
             ),
           ),
           <.div(
@@ -118,7 +118,7 @@ final class TeamControllerView(
                 }
               },
               i18n("app.submit"),
-            ),
+            )
           ),
         )
       }
@@ -152,7 +152,7 @@ final class TeamControllerView(
                 teams = teamsAndQuizStateStore.stateOrEmpty.teams,
                 maybeTeam = teamsAndQuizStateStore.stateOrEmpty.teams.find(_.id == props.teamId),
               )
-            }
+            },
           )
         }
 
@@ -223,8 +223,8 @@ final class TeamControllerView(
         }
       }
 
-      private def controller(
-          implicit team: Team,
+      private def controller(implicit
+          team: Team,
           quizState: QuizState,
           router: RouterContext,
       ): VdomElement = {
@@ -269,18 +269,18 @@ final class TeamControllerView(
             },
             "<< ",
             i18n("app.choose-other-team"),
-          )
+          ),
         )
       }
 
-      private def singleAnswerButton(question: Question)(
-          implicit team: Team,
+      private def singleAnswerButton(question: Question)(implicit
+          team: Team,
           quizState: QuizState,
       ): VdomNode = {
         val canSubmitResponse = quizState.canSubmitResponse(team)
 
         Bootstrap.Button(
-          variant = Variant.primary,
+          variant = Variant.primary
         )(
           ^.className := "the-one-button",
           ^.disabled := !canSubmitResponse,
@@ -293,16 +293,16 @@ final class TeamControllerView(
         )
       }
 
-      private def multipleChoiceAnswerButtons(question: Question)(
-          implicit team: Team,
+      private def multipleChoiceAnswerButtons(question: Question)(implicit
+          team: Team,
           quizState: QuizState,
       ): VdomNode = {
         val choices = question.maybeTextualChoices.get
         val maybeCurrentSubmissionValue =
           quizState.submissions.filter(_.teamId == team.id).map(_.value).lastOption
         val canSubmitResponse = quizState.canSubmitResponse(team)
-        val showSubmissionCorrectness = question.onlyFirstGainsPoints || question.answerIsVisible(
-          quizState.questionProgressIndex)
+        val showSubmissionCorrectness =
+          question.onlyFirstGainsPoints || question.answerIsVisible(quizState.questionProgressIndex)
 
         <.ul(
           ^.className := "multiple-choice-answer-buttons",
@@ -316,7 +316,7 @@ final class TeamControllerView(
               <.li(
                 ^.key := choice,
                 Bootstrap.Button(
-                  variant = if (thisChoiceWasChosen) Variant.primary else Variant.default,
+                  variant = if (thisChoiceWasChosen) Variant.primary else Variant.default
                 )(
                   ^.disabled := !canSubmitResponse,
                   ^.onClick --> submitResponse(thisChoiceSubmissionValue),
@@ -325,11 +325,11 @@ final class TeamControllerView(
                   },
                   answerBullet.toVdomNode,
                   <.span(
-                    choice,
+                    choice
                   ),
-                )
+                ),
               )
-            }).toVdomArray
+            }).toVdomArray,
         )
       }
 
@@ -338,8 +338,8 @@ final class TeamControllerView(
           defaultValue: String = "",
           textAlwaysDisabled: Boolean = false,
           clearTextAfterSubmit: Boolean = true,
-      )(
-          implicit team: Team,
+      )(implicit
+          team: Team,
           quizState: QuizState,
       ): VdomNode = {
         val maybeCurrentSubmission = quizState.submissions.filter(_.teamId == team.id).lastOption
@@ -349,8 +349,8 @@ final class TeamControllerView(
             case _                                 => None
           }
         val canSubmitResponse = quizState.canSubmitResponse(team)
-        val showSubmissionCorrectness = question.onlyFirstGainsPoints || question.answerIsVisible(
-          quizState.questionProgressIndex)
+        val showSubmissionCorrectness =
+          question.onlyFirstGainsPoints || question.answerIsVisible(quizState.questionProgressIndex)
 
         <.form(
           ^.className := "free-text-answer-form",
@@ -365,8 +365,8 @@ final class TeamControllerView(
                 disabled = !canSubmitResponse || textAlwaysDisabled,
                 listener = { newValue =>
                   $.forceUpdate.runNow() // To update OrderItem buttons
-                }
-              ),
+                },
+              )
             ),
           ),
           <.div(
@@ -391,7 +391,7 @@ final class TeamControllerView(
                 }
               },
               i18n("app.submit"),
-            ),
+            )
           ),
           <<.ifDefined(maybeCurrentSubmissionText) { currentSubmissionText =>
             <.div(
@@ -404,14 +404,14 @@ final class TeamControllerView(
                                   else "incorrect")
                 },
                 currentSubmissionText,
-              )
+              ),
             )
           },
         )
       }
 
-      private def orderItemsForm(question: Question.OrderItems)(
-          implicit team: Team,
+      private def orderItemsForm(question: Question.OrderItems)(implicit
+          team: Team,
           quizState: QuizState,
       ): VdomNode = {
         val canSubmitResponse = quizState.canSubmitResponse(team)
@@ -435,53 +435,50 @@ final class TeamControllerView(
           ),
           if (canSubmitResponse) {
             ReactBeautifulDnd.DragDropContext(onDragEndHandler = onDragEndHandler(items, question))(
-              ReactBeautifulDnd.Droppable(droppableId = "droppable") {
-                (provided, snapshot) =>
-                  <.ul(
-                    ^.className := "order-items-answer-buttons",
-                    rawTagMod("ref", provided.innerRef),
-                    (for ((item, index) <- items.zipWithIndex)
-                      yield {
-                        ReactBeautifulDnd.Draggable(
-                          key = s"draggable-${item.item}",
-                          draggableId = item.item,
-                          index = index,
-                        ) { (provided, snapshot) =>
-                          <.li(toTagMods(provided.draggableProps) ++ toTagMods(provided.dragHandleProps): _*)(
-                            ^.key := s"item-${item.item}",
-                            rawTagMod("ref", provided.innerRef),
-                            <.div(
-                              ^.className := "draggable-button",
-                              Bootstrap.FontAwesomeIcon("arrows-v"),
-                              " ",
-                              s"${question.toCharacterCode(item)}/ ${item.item}",
-                            )
-                          )
-                        }
-                      }).toVdomArray
-                  )
+              ReactBeautifulDnd.Droppable(droppableId = "droppable") { (provided, snapshot) =>
+                <.ul(
+                  ^.className := "order-items-answer-buttons",
+                  rawTagMod("ref", provided.innerRef),
+                  (for ((item, index) <- items.zipWithIndex)
+                    yield {
+                      ReactBeautifulDnd.Draggable(
+                        key = s"draggable-${item.item}",
+                        draggableId = item.item,
+                        index = index,
+                      ) { (provided, snapshot) =>
+                        <.li(toTagMods(provided.draggableProps) ++ toTagMods(provided.dragHandleProps): _*)(
+                          ^.key := s"item-${item.item}",
+                          rawTagMod("ref", provided.innerRef),
+                          <.div(
+                            ^.className := "draggable-button",
+                            Bootstrap.FontAwesomeIcon("arrows-v"),
+                            " ",
+                            s"${question.toCharacterCode(item)}/ ${item.item}",
+                          ),
+                        )
+                      }
+                    }).toVdomArray,
+                )
               }
             )
           } else {
-            <<.ifDefined(maybeCurrentSubmissionText) {
-              submissionText =>
-                val submittedItems = submissionText.map(question.itemFromCharacterCode)
-                <.ul(
-                  ^.className := "order-items-answer-buttons",
-                  (for (item <- submittedItems)
-                    yield
-                      <.li(
-                        ^.key := s"item-${item.item}",
-                        <.div(
-                          ^.className := "draggable-button disabled",
-                          Bootstrap.FontAwesomeIcon("arrows-v"),
-                          " ",
-                          s"${question.toCharacterCode(item)}/ ${item.item}",
-                        )
-                      )).toVdomArray
-                )
+            <<.ifDefined(maybeCurrentSubmissionText) { submissionText =>
+              val submittedItems = submissionText.map(question.itemFromCharacterCode)
+              <.ul(
+                ^.className := "order-items-answer-buttons",
+                (for (item <- submittedItems)
+                  yield <.li(
+                    ^.key := s"item-${item.item}",
+                    <.div(
+                      ^.className := "draggable-button disabled",
+                      Bootstrap.FontAwesomeIcon("arrows-v"),
+                      " ",
+                      s"${question.toCharacterCode(item)}/ ${item.item}",
+                    ),
+                  )).toVdomArray,
+              )
             }
-          }
+          },
         )
       }
       private def onDragEndHandler(
@@ -504,7 +501,8 @@ final class TeamControllerView(
       }
 
       private def maybeOrderItemsFromTextInput(
-          question: Question.OrderItems): Option[Seq[Question.OrderItems.Item]] = {
+          question: Question.OrderItems
+      ): Option[Seq[Question.OrderItems.Item]] = {
         val answerString = freeTextAnswerInputRef.apply().valueOrDefault
         if (answerString != null && question.isValidAnswerString(answerString)) {
           Some(answerString.map(question.itemFromCharacterCode))

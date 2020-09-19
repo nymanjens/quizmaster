@@ -21,8 +21,8 @@ import japgolly.scalajs.react.vdom.html_<^.<
 import scala.collection.immutable.Seq
 import scala.collection.mutable
 
-final class SubmissionsSummaryChart(
-    implicit quizConfig: QuizConfig,
+final class SubmissionsSummaryChart(implicit
+    quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     submissionsSummaryStore: SubmissionsSummaryStore,
     i18n: I18n,
@@ -38,10 +38,12 @@ final class SubmissionsSummaryChart(
     ComponentConfig(backendConstructor = new Backend(_), initialState = State())
       .withStateStoresDependency(
         teamsAndQuizStateStore,
-        _.copy(teams = teamsAndQuizStateStore.stateOrEmpty.teams))
+        _.copy(teams = teamsAndQuizStateStore.stateOrEmpty.teams),
+      )
       .withStateStoresDependency(
         submissionsSummaryStore,
-        _.copy(submissionsSummaryState = submissionsSummaryStore.stateOrEmpty))
+        _.copy(submissionsSummaryState = submissionsSummaryStore.stateOrEmpty),
+      )
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(selectedTeamId: Option[Long])
@@ -68,15 +70,14 @@ final class SubmissionsSummaryChart(
             Recharts.Tooltip(),
             Recharts.Legend(),
             (for (team <- state.teams)
-              yield
-                Recharts.Line(
-                  key = team.name,
-                  tpe = "linear",
-                  dataKey = team.name,
-                  stroke = TeamIcon.colorOf(team),
-                )).toVdomArray,
-          ),
-        )
+              yield Recharts.Line(
+                key = team.name,
+                tpe = "linear",
+                dataKey = team.name,
+                stroke = TeamIcon.colorOf(team),
+              )).toVdomArray,
+          )
+        ),
       )
     }
 

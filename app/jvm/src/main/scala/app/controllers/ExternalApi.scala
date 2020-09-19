@@ -28,8 +28,8 @@ import scala.concurrent.Await
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 
-final class ExternalApi @Inject()(
-    implicit override val messagesApi: MessagesApi,
+final class ExternalApi @Inject() (implicit
+    override val messagesApi: MessagesApi,
     components: ControllerComponents,
     clock: Clock,
     entityAccess: JvmEntityAccess,
@@ -43,7 +43,8 @@ final class ExternalApi @Inject()(
 
     val allEntitiesResponse = Await.result(
       new HttpPostAutowireClient(serverDomain).apply[ScalaJsApi].getAllEntities(EntityTypes.all).call(),
-      atMost = Duration.Inf)
+      atMost = Duration.Inf,
+    )
 
     for (entityType <- EntityTypes.all) {
       entityAccess.persistEntityModifications(
@@ -58,7 +59,8 @@ final class ExternalApi @Inject()(
           }
 
           internal()
-        })
+        }
+      )
     }
 
     Ok(s"Done importing ${allEntitiesResponse.entitiesMap.values.flatten.size} entities")
@@ -75,7 +77,8 @@ final class ExternalApi @Inject()(
             .option(HttpOptions.readTimeout(10000))
             .asBytes
             .body
-        ))
+        )
+      )
     }
 
     override def read[R: Pickler](p: ByteBuffer) = Unpickle[R].fromBytes(p)

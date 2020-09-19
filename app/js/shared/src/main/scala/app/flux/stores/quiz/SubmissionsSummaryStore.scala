@@ -23,8 +23,8 @@ import scala.async.Async.await
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
-final class SubmissionsSummaryStore(
-    implicit entityAccess: JsEntityAccess,
+final class SubmissionsSummaryStore(implicit
+    entityAccess: JsEntityAccess,
     i18n: I18n,
     user: User,
     dispatcher: Dispatcher,
@@ -48,24 +48,23 @@ final class SubmissionsSummaryStore(
         },
       roundToTimeEstimateMap = (
         for (roundIndex <- quizConfig.rounds.indices)
-          yield
-            roundIndex -> {
-              if (allSubmissions.exists(_.roundIndex == roundIndex)) {
-                val previousRoundEnd = allSubmissions.reverseIterator.find(s => s.roundIndex < roundIndex)
-                val firstQuestionInRound = allSubmissions.find(_.roundIndex == roundIndex).get
-                val lastQuestionInRound = allSubmissions.reverseIterator.find(_.roundIndex == roundIndex).get
-                val startTime = previousRoundEnd
-                  .map(_.createTime) getOrElse (firstQuestionInRound.createTime - firstQuestionDurationEstimate)
+          yield roundIndex -> {
+            if (allSubmissions.exists(_.roundIndex == roundIndex)) {
+              val previousRoundEnd = allSubmissions.reverseIterator.find(s => s.roundIndex < roundIndex)
+              val firstQuestionInRound = allSubmissions.find(_.roundIndex == roundIndex).get
+              val lastQuestionInRound = allSubmissions.reverseIterator.find(_.roundIndex == roundIndex).get
+              val startTime = previousRoundEnd
+                .map(_.createTime) getOrElse (firstQuestionInRound.createTime - firstQuestionDurationEstimate)
 
-                lastQuestionInRound.createTime - startTime
-              } else {
-                Duration.ZERO
-              }
+              lastQuestionInRound.createTime - startTime
+            } else {
+              Duration.ZERO
             }
+          }
       ).toMap.withDefault(_ => Duration.ZERO),
       totalQuizTimeEstimate = if (allSubmissions.nonEmpty) {
         firstQuestionDurationEstimate + (allSubmissions.last.createTime - allSubmissions.head.createTime)
-      } else Duration.ZERO
+      } else Duration.ZERO,
     )
   }
 
@@ -86,8 +85,9 @@ object SubmissionsSummaryStore {
       roundToTimeEstimateMap: Map[RoundIndex, Duration],
       totalQuizTimeEstimate: Duration,
   ) {
-    def points(roundIndex: Int, questionIndex: Int, teamId: Long)(
-        implicit quizConfig: QuizConfig): FixedPointNumber = {
+    def points(roundIndex: Int, questionIndex: Int, teamId: Long)(implicit
+        quizConfig: QuizConfig
+    ): FixedPointNumber = {
       if (hasAnySubmission(roundIndex, questionIndex, teamId)) {
         val allSubmissionsForQuestion = latestSubmissionsMap(QuestionIndex(roundIndex, questionIndex))
         val submissionEntity: SubmissionEntity = allSubmissionsForQuestion(teamId)

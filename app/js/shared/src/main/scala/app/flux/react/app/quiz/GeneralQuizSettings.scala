@@ -23,8 +23,8 @@ import japgolly.scalajs.react.vdom.html_<^.<
 
 import scala.concurrent.Future
 
-final class GeneralQuizSettings(
-    implicit i18n: I18n,
+final class GeneralQuizSettings(implicit
+    i18n: I18n,
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
 ) extends HydroReactComponent {
@@ -39,13 +39,14 @@ final class GeneralQuizSettings(
     .withStateStoresDependency(
       teamsAndQuizStateStore,
       _.copy(
-        quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
-      ))
+        quizState = teamsAndQuizStateStore.stateOrEmpty.quizState
+      ),
+    )
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props()
   protected case class State(
-      quizState: QuizState = QuizState.nullInstance,
+      quizState: QuizState = QuizState.nullInstance
   )
 
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
@@ -56,7 +57,7 @@ final class GeneralQuizSettings(
         ^.className := "general-quiz-settings",
         Bootstrap.Row(
           HalfPanel(
-            title = <.span("General quiz settings"),
+            title = <.span("General quiz settings")
           ) {
             <.span(
               <.div(
@@ -77,10 +78,10 @@ final class GeneralQuizSettings(
                   selectedValue = generalQuizSettings.answerBulletType,
                   updateValueFunction = teamsAndQuizStateStore.setAnswerBulletType,
                 ),
-              )
+              ),
             )
           }
-        )
+        ),
       )
     }
 
@@ -92,14 +93,13 @@ final class GeneralQuizSettings(
       Bootstrap.ButtonGroup(
         (
           for ((value, label) <- valuesToLabelMap)
-            yield
-              Bootstrap.Button(
-                variant = if (value == selectedValue) Variant.primary else Variant.default,
-              )(
-                ^.onClick --> Callback.future(updateValueFunction(value).map(_ => Callback.empty)),
-                ^.key := value.toString,
-                label,
-              )
+            yield Bootstrap.Button(
+              variant = if (value == selectedValue) Variant.primary else Variant.default
+            )(
+              ^.onClick --> Callback.future(updateValueFunction(value).map(_ => Callback.empty)),
+              ^.key := value.toString,
+              label,
+            )
         ).toVdomArray
       )
     }

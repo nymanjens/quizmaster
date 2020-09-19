@@ -36,12 +36,14 @@ abstract class HydroReactComponent {
     if (dummyBackend.isInstanceOf[WillMount]) {
       step4 = step4
         .componentWillMount(scope =>
-          scope.backend.asInstanceOf[WillMount].willMount(scope.props, scope.state))
+          scope.backend.asInstanceOf[WillMount].willMount(scope.props, scope.state)
+        )
     }
     if (dummyBackend.isInstanceOf[WillUnmount]) {
       step4 = step4
         .componentWillUnmount(scope =>
-          scope.backend.asInstanceOf[WillUnmount].willUnmount(scope.props, scope.state))
+          scope.backend.asInstanceOf[WillUnmount].willUnmount(scope.props, scope.state)
+        )
     }
     if (dummyBackend.isInstanceOf[DidMount]) {
       step4 = step4
@@ -49,23 +51,24 @@ abstract class HydroReactComponent {
     }
     if (dummyBackend.isInstanceOf[WillReceiveProps]) {
       step4 = step4
-        .componentWillReceiveProps(
-          scope =>
-            scope.backend
-              .asInstanceOf[WillReceiveProps]
-              .willReceiveProps(currentProps = scope.currentProps, nextProps = scope.nextProps, scope.state))
+        .componentWillReceiveProps(scope =>
+          scope.backend
+            .asInstanceOf[WillReceiveProps]
+            .willReceiveProps(currentProps = scope.currentProps, nextProps = scope.nextProps, scope.state)
+        )
     }
     if (dummyBackend.isInstanceOf[DidUpdate]) {
       step4 = step4
-        .componentDidUpdate(
-          scope =>
-            scope.backend
-              .asInstanceOf[DidUpdate]
-              .didUpdate(
-                prevProps = scope.prevProps,
-                currentProps = scope.currentProps,
-                prevState = scope.prevState,
-                currentState = scope.currentState))
+        .componentDidUpdate(scope =>
+          scope.backend
+            .asInstanceOf[DidUpdate]
+            .didUpdate(
+              prevProps = scope.prevProps,
+              currentProps = scope.currentProps,
+              prevState = scope.prevState,
+              currentState = scope.currentState,
+            )
+        )
     }
     if (config.stateStoresDependencies.nonEmpty) {
       step4 = step4
@@ -81,8 +84,8 @@ abstract class HydroReactComponent {
           logExceptions {
             var anythingChanged = false
             for {
-              (StateStoresDependency(oldStore, _), StateStoresDependency(newStore, _)) <- getStateStoresDependencies(
-                scope.currentProps) zip getStateStoresDependencies(scope.nextProps)
+              (StateStoresDependency(oldStore, _), StateStoresDependency(newStore, _)) <-
+                getStateStoresDependencies(scope.currentProps) zip getStateStoresDependencies(scope.nextProps)
               if oldStore != newStore
             } {
               oldStore.deregister(scope.backend)
@@ -128,7 +131,8 @@ abstract class HydroReactComponent {
             state = stateUpdate(state)
           }
           state
-      })
+        }
+      )
     }
   }
   trait WillMount { def willMount(props: Props, state: State): Callback }
@@ -152,7 +156,8 @@ abstract class HydroReactComponent {
       withStateStoresDependencyFromProps(_ => StateStoresDependency(store, stateUpdate))
 
     def withStateStoresDependencyFromProps(
-        dependencyFromProps: Props => StateStoresDependency): ComponentConfig = {
+        dependencyFromProps: Props => StateStoresDependency
+    ): ComponentConfig = {
       new ComponentConfig(
         backendConstructor = backendConstructor,
         initialStateFromProps = initialStateFromProps,

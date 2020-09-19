@@ -38,7 +38,8 @@ final class GamepadStore extends StateStore[State] {
               "duration" -> 400,
               "weakMagnitude" -> 1.0,
               "strongMagnitude" -> 1.0,
-            ))
+            ),
+          )
         }
       }
     }
@@ -54,7 +55,8 @@ final class GamepadStore extends StateStore[State] {
   private var startedCheckingForControllerInput: Boolean = false
   private def startButtonCheckerLoop(): Unit = {
     dom.window.addEventListener(
-      "gamepadconnected", { (e: Event) =>
+      "gamepadconnected",
+      { (e: Event) =>
         if (!startedCheckingForControllerInput) {
 
           startedCheckingForControllerInput = true
@@ -62,10 +64,10 @@ final class GamepadStore extends StateStore[State] {
             () => {
               setState(getCurrentStateFromControllers())
             },
-            /* timeout in millis */ 3
+            /* timeout in millis */ 3,
           )
         }
-      }
+      },
     )
   }
 

@@ -29,8 +29,8 @@ import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.util.Random
 
-final class TeamInputStore(
-    implicit entityAccess: JsEntityAccess,
+final class TeamInputStore(implicit
+    entityAccess: JsEntityAccess,
     user: User,
     dispatcher: Dispatcher,
     clock: Clock,
@@ -60,7 +60,8 @@ final class TeamInputStore(
       entityAccess
         .newQuery[Team]()
         .sort(DbQuery.Sorting.ascBy(ModelFields.Team.index))
-        .data())
+        .data()
+    )
 
     for (team <- allTeams.find(_.id == teamId)) {
       gamepadStore.rumble(gamepadIndex = allTeams.indexOf(team))
@@ -91,11 +92,15 @@ final class TeamInputStore(
             entityAccess
               .newQuery[Team]()
               .sort(DbQuery.Sorting.ascBy(ModelFields.Team.index))
-              .data())
+              .data()
+          )
 
           setState(
-            State(teamIdToGamepadState = (teams.map(_.id) zip gamepadStore.state.gamepads).toMap
-              .withDefaultValue(GamepadState.nullInstance)))
+            State(teamIdToGamepadState =
+              (teams.map(_.id) zip gamepadStore.state.gamepads).toMap
+                .withDefaultValue(GamepadState.nullInstance)
+            )
+          )
 
           await(maybeAddSubmissions(teams))
         }
@@ -117,7 +122,8 @@ final class TeamInputStore(
       val quizState = await(
         entityAccess
           .newQuery[QuizState]()
-          .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId)) getOrElse QuizState.nullInstance
+          .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId)
+      ) getOrElse QuizState.nullInstance
 
       if (onRelevantPageForSubmissions && quizState.canSubmitResponse(team)) {
         val question = quizState.maybeQuestion.get
@@ -149,7 +155,7 @@ final class TeamInputStore(
 
 object TeamInputStore {
   case class State(
-      teamIdToGamepadState: Map[Long, GamepadState] = Map().withDefaultValue(GamepadState.nullInstance),
+      teamIdToGamepadState: Map[Long, GamepadState] = Map().withDefaultValue(GamepadState.nullInstance)
   )
   object State {
     def nullInstance = State()

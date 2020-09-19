@@ -24,8 +24,8 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
 
-final class MasterView(
-    implicit pageHeader: PageHeader,
+final class MasterView(implicit
+    pageHeader: PageHeader,
     i18n: I18n,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
@@ -49,7 +49,8 @@ final class MasterView(
       _.copy(
         teams = teamsAndQuizStateStore.stateOrEmpty.teams,
         quizState = teamsAndQuizStateStore.stateOrEmpty.quizState,
-      ))
+      ),
+    )
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(router: RouterContext)
@@ -89,7 +90,7 @@ final class MasterView(
         <.div(
           ^.className := "banner",
           "Master",
-        )
+        ),
       )
     }
 
@@ -112,7 +113,7 @@ final class MasterView(
             Bootstrap.Glyphicon("arrow-right"),
             " Next",
           )
-        }
+        },
       )
     }
   }

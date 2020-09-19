@@ -30,8 +30,8 @@ import japgolly.scalajs.react.vdom.html_<^.<
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js
 
-final class SubmissionsSummaryTable(
-    implicit quizConfig: QuizConfig,
+final class SubmissionsSummaryTable(implicit
+    quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     submissionsSummaryStore: SubmissionsSummaryStore,
     i18n: I18n,
@@ -47,10 +47,12 @@ final class SubmissionsSummaryTable(
     ComponentConfig(backendConstructor = new Backend(_), initialState = State())
       .withStateStoresDependency(
         teamsAndQuizStateStore,
-        _.copy(teams = teamsAndQuizStateStore.stateOrEmpty.teams))
+        _.copy(teams = teamsAndQuizStateStore.stateOrEmpty.teams),
+      )
       .withStateStoresDependency(
         submissionsSummaryStore,
-        _.copy(submissionsSummaryState = submissionsSummaryStore.stateOrEmpty))
+        _.copy(submissionsSummaryState = submissionsSummaryStore.stateOrEmpty),
+      )
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(selectedTeamId: Option[Long])
@@ -69,7 +71,7 @@ final class SubmissionsSummaryTable(
         <.table(
           ^.className := "table table-bordered table-hover table-condensed",
           <.thead(
-            headerRow(),
+            headerRow()
           ),
           <.tbody(
             {
@@ -89,20 +91,19 @@ final class SubmissionsSummaryTable(
       <.tr(
         <.th(i18n("app.question")), {
           for (team <- state.teams)
-            yield
-              <.th(
-                ^.key := team.id,
-                ^^.ifThen(props.selectedTeamId == Some(team.id)) {
-                  ^.className := "info"
-                },
-                team.name,
-              )
+            yield <.th(
+              ^.key := team.id,
+              ^^.ifThen(props.selectedTeamId == Some(team.id)) {
+                ^.className := "info"
+              },
+              team.name,
+            )
         }.toVdomArray,
       )
     }
 
-    private def roundTitleRow(round: Round, roundIndex: Int)(
-        implicit state: State,
+    private def roundTitleRow(round: Round, roundIndex: Int)(implicit
+        state: State,
         props: Props,
     ): VdomNode = {
       <.tr(
@@ -110,13 +111,13 @@ final class SubmissionsSummaryTable(
         <.th(
           ^.colSpan := 1 + state.teams.size,
           round.name,
-          s" [${state.submissionsSummaryState.roundToTimeEstimateMap(roundIndex).toMinutes}']"
+          s" [${state.submissionsSummaryState.roundToTimeEstimateMap(roundIndex).toMinutes}']",
         ),
       )
     }
 
-    private def questionRow(question: Question, roundIndex: Int, questionIndex: Int)(
-        implicit state: State,
+    private def questionRow(question: Question, roundIndex: Int, questionIndex: Int)(implicit
+        state: State,
         props: Props,
     ): VdomNode = {
       <.tr(
@@ -126,20 +127,19 @@ final class SubmissionsSummaryTable(
             case question: Question.Standard   => s"${question.question} (${question.answer})"
             case question: Question.DoubleQ    => s"${question.textualQuestion} (${question.textualAnswer})"
             case question: Question.OrderItems => s"${question.question} (${question.answerAsString})"
-          },
+          }
         ), {
           for (team <- state.teams)
-            yield
-              <.td(
-                ^.key := s"$roundIndex-$questionIndex-${team.id}",
-                ^^.ifThen(props.selectedTeamId == Some(team.id)) {
-                  ^.className := "info"
-                },
-                <<.ifThen(state.submissionsSummaryState.hasAnySubmission(roundIndex, questionIndex, team.id)) {
-                  hideIfZero(state.submissionsSummaryState.points(roundIndex, questionIndex, team.id))
-                },
-              )
-        }.toVdomArray
+            yield <.td(
+              ^.key := s"$roundIndex-$questionIndex-${team.id}",
+              ^^.ifThen(props.selectedTeamId == Some(team.id)) {
+                ^.className := "info"
+              },
+              <<.ifThen(state.submissionsSummaryState.hasAnySubmission(roundIndex, questionIndex, team.id)) {
+                hideIfZero(state.submissionsSummaryState.points(roundIndex, questionIndex, team.id))
+              },
+            )
+        }.toVdomArray,
       )
     }
 
@@ -150,7 +150,7 @@ final class SubmissionsSummaryTable(
           <.th(
             ^.colSpan := 1 + state.teams.size,
             i18n("app.totals"),
-            s" [${state.submissionsSummaryState.totalQuizTimeEstimate.toMinutes}']"
+            s" [${state.submissionsSummaryState.totalQuizTimeEstimate.toMinutes}']",
           ),
         ),
         <<.ifThen(state.teams.exists(team => team.score != state.submissionsSummaryState.totalPoints(team))) {
@@ -159,29 +159,27 @@ final class SubmissionsSummaryTable(
               ^.key := "total-from-submissions",
               <.th(i18n("app.total-from-submissions")), {
                 for (team <- state.teams)
-                  yield
-                    <.td(
-                      ^.key := team.id,
-                      ^^.ifThen(props.selectedTeamId == Some(team.id)) {
-                        ^.className := "info"
-                      },
-                      state.submissionsSummaryState.totalPoints(team).toString
-                    )
-              }.toVdomArray
+                  yield <.td(
+                    ^.key := team.id,
+                    ^^.ifThen(props.selectedTeamId == Some(team.id)) {
+                      ^.className := "info"
+                    },
+                    state.submissionsSummaryState.totalPoints(team).toString,
+                  )
+              }.toVdomArray,
             ),
             <.tr(
               ^.key := "discretionary",
               <.th(i18n("app.discretionary-points")), {
                 for (team <- state.teams)
-                  yield
-                    <.td(
-                      ^.key := team.id,
-                      ^^.ifThen(props.selectedTeamId == Some(team.id)) {
-                        ^.className := "info"
-                      },
-                      hideIfZero(team.score - state.submissionsSummaryState.totalPoints(team)),
-                    )
-              }.toVdomArray
+                  yield <.td(
+                    ^.key := team.id,
+                    ^^.ifThen(props.selectedTeamId == Some(team.id)) {
+                      ^.className := "info"
+                    },
+                    hideIfZero(team.score - state.submissionsSummaryState.totalPoints(team)),
+                  )
+              }.toVdomArray,
             ),
           )
         },
@@ -189,15 +187,14 @@ final class SubmissionsSummaryTable(
           ^.key := "team-score",
           <.th(i18n("app.total-team-score")), {
             for (team <- state.teams)
-              yield
-                <.th(
-                  ^.key := team.id,
-                  ^^.ifThen(props.selectedTeamId == Some(team.id)) {
-                    ^.className := "info"
-                  },
-                  team.score.toString,
-                )
-          }.toVdomArray
+              yield <.th(
+                ^.key := team.id,
+                ^^.ifThen(props.selectedTeamId == Some(team.id)) {
+                  ^.className := "info"
+                },
+                team.score.toString,
+              )
+          }.toVdomArray,
         ),
       )
     }

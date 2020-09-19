@@ -23,8 +23,8 @@ import org.scalajs.dom
 
 import scala.collection.immutable.Seq
 
-final class ImportBackupPanel(
-    implicit pageHeader: PageHeader,
+final class ImportBackupPanel(implicit
+    pageHeader: PageHeader,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
@@ -42,7 +42,7 @@ final class ImportBackupPanel(
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props()
   protected case class State(
-      importString: String = "",
+      importString: String = ""
   )
 
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) {
@@ -66,10 +66,10 @@ final class ImportBackupPanel(
                     val newString = e.target.value
                     $.modState(_.copy(importString = newString))
                   }
-                }
+                },
               ),
               " ",
-              importBackupButton()
+              importBackupButton(),
             )
           }
         )
@@ -86,7 +86,7 @@ final class ImportBackupPanel(
               .replaceAllEntitiesByImportString(state.importString)
               .map(_ => Callback.empty)
           }
-        }
+        },
       )
     }
   }

@@ -4,7 +4,7 @@ import app.common.FixedPointNumber.FixedPointNumberNumeric
 
 /** Number with a single decimal digit after the point. This is used for representing points/sores. */
 class FixedPointNumber private (
-    private[FixedPointNumber] val numberWithoutPoint: Int,
+    private[FixedPointNumber] val numberWithoutPoint: Int
 ) {
 
   override def toString: String = {

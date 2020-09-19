@@ -28,8 +28,8 @@ import japgolly.scalajs.react.vdom.html_<^.<
 import scala.collection.immutable.Seq
 import scala.scalajs.js
 
-final class GamepadSetupView(
-    implicit pageHeader: PageHeader,
+final class GamepadSetupView(implicit
+    pageHeader: PageHeader,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
     teamInputStore: TeamInputStore,
@@ -47,12 +47,14 @@ final class GamepadSetupView(
   override protected val config = ComponentConfig(backendConstructor = new Backend(_), initialState = State())
     .withStateStoresDependency(
       teamInputStore,
-      _.copy(teamIdToGamepadState = teamInputStore.state.teamIdToGamepadState))
+      _.copy(teamIdToGamepadState = teamInputStore.state.teamIdToGamepadState),
+    )
     .withStateStoresDependency(
       teamsAndQuizStateStore,
       _.copy(
-        teams = teamsAndQuizStateStore.stateOrEmpty.teams,
-      ))
+        teams = teamsAndQuizStateStore.stateOrEmpty.teams
+      ),
+    )
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(router: RouterContext)
@@ -80,12 +82,12 @@ final class GamepadSetupView(
                     <.th("Team"),
                     <.th("Gamepad input"),
                   ),
-                  tableRowDatas = tableRowDatas(state)
-                ),
+                  tableRowDatas = tableRowDatas(state),
+                )
               )
             }
           )
-        }
+        },
       )
     }
 
@@ -106,20 +108,21 @@ final class GamepadSetupView(
                     gamepadState.arrowPressed match {
                       case None =>
                         AnswerBullet.all.head.arrowIcon(
-                          ^.style := js.Dictionary("color" -> "white"),
+                          ^.style := js.Dictionary("color" -> "white")
                         )
                       case Some(arrow) => AnswerBullet.all(arrow.answerIndex).arrowIcon
                     },
                     Bootstrap.FontAwesomeIcon("circle")(
                       ^^.ifThen(!gamepadState.otherButtonPressed) {
                         ^.style := js.Dictionary("color" -> "white")
-                      },
-                    )
+                      }
+                    ),
                   )
                 }
-              }
-            )
-          ))
+              },
+            ),
+          )
+        )
       }
     }
   }

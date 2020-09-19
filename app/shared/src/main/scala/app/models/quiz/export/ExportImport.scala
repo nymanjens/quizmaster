@@ -36,9 +36,9 @@ object ExportImport {
               answerBulletType = answerBulletType match {
                 case "Arrows"     => AnswerBulletType.Arrows
                 case "Characters" => AnswerBulletType.Characters
-              }
-            )
-          )
+              },
+            ),
+          ),
         )
     }
   }
@@ -51,15 +51,14 @@ object ExportImport {
     val exportRegex: Regex = """_~_(.+?)_~_(-?[\d\.]+)""".r
 
     for ((teamString, index) <- teamsString.split("=~=").toVector.zipWithIndex)
-      yield
-        teamString match {
-          case exportRegex(name, score) =>
-            Team(
-              name = name,
-              score = FixedPointNumber(score.toDouble),
-              index = index,
-            )
-        }
+      yield teamString match {
+        case exportRegex(name, score) =>
+          Team(
+            name = name,
+            score = FixedPointNumber(score.toDouble),
+            index = index,
+          )
+      }
   }
 
   case class FullState(

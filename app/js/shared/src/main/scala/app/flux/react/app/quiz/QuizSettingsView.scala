@@ -28,8 +28,8 @@ import japgolly.scalajs.react.vdom.html_<^.<
 import scala.collection.immutable.Seq
 import scala.scalajs.js
 
-final class QuizSettingsView(
-    implicit pageHeader: PageHeader,
+final class QuizSettingsView(implicit
+    pageHeader: PageHeader,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
     teamInputStore: TeamInputStore,

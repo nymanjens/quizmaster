@@ -30,8 +30,8 @@ import scala.collection.immutable.Seq
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
-final class TeamsAndQuizStateStore(
-    implicit entityAccess: JsEntityAccess,
+final class TeamsAndQuizStateStore(implicit
+    entityAccess: JsEntityAccess,
     i18n: I18n,
     user: User,
     dispatcher: Dispatcher,
@@ -40,9 +40,8 @@ final class TeamsAndQuizStateStore(
     scalaJsApiClient: ScalaJsApiClient,
 ) extends AsyncEntityDerivedStateStore[State] {
 
-  dispatcher.registerPartialAsync {
-    case AppActions.AddSubmission(teamId, submissionValue) =>
-      scalaJsApiClient.doTeamOrQuizStateUpdate(AddSubmission(teamId, submissionValue))
+  dispatcher.registerPartialAsync { case AppActions.AddSubmission(teamId, submissionValue) =>
+    scalaJsApiClient.doTeamOrQuizStateUpdate(AddSubmission(teamId, submissionValue))
   }
 
   // **************** Implementation of AsyncEntityDerivedStateStore methods **************** //
@@ -52,11 +51,13 @@ final class TeamsAndQuizStateStore(
         entityAccess
           .newQuery[Team]()
           .sort(DbQuery.Sorting.ascBy(ModelFields.Team.index))
-          .data()),
+          .data()
+      ),
       quizState = await(
         entityAccess
           .newQuery[QuizState]()
-          .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId)) getOrElse QuizState.nullInstance,
+          .findOne(ModelFields.QuizState.id === QuizState.onlyPossibleId)
+      ) getOrElse QuizState.nullInstance,
     )
   }
 

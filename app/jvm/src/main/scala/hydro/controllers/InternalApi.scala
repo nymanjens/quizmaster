@@ -32,8 +32,8 @@ import play.api.mvc._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
 
-final class InternalApi @Inject()(
-    implicit override val messagesApi: MessagesApi,
+final class InternalApi @Inject() (implicit
+    override val messagesApi: MessagesApi,
     components: ControllerComponents,
     clock: Clock,
     entityAccess: JvmEntityAccess,
@@ -100,8 +100,11 @@ final class InternalApi @Inject()(
               .map(
                 Publishers.combine[HydroPushSocketPacket](
                   entityModificationPublisher,
-                  hydroPushSocketHeartbeatScheduler.publisher),
-                packetToBytes))
+                  hydroPushSocketHeartbeatScheduler.publisher,
+                ),
+                packetToBytes,
+              )
+          )
       Flow.fromSinkAndSource(in, out)
   }
 
@@ -121,8 +124,8 @@ object InternalApi {
   }
 
   @Singleton
-  private[controllers] class HydroPushSocketHeartbeatScheduler @Inject()(
-      implicit actorSystem: ActorSystem,
+  private[controllers] class HydroPushSocketHeartbeatScheduler @Inject() (implicit
+      actorSystem: ActorSystem,
       executionContext: ExecutionContext,
   ) {
 

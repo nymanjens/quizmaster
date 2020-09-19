@@ -61,7 +61,8 @@ object TextInput extends HydroReactComponent {
   // **************** Implementation of HydroReactComponent methods ****************//
   override protected val config = ComponentConfig(
     backendConstructor = new Backend(_),
-    initialStateFromProps = props => State(value = props.defaultValue))
+    initialStateFromProps = props => State(value = props.defaultValue),
+  )
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props private[TextInput] (

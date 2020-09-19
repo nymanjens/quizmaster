@@ -18,8 +18,8 @@ import scala.collection.immutable.Seq
 import scala.collection.mutable
 import scala.scalajs.js
 
-final class SoundEffectController(
-    implicit dispatcher: Dispatcher,
+final class SoundEffectController(implicit
+    dispatcher: Dispatcher
 ) {
   private var currentPage: Page = _
   private val soundsPlaying: mutable.Set[SoundEffect] = mutable.Set()
@@ -72,7 +72,7 @@ final class SoundEffectController(
             js.timers.setTimeout(timeoutTime)(logExceptions {
               soundsPlaying.remove(soundEffect)
             })
-          }
+          },
         )
 
         println(s"  Playing ${soundEffect.filepath}..")

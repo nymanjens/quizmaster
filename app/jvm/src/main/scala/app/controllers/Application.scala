@@ -30,8 +30,8 @@ import play.api.mvc._
 import scala.concurrent.ExecutionContext
 
 @Singleton
-final class Application @Inject()(
-    implicit override val messagesApi: MessagesApi,
+final class Application @Inject() (implicit
+    override val messagesApi: MessagesApi,
     playConfiguration: play.api.Configuration,
     components: ControllerComponents,
     clock: Clock,
@@ -59,7 +59,8 @@ final class Application @Inject()(
         case EntityModification.Update(quizState: QuizState) =>
           if (quizState.roundIndex != lastSeenRoundIndex) {
             println(
-              s"  >>>> [$currentTimeString] Changed round from ${lastSeenRoundIndex + 1} to ${quizState.roundIndex + 1}")
+              s"  >>>> [$currentTimeString] Changed round from ${lastSeenRoundIndex + 1} to ${quizState.roundIndex + 1}"
+            )
             lastSeenRoundIndex = quizState.roundIndex
           }
       }
@@ -93,7 +94,7 @@ final class Application @Inject()(
         source = source,
         rangeHeader = request.headers.get(RANGE),
         fileName = None,
-        contentType = None // TODO: Set content type
+        contentType = None, // TODO: Set content type
       )
   }
 
@@ -119,7 +120,8 @@ final class Application @Inject()(
               case _: Question.Standard | _: Question.OrderItems =>
                 if (question.maxTime > infiniteDurationThreshold) Duration.ofSeconds(30) else question.maxTime
               case _: Question.DoubleQ => Duration.ofSeconds(20)
-          })
+            }
+          )
           .sum
           .toMinutes
           .toDouble

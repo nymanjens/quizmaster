@@ -19,8 +19,8 @@ import scala.concurrent.Promise
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 /** RemoteDatabaseProxy implementation that queries the remote back-end directly until LocalDatabase */
-final class HybridRemoteDatabaseProxy(futureLocalDatabase: FutureLocalDatabase)(
-    implicit apiClient: ScalaJsApiClient,
+final class HybridRemoteDatabaseProxy(futureLocalDatabase: FutureLocalDatabase)(implicit
+    apiClient: ScalaJsApiClient,
     getInitialDataResponse: GetInitialDataResponse,
     hydroPushSocketClientFactory: HydroPushSocketClientFactory,
     entitySyncLogic: EntitySyncLogic,
@@ -50,7 +50,8 @@ final class HybridRemoteDatabaseProxy(futureLocalDatabase: FutureLocalDatabase)(
   }
 
   override def pendingModifications(): Future[Seq[EntityModification]] = async {
-    val localDatabase = await(futureLocalDatabase.future()) // "Pending modifications" make no sense without a local database
+    val localDatabase =
+      await(futureLocalDatabase.future()) // "Pending modifications" make no sense without a local database
     await(localDatabase.pendingModifications())
   }
 
@@ -63,7 +64,8 @@ final class HybridRemoteDatabaseProxy(futureLocalDatabase: FutureLocalDatabase)(
         // Apply changes to local database, but don't wait for it
         PersistEntityModificationsResponse(
           queryReflectsModificationsFuture = serverUpdated,
-          completelyDoneFuture = serverUpdated)
+          completelyDoneFuture = serverUpdated,
+        )
 
       case Some(localDatabase) =>
         val serverUpdated = async {
@@ -84,12 +86,14 @@ final class HybridRemoteDatabaseProxy(futureLocalDatabase: FutureLocalDatabase)(
         }
         PersistEntityModificationsResponse(
           queryReflectsModificationsFuture = queryReflectsModifications,
-          completelyDoneFuture = completelyDone)
+          completelyDoneFuture = completelyDone,
+        )
     }
   }
 
   override def startCheckingForModifiedEntityUpdates(
-      maybeNewEntityModificationsListener: Seq[EntityModification] => Future[Unit]): Unit = {
+      maybeNewEntityModificationsListener: Seq[EntityModification] => Future[Unit]
+  ): Unit = {
     // Adding at start here because old modifications were already reflected in API lookups
     futureLocalDatabase.scheduleUpdateAtStart(localDatabase =>
       async {
@@ -106,14 +110,16 @@ final class HybridRemoteDatabaseProxy(futureLocalDatabase: FutureLocalDatabase)(
                 await(entitySyncLogic.handleEntityModificationUpdate(modifications, localDatabase))
                 await(localDatabase.removePendingModifications(modifications))
                 await(
-                  localDatabase.setSingletonValue(NextUpdateTokenKey, modificationsWithToken.nextUpdateToken))
+                  localDatabase.setSingletonValue(NextUpdateTokenKey, modificationsWithToken.nextUpdateToken)
+                )
                 await(localDatabase.save())
               }
               await(maybeNewEntityModificationsListener(modifications))
-          }
+            },
         )
         await(permanentPushClient.firstMessageWasProcessedFuture)
-    })
+      }
+    )
   }
 
   override def clearLocalDatabase(): Future[Unit] = {
@@ -122,12 +128,11 @@ final class HybridRemoteDatabaseProxy(futureLocalDatabase: FutureLocalDatabase)(
       await(localDatabase.resetAndInitialize())
       await(localDatabase.save())
     }
-    clearFuture.recover {
-      case t: Throwable =>
-        console.log(s"  Could not clear local database: $t")
-        t.printStackTrace()
-        // Fall back to successful future
-        (): Unit
+    clearFuture.recover { case t: Throwable =>
+      console.log(s"  Could not clear local database: $t")
+      t.printStackTrace()
+      // Fall back to successful future
+      (): Unit
     }
   }
 
@@ -137,8 +142,8 @@ final class HybridRemoteDatabaseProxy(futureLocalDatabase: FutureLocalDatabase)(
 object HybridRemoteDatabaseProxy {
   private val localDatabaseAndEntityVersion = "hydro-2.3"
 
-  def create(localDatabase: Future[LocalDatabase])(
-      implicit apiClient: ScalaJsApiClient,
+  def create(localDatabase: Future[LocalDatabase])(implicit
+      apiClient: ScalaJsApiClient,
       getInitialDataResponse: GetInitialDataResponse,
       hydroPushSocketClientFactory: HydroPushSocketClientFactory,
       entitySyncLogic: EntitySyncLogic,
@@ -154,7 +159,8 @@ object HybridRemoteDatabaseProxy {
           if (!dbVersionOption.contains(localDatabaseAndEntityVersion)) {
             console.log(
               s"  The database version ${dbVersionOption getOrElse "<empty>"} no longer matches " +
-                s"the newest version $localDatabaseAndEntityVersion")
+                s"the newest version $localDatabaseAndEntityVersion"
+            )
             true
           } else {
             console.log(s"  Database was loaded successfully. No need for a full repopulation.")

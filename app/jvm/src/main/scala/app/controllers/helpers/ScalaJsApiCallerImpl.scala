@@ -17,7 +17,7 @@ import hydro.models.modification.EntityType
 
 import scala.collection.immutable.Seq
 
-final class ScalaJsApiCallerImpl @Inject()(implicit scalaJsApiServerFactory: ScalaJsApiServerFactory)
+final class ScalaJsApiCallerImpl @Inject() (implicit scalaJsApiServerFactory: ScalaJsApiServerFactory)
     extends ScalaJsApiCaller {
 
   override def apply(path: String, argsMap: Map[String, ByteBuffer]): ByteBuffer = {

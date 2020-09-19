@@ -37,7 +37,9 @@ final class PendingModificationsStore(implicit jsEntityAccess: JsEntityAccess) e
       if (jsEntityAccess.pendingModifications.persistedLocally) {
         setState(
           State(
-            numberOfModifications = getModificationsSize(jsEntityAccess.pendingModifications.modifications)))
+            numberOfModifications = getModificationsSize(jsEntityAccess.pendingModifications.modifications)
+          )
+        )
       } else {
         setState(State(numberOfModifications = 0))
       }

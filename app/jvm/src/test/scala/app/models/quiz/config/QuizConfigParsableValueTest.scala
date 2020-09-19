@@ -97,7 +97,7 @@ class QuizConfigParsableValueTest extends Specification {
         |        textualChoices: [3, 4, 5, 6]
         |
         |""".stripMargin,
-      createQuizConfigParsableValue("../../conf/demo-quiz-config.yml")
+      createQuizConfigParsableValue("../../conf/demo-quiz-config.yml"),
     )
 
     quizConfig mustEqual QuizConfig(
@@ -213,7 +213,7 @@ class QuizConfigParsableValueTest extends Specification {
               maxTime = Duration.ofSeconds(15),
               onlyFirstGainsPoints = false,
               showSingleAnswerButtonToTeams = false,
-            ),
+            )
           ),
         ),
         Round(
@@ -227,9 +227,9 @@ class QuizConfigParsableValueTest extends Specification {
               textualAnswer = "3",
               textualChoices = Seq("3", "4", "5", "6"),
               pointsToGain = FixedPointNumber(2),
-            ),
+            )
           ),
-        )
+        ),
       ),
     )
   }
@@ -240,7 +240,7 @@ class QuizConfigParsableValueTest extends Specification {
          |title: Demo quiz
          |rounds: []
          |""".stripMargin,
-      createQuizConfigParsableValue("../../conf/demo-quiz-config.yml")
+      createQuizConfigParsableValue("../../conf/demo-quiz-config.yml"),
     )
 
     quizConfig mustEqual QuizConfig(

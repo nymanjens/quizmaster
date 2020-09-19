@@ -29,9 +29,9 @@ object TextInput {
         ^.value := valueString,
         ^.onChange ==> ((event: ReactEventFromInput) => onChange(event.target.value)),
         ^.autoFocus := extraProps.focusOnMount,
-        ^.disabled := extraProps.disabled
+        ^.disabled := extraProps.disabled,
       )
-    }
+    },
   )
 
   // **************** API ****************//
@@ -59,7 +59,7 @@ object TextInput {
       inputClasses = inputClasses,
       listener = listener,
       valueTransformer = ValueTransformer.nullInstance,
-      extra = ExtraProps(inputType = inputType, focusOnMount = focusOnMount, disabled = disabled)
+      extra = ExtraProps(inputType = inputType, focusOnMount = focusOnMount, disabled = disabled),
     )
     ref.mutableRef.component(props)
   }
@@ -68,8 +68,8 @@ object TextInput {
 
   // **************** Public inner types ****************//
   final class Reference private[TextInput] (
-      private[TextInput] val mutableRef: InputComponent.ThisMutableRef[Value, ExtraProps])
-      extends InputComponent.Reference(mutableRef)
+      private[TextInput] val mutableRef: InputComponent.ThisMutableRef[Value, ExtraProps]
+  ) extends InputComponent.Reference(mutableRef)
 
   case class ExtraProps private[TextInput] (inputType: String, focusOnMount: Boolean, disabled: Boolean)
 

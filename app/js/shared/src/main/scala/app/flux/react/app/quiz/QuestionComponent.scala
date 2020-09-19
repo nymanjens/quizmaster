@@ -35,8 +35,8 @@ import japgolly.scalajs.react.vdom.VdomNode
 
 import scala.scalajs.js
 
-final class QuestionComponent(
-    implicit pageHeader: PageHeader,
+final class QuestionComponent(implicit
+    pageHeader: PageHeader,
     i18n: I18n,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
@@ -59,7 +59,8 @@ final class QuestionComponent(
         showMasterData = showMasterData,
         quizState = quizState,
         teams = teams,
-      ))
+      )
+    )
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//
@@ -111,21 +112,22 @@ final class QuestionComponent(
           ^.className := "question",
           i18n("app.question"),
           " ",
-          questionNumber
+          questionNumber,
         ),
         pointsMetadata(question),
       )
     }
 
     private def showSingleQuestion(
-        question: Question.Standard,
-    )(
-        implicit props: Props,
+        question: Question.Standard
+    )(implicit
+        props: Props
     ): VdomElement = {
       implicit val _ = props.quizState
       val progressIndex = props.questionProgressIndex
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
-      val showSubmissionsOnChoices = question.isMultipleChoice && (question.onlyFirstGainsPoints || answerIsVisible)
+      val showSubmissionsOnChoices =
+        question.isMultipleChoice && (question.onlyFirstGainsPoints || answerIsVisible)
       val showGamepadIconUnderChoices =
         props.quizState.submissions.nonEmpty || (props.quizState.canAnyTeamSubmitResponse && question.onlyFirstGainsPoints)
       val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
@@ -200,7 +202,7 @@ final class QuestionComponent(
                     playing = timerIsRunning,
                     key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
                   )
-                }
+                },
               )
             }
           },
@@ -217,12 +219,13 @@ final class QuestionComponent(
                     yield {
                       val visibleSubmissions =
                         if (showSubmissionsOnChoices)
-                          props.quizState.submissions.filter(
-                            _.value == SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
+                          props.quizState.submissions
+                            .filter(_.value == SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
                         else Seq()
                       val isCorrectAnswer =
                         question.isCorrectAnswer(
-                          SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex)) == Some(true)
+                          SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex)
+                        ) == Some(true)
                       <.li(
                         ^.key := choice,
                         answerBullet.toVdomNode,
@@ -236,8 +239,8 @@ final class QuestionComponent(
                         " ",
                         showSubmissions(visibleSubmissions),
                       )
-                    }).toVdomArray
-                )
+                    }).toVdomArray,
+                ),
               )
             }
           },
@@ -250,7 +253,7 @@ final class QuestionComponent(
           " ",
           <<.ifThen(!showSubmissionsOnChoices) {
             showSubmissions(props.quizState.submissions)
-          }
+          },
         ),
         <<.ifThen(question.choices.isEmpty || !answerIsVisible) {
           ifVisibleOrMaster(answerIsVisible) {
@@ -291,14 +294,14 @@ final class QuestionComponent(
               key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
             )
           }
-        }
+        },
       )
     }
 
     private def showDoubleQuestion(
-        question: Question.DoubleQ,
-    )(
-        implicit props: Props,
+        question: Question.DoubleQ
+    )(implicit
+        props: Props
     ): VdomElement = {
       implicit val _ = props.quizState
       val progressIndex = props.questionProgressIndex
@@ -345,8 +348,8 @@ final class QuestionComponent(
                 (for ((choice, answerBullet) <- question.textualChoices zip AnswerBullet.all)
                   yield {
                     val submissions =
-                      props.quizState.submissions.filter(
-                        _.value == SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
+                      props.quizState.submissions
+                        .filter(_.value == SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex))
                     val isCorrectAnswer =
                       question
                         .isCorrectAnswer(SubmissionValue.MultipleChoiceAnswer(answerBullet.answerIndex)) ==
@@ -354,7 +357,9 @@ final class QuestionComponent(
                     <.li(
                       ^.key := choice,
                       answerBullet.toVdomNode,
-                      if (isCorrectAnswer && (answerIsVisible || submissions.nonEmpty || props.showMasterData)) {
+                      if (
+                        isCorrectAnswer && (answerIsVisible || submissions.nonEmpty || props.showMasterData)
+                      ) {
                         <.span(^.className := "correct", choice)
                       } else if (!isCorrectAnswer && submissions.nonEmpty) {
                         <.span(^.className := "incorrect", choice)
@@ -364,8 +369,8 @@ final class QuestionComponent(
                       " ",
                       showSubmissions(submissions),
                     )
-                  }).toVdomArray
-              )
+                  }).toVdomArray,
+              ),
             )
           },
         ),
@@ -373,21 +378,21 @@ final class QuestionComponent(
           ^.className := "submissions-without-choices",
           ifVisibleOrMaster(props.quizState.canAnyTeamSubmitResponse) {
             Bootstrap.FontAwesomeIcon("gamepad")
-          }
+          },
         ),
         <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && correctSubmissionWasEntered) {
           <.div(
             ^.className := "timer",
             syncedTimerBar(maxTime = question.maxTime),
           )
-        }
+        },
       )
     }
 
     private def showOrderItemsQuestion(
-        question: Question.OrderItems,
-    )(
-        implicit props: Props,
+        question: Question.OrderItems
+    )(implicit
+        props: Props
     ): VdomElement = {
       implicit val _ = props.quizState
       val progressIndex = props.questionProgressIndex
@@ -426,7 +431,7 @@ final class QuestionComponent(
                           s"${question.toCharacterCode(item)}/ ${item.item}",
                           <<.ifDefined(item.answerDetail) { answerDetail =>
                             s" ($answerDetail)"
-                          }
+                          },
                         ),
                       )
                     }).toVdomArray
@@ -445,7 +450,7 @@ final class QuestionComponent(
         },
         <.div(
           ^.className := "submissions-without-choices",
-          showSubmissions(props.quizState.submissions)
+          showSubmissions(props.quizState.submissions),
         ),
         ifVisibleOrMaster(answerIsVisible) {
           if (answerIsVisible) {
@@ -516,7 +521,7 @@ final class QuestionComponent(
             if (question.defaultPointsToGainOnWrongAnswer == -1) i18n("app.wrong-answer-loses-1-point")
             else i18n("app.wrong-answer-loses-n-points", question.defaultPointsToGainOnWrongAnswer.negate)
           ) + "."
-        }
+        },
       )
     }
 
@@ -525,10 +530,9 @@ final class QuestionComponent(
         for {
           (submission, index) <- submissions.zipWithIndex
           team <- props.teams.find(_.id == submission.teamId)
-        } yield
-          TeamIcon(team)(
-            ^.key := s"${submission.teamId}-$index",
-          )
+        } yield TeamIcon(team)(
+          ^.key := s"${submission.teamId}-$index"
+        )
       )
     }
 
@@ -561,7 +565,7 @@ final class QuestionComponent(
         <.br(),
         "Restart: shift + r",
         <.br(),
-        "Toggle fullscreen: alt + enter"
+        "Toggle fullscreen: alt + enter",
       )
     }
   }

@@ -20,8 +20,8 @@ import scala.collection.mutable
 import scala.concurrent.duration._
 import scala.scalajs.js
 
-final class Layout(
-    implicit sbadminLayout: SbadminLayout,
+final class Layout(implicit
+    sbadminLayout: SbadminLayout,
     teamsList: TeamsList,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     quizConfig: QuizConfig,
@@ -41,7 +41,7 @@ final class Layout(
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class State(
-      boundShortcutsAndPreloadedMedia: Boolean = false,
+      boundShortcutsAndPreloadedMedia: Boolean = false
   )
   protected case class Props(router: RouterContext, children: Seq[VdomNode])
 
@@ -74,8 +74,9 @@ final class Layout(
       )
     }
 
-    private def maybeScheduleBindShortcutsAndPreloadMedia(state: State)(
-        implicit router: RouterContext): Unit = {
+    private def maybeScheduleBindShortcutsAndPreloadMedia(
+        state: State
+    )(implicit router: RouterContext): Unit = {
       if (!state.boundShortcutsAndPreloadedMedia && AppPages.isMasterOnlyPage(router.currentPage)) {
         js.timers.setTimeout(300.milliseconds) {
           val updatedState = $.state.runNow()
@@ -92,16 +93,22 @@ final class Layout(
       println("  Binding shortcuts...")
 
       def bind(shortcut: String, runnable: () => Unit): Unit = {
-        Mousetrap.bind(shortcut, e => {
-          e.preventDefault()
-          runnable()
-        })
+        Mousetrap.bind(
+          shortcut,
+          e => {
+            e.preventDefault()
+            runnable()
+          },
+        )
       }
       def bindGlobal(shortcut: String, runnable: () => Unit): Unit = {
-        Mousetrap.bindGlobal(shortcut, e => {
-          e.preventDefault()
-          runnable()
-        })
+        Mousetrap.bindGlobal(
+          shortcut,
+          e => {
+            e.preventDefault()
+            runnable()
+          },
+        )
       }
 
       // Quiz navigation
@@ -118,10 +125,12 @@ final class Layout(
       for ((teamIndex, shortkey) <- (0 to 10) zip ((1 to 9) :+ 0)) {
         bind(
           s"$shortkey",
-          () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = FixedPointNumber(+1)))
+          () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = FixedPointNumber(+1)),
+        )
         bind(
           s"shift+$shortkey",
-          () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = FixedPointNumber(-1)))
+          () => teamsAndQuizStateStore.updateScore(teamIndex, scoreDiff = FixedPointNumber(-1)),
+        )
       }
     }
 

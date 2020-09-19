@@ -23,8 +23,8 @@ import play.api.Application
 
 import scala.collection.JavaConverters._
 
-final class ApplicationStartHook @Inject()(
-    implicit app: Application,
+final class ApplicationStartHook @Inject() (implicit
+    app: Application,
     entityAccess: JvmEntityAccess,
     clock: Clock,
 ) {
@@ -50,28 +50,28 @@ final class ApplicationStartHook @Inject()(
           name = "Team A",
           score = FixedPointNumber(0),
           index = 0,
-        ),
+        )
       ),
       EntityModification.createAddWithRandomId(
         Team(
           name = "Team B",
           score = FixedPointNumber(0),
           index = 1,
-        ),
+        )
       ),
       EntityModification.createAddWithRandomId(
         Team(
           name = "Team C",
           score = FixedPointNumber(0),
           index = 2,
-        ),
+        )
       ),
       EntityModification.createAddWithRandomId(
         Team(
           name = "Team D",
           score = FixedPointNumber(0),
           index = 3,
-        ),
+        )
       ),
     )
   }

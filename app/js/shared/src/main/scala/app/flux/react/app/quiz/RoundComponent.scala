@@ -7,15 +7,15 @@ import hydro.flux.react.ReactVdomUtils.<<
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
 
-final class RoundComponent(
-    implicit
+final class RoundComponent(implicit
     quizConfig: QuizConfig,
     i18n: I18n,
     submissionsSummaryTable: SubmissionsSummaryTable,
     submissionsSummaryChart: SubmissionsSummaryChart,
 ) {
-  def apply(round: QuizConfig.Round, showMasterData: Boolean = false)(
-      implicit quizState: QuizState): VdomElement = {
+  def apply(round: QuizConfig.Round, showMasterData: Boolean = false)(implicit
+      quizState: QuizState
+  ): VdomElement = {
     <.div(
       ^.className := "round-wrapper",
       <.div(
@@ -26,7 +26,7 @@ final class RoundComponent(
         <<.ifDefined(round.expectedTime) { expectedTime =>
           <.div(
             ^.className := "round-metadata",
-            i18n("app.expected-minutes", expectedTime.toMinutes)
+            i18n("app.expected-minutes", expectedTime.toMinutes),
           )
         }
       },

@@ -6,8 +6,8 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
 
-final class QuizSettingsPanels(
-    implicit teamEditor: TeamEditor,
+final class QuizSettingsPanels(implicit
+    teamEditor: TeamEditor,
     importBackupPanel: ImportBackupPanel,
     generalQuizSettings: GeneralQuizSettings,
 ) extends HydroReactComponent.Stateless {

@@ -24,8 +24,8 @@ import com.google.inject.Inject
 
 import scala.collection.immutable.Seq
 
-class QuizConfigParsableValue @Inject()(
-    implicit quizAssets: QuizAssets,
+class QuizConfigParsableValue @Inject() (implicit
+    quizAssets: QuizAssets
 ) extends MapParsableValue[QuizConfig] {
   override val supportedKeyValuePairs = Map(
     "title" -> Optional(StringValue),
@@ -70,7 +70,8 @@ class QuizConfigParsableValue @Inject()(
           case Some("orderItems")      => OrderItemsQuestionValue.parse(yamlMapWithoutQuestionType)
           case Some(other) =>
             ParseResult.onlyError(
-              s"questionType expected to be one of these: [unset, 'standard', 'double', 'orderItems'], but found $other")
+              s"questionType expected to be one of these: [unset, 'standard', 'double', 'orderItems'], but found $other"
+            )
         }
 
       } else {
@@ -111,9 +112,8 @@ class QuizConfigParsableValue @Inject()(
         audioSrc = map.optional("audioSrc"),
         videoSrc = map.optional("videoSrc"),
         pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
-        pointsToGainOnFirstAnswer =
-          map.optional("pointsToGainOnFirstAnswer") getOrElse map
-            .optional("pointsToGain", FixedPointNumber(1)),
+        pointsToGainOnFirstAnswer = map.optional("pointsToGainOnFirstAnswer") getOrElse map
+          .optional("pointsToGain", FixedPointNumber(1)),
         pointsToGainOnWrongAnswer = map.optional("pointsToGainOnWrongAnswer", FixedPointNumber(0)),
         maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", 180)),
         onlyFirstGainsPoints = map.optional("onlyFirstGainsPoints", false),
@@ -158,7 +158,8 @@ class QuizConfigParsableValue @Inject()(
       "question" -> Required(StringValue),
       "questionDetail" -> Optional(StringValue),
       "orderedItemsThatWillBePresentedInAlphabeticalOrder" -> Required(
-        ListParsableValue(OrderItemValue)(_.item)),
+        ListParsableValue(OrderItemValue)(_.item)
+      ),
       "answerDetail" -> Optional(StringValue),
       "pointsToGain" -> Optional(FixedPointNumberValue),
       "maxTimeSeconds" -> Optional(IntValue),
@@ -183,7 +184,8 @@ class QuizConfigParsableValue @Inject()(
         Question.OrderItems.Item(
           item = s,
           answerDetail = None,
-      ))
+        )
+    )
   }
 
   private object RawOrderItemValue extends MapParsableValue[Question.OrderItems.Item] {
@@ -205,7 +207,8 @@ class QuizConfigParsableValue @Inject()(
         Image(
           src = s,
           size = "large",
-      ))
+        )
+    )
   }
 
   private object RawImageValue extends MapParsableValue[Image] {
