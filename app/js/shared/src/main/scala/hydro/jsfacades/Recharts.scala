@@ -83,7 +83,7 @@ object Recharts {
 
   def Tooltip() = {
     val component = JsComponent[js.Object, Children.None, Null](TooltipComponent)
-    component(js.Dynamic.literal())
+    component(js.Dynamic.literal(isAnimationActive = false))
   }
 
   def Legend() = {
