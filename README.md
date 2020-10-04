@@ -24,7 +24,7 @@ A web-app for conducting a quiz, including a page for players to enter their ans
 docker run nymanjens/quizmaster:latest bin/server
 ```
 
-- Browse to http://<ip_address>:9000
+- Browse to `http://<ip_address>:9000`
 
 ## Configuration
 
