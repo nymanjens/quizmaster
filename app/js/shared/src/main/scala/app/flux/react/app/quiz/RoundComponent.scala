@@ -40,7 +40,7 @@ final class RoundComponent(implicit
         <<.ifDefined(quizConfig.author) { author =>
           <.div(
             ^.className := "round-metadata",
-            author,
+            <<.nl2BrBlockWithLinks(author),
           )
         }
       },
