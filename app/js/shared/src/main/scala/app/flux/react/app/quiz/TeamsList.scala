@@ -93,6 +93,9 @@ final class TeamsList(implicit
           ^^.ifThen(state.teams.size > 6) {
             ^.className := "teams-list-smaller"
           },
+          ^^.ifThen(state.teams.size > 10) {
+            ^.className := "teams-list-smallerer"
+          },
           (for (team <- state.teams) yield {
             val maybeSubmission =
               quizState.submissions.filter(_.teamId == team.id).lastOption
