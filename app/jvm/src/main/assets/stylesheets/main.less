@@ -266,9 +266,16 @@ table.table-bordered {
       &.teams-list-smallerer {
         width: 500px;
         li {
-          float: left;
           width: 240px;
           margin-right: 10px;
+        }
+        li:nth-child(odd) {
+          float: left;
+          clear: both;
+        }
+        li:nth-child(even) {
+          float: right;
+          clear: right;
         }
       }
     }
