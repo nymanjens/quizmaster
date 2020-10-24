@@ -183,6 +183,13 @@ final class ScalaJsApiServerFactory @Inject() (implicit
               oldState.copy(imageIsEnlarged = !oldState.imageIsEnlarged)
             }
 
+          case SetSortTeamsByScore(sortTeamsByScore: Boolean) =>
+            StateUpsertHelper.doQuizStateUpsert { oldState =>
+              oldState.copy(
+                generalQuizSettings = oldState.generalQuizSettings.copy(sortTeamsByScore = sortTeamsByScore)
+              )
+            }
+
           case SetShowAnswers(showAnswers: Boolean) =>
             StateUpsertHelper.doQuizStateUpsert { oldState =>
               oldState.copy(

@@ -62,6 +62,15 @@ final class GeneralQuizSettings(implicit
             <.span(
               <.div(
                 ^.className := "single-quiz-setting",
+                "Sort teams by: ",
+                toggleButttonGroup(
+                  valuesToLabelMap = Map(false -> "Creation time", true -> "Score"),
+                  selectedValue = generalQuizSettings.sortTeamsByScore,
+                  updateValueFunction = teamsAndQuizStateStore.setSortTeamsByScore,
+                ),
+              ),
+              <.div(
+                ^.className := "single-quiz-setting",
                 "Show answers: ",
                 toggleButttonGroup(
                   valuesToLabelMap = Map(false -> "No", true -> "Yes"),

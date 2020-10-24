@@ -15,6 +15,7 @@ object ExportImport {
     s"<~<" +
       s"${fullState.quizState.roundIndex}<~<" +
       s"${fullState.quizState.questionIndex}<~<" +
+      s"${fullState.quizState.generalQuizSettings.sortTeamsByScore}<~<" +
       s"${fullState.quizState.generalQuizSettings.showAnswers}<~<" +
       s"${fullState.quizState.generalQuizSettings.answerBulletType}<~<" +
       exportTeams(fullState.teams) +
@@ -22,16 +23,17 @@ object ExportImport {
   }
 
   def importFromString(string: String): FullState = {
-    val exportRegex: Regex = """<~<(-?\d+)<~<(-?\d+)<~<(\w+)<~<(\w+)<~<(.+)>~>""".r
+    val exportRegex: Regex = """<~<(-?\d+)<~<(-?\d+)<~<(\w+)<~<(\w+)<~<(\w+)<~<(.+)>~>""".r
 
     string.trim match {
-      case exportRegex(roundIndex, questionIndex, showAnswers, answerBulletType, teamsString) =>
+      case exportRegex(roundIndex, questionIndex, sortTeamsByScore, showAnswers, answerBulletType, teamsString) =>
         FullState(
           teams = importTeams(teamsString),
           quizState = QuizState(
             roundIndex = roundIndex.toInt,
             questionIndex = questionIndex.toInt,
             generalQuizSettings = GeneralQuizSettings(
+              sortTeamsByScore = sortTeamsByScore.toBoolean,
               showAnswers = showAnswers.toBoolean,
               answerBulletType = answerBulletType match {
                 case "Arrows"     => AnswerBulletType.Arrows

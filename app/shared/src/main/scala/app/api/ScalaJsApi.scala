@@ -100,6 +100,7 @@ object ScalaJsApi {
     case class GoToNextRound() extends TeamOrQuizStateUpdate
     case class ResetCurrentQuestion() extends TeamOrQuizStateUpdate
     case class ToggleImageIsEnlarged() extends TeamOrQuizStateUpdate
+    case class SetSortTeamsByScore(sortTeamsByScore: Boolean) extends TeamOrQuizStateUpdate
     case class SetShowAnswers(showAnswers: Boolean) extends TeamOrQuizStateUpdate
     case class SetAnswerBulletType(answerBulletType: AnswerBulletType) extends TeamOrQuizStateUpdate
     case class ToggleTimerPaused(timerRunningValue: Option[Boolean] = None) extends TeamOrQuizStateUpdate

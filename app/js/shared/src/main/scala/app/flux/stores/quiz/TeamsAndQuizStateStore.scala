@@ -119,6 +119,9 @@ final class TeamsAndQuizStateStore(implicit
   def toggleImageIsEnlarged(): Future[Unit] = {
     scalaJsApiClient.doTeamOrQuizStateUpdate(ToggleImageIsEnlarged())
   }
+  def setSortTeamsByScore(sortTeamsByScore: Boolean): Future[Unit] = {
+    scalaJsApiClient.doTeamOrQuizStateUpdate(SetSortTeamsByScore(sortTeamsByScore))
+  }
   def setShowAnswers(showAnswers: Boolean): Future[Unit] = {
     scalaJsApiClient.doTeamOrQuizStateUpdate(SetShowAnswers(showAnswers))
   }

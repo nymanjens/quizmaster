@@ -238,6 +238,7 @@ object QuizState {
   }
 
   case class GeneralQuizSettings(
+      sortTeamsByScore: Boolean = false,
       showAnswers: Boolean = true,
       answerBulletType: AnswerBulletType = AnswerBulletType.Arrows,
   )

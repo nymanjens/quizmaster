@@ -36,8 +36,9 @@ class ExportImportTest extends Specification {
         questionProgressIndex = 0,
         timerState = TimerState.nullInstance,
         submissions = Seq(),
-        imageIsEnlarged = false,
+        imageIsEnlarged = true,
         generalQuizSettings = GeneralQuizSettings(
+          sortTeamsByScore = true,
           showAnswers = false,
           answerBulletType = AnswerBulletType.Characters,
         ),
