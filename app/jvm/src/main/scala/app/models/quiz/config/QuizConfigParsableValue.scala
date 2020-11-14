@@ -64,7 +64,7 @@ class QuizConfigParsableValue @Inject() (implicit
 
       for (i <- 0 until numQuestions) yield {
         Round(
-          name = i18n("app.round-n", i + 1),
+          name = i18n("app.round-n", String.valueOf(i + 1)),
           questions = rounds.map(_.questions(i)),
           expectedTime = None,
         )
