@@ -21,17 +21,20 @@ import app.models.quiz.config.ValidatingYamlParser.ParsableValue.StringValue
 import app.models.quiz.config.ValidatingYamlParser.ParsableValue.WithStringSimplification
 import app.models.quiz.config.ValidatingYamlParser.ParseResult
 import com.google.inject.Inject
+import hydro.common.I18n
 
 import scala.collection.immutable.Seq
 
 class QuizConfigParsableValue @Inject() (implicit
-    quizAssets: QuizAssets
+    quizAssets: QuizAssets,
+    i18n: I18n,
 ) extends MapParsableValue[QuizConfig] {
   override val supportedKeyValuePairs = Map(
     "title" -> Optional(StringValue),
     "author" -> Optional(StringValue),
     "masterSecret" -> Optional(StringValue),
     "rounds" -> Required(ListParsableValue(RoundValue)(_.name)),
+    "zipRoundsWithGeneticRoundNames" -> Optional(BooleanValue),
   )
 
   override def parseFromParsedMapValues(map: StringMap) = {
@@ -39,8 +42,34 @@ class QuizConfigParsableValue @Inject() (implicit
       title = map.optional("title"),
       author = map.optional("author"),
       masterSecret = map.optional("masterSecret", "*"),
-      rounds = map.required[Seq[Round]]("rounds"),
+      rounds = {
+        val rounds = map.required[Seq[Round]]("rounds")
+        if (map.optional("zipRoundsWithGeneticRoundNames", false)) zipRoundsWithGeneticRoundNames(rounds)
+        else rounds
+      },
     )
+  }
+
+  private def zipRoundsWithGeneticRoundNames(rounds: Seq[Round]): Seq[Round] = {
+    if (rounds.isEmpty) {
+      rounds
+    } else {
+      val numQuestions = rounds.head.questions.size
+      for (round <- rounds) {
+        require(
+          round.questions.size == numQuestions,
+          s"zipRoundsWithGeneticRoundNames is true, but not all rounds have the same amount of questions (${round.name})",
+        )
+      }
+
+      for (i <- 0 until numQuestions) yield {
+        Round(
+          name = i18n("app.round-n", i + 1),
+          questions = rounds.map(_.questions(i)),
+          expectedTime = None,
+        )
+      }
+    }
   }
 
   private object RoundValue extends MapParsableValue[Round] {

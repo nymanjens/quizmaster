@@ -16,6 +16,7 @@ import com.google.inject.AbstractModule
 import com.google.inject.Guice
 import com.google.inject.Module
 import com.typesafe.config.ConfigFactory
+import hydro.common.I18n
 import org.junit.runner._
 import org.specs2.runner._
 import org.specs2.mutable.Specification
@@ -280,6 +281,9 @@ class QuizConfigParsableValueTest extends Specification {
       override def configure(): Unit = {
         bind(classOf[play.api.Configuration])
           .toInstance(play.api.Configuration("app.quiz.configYamlFilePath" -> configYamlFilePath))
+        bind(classOf[I18n]).toInstance(new I18n {
+          override def apply(key: String, args: Any*): String = key
+        })
       }
     }
   }

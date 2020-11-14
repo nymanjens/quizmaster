@@ -124,6 +124,7 @@ app.submit-and-create=Verzenden en nieuwe maken
 # Added for quizmaster
 app.welcome=Welkom
 app.end-of-the-quiz=Einde van de quiz!
+app.round-n=Ronde {0}
 app.round-i-of-n=Ronde {0} van {1}
 app.question-i-of-n=Vraag {0} van {1}
 app.questions=vragen
