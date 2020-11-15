@@ -113,6 +113,7 @@ class QuizConfigParsableValueTest extends Specification {
             Question.Standard(
               question = "What is the capital of France?",
               questionDetail = None,
+              tag = None,
               choices = Some(Seq("Paris", "London", "Brussels", "Berlin")),
               answer = "Paris",
               answerDetail =
@@ -132,6 +133,7 @@ class QuizConfigParsableValueTest extends Specification {
             Question.Standard(
               question = "What is the capital of Belgium?",
               questionDetail = None,
+              tag = None,
               choices = Some(Seq("Paris", "London", "Brussels", "Berlin")),
               answer = "Brussels",
               answerDetail = None,
@@ -150,6 +152,7 @@ class QuizConfigParsableValueTest extends Specification {
             Question.Standard(
               question = "Who was the country Columbia named after?",
               questionDetail = None,
+              tag = None,
               choices = None,
               answer = "Christoffer Columbus",
               answerDetail = None,
@@ -168,6 +171,7 @@ class QuizConfigParsableValueTest extends Specification {
             Question.OrderItems(
               question = "Order these cities from small to large",
               questionDetail = Some("Population according to Google on July 2020"),
+              tag = None,
               orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
                 Question.OrderItems.Item(item = "Riga", answerDetail = None),
                 Question.OrderItems.Item(item = "Stockholm", answerDetail = None),
@@ -181,6 +185,7 @@ class QuizConfigParsableValueTest extends Specification {
             Question.OrderItems(
               question = "Order these cities from small to large",
               questionDetail = None,
+              tag = None,
               orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
                 Question.OrderItems.Item(item = "Riga", answerDetail = Some("~600k")),
                 Question.OrderItems.Item(item = "Stockholm", answerDetail = Some("~1M")),
@@ -200,6 +205,7 @@ class QuizConfigParsableValueTest extends Specification {
             Question.Standard(
               question = "After which season is this track named?",
               questionDetail = Some("(Royalty Free Music from Bensound)"),
+              tag = None,
               choices = None,
               answer = "Summer",
               answerDetail = Some("(By Bensound)"),
