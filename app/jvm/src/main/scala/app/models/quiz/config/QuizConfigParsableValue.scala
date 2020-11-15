@@ -113,6 +113,7 @@ class QuizConfigParsableValue @Inject() (implicit
     override val supportedKeyValuePairs = Map(
       "question" -> Required(StringValue),
       "questionDetail" -> Optional(StringValue),
+      "tag" -> Optional(StringValue),
       "choices" -> Optional(ListParsableValue(StringValue)(s => s)),
       "answer" -> Required(StringValue),
       "answerDetail" -> Optional(StringValue),
@@ -132,6 +133,7 @@ class QuizConfigParsableValue @Inject() (implicit
       Question.Standard(
         question = map.required[String]("question"),
         questionDetail = map.optional("questionDetail"),
+        tag = map.optional("tag"),
         choices = map.optional("choices"),
         answer = map.required[String]("answer"),
         answerDetail = map.optional("answerDetail"),
@@ -186,6 +188,7 @@ class QuizConfigParsableValue @Inject() (implicit
     override val supportedKeyValuePairs = Map(
       "question" -> Required(StringValue),
       "questionDetail" -> Optional(StringValue),
+      "tag" -> Optional(StringValue),
       "orderedItemsThatWillBePresentedInAlphabeticalOrder" -> Required(
         ListParsableValue(OrderItemValue)(_.item)
       ),
@@ -197,6 +200,7 @@ class QuizConfigParsableValue @Inject() (implicit
       Question.OrderItems(
         question = map.required[String]("question"),
         questionDetail = map.optional("questionDetail"),
+        tag = map.optional("tag"),
         orderedItemsThatWillBePresentedInAlphabeticalOrder =
           map.required[Seq[Question.OrderItems.Item]]("orderedItemsThatWillBePresentedInAlphabeticalOrder"),
         answerDetail = map.optional("answerDetail"),

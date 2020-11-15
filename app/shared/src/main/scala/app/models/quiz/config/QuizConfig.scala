@@ -86,6 +86,7 @@ object QuizConfig {
     case class Standard(
         question: String,
         questionDetail: Option[String],
+        tag: Option[String],
         choices: Option[Seq[String]],
         answer: String,
         answerDetail: Option[String],
@@ -263,6 +264,7 @@ object QuizConfig {
     case class OrderItems(
         question: String,
         questionDetail: Option[String],
+        tag: Option[String],
         orderedItemsThatWillBePresentedInAlphabeticalOrder: Seq[OrderItems.Item],
         answerDetail: Option[String],
         pointsToGain: FixedPointNumber,
