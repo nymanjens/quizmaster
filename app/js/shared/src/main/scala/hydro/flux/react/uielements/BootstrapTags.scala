@@ -10,7 +10,7 @@ object BootstrapTags {
     Seq(Variant.primary, Variant.success, Variant.info, Variant.warning, Variant.danger)
 
   def toStableVariant(tag: String): Variant = {
-    val index = abs(tag.hashCode) % bootstrapClassSuffixOptions.size
+    val index = abs((tag + "SEED").hashCode) % bootstrapClassSuffixOptions.size
     bootstrapClassSuffixOptions(index)
   }
 }

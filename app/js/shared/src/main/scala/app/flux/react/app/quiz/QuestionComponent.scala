@@ -27,6 +27,7 @@ import hydro.flux.react.ReactVdomUtils.<<
 import hydro.flux.react.uielements.Bootstrap
 import hydro.flux.react.uielements.PageHeader
 import hydro.flux.react.ReactVdomUtils.^^
+import hydro.flux.react.uielements.BootstrapTags
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
@@ -136,6 +137,10 @@ final class QuestionComponent(implicit
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
             ^.className := "question",
+            <<.ifDefined(question.tag) {tag =>
+                Bootstrap.Label(BootstrapTags.toStableVariant(tag))(tag)
+            },
+            " ",
             <<.nl2BrBlockWithLinks(question.question),
           )
         },
@@ -402,6 +407,10 @@ final class QuestionComponent(implicit
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
             ^.className := "question",
+            <<.ifDefined(question.tag) {tag =>
+              Bootstrap.Label(BootstrapTags.toStableVariant(tag))(tag)
+            },
+            " ",
             <<.nl2BrBlockWithLinks(question.question),
           )
         },
