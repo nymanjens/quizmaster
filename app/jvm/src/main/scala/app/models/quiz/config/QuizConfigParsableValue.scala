@@ -34,7 +34,7 @@ class QuizConfigParsableValue @Inject() (implicit
     "author" -> Optional(StringValue),
     "masterSecret" -> Optional(StringValue),
     "rounds" -> Required(ListParsableValue(RoundValue)(_.name)),
-    "zipRoundsWithGeneticRoundNames" -> Optional(BooleanValue),
+    "zipRoundsWithGenericRoundNames" -> Optional(BooleanValue),
   )
 
   override def parseFromParsedMapValues(map: StringMap) = {
@@ -44,13 +44,13 @@ class QuizConfigParsableValue @Inject() (implicit
       masterSecret = map.optional("masterSecret", "*"),
       rounds = {
         val rounds = map.required[Seq[Round]]("rounds")
-        if (map.optional("zipRoundsWithGeneticRoundNames", false)) zipRoundsWithGeneticRoundNames(rounds)
+        if (map.optional("zipRoundsWithGenericRoundNames", false)) zipRoundsWithGenericRoundNames(rounds)
         else rounds
       },
     )
   }
 
-  private def zipRoundsWithGeneticRoundNames(rounds: Seq[Round]): Seq[Round] = {
+  private def zipRoundsWithGenericRoundNames(rounds: Seq[Round]): Seq[Round] = {
     if (rounds.isEmpty) {
       rounds
     } else {
@@ -58,7 +58,7 @@ class QuizConfigParsableValue @Inject() (implicit
       for (round <- rounds) {
         require(
           round.questions.size == numQuestions,
-          s"zipRoundsWithGeneticRoundNames is true, but not all rounds have the same amount of questions (${round.name})",
+          s"zipRoundsWithGenericRoundNames is true, but not all rounds have the same amount of questions (${round.name})",
         )
       }
 
