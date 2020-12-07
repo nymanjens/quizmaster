@@ -27,9 +27,9 @@ import scala.util.Random
 
 case class QuizState(
     /**
-      * Number from -1 to `rounds.size`. A value of -1 means that the quiz has not started yet. `rounds.size` means
-      * that the quiz has finished.
-      */
+     * Number from -1 to `rounds.size`. A value of -1 means that the quiz has not started yet. `rounds.size` means
+     * that the quiz has finished.
+     */
     roundIndex: Int = -1,
     /** Number from -1 to `questions.size - 1`. A value of -1 means that the round name should be shown. */
     questionIndex: Int = -1,

@@ -75,10 +75,10 @@ object QuizConfig {
     def maybeTextualChoices: Option[Seq[String]]
 
     /**
-      * Returns true if the given submission is correct according to configured answer.
-      *
-      * Always returns false if the given value is not scorable.
-      */
+     * Returns true if the given submission is correct according to configured answer.
+     *
+     * Always returns false if the given value is not scorable.
+     */
     def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean]
   }
 
@@ -134,12 +134,12 @@ object QuizConfig {
       }
 
       /**
-        * Steps:
-        * 0- Show preparatory title: "Question 2"
-        * 1- Show question: "This is the question, do you know the answer?"
-        * 2- Show answer
-        * 3- (if possible) Show answer and give points
-        */
+       * Steps:
+       * 0- Show preparatory title: "Question 2"
+       * 1- Show question: "This is the question, do you know the answer?"
+       * 2- Show answer
+       * 3- (if possible) Show answer and give points
+       */
       override def progressStepsCount(includeAnswers: Boolean): Int = {
         def oneIfTrue(b: Boolean): Int = if (b) 1 else 0
         val includeStep2 = includeAnswers
@@ -223,13 +223,13 @@ object QuizConfig {
       override def showSingleAnswerButtonToTeams: Boolean = false
 
       /**
-        * Steps:
-        * 0- Show preparatory title: "Question 2"
-        * 1- Show question: "This is the question, do you know the answer?"
-        * 2- Show choices; when right answer is given, start the timer
-        * 3- Show answer
-        * 4- Show answer and give points
-        */
+       * Steps:
+       * 0- Show preparatory title: "Question 2"
+       * 1- Show question: "This is the question, do you know the answer?"
+       * 2- Show choices; when right answer is given, start the timer
+       * 3- Show answer
+       * 4- Show answer and give points
+       */
       override def progressStepsCount(includeAnswers: Boolean): Int = {
         if (includeAnswers) 5 else 3
       }
@@ -329,12 +329,12 @@ object QuizConfig {
       override def showSingleAnswerButtonToTeams: Boolean = false
 
       /**
-        * Steps:
-        * 0- Show preparatory title: "Question 2"
-        * 1- Show question: "This is the question, do you know the answer?"
-        * 2- Show answer
-        * 3- Show answer and give points
-        */
+       * Steps:
+       * 0- Show preparatory title: "Question 2"
+       * 1- Show question: "This is the question, do you know the answer?"
+       * 2- Show answer
+       * 3- Show answer and give points
+       */
       override def progressStepsCount(includeAnswers: Boolean): Int = {
         if (includeAnswers) 4 else 2
       }

@@ -41,9 +41,9 @@ object ScalaJsApi {
   val xorEncryptionByte: Byte = 0xbd.toByte
 
   /**
-    * @param i18nMessages Maps key to the message with placeholders.
-    * @param nextUpdateToken An update token for all changes since this call
-    */
+   * @param i18nMessages Maps key to the message with placeholders.
+   * @param nextUpdateToken An update token for all changes since this call
+   */
   case class GetInitialDataResponse(
       i18nMessages: Map[String, String],
       nextUpdateToken: UpdateToken,
@@ -87,15 +87,15 @@ object ScalaJsApi {
     case class GoToPreviousQuestion() extends TeamOrQuizStateUpdate
 
     /**
-      * Go to the start of the current question if it's not already there or the start of the previous question
-      * otherwise
-      */
+     * Go to the start of the current question if it's not already there or the start of the previous question
+     * otherwise
+     */
     case class GoToNextQuestion() extends TeamOrQuizStateUpdate
 
     /**
-      * Go to the start of the current round if it's not already there or the start of the previous round
-      * otherwise
-      */
+     * Go to the start of the current round if it's not already there or the start of the previous round
+     * otherwise
+     */
     case class GoToPreviousRound() extends TeamOrQuizStateUpdate
     case class GoToNextRound() extends TeamOrQuizStateUpdate
     case class ResetCurrentQuestion() extends TeamOrQuizStateUpdate

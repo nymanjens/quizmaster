@@ -26,7 +26,14 @@ object ExportImport {
     val exportRegex: Regex = """<~<(-?\d+)<~<(-?\d+)<~<(\w+)<~<(\w+)<~<(\w+)<~<(.+)>~>""".r
 
     string.trim match {
-      case exportRegex(roundIndex, questionIndex, sortTeamsByScore, showAnswers, answerBulletType, teamsString) =>
+      case exportRegex(
+            roundIndex,
+            questionIndex,
+            sortTeamsByScore,
+            showAnswers,
+            answerBulletType,
+            teamsString,
+          ) =>
         FullState(
           teams = importTeams(teamsString),
           quizState = QuizState(

@@ -19,10 +19,10 @@ trait LocalDatabase {
 
   // **************** Setters ****************//
   /**
-    * Applies given modification in memory but doesn't persist it in the browser's storage (call `save()` to do this).
-    *
-    * @return true if the in memory database changed as a result of this method
-    */
+   * Applies given modification in memory but doesn't persist it in the browser's storage (call `save()` to do this).
+   *
+   * @return true if the in memory database changed as a result of this method
+   */
   def applyModifications(modifications: Seq[EntityModification]): Future[Unit]
   def addAll[E <: Entity: EntityType](entities: Seq[E]): Future[Unit]
 

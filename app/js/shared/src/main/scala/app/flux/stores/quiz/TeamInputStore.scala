@@ -44,8 +44,8 @@ final class TeamInputStore(implicit
   private var _state: State = State.nullInstance
 
   /**
-    * Queue that processes a single task at once to avoid concurrent update issues (on the same client tab).
-    */
+   * Queue that processes a single task at once to avoid concurrent update issues (on the same client tab).
+   */
   private val updateStateQueue: SerializingTaskQueue = SerializingTaskQueue.create()
 
   gamepadStore.register(GamepadStoreListener)

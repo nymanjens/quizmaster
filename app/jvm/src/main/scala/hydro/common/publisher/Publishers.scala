@@ -11,9 +11,9 @@ import scala.collection.immutable.Seq
 object Publishers {
 
   /**
-    * Returns the same publisher as the given one, except that the given `mappingFunction` is applied to all
-    * messages.
-    */
+   * Returns the same publisher as the given one, except that the given `mappingFunction` is applied to all
+   * messages.
+   */
   def map[From, To](delegate: Publisher[From], mappingFunction: From => To): Publisher[To] =
     new MappingPublisher(delegate, mappingFunction)
 
@@ -21,9 +21,9 @@ object Publishers {
     new CombiningPublisher[T](publishers.toVector)
 
   /**
-    * Returns a new publisher that is the same as the given publisher, except that the messages posted by the
-    * given publisher are stored and replayed when the first subscriber is added to the returned subscriber.
-    */
+   * Returns a new publisher that is the same as the given publisher, except that the messages posted by the
+   * given publisher are stored and replayed when the first subscriber is added to the returned subscriber.
+   */
   def delayMessagesUntilFirstSubscriber[T](delegate: Publisher[T]): Publisher[T] =
     new ReplayingPublisher(delegate)
 
