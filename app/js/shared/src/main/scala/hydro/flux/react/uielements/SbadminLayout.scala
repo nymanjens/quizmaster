@@ -80,18 +80,19 @@ final class SbadminLayout(implicit
               applicationDisconnectedIcon(),
               pendingModificationsCounter(),
               versionNavbar(),
-              <.li(linkToPage(AppPages.TeamSelection)),
-              <.li(linkToPage(AppPages.Quiz)),
-              <.li(linkToPage(AppPages.Master)),
+              <.li(linkToPage(AppPages.TeamSelection, "Player input")),
+              <.li(linkToPage(AppPages.Quiz, "Quiz view")),
+              <.li(linkToPage(AppPages.Master, "Master view")),
               <.li(
                 <.a(
                   ^.href := s"/rounds/${quizConfig.masterSecret}/",
                   Bootstrap.FontAwesomeIcon("bar-chart-o", fixedWidth = true),
+                  tooltip("Question stats"),
                 )
               ),
-              <.li(linkToPage(AppPages.SubmissionsSummary)),
-              <.li(linkToPage(AppPages.Gamepad)),
-              <.li(linkToPage(AppPages.QuizSettings)),
+              <.li(linkToPage(AppPages.SubmissionsSummary, "Answers")),
+              <.li(linkToPage(AppPages.Gamepad, "Gamepads")),
+              <.li(linkToPage(AppPages.QuizSettings, "Settings")),
               <.li(
                 <.a(
                   ^.href := "javascript:void(0)",
@@ -103,6 +104,7 @@ final class SbadminLayout(implicit
                     }
                   },
                   Bootstrap.FontAwesomeIcon("lock", fixedWidth = true),
+                  tooltip("Logout"),
                 )
               ),
             )
@@ -128,6 +130,7 @@ final class SbadminLayout(implicit
                     }
                   },
                   Bootstrap.FontAwesomeIcon("unlock", fixedWidth = true),
+                  tooltip("Login as master"),
                 )
               ),
             )
@@ -163,13 +166,24 @@ final class SbadminLayout(implicit
       )
     }
 
-    private def linkToPage(page: Page)(implicit router: RouterContext): VdomElement = {
+    private def linkToPage(page: Page, tooltipText: String)(implicit router: RouterContext): VdomElement = {
       router.anchorWithHrefTo(page)(
         ^^.ifThen(router.currentPage == page) {
           ^.className := "selected"
         },
         <.i(
           ^.className := page.iconClass
+        ),
+        tooltip(tooltipText)
+      )
+    }
+
+    private def tooltip(tooltipText: String): TagMod = {
+      TagMod(
+        ^.className := "with-tooltip",
+        <.span(
+          ^.className := "tooltiptext",
+          tooltipText,
         ),
       )
     }
