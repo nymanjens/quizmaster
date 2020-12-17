@@ -1,5 +1,6 @@
 package app.flux.react.app.quiz
 
+import scala.collection.immutable.Seq
 import hydro.jsfacades.ReactBeautifulDnd
 import hydro.jsfacades.ReactBeautifulDnd.OnDragEndHandler
 import app.api.ScalaJsApiClient
@@ -366,6 +367,7 @@ final class TeamControllerView(implicit
                 listener = { newValue =>
                   $.forceUpdate.runNow() // To update OrderItem buttons
                 },
+                extraTagMods = Seq(^.autoComplete := "off"),
               )
             ),
           ),

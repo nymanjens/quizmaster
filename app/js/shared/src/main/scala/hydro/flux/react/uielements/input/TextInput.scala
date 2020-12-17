@@ -35,6 +35,7 @@ object TextInput extends HydroReactComponent {
       disabled: Boolean = false,
       defaultValue: String = "",
       listener: String => Unit = _ => (): Unit,
+      extraTagMods: Seq[TagMod] = Seq(),
   ): VdomElement = {
     val props = Props(
       name = name,
@@ -44,6 +45,7 @@ object TextInput extends HydroReactComponent {
       disabled = disabled,
       defaultValue = defaultValue,
       listener = listener,
+      extraTagMods = extraTagMods,
     )
     ref.mutableRef.component(props)
   }
@@ -73,6 +75,7 @@ object TextInput extends HydroReactComponent {
       disabled: Boolean,
       defaultValue: String,
       listener: String => Unit,
+      extraTagMods: Seq[TagMod],
   )
   protected case class State(value: String) {
     def withValue(newValue: String): State = copy(value = newValue)
@@ -125,6 +128,8 @@ object TextInput extends HydroReactComponent {
           }
         },
         ^.autoFocus := props.focusOnMount,
+      )(
+        props.extraTagMods: _*
       ).withRef(theInput)
     }
   }
