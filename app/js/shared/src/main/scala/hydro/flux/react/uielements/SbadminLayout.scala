@@ -104,7 +104,7 @@ final class SbadminLayout(implicit
                     }
                   },
                   Bootstrap.FontAwesomeIcon("lock", fixedWidth = true),
-                  tooltip("Logout"),
+                  tooltip("Logout", alignRight = true),
                 )
               ),
             )
@@ -130,7 +130,7 @@ final class SbadminLayout(implicit
                     }
                   },
                   Bootstrap.FontAwesomeIcon("unlock", fixedWidth = true),
-                  tooltip("Login as master"),
+                  tooltip("Login as master", alignRight = true),
                 )
               ),
             )
@@ -178,11 +178,12 @@ final class SbadminLayout(implicit
       )
     }
 
-    private def tooltip(tooltipText: String): TagMod = {
+    private def tooltip(tooltipText: String, alignRight: Boolean = false): TagMod = {
       TagMod(
         ^.className := "with-tooltip",
         <.span(
           ^.className := "tooltiptext",
+          ^^.ifThen(alignRight) (^.className := "tooltiptext-align-right"),
           tooltipText,
         ),
       )
