@@ -306,6 +306,9 @@ final class ScalaJsApiServerFactory @Inject() (implicit
 
         val question = quizState.maybeQuestion.get
         val isCorrectAnswer = question.isCorrectAnswer(submissionValue)
+        def teamHasSubmission(thisTeam: Team): Boolean =
+          quizState.submissions.exists(_.teamId == thisTeam.id)
+        lazy val allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
 
         if (question.isMultipleChoice) {
           addVerifiedSubmission(
@@ -318,7 +321,7 @@ final class ScalaJsApiServerFactory @Inject() (implicit
             resetTimer = question.isInstanceOf[Question.DoubleQ],
             pauseTimer =
               if (question.onlyFirstGainsPoints) isCorrectAnswer == Some(true)
-              else false,
+              else allOtherTeamsHaveSubmission,
             allowMoreThanOneSubmissionPerTeam = false,
             removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
           )
@@ -330,7 +333,7 @@ final class ScalaJsApiServerFactory @Inject() (implicit
               value = submissionValue,
               isCorrectAnswer = isCorrectAnswer,
             ),
-            pauseTimer = if (question.onlyFirstGainsPoints) true else false,
+            pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
             allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
             removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
           )
