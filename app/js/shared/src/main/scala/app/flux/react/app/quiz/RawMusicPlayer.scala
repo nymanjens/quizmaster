@@ -64,7 +64,7 @@ private[quiz] object RawMusicPlayer extends HydroReactComponent.Stateless {
 
     override def render(props: Props, state: State) = logExceptions {
       <.audio(
-        ^.controls := false,
+        ^.controls := true,
         ^.src := props.src,
         ^.preload := "auto",
       ).withRef(audioRef)

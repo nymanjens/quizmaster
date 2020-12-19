@@ -260,6 +260,17 @@ final class QuestionComponent(implicit
             showSubmissions(props.quizState.submissions)
           },
         ),
+        <<.ifDefined(question.audioSrc) { audioRelativePath =>
+          <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && !props.showMasterData) {
+            val timerState = props.quizState.timerState
+            val timerIsRunning = timerState.timerRunning && !timerState.hasFinished(question.maxTime)
+            audioPlayer(
+              audioRelativePath,
+              playing = timerIsRunning,
+              key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
+            )
+          }
+        },
         <<.ifThen(question.choices.isEmpty || !answerIsVisible) {
           ifVisibleOrMaster(answerIsVisible) {
             if (answerIsVisible) {
@@ -288,17 +299,6 @@ final class QuestionComponent(implicit
             },
             syncedTimerBar(maxTime = question.maxTime),
           )
-        },
-        <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && !props.showMasterData) {
-          <<.ifDefined(question.audioSrc) { audioRelativePath =>
-            val timerState = props.quizState.timerState
-            val timerIsRunning = timerState.timerRunning && !timerState.hasFinished(question.maxTime)
-            audioPlayer(
-              audioRelativePath,
-              playing = timerIsRunning,
-              key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
-            )
-          }
         },
       )
     }
