@@ -17,6 +17,7 @@ case class QuizConfig(
     rounds: Seq[Round],
     title: Option[String],
     author: Option[String],
+    instructionsOnFirstSlide: Option[String],
     masterSecret: String,
 )
 

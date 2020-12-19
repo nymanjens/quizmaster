@@ -32,6 +32,7 @@ class QuizConfigParsableValue @Inject() (implicit
   override val supportedKeyValuePairs = Map(
     "title" -> Optional(StringValue),
     "author" -> Optional(StringValue),
+    "instructionsOnFirstSlide" -> Optional(StringValue),
     "masterSecret" -> Optional(StringValue),
     "rounds" -> Required(ListParsableValue(RoundValue)(_.name)),
     "zipRoundsWithGenericRoundNames" -> Optional(BooleanValue),
@@ -41,6 +42,7 @@ class QuizConfigParsableValue @Inject() (implicit
     QuizConfig(
       title = map.optional("title"),
       author = map.optional("author"),
+      instructionsOnFirstSlide = map.optional("instructionsOnFirstSlide"),
       masterSecret = map.optional("masterSecret", "*"),
       rounds = {
         val rounds = map.required[Seq[Round]]("rounds")

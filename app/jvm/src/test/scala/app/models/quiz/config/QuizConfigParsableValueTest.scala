@@ -33,6 +33,7 @@ class QuizConfigParsableValueTest extends Specification {
       """
         |title: Demo quiz
         |author: Jens Nyman
+        |instructionsOnFirstSlide: Don't look up the answers online
         |masterSecret: quiz # Remove this line to allow anyone to access the master controls
         |
         |rounds:
@@ -104,6 +105,7 @@ class QuizConfigParsableValueTest extends Specification {
     quizConfig mustEqual QuizConfig(
       title = Some("Demo quiz"),
       author = Some("Jens Nyman"),
+      instructionsOnFirstSlide = Some("Don't look up the answers online"),
       masterSecret = "quiz",
       rounds = Seq(
         Round(
@@ -253,6 +255,7 @@ class QuizConfigParsableValueTest extends Specification {
     quizConfig mustEqual QuizConfig(
       title = Some("Demo quiz"),
       author = None,
+      instructionsOnFirstSlide = None,
       masterSecret = "*",
       rounds = Seq(),
     )

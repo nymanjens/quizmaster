@@ -44,6 +44,14 @@ final class RoundComponent(implicit
           )
         }
       },
+      <<.ifThen(quizState.quizIsBeingSetUp) {
+        <<.ifDefined(quizConfig.instructionsOnFirstSlide) { instructionsOnFirstSlide =>
+          <.div(
+            ^.className := "round-metadata",
+            <<.nl2BrBlockWithLinks(instructionsOnFirstSlide),
+          )
+        }
+      },
       <<.ifThen(quizState.quizIsBeingSetUp && showMasterData) {
         <.div(
           ^.className := "round-help",

@@ -1,5 +1,6 @@
 title: Demo quiz
 author: Jens Nyman
+instructionsOnFirstSlide: Please, don't look up the answers online
 masterSecret: quiz # Remove this line to allow anyone to access the master controls
 
 rounds:
