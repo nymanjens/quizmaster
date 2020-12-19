@@ -174,7 +174,7 @@ final class SbadminLayout(implicit
         <.i(
           ^.className := page.iconClass
         ),
-        tooltip(tooltipText)
+        tooltip(tooltipText),
       )
     }
 
@@ -183,7 +183,7 @@ final class SbadminLayout(implicit
         ^.className := "with-tooltip",
         <.span(
           ^.className := "tooltiptext",
-          ^^.ifThen(alignRight) (^.className := "tooltiptext-align-right"),
+          ^^.ifThen(alignRight)(^.className := "tooltiptext-align-right"),
           tooltipText,
         ),
       )
