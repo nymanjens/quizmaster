@@ -224,7 +224,7 @@ final class ScalaJsApiServerFactory @Inject() (implicit
                 timerState = TimerState(
                   lastSnapshotInstant = clock.nowInstant,
                   lastSnapshotElapsedTime = Seq(Duration.ZERO, timerState.elapsedTime() - duration).max,
-                  timerRunning = timerState.timerRunning,
+                  timerRunning = if(duration.isNegative) timerState.timerRunning else true,
                   uniqueIdOfMediaPlaying = timerState.uniqueIdOfMediaPlaying,
                 )
               )
