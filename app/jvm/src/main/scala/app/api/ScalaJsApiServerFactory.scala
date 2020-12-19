@@ -219,15 +219,31 @@ final class ScalaJsApiServerFactory @Inject() (implicit
 
           case AddTimeToTimer(duration: Duration) =>
             StateUpsertHelper.doQuizStateUpsert { state =>
+              val maxTime = state.maybeQuestion.map(_.maxTime) getOrElse Duration.ZERO
               val timerState = state.timerState
-              state.copy(
-                timerState = TimerState(
-                  lastSnapshotInstant = clock.nowInstant,
-                  lastSnapshotElapsedTime = Seq(Duration.ZERO, timerState.elapsedTime() - duration).max,
-                  timerRunning = if(duration.isNegative) timerState.timerRunning else true,
-                  uniqueIdOfMediaPlaying = timerState.uniqueIdOfMediaPlaying,
+              val durationIsPositive = !duration.isNegative
+              if (timerState.hasFinished(maxTime) && durationIsPositive) {
+                // Adding time to an expired timer --> reset because:
+                //   - the elapsed time may not be accurate
+                //   - the timer should start running again
+                state.copy(
+                  timerState = TimerState(
+                    lastSnapshotInstant = clock.nowInstant,
+                    lastSnapshotElapsedTime = maxTime - duration,
+                    timerRunning = true,
+                    uniqueIdOfMediaPlaying = timerState.uniqueIdOfMediaPlaying,
+                  )
                 )
-              )
+              } else {
+                state.copy(
+                  timerState = TimerState(
+                    lastSnapshotInstant = clock.nowInstant,
+                    lastSnapshotElapsedTime = Seq(Duration.ZERO, timerState.elapsedTime() - duration).max,
+                    timerRunning = timerState.timerRunning,
+                    uniqueIdOfMediaPlaying = timerState.uniqueIdOfMediaPlaying,
+                  )
+                )
+              }
             }
 
           case RestartMedia() =>
