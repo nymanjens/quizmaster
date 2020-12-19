@@ -338,7 +338,6 @@ final class TeamControllerView(implicit
           question: Question,
           defaultValue: String = "",
           textAlwaysDisabled: Boolean = false,
-          clearTextAfterSubmit: Boolean = true,
       )(implicit
           team: Team,
           quizState: QuizState,
@@ -386,9 +385,6 @@ final class TeamControllerView(implicit
                 if (answer.isEmpty || alreadySubmittedThisValue) {
                   Callback.empty
                 } else {
-                  if (clearTextAfterSubmit) {
-                    freeTextAnswerInputRef().setValue("")
-                  }
                   submitResponse(SubmissionValue.FreeTextAnswer(makeWhitespaceVisible(answer)))
                 }
               },
@@ -433,7 +429,6 @@ final class TeamControllerView(implicit
             question,
             defaultValue = items.map(question.toCharacterCode).mkString,
             textAlwaysDisabled = true,
-            clearTextAfterSubmit = false,
           ),
           if (canSubmitResponse) {
             ReactBeautifulDnd.DragDropContext(onDragEndHandler = onDragEndHandler(items, question))(
