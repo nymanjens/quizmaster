@@ -322,9 +322,15 @@ final class ScalaJsApiServerFactory @Inject() (implicit
 
         val question = quizState.maybeQuestion.get
         val isCorrectAnswer = question.isCorrectAnswer(submissionValue)
-        def teamHasSubmission(thisTeam: Team): Boolean =
-          quizState.submissions.exists(_.teamId == thisTeam.id)
-        lazy val allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
+        val shouldPauseTimerBecauseAllTeamsHaveSubmission = {
+          def teamHasSubmission(thisTeam: Team): Boolean =
+            quizState.submissions.exists(_.teamId == thisTeam.id)
+          val allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
+          // Only pause if this submission is the one that changes the state from "not all teams have
+          // submitted" to "all teams have submitted". This means that this team shouldn't already have a
+          // submission.
+          allOtherTeamsHaveSubmission && !teamHasSubmission(team)
+        }
 
         if (question.isMultipleChoice) {
           addVerifiedSubmission(
@@ -337,7 +343,7 @@ final class ScalaJsApiServerFactory @Inject() (implicit
             resetTimer = question.isInstanceOf[Question.DoubleQ],
             pauseTimer =
               if (question.onlyFirstGainsPoints) isCorrectAnswer == Some(true)
-              else allOtherTeamsHaveSubmission,
+              else shouldPauseTimerBecauseAllTeamsHaveSubmission,
             allowMoreThanOneSubmissionPerTeam = false,
             removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
           )
@@ -349,7 +355,8 @@ final class ScalaJsApiServerFactory @Inject() (implicit
               value = submissionValue,
               isCorrectAnswer = isCorrectAnswer,
             ),
-            pauseTimer = if (question.onlyFirstGainsPoints) true else allOtherTeamsHaveSubmission,
+            pauseTimer =
+              if (question.onlyFirstGainsPoints) true else shouldPauseTimerBecauseAllTeamsHaveSubmission,
             allowMoreThanOneSubmissionPerTeam = question.onlyFirstGainsPoints,
             removeEarlierDifferentSubmissionBySameTeam = !question.onlyFirstGainsPoints,
           )
