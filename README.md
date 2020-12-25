@@ -65,6 +65,3 @@ Follow these steps to host a quiz:
   - `shift + =/-`: Add/subtract 30 seconds from the current timer
   - `alt + enter`: Toggle enlarged image (if there is a visible image)
   - `a`: toggle the answer to be visible in the master view (http://localhost:9000/app/master)
-- **Scoring**
-  - `1/2/3/.../0`: Increase the score of team 1, 2, ..., 10 by one point
-  - `shift + 1/2/3/.../0`: Decrease the score of team 1, 2, ..., 10 by one point
