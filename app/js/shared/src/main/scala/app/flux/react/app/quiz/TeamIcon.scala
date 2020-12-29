@@ -11,16 +11,21 @@ object TeamIcon {
   private val colors: Seq[String] =
     Seq("red", "orange", "blue", "green", "deeppink", "#DD0", "purple", "fuchsia")
   private val icons: Seq[VdomTag] = Seq(
-    Bootstrap.FontAwesomeIcon("bomb", fixedWidth = true),
-    Bootstrap.FontAwesomeIcon("beer", fixedWidth = true),
+    Bootstrap.FontAwesomeIcon("tree", fixedWidth = true),
+    Bootstrap.FontAwesomeIcon("paw", fixedWidth = true),
+    Bootstrap.FontAwesomeIcon("rocket", fixedWidth = true),
     Bootstrap.FontAwesomeIcon("truck", fixedWidth = true),
-    Bootstrap.FontAwesomeIcon("flag", fixedWidth = true),
-    Bootstrap.FontAwesomeIcon("anchor", fixedWidth = true),
-    Bootstrap.FontAwesomeIcon("road", fixedWidth = true),
-    Bootstrap.FontAwesomeIcon("shopping-cart", fixedWidth = true),
-    Bootstrap.FontAwesomeIcon("cutlery", fixedWidth = true),
-    Bootstrap.FontAwesomeIcon("shield", fixedWidth = true),
+    Bootstrap.Glyphicon("knight"),
+    Bootstrap.Glyphicon("grain"),
     Bootstrap.FontAwesomeIcon("flask", fixedWidth = true),
+    Bootstrap.FontAwesomeIcon("flag", fixedWidth = true),
+    Bootstrap.FontAwesomeIcon("cloud", fixedWidth = true),
+    Bootstrap.Glyphicon("piggy-bank"),
+    Bootstrap.Glyphicon("sunglasses"),
+    Bootstrap.FontAwesomeIcon("shopping-cart", fixedWidth = true),
+    Bootstrap.FontAwesomeIcon("coffee", fixedWidth = true),
+    Bootstrap.Glyphicon("tree-deciduous"),
+    Bootstrap.FontAwesomeIcon("beer", fixedWidth = true),
   )
 
   def apply(team: Team): VdomTag = {
