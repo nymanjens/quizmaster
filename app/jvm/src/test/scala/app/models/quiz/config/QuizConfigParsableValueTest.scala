@@ -36,6 +36,10 @@ class QuizConfigParsableValueTest extends Specification {
         |author: Jens Nyman
         |instructionsOnFirstSlide: Don't look up the answers online
         |masterSecret: quiz # Remove this line to allow anyone to access the master controls
+        |usageStatistics:
+        |    sendAnonymousUsageDataAtEndOfQuiz: true
+        |    includeAuthor: true
+        |    includeQuizTitle: true
         |
         |rounds:
         |  - name: Geography
@@ -108,7 +112,11 @@ class QuizConfigParsableValueTest extends Specification {
       author = Some("Jens Nyman"),
       instructionsOnFirstSlide = Some("Don't look up the answers online"),
       masterSecret = "quiz",
-      usageStatistics = UsageStatistics.default,
+      usageStatistics = UsageStatistics(
+        sendAnonymousUsageDataAtEndOfQuiz = true,
+        includeAuthor = true,
+        includeQuizTitle = true,
+      ),
       rounds = Seq(
         Round(
           name = "Geography",
