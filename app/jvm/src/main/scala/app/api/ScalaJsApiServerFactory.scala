@@ -774,7 +774,9 @@ final class ScalaJsApiServerFactory @Inject() (implicit
       )
 
       if (
-        !quizState.quizHasEnded && newQuizState.quizHasEnded && quizConfig.usageStatistics.sendAnonymousUsageDataAtEndOfQuiz
+        !quizState.quizHasEnded &&
+        newQuizState.quizHasEnded &&
+        quizConfig.usageStatistics.sendAnonymousUsageDataAtEndOfQuiz
       ) {
         // Return value is unused because we don't wait for the statistics to be sent
         val unusedFuture = sendUsageStatisticsToDeveloper(ExecutionContext.Implicits.global)
