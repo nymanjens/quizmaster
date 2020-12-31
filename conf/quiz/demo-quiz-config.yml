@@ -24,7 +24,7 @@ rounds:
       - question: What is the capital of France?
         choices: [Paris, London, Brussels, Berlin]
         answer: Paris
-        image: {src: geography/france.png, size: small}
+        image: geography/france.png
         answerImage: geography/france-answer.png
         answerDetail: |
           Image released under Creative Commons by Destination2
@@ -62,15 +62,3 @@ rounds:
         answer: Summer
         answerDetail: (By Bensound)
         audioSrc: music_round/bensound-summer.mp3
-
-
-  - name: Double questions round
-    questions:
-      # Special question type: Answer a textual and verbal question simultaneously. Note that this
-      # is quite advanced and you may want to ignore this.
-      - questionType: double
-        verbalQuestion: How many sides does a rectangle have?
-        verbalAnswer: 4
-        textualQuestion: How many sides does a triangle have?
-        textualChoices: [3, 4, 5, 6]
-        textualAnswer: 3
