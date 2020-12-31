@@ -7,6 +7,7 @@ import app.common.FixedPointNumber
 import app.models.quiz.config.QuizConfig.Image
 import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.config.QuizConfig.Round
+import app.models.quiz.config.QuizConfig.UsageStatistics
 
 import scala.collection.immutable.Seq
 import app.models.quiz.config.ValidatingYamlParser.ParseResult
@@ -107,6 +108,7 @@ class QuizConfigParsableValueTest extends Specification {
       author = Some("Jens Nyman"),
       instructionsOnFirstSlide = Some("Don't look up the answers online"),
       masterSecret = "quiz",
+      usageStatistics = UsageStatistics.default,
       rounds = Seq(
         Round(
           name = "Geography",
@@ -257,6 +259,7 @@ class QuizConfigParsableValueTest extends Specification {
       author = None,
       instructionsOnFirstSlide = None,
       masterSecret = "*",
+      usageStatistics = UsageStatistics.default,
       rounds = Seq(),
     )
   }

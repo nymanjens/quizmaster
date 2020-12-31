@@ -35,9 +35,9 @@ class QuizConfigParsableValue @Inject() (implicit
     "author" -> Optional(StringValue),
     "instructionsOnFirstSlide" -> Optional(StringValue),
     "masterSecret" -> Optional(StringValue),
-    "rounds" -> Required(ListParsableValue(RoundValue)(_.name)),
     "zipRoundsWithGenericRoundNames" -> Optional(BooleanValue),
     "usageStatistics" -> Optional(UsageStatisticsValue),
+    "rounds" -> Required(ListParsableValue(RoundValue)(_.name)),
   )
 
   override def parseFromParsedMapValues(map: StringMap) = {
@@ -74,6 +74,21 @@ class QuizConfigParsableValue @Inject() (implicit
           expectedTime = None,
         )
       }
+    }
+  }
+
+  private object UsageStatisticsValue extends MapParsableValue[UsageStatistics] {
+    override val supportedKeyValuePairs = Map(
+      "sendAnonymousUsageDataAtEndOfQuiz" -> Optional(BooleanValue),
+      "includeAuthor" -> Optional(BooleanValue),
+      "includeQuizTitle" -> Optional(BooleanValue),
+    )
+    override def parseFromParsedMapValues(map: StringMap) = {
+      UsageStatistics(
+        sendAnonymousUsageDataAtEndOfQuiz = map.optional("sendAnonymousUsageDataAtEndOfQuiz", false),
+        includeAuthor = map.optional("includeAuthor", false),
+        includeQuizTitle = map.optional("includeQuizTitle", false),
+      )
     }
   }
 
@@ -265,21 +280,6 @@ class QuizConfigParsableValue @Inject() (implicit
         v.validationErrors(),
         quizAssets.imageExistsOrValidationError(v.src).toSet,
       ).flatten
-    }
-  }
-
-  private object UsageStatisticsValue extends MapParsableValue[UsageStatistics] {
-    override val supportedKeyValuePairs = Map(
-      "sendAnonymousUsageDataAtEndOfQuiz" -> Optional(BooleanValue),
-      "includeAuthor" -> Optional(BooleanValue),
-      "includeQuizTitle" -> Optional(BooleanValue),
-    )
-    override def parseFromParsedMapValues(map: StringMap) = {
-      UsageStatistics(
-        sendAnonymousUsageDataAtEndOfQuiz = map.optional("sendAnonymousUsageDataAtEndOfQuiz", false),
-        includeAuthor = map.optional("includeAuthor", false),
-        includeQuizTitle = map.optional("includeQuizTitle", false),
-      )
     }
   }
 
