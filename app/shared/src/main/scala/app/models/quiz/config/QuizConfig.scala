@@ -6,6 +6,7 @@ import app.common.FixedPointNumber
 import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.Submission.SubmissionValue
+import app.models.quiz.config.QuizConfig.UsageStatistics
 import hydro.common.CollectionUtils.conditionalOption
 import hydro.common.GuavaReplacement.ImmutableBiMap
 import hydro.common.GuavaReplacement.Splitter
@@ -19,8 +20,8 @@ case class QuizConfig(
     author: Option[String],
     instructionsOnFirstSlide: Option[String],
     masterSecret: String,
+    usageStatistics: UsageStatistics,
 )
-
 object QuizConfig {
 
   case class Round(
@@ -430,5 +431,18 @@ object QuizConfig {
         )
       ).flatten
     }
+  }
+
+  case class UsageStatistics(
+      sendAnonymousUsageDataAtEndOfQuiz: Boolean,
+      includeAuthor: Boolean,
+      includeQuizTitle: Boolean,
+  )
+  object UsageStatistics {
+    val default: UsageStatistics = UsageStatistics(
+      sendAnonymousUsageDataAtEndOfQuiz = false,
+      includeAuthor = false,
+      includeQuizTitle = false,
+    )
   }
 }

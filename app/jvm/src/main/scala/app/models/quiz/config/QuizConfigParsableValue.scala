@@ -9,6 +9,7 @@ import scala.collection.JavaConverters._
 import app.models.quiz.config.QuizConfig.Image
 import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.config.QuizConfig.Round
+import app.models.quiz.config.QuizConfig.UsageStatistics
 import app.models.quiz.config.ValidatingYamlParser.ParsableValue
 import app.models.quiz.config.ValidatingYamlParser.ParsableValue.BooleanValue
 import app.models.quiz.config.ValidatingYamlParser.ParsableValue.IntValue
@@ -36,6 +37,7 @@ class QuizConfigParsableValue @Inject() (implicit
     "masterSecret" -> Optional(StringValue),
     "rounds" -> Required(ListParsableValue(RoundValue)(_.name)),
     "zipRoundsWithGenericRoundNames" -> Optional(BooleanValue),
+    "usageStatistics" -> Optional(UsageStatisticsValue),
   )
 
   override def parseFromParsedMapValues(map: StringMap) = {
@@ -49,6 +51,7 @@ class QuizConfigParsableValue @Inject() (implicit
         if (map.optional("zipRoundsWithGenericRoundNames", false)) zipRoundsWithGenericRoundNames(rounds)
         else rounds
       },
+      usageStatistics = map.optional("usageStatistics", UsageStatistics.default),
     )
   }
 
@@ -262,6 +265,21 @@ class QuizConfigParsableValue @Inject() (implicit
         v.validationErrors(),
         quizAssets.imageExistsOrValidationError(v.src).toSet,
       ).flatten
+    }
+  }
+
+  private object UsageStatisticsValue extends MapParsableValue[UsageStatistics] {
+    override val supportedKeyValuePairs = Map(
+      "sendAnonymousUsageDataAtEndOfQuiz" -> Optional(BooleanValue),
+      "includeAuthor" -> Optional(BooleanValue),
+      "includeQuizTitle" -> Optional(BooleanValue),
+    )
+    override def parseFromParsedMapValues(map: StringMap) = {
+      UsageStatistics(
+        sendAnonymousUsageDataAtEndOfQuiz = map.optional("sendAnonymousUsageDataAtEndOfQuiz", false),
+        includeAuthor = map.optional("includeAuthor", false),
+        includeQuizTitle = map.optional("includeQuizTitle", false),
+      )
     }
   }
 
