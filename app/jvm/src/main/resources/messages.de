@@ -1,0 +1,64 @@
+# German messages
+
+# --- Errors
+error.invalid=Ungültiger Wert
+error.required=Dieses Feld wird benötigt
+error.date=Gültiges Datum erforderlich
+
+# --- Project-specific messages
+app.date.month.jan.abbrev=jan
+app.date.month.feb.abbrev=feb
+app.date.month.mar.abbrev=mar
+app.date.month.apr.abbrev=apr
+app.date.month.may.abbrev=mei
+app.date.month.jun.abbrev=jun
+app.date.month.jul.abbrev=jul
+app.date.month.aug.abbrev=aug
+app.date.month.sep.abbrev=sep
+app.date.month.oct.abbrev=okt
+app.date.month.nov.abbrev=nov
+app.date.month.dec.abbrev=dez
+
+app.date.dayofweek.mon.abbrev=mo
+app.date.dayofweek.tue.abbrev=di
+app.date.dayofweek.wed.abbrev=mi
+app.date.dayofweek.thu.abbrev=do
+app.date.dayofweek.fri.abbrev=fr
+app.date.dayofweek.sat.abbrev=sa
+app.date.dayofweek.sun.abbrev=so
+
+# Added for quizmaster
+app.welcome=Willkommen!
+app.end-of-the-quiz=Ende des Quiz!
+app.round-n=Runde {0}
+app.round-i-of-n=Runde {0} von {1}
+app.question-i-of-n=Frage {0} von {1}
+app.questions=Fragen
+app.question=Frage
+app.first-right-answer-gains-n-points=Die erste richtige Antwort erhält {0} Punkte
+app.first-right-answer-gains-1-point=Die erste richtige Antwort erhält 1 Punkt
+app.others-gain-1-point=Andere richtige Antworten erhalten 1 Punkt
+app.others-gain-m-points=Andere richtige Antworten erhalten {0} Punkte
+app.all-right-answers-gain-n-points=Alle richtigen Antworten erhalten {0} Punkte
+app.all-right-answers-gain-1-point=Alle richtigen Antworten erhalten  Punkt
+app.wrong-answer-loses-n-points=Fout antwoord verliest {0} punten
+app.wrong-answer-loses-1-point=Falsche Antworten verlieren {0} Punkte
+app.enter-master-secret=Geben Sie das Master-Passwort ein
+app.expected-minutes=Verwachte duur: {0} Minuten
+app.max-points-to-gain=Maximal zu gewinnende Punkte
+app.enter-team-name=Gebe deinen Namen oder den Namen deines Teams ein
+app.waiting-for-the-next-question=Warten auf die nächste Frage ...
+app.stop-the-timer-and-give-the-answer=Stoppe den Timer und gib eine Antwort
+app.indicate-that-you-have-written-down-your-answer=Zeige dass du deine Antwort aufgeschrieben haben
+app.enter-your-answer=Geben deine Antwort ein
+app.you-submitted=Eingereicht
+app.successfully-submitted-answer=Erfolgreich übermittelte Antwort
+app.choose-other-team=Wähle ein anderes Team
+app.give-your-answer=Gib deine Antwort
+app.correct=Richtig!
+app.incorrect=Falsch
+app.summary-of-all-scores=Zusammenfassung aller Ergebnisse
+app.totals=Summe
+app.total-from-submissions=Summe aller Antworten
+app.discretionary-points=Zusätzliche Punkte vom Quizmaster
+app.total-team-score=Gesamtpunktzahl
