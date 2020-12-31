@@ -10,6 +10,8 @@ trait PlayI18n extends I18n {
 
   /** Returns a map that maps key to the message with placeholders. */
   def allI18nMessages: Map[String, String]
+
+  def languageCode: String
 }
 
 object PlayI18n {
@@ -29,5 +31,7 @@ object PlayI18n {
       // defaultLang is extended by "default" in case it didn't overwrite a message key.
       messagesApi.messages("default") ++ messagesApi.messages(defaultLang.code)
     }
+
+    override def languageCode: String = defaultLang.code
   }
 }
