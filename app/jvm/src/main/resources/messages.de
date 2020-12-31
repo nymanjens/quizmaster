@@ -62,3 +62,17 @@ app.totals=Summe
 app.total-from-submissions=Summe aller Antworten
 app.discretionary-points=Zusätzliche Punkte vom Quizmaster
 app.total-team-score=Gesamtpunktzahl
+
+### Missing ###
+# app.first-round-help
+# app.gamepad-setup
+# app.loading
+# app.master
+# app.no-entries
+# app.offline
+# app.quiz
+# app.quiz-settings
+# app.sending-data-to-server
+# app.sending-data-to-server-failed
+# app.submit
+# app.team
