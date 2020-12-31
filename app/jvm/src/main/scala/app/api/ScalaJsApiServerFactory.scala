@@ -1,6 +1,10 @@
 package app.api
 
+import java.io.BufferedReader
+import java.io.InputStream
+import java.io.InputStreamReader
 import java.lang.Math.abs
+import java.net.URL
 
 import hydro.common.time.JavaTimeImplicits._
 import java.time.Duration
@@ -25,6 +29,7 @@ import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.SubmissionEntity
 import app.models.user.User
+import app.AppVersion
 import com.google.inject._
 import hydro.api.PicklableDbQuery
 import hydro.common.PlayI18n
@@ -38,10 +43,14 @@ import hydro.models.Entity
 import hydro.models.access.DbQuery
 import hydro.models.access.DbQuery.Sorting
 
+import scala.collection.immutable.ListMap
 import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.io.BufferedSource
+import scala.io.Source
+import scala.math.Ordering
 import scala.util.Random
 
 @Singleton
@@ -478,6 +487,78 @@ final class ScalaJsApiServerFactory @Inject() (implicit
     singleThreadedExecutor.submit[R](() => func).get()
   }
 
+  private def sendUsageStatisticsToDeveloper(implicit executor: ExecutionContext): Future[Unit] = Future {
+    require(quizConfig.usageStatistics.sendAnonymousUsageDataAtEndOfQuiz)
+
+    val submissions =
+      entityAccess
+        .newQuerySync[SubmissionEntity]()
+        .sort(Sorting.ascBy(ModelFields.SubmissionEntity.createTime))
+        .data()
+    val teams = fetchAllTeams()
+
+    val timeSinceFirstSubmission =
+      for (firstSubmission <- submissions.headOption) yield clock.nowInstant - firstSubmission.createTime
+    val maxScore: FixedPointNumber = quizConfig.rounds
+      .flatMap(_.questions)
+      .map(
+        // Heuristic because it doesn't take into account extra points for being first.
+        _.getPointsToGain(
+          submissionValue = None,
+          isCorrect = Some(true),
+          previousCorrectSubmissionsExist = false,
+        )
+      )
+      .sum
+    val medianScore = median(teams.map(_.score))
+    val medianScorePercentage = (100 * medianScore.toDouble / maxScore.toDouble).toInt
+
+    val queryParameters: Map[String, Any] = ListMap(
+      "project" -> "quizmaster",
+      "version" -> AppVersion.versionString,
+      "minutesSinceFirstSubmission" -> timeSinceFirstSubmission.map(_.toMinutes).getOrElse("null"),
+      "numberOfPlayers" -> teams.size,
+      "numberOfQuestions" -> quizConfig.rounds.flatMap(_.questions).size,
+      "numberOfSubmissions" -> submissions.size,
+      "medianScore" -> s"$medianScorePercentage%",
+      "language" -> i18n.languageCode,
+      "author" -> (if (quizConfig.usageStatistics.includeAuthor) quizConfig.author else "null"),
+      "quizTitle" -> (if (quizConfig.usageStatistics.includeQuizTitle) quizConfig.title else "null"),
+    )
+    val stringifiedParams = queryParameters
+      .map { case (key, value) =>
+        val cleanedValue = value.toString.replace("&", "").replace("\"", "")
+        s"$key=$cleanedValue"
+      }
+      .mkString("&")
+
+    try {
+      val response = makeHttpGet(s"https://stats.totw.nl/recordStats?$stringifiedParams")
+      require(response.trim == "OK", s"Expected response to be 'OK' but was $response")
+    } catch {
+      case e: Throwable => println(s"  Failed to send usage statistics: $e")
+    }
+  }(executor)
+
+  private def makeHttpGet(url: String): String = {
+    var inputStream: InputStream = null
+    try {
+      val urlConnection = new URL(url).openConnection()
+      urlConnection.setRequestProperty("User-Agent", """Quizmaster""")
+      inputStream = urlConnection.getInputStream()
+      val bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+      bufferedReader.readLine()
+    } finally {
+      if (inputStream != null) {
+        inputStream.close()
+      }
+    }
+  }
+
+  private def median[T: Ordering](seq: Seq[T]): T = {
+    seq.sorted.drop(seq.length / 2).head
+  }
+
   private object StateUpsertHelper {
 
     /** Returns true if something changed. */
@@ -683,7 +764,7 @@ final class ScalaJsApiServerFactory @Inject() (implicit
     }
 
     def goToNextRoundUpdate(quizState: QuizState): QuizState = {
-      quizState.copy(
+      val newQuizState = quizState.copy(
         roundIndex = quizState.roundIndex + 1,
         questionIndex = -1,
         questionProgressIndex = 0,
@@ -691,6 +772,15 @@ final class ScalaJsApiServerFactory @Inject() (implicit
         submissions = Seq(),
         imageIsEnlarged = false,
       )
+
+      if (
+        !quizState.quizHasEnded && newQuizState.quizHasEnded && quizConfig.usageStatistics.sendAnonymousUsageDataAtEndOfQuiz
+      ) {
+        // Return value is unused because we don't wait for the statistics to be sent
+        val unusedFuture = sendUsageStatisticsToDeveloper(ExecutionContext.Implicits.global)
+      }
+
+      newQuizState
     }
 
     private def addOrRemovePoints(quizState: QuizState): Unit = executeInSingleThreadAndWait[Unit] {

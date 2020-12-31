@@ -6,6 +6,21 @@ author: Jens Nyman # Change this to your name
 instructionsOnFirstSlide: Please, don't look up the answers online
 masterSecret: quiz # Remove this line to allow anyone to access the master controls
 
+usageStatistics:
+    # Set this to true if you're OK with sending anonymous usage statistics to the developer.
+    #
+    # The developer politely asks you to keep this so that they get a sense of how much this is
+    # used.
+    #
+    # Unless you explicitly allow it below, the data sent to the developer will never contain
+    # anything that identifies you personally. For example: It'll contain the version, the language,
+    # and the number of players.
+    sendAnonymousUsageDataAtEndOfQuiz: true
+
+    # Uncomment these lines if you're fine with sending extra data to the developer of Quizmaster.
+    #includeAuthor: true
+    #includeQuizTitle: true
+
 rounds:
   - name: Geography
     questions:
