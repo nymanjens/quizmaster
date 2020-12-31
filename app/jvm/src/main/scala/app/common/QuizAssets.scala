@@ -4,12 +4,14 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import app.models.quiz.config.QuizConfig
-import app.models.quiz.config.QuizConfig.Image
-import app.models.quiz.config.QuizConfig.Question
 import com.google.inject._
 import hydro.common.CollectionUtils.conditionalOption
+import hydro.common.GuavaReplacement.Iterables.getOnlyElement
 import hydro.common.ResourceFiles
+
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
 
 @Singleton
 final class QuizAssets @Inject() (implicit
@@ -21,45 +23,32 @@ final class QuizAssets @Inject() (implicit
     Paths.get(ResourceFiles.canonicalizePath(configLocation)).getParent
   }
 
-  def quizImage(relativePath: String): Path = {
-    assertExists {
-      configPath.resolve("images").resolve(relativePath)
+  def toFullPath(relativePath: String): Path = {
+    fullPathOrValidationError(relativePath).get
+  }
+
+  def assetExistsOrValidationError(relativePath: String): Option[String] = {
+    fullPathOrValidationError(relativePath) match {
+      case Success(_)         => None
+      case Failure(exception) => Some(exception.getMessage)
     }
   }
 
-  def quizAudio(relativePath: String): Path = {
-    assertExists {
-      configPath.resolve("audio").resolve(relativePath)
+  private def fullPathOrValidationError(relativePath: String): Try[Path] = {
+    val existingPaths =
+      for {
+        assetFolder <- Seq("assets", "images", "audio", "video")
+        fullPath <- Some(configPath.resolve(assetFolder).resolve(relativePath))
+        if Files.exists(fullPath)
+      } yield fullPath
+
+    existingPaths match {
+      case Seq() =>
+        Failure(
+          new RuntimeException(s"Could not find path ${configPath.resolve("assets").resolve(relativePath)}")
+        )
+      case Seq(p) => Success(p)
+      case _      => Failure(new RuntimeException(s"Found multiple paths with the same resource: $existingPaths"))
     }
-  }
-
-  def quizVideo(relativePath: String): Path = {
-    assertExists {
-      configPath.resolve("video").resolve(relativePath)
-    }
-  }
-
-  def imageExistsOrValidationError(relativePath: String): Option[String] = {
-    assetExistsOrValidationError(Paths.get("images").resolve(relativePath))
-  }
-
-  def audioExistsOrValidationError(relativePath: String): Option[String] = {
-    assetExistsOrValidationError(Paths.get("audio").resolve(relativePath))
-  }
-
-  def videoExistsOrValidationError(relativePath: String): Option[String] = {
-    assetExistsOrValidationError(Paths.get("video").resolve(relativePath))
-  }
-
-  private def assetExistsOrValidationError(relativePath: Path): Option[String] = {
-    conditionalOption(
-      !Files.exists(configPath.resolve(relativePath)),
-      s"Could not find the asset: $relativePath",
-    )
-  }
-
-  private def assertExists(path: Path): Path = {
-    require(Files.exists(path), s"Could not find path $path")
-    path
   }
 }

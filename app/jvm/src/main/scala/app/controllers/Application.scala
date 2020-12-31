@@ -73,15 +73,15 @@ final class Application @Inject() (implicit
   })
 
   def quizImage(file: String): Action[AnyContent] = {
-    serveAsset(quizAssets.quizImage(file))
+    serveAsset(quizAssets.toFullPath(file))
   }
 
   def quizAudio(file: String): Action[AnyContent] = {
-    serveAsset(quizAssets.quizAudio(file))
+    serveAsset(quizAssets.toFullPath(file))
   }
 
   def quizVideo(file: String): Action[AnyContent] = {
-    serveAsset(quizAssets.quizVideo(file))
+    serveAsset(quizAssets.toFullPath(file))
   }
 
   def serveAsset(assetPath: Path): Action[AnyContent] = Action { implicit request =>
