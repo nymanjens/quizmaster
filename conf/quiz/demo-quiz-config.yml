@@ -1,5 +1,8 @@
+# This is a demo quiz config.
+# This file contains all fields that you might want to update when creating your own quiz.
+
 title: Demo quiz
-author: Jens Nyman
+author: Jens Nyman # Change this to your name
 instructionsOnFirstSlide: Please, don't look up the answers online
 masterSecret: quiz # Remove this line to allow anyone to access the master controls
 
@@ -14,30 +17,30 @@ rounds:
       - question: What is the capital of Belgium?
         choices: [Paris, London, Brussels, Berlin]
         answer: Brussels
-        pointsToGainOnFirstAnswer: 1.5
-        pointsToGain: 1.2
-        pointsToGainOnWrongAnswer: -0.5
+        pointsToGain: 1 # This is the default
+        pointsToGainOnFirstAnswer: 2 # Double points for first right answer
 
       # Multiple-choice question - only the first right answer gets points
       - question: What is the capital of France?
         choices: [Paris, London, Brussels, Berlin]
         answer: Paris
         image: {src: geography/france.png, size: small}
-        answerImage: {src: geography/france-answer.png, size: large}
+        answerImage: geography/france-answer.png
         answerDetail: |
           Image released under Creative Commons by Destination2
           (www.destination2.co.uk)
-        pointsToGain: 0
-        maxTimeSeconds: 120
-        onlyFirstGainsPoints: true
+        pointsToGain: 0 # This question won't give any points
+        maxTimeSeconds: 120 # This is 3 minutes by default
 
-      # Question to be answered verbally (with video) - only the first right answer gets points, players can stop the timer to attempt an answer
+      # Question to be answered verbally (with video) - only the first right answer gets points,
+      # players can stop the timer to attempt an answer
       - question: What city does this video from 1935 show?
         answer: Guatemala City
         videoSrc: geography/about_bananas.mp4
         pointsToGain: 2
-        onlyFirstGainsPoints: true
-        showSingleAnswerButtonToTeams: true # Show a button to stop the timer
+        onlyFirstGainsPoints: true # See who can answer this question first
+        showSingleAnswerButtonToTeams: true # Show a button to stop the timer. Answers can then be
+                                            # given verbally.
 
       # Special question type: Put items in the correct order
       - questionType: orderItems
@@ -50,6 +53,7 @@ rounds:
          - {item: London, answerDetail: ~9M}
         pointsToGain: 2
 
+
   - name: Music round
     questions:
       # Standard textual question with audio
@@ -59,9 +63,11 @@ rounds:
         answerDetail: (By Bensound)
         audioSrc: music_round/bensound-summer.mp3
 
+
   - name: Double questions round
     questions:
-      # Special question type: Answer a textual and verbal question simultaneously
+      # Special question type: Answer a textual and verbal question simultaneously. Note that this
+      # is quite advanced and you may want to ignore this.
       - questionType: double
         verbalQuestion: How many sides does a rectangle have?
         verbalAnswer: 4
