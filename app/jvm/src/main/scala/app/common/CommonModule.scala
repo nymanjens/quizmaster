@@ -11,7 +11,7 @@ import hydro.common.PlayI18n
 final class CommonModule extends AbstractModule {
 
   override def configure() = {
-    bindSingleton(classOf[PlayI18n], classOf[PlayI18n.Impl])
+    bindSingleton(classOf[PlayI18n], classOf[PlayI18n.GuiceImpl])
     bind(classOf[I18n]).to(classOf[PlayI18n])
     bind(classOf[QuizAssets]).asEagerSingleton()
   }

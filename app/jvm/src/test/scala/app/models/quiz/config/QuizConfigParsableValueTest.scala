@@ -36,6 +36,7 @@ class QuizConfigParsableValueTest extends Specification {
         |author: Jens Nyman
         |instructionsOnFirstSlide: Don't look up the answers online
         |masterSecret: quiz # Remove this line to allow anyone to access the master controls
+        |language: nl
         |usageStatistics:
         |    sendAnonymousUsageDataAtEndOfQuiz: true
         |    includeAuthor: true
@@ -112,6 +113,7 @@ class QuizConfigParsableValueTest extends Specification {
       author = Some("Jens Nyman"),
       instructionsOnFirstSlide = Some("Don't look up the answers online"),
       masterSecret = "quiz",
+      languageCode = "nl",
       usageStatistics = UsageStatistics(
         sendAnonymousUsageDataAtEndOfQuiz = true,
         includeAuthor = true,
@@ -267,6 +269,7 @@ class QuizConfigParsableValueTest extends Specification {
       author = None,
       instructionsOnFirstSlide = None,
       masterSecret = "*",
+      languageCode = "en",
       usageStatistics = UsageStatistics.default,
       rounds = Seq(),
     )

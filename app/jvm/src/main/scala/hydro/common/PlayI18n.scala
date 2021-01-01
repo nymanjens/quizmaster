@@ -1,6 +1,8 @@
 package hydro.common
 
+import app.models.quiz.config.QuizConfig
 import com.google.inject.Inject
+import hydro.common
 import hydro.common.GuavaReplacement.Iterables.getOnlyElement
 import play.api.i18n.Lang
 import play.api.i18n.Langs
@@ -15,12 +17,21 @@ trait PlayI18n extends I18n {
 }
 
 object PlayI18n {
-  final class Impl @Inject() (implicit val messagesApi: MessagesApi, langs: Langs) extends PlayI18n {
 
-    private val defaultLang: Lang = {
-      require(langs.availables.size == 1, "Only a single language is supported at a time.")
-      getOnlyElement(langs.availables)
+  def fromLanguageCode(code: String)(implicit messagesApi: MessagesApi): PlayI18n = {
+    new common.PlayI18n.BaseImpl {
+      override def languageCode: String = code
     }
+  }
+
+  abstract class BaseImpl(implicit messagesApi: MessagesApi) extends PlayI18n {
+
+    require(
+      messagesApi.messages contains languageCode,
+      s"The configured language code $languageCode is not supported. Supported language codes: ${messagesApi.messages.keys}",
+    )
+
+    private def defaultLang: Lang = Lang(languageCode)
 
     // ****************** Implementation of PlayI18n trait ****************** //
     override def apply(key: String, args: Any*): String = {
@@ -32,6 +43,11 @@ object PlayI18n {
       messagesApi.messages("default") ++ messagesApi.messages(defaultLang.code)
     }
 
-    override def languageCode: String = defaultLang.code
+    override def languageCode: String
+  }
+
+  final class GuiceImpl @Inject() (implicit val messagesApi: MessagesApi, quizConfig: QuizConfig)
+      extends BaseImpl {
+    override def languageCode: String = quizConfig.languageCode
   }
 }

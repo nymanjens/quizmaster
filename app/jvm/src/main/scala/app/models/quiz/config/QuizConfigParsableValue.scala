@@ -22,13 +22,14 @@ import app.models.quiz.config.ValidatingYamlParser.ParsableValue.StringValue
 import app.models.quiz.config.ValidatingYamlParser.ParsableValue.WithStringSimplification
 import app.models.quiz.config.ValidatingYamlParser.ParseResult
 import com.google.inject.Inject
-import hydro.common.I18n
+import hydro.common.PlayI18n
+import play.api.i18n.MessagesApi
 
 import scala.collection.immutable.Seq
 
 class QuizConfigParsableValue @Inject() (implicit
     quizAssets: QuizAssets,
-    i18n: I18n,
+    messagesApi: MessagesApi,
 ) extends MapParsableValue[QuizConfig] {
   override val supportedKeyValuePairs = Map(
     "title" -> Optional(StringValue),
@@ -36,11 +37,14 @@ class QuizConfigParsableValue @Inject() (implicit
     "instructionsOnFirstSlide" -> Optional(StringValue),
     "masterSecret" -> Optional(StringValue),
     "zipRoundsWithGenericRoundNames" -> Optional(BooleanValue),
+    "language" -> Optional(StringValue),
     "usageStatistics" -> Optional(UsageStatisticsValue),
     "rounds" -> Required(ListParsableValue(RoundValue)(_.name)),
   )
 
   override def parseFromParsedMapValues(map: StringMap) = {
+    val languageCode = map.optional("language", "en")
+
     QuizConfig(
       title = map.optional("title"),
       author = map.optional("author"),
@@ -48,14 +52,18 @@ class QuizConfigParsableValue @Inject() (implicit
       masterSecret = map.optional("masterSecret", "*"),
       rounds = {
         val rounds = map.required[Seq[Round]]("rounds")
-        if (map.optional("zipRoundsWithGenericRoundNames", false)) zipRoundsWithGenericRoundNames(rounds)
+        if (map.optional("zipRoundsWithGenericRoundNames", false))
+          zipRoundsWithGenericRoundNames(rounds, languageCode)
         else rounds
       },
+      languageCode = languageCode,
       usageStatistics = map.optional("usageStatistics", UsageStatistics.default),
     )
   }
 
-  private def zipRoundsWithGenericRoundNames(rounds: Seq[Round]): Seq[Round] = {
+  private def zipRoundsWithGenericRoundNames(rounds: Seq[Round], languageCode: String): Seq[Round] = {
+    val i18n = PlayI18n.fromLanguageCode(languageCode)
+
     if (rounds.isEmpty) {
       rounds
     } else {

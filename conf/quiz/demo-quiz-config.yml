@@ -5,6 +5,7 @@ title: Demo quiz
 author: Jens Nyman # Change this to your name
 instructionsOnFirstSlide: Please, don't look up the answers online
 masterSecret: quiz # Remove this line to allow anyone to access the master controls
+language: en # This is the default. The other supported languages can be found in application.conf
 
 usageStatistics:
     # Set this to true if you're OK with sending anonymous usage statistics to the developer.

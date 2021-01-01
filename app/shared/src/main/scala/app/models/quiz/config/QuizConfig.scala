@@ -20,6 +20,7 @@ case class QuizConfig(
     author: Option[String],
     instructionsOnFirstSlide: Option[String],
     masterSecret: String,
+    languageCode: String,
     usageStatistics: UsageStatistics,
 )
 object QuizConfig {
