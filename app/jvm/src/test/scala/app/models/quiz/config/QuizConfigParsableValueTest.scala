@@ -8,22 +8,20 @@ import app.models.quiz.config.QuizConfig.Image
 import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.config.QuizConfig.UsageStatistics
-
-import scala.collection.immutable.Seq
-import app.models.quiz.config.ValidatingYamlParser.ParseResult
-import com.google.common.io.Files
 import com.google.common.io.MoreFiles
 import com.google.inject.AbstractModule
 import com.google.inject.Guice
 import com.google.inject.Module
-import com.typesafe.config.ConfigFactory
 import hydro.common.I18n
 import org.junit.runner._
-import org.specs2.runner._
 import org.specs2.mutable.Specification
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.test.WithApplication
+import org.specs2.runner._
+import play.api.i18n.DefaultLangs
+import play.api.i18n.DefaultMessagesApi
+import play.api.i18n.Lang
+import play.api.i18n.MessagesApi
 
+import scala.collection.immutable.Seq
 import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
@@ -307,6 +305,13 @@ class QuizConfigParsableValueTest extends Specification {
         bind(classOf[I18n]).toInstance(new I18n {
           override def apply(key: String, args: Any*): String = key
         })
+        bind(classOf[MessagesApi]).toInstance(
+          new DefaultMessagesApi(
+            messages = Map("default" -> Map(), "en" -> Map(), "nl" -> Map()),
+            langs = new DefaultLangs(Seq(Lang("en"), Lang("nl"))),
+            langCookieSecure = false,
+          )
+        )
       }
     }
   }
