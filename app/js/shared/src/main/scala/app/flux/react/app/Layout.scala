@@ -1,6 +1,7 @@
 package app.flux.react.app
 
 import app.common.FixedPointNumber
+import app.common.JsQuizAssets
 import app.flux.react.app.quiz.TeamsList
 import app.flux.router.AppPages
 import app.flux.stores.quiz.TeamsAndQuizStateStore
@@ -145,12 +146,12 @@ final class Layout(implicit
           case single: Question.Standard =>
             for (image <- Seq() ++ single.image ++ single.answerImage) {
               val htmlImage = new HtmlImage()
-              htmlImage.asInstanceOf[js.Dynamic].src = s"/quizassets/${image.src}"
+              htmlImage.asInstanceOf[js.Dynamic].src = s"/quizassets/${JsQuizAssets.encodeSource(image.src)}"
               preloadedImages.append(htmlImage)
             }
 
             for (audioSrc <- single.audioSrc) {
-              val audio = new Audio(s"/quizassets/$audioSrc")
+              val audio = new Audio(s"/quizassets/${JsQuizAssets.encodeSource(audioSrc)}")
               preloadedAudios.append(audio)
             }
 

@@ -1,6 +1,7 @@
 package app.flux.react.app.quiz
 
 import app.common.AnswerBullet
+import app.common.JsQuizAssets
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.async.Async.async
@@ -169,7 +170,7 @@ final class QuestionComponent(implicit
                 ^.className := "image-holder",
                 ^.className := image.size,
                 <.img(
-                  ^.src := s"/quizassets/${image.src}",
+                  ^.src := s"/quizassets/${JsQuizAssets.encodeSource(image.src)}",
                   ^.className := image.size,
                   ^^.ifThen(props.quizState.imageIsEnlarged) {
                     if (props.showMasterData) {
@@ -546,7 +547,11 @@ final class QuestionComponent(implicit
     }
 
     private def audioPlayer(audioRelativePath: String, playing: Boolean, key: String): VdomNode = {
-      RawMusicPlayer(src = "/quizassets/" + audioRelativePath, playing = playing, key = key)
+      RawMusicPlayer(
+        src = s"/quizassets/${JsQuizAssets.encodeSource(audioRelativePath)}",
+        playing = playing,
+        key = key,
+      )
     }
 
     private def videoPlayer(
@@ -555,7 +560,7 @@ final class QuestionComponent(implicit
         key: String,
     ): VdomNode = {
       RawVideoPlayer(
-        src = "/quizassets/" + videoRelativePath,
+        src = s"/quizassets/${JsQuizAssets.encodeSource(videoRelativePath)}",
         playing = playing,
         key = key,
       )
