@@ -521,7 +521,7 @@ final class ScalaJsApiServerFactory @Inject() (implicit
       "numberOfQuestions" -> quizConfig.rounds.flatMap(_.questions).size,
       "numberOfSubmissions" -> submissions.size,
       "medianScore" -> s"$medianScorePercentage%",
-      "language" -> i18n.languageCode,
+      "language" -> quizConfig.languageCode,
       "author" -> (if (quizConfig.usageStatistics.includeAuthor) quizConfig.author else "null"),
       "quizTitle" -> (if (quizConfig.usageStatistics.includeQuizTitle) quizConfig.title else "null"),
     )

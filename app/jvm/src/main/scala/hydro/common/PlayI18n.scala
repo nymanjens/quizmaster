@@ -12,19 +12,15 @@ trait PlayI18n extends I18n {
 
   /** Returns a map that maps key to the message with placeholders. */
   def allI18nMessages: Map[String, String]
-
-  def languageCode: String
 }
 
 object PlayI18n {
 
   def fromLanguageCode(code: String)(implicit messagesApi: MessagesApi): PlayI18n = {
-    new common.PlayI18n.BaseImpl {
-      override def languageCode: String = code
-    }
+    new common.PlayI18n.BaseImpl(code) {}
   }
 
-  abstract class BaseImpl(implicit messagesApi: MessagesApi) extends PlayI18n {
+  abstract class BaseImpl(languageCode: String)(implicit messagesApi: MessagesApi) extends PlayI18n {
 
     require(
       messagesApi.messages contains languageCode,
@@ -42,12 +38,8 @@ object PlayI18n {
       // defaultLang is extended by "default" in case it didn't overwrite a message key.
       messagesApi.messages("default") ++ messagesApi.messages(defaultLang.code)
     }
-
-    override def languageCode: String
   }
 
   final class GuiceImpl @Inject() (implicit val messagesApi: MessagesApi, quizConfig: QuizConfig)
-      extends BaseImpl {
-    override def languageCode: String = quizConfig.languageCode
-  }
+      extends BaseImpl(quizConfig.languageCode)
 }
