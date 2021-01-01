@@ -76,9 +76,9 @@ final class Application @Inject() (implicit
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now)
   })
 
-  def quizAssets(encodedRelativePath: String): Action[AnyContent] = Action { implicit request =>
-    val relativePath = new String(BaseEncoding.base64().decode(encodedRelativePath), StandardCharsets.UTF_8)
-    val assetPath = quizAssets.toFullPath(relativePath)
+  def quizAssets(encodedSource: String): Action[AnyContent] = Action { implicit request =>
+    val assetPath =
+      quizAssets.toFullPath(new String(BaseEncoding.base64().decode(encodedSource), StandardCharsets.UTF_8))
     val connection = assetPath.toFile.toURI.toURL.openConnection()
     val stream = connection.getInputStream
     val source = StreamConverters.fromInputStream(() => stream)

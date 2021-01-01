@@ -40,7 +40,7 @@ rounds:
       - question: What is the capital of France?
         choices: [Paris, London, Brussels, Berlin]
         answer: Paris
-        image: geography/france.png
+        image: https://raw.githubusercontent.com/nymanjens/quizmaster/master/conf/quiz/assets/geography/france.png
         answerImage: geography/france-answer.png
         answerDetail: |
           Image released under Creative Commons by Destination2
@@ -77,4 +77,4 @@ rounds:
         questionDetail: (Royalty Free Music from Bensound)
         answer: Summer
         answerDetail: (By Bensound)
-        audioSrc: music_round/bensound-summer.mp3
+        audioSrc: https://www.bensound.com/bensound-music/bensound-summer.mp3

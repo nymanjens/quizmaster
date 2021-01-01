@@ -15,17 +15,17 @@ object BuildSettings {
 
   /** Options for the scala compiler */
   val scalacOptions = Seq(
-    "-deprecation", // Emit warning and location for usages of deprecated APIs
     "-encoding",
     "UTF-8",
     "-feature", // Emit warning and location for usages of features that should be imported explicitly
     "-unchecked", // Enable additional warnings where generated code depends on assumptions
-    "-Xfatal-warnings", // Make warnings behave like errors
     "-Xfuture", // Warn of changes to future major Scala version
     "-Xlint:-unused,_",
     "-Yno-adapted-args", // Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
     "-Ywarn-dead-code",
     "-Ywarn-unused:-imports"
+    // "-Xfatal-warnings", // Make warnings behave like errors
+    //"-deprecation", // Emit warning and location for usages of deprecated APIs
     // "-Ywarn-value-discard" // Warning for value discard bugs (see
     // http://underscore.io/blog/posts/2016/11/24/value-discard.html)
     // Disabled because some cases (e.g. Guice modules) actually
