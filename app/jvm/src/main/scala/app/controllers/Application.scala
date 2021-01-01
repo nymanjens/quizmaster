@@ -208,7 +208,9 @@ final class Application @Inject() (implicit
         |Quiz config location: ${quizAssets.configPath}
         |Quiz title: ${quizConfig.title.getOrElse("-")}
         |Quiz author: ${quizConfig.author.getOrElse("-")}
+        |Language: ${quizConfig.languageCode}
         |Rounds: ${quizConfig.rounds.size}
+        |Questions: ${quizConfig.rounds.flatMap(_.questions).size}
         |""".stripMargin.trim)
   }
 }
