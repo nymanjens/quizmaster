@@ -169,7 +169,7 @@ final class QuestionComponent(implicit
                 ^.className := "image-holder",
                 ^.className := image.size,
                 <.img(
-                  ^.src := s"/quizimages/${image.src}",
+                  ^.src := s"/quizassets/${image.src}",
                   ^.className := image.size,
                   ^^.ifThen(props.quizState.imageIsEnlarged) {
                     if (props.showMasterData) {
@@ -546,7 +546,7 @@ final class QuestionComponent(implicit
     }
 
     private def audioPlayer(audioRelativePath: String, playing: Boolean, key: String): VdomNode = {
-      RawMusicPlayer(src = "/quizaudio/" + audioRelativePath, playing = playing, key = key)
+      RawMusicPlayer(src = "/quizassets/" + audioRelativePath, playing = playing, key = key)
     }
 
     private def videoPlayer(
@@ -555,7 +555,7 @@ final class QuestionComponent(implicit
         key: String,
     ): VdomNode = {
       RawVideoPlayer(
-        src = "/quizvideo/" + videoRelativePath,
+        src = "/quizassets/" + videoRelativePath,
         playing = playing,
         key = key,
       )

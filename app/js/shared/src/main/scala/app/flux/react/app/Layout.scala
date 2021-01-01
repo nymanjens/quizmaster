@@ -145,12 +145,12 @@ final class Layout(implicit
           case single: Question.Standard =>
             for (image <- Seq() ++ single.image ++ single.answerImage) {
               val htmlImage = new HtmlImage()
-              htmlImage.asInstanceOf[js.Dynamic].src = s"/quizimages/${image.src}"
+              htmlImage.asInstanceOf[js.Dynamic].src = s"/quizassets/${image.src}"
               preloadedImages.append(htmlImage)
             }
 
             for (audioSrc <- single.audioSrc) {
-              val audio = new Audio(s"/quizaudio/$audioSrc")
+              val audio = new Audio(s"/quizassets/$audioSrc")
               preloadedAudios.append(audio)
             }
 

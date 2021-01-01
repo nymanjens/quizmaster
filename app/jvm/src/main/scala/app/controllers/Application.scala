@@ -72,19 +72,8 @@ final class Application @Inject() (implicit
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now)
   })
 
-  def quizImage(file: String): Action[AnyContent] = {
-    serveAsset(quizAssets.toFullPath(file))
-  }
-
-  def quizAudio(file: String): Action[AnyContent] = {
-    serveAsset(quizAssets.toFullPath(file))
-  }
-
-  def quizVideo(file: String): Action[AnyContent] = {
-    serveAsset(quizAssets.toFullPath(file))
-  }
-
-  def serveAsset(assetPath: Path): Action[AnyContent] = Action { implicit request =>
+  def quizAssets(file: String): Action[AnyContent] = Action { implicit request =>
+    val assetPath = quizAssets.toFullPath(file)
     val connection = assetPath.toFile.toURI.toURL.openConnection()
     val stream = connection.getInputStream
     val source = StreamConverters.fromInputStream(() => stream)
