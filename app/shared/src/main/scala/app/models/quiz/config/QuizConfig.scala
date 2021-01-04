@@ -38,6 +38,7 @@ object QuizConfig {
         isCorrect: Option[Boolean],
         previousCorrectSubmissionsExist: Boolean,
     ): FixedPointNumber
+
     final def defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer: Boolean): FixedPointNumber = {
       getPointsToGain(
         submissionValue = None,
@@ -45,6 +46,7 @@ object QuizConfig {
         previousCorrectSubmissionsExist = !isFirstCorrectAnswer,
       )
     }
+
     final def defaultPointsToGainOnWrongAnswer: FixedPointNumber = {
       getPointsToGain(
         submissionValue = None,
@@ -96,9 +98,7 @@ object QuizConfig {
         answerImage: Option[Image],
         masterNotes: Option[String],
         image: Option[Image],
-        // Relative path in audio directory
         audioSrc: Option[String],
-        // Relative path in video directory
         videoSrc: Option[String],
         pointsToGain: FixedPointNumber,
         pointsToGainOnFirstAnswer: FixedPointNumber,
@@ -161,6 +161,94 @@ object QuizConfig {
       override def isMultipleChoice: Boolean = choices.nonEmpty
       override def textualQuestion: String = question
       override def maybeTextualChoices: Option[Seq[String]] = choices
+
+      override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
+        submissionValue match {
+          case SubmissionValue.PressedTheOneButton => None
+          case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
+            Some(choices.get.apply(answerIndex) == answer)
+          case SubmissionValue.FreeTextAnswer(freeTextAnswer) =>
+            def normalizeTextForComparison(s: String): String = {
+              s.replace(" ", "").replace(".", "").replace("-", "").toLowerCase
+            }
+            Some(normalizeTextForComparison(answer) == normalizeTextForComparison(freeTextAnswer))
+        }
+      }
+
+      def questionIsVisible(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex >= 1
+      }
+      def choicesAreVisible(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex >= 1
+      }
+      override def answerIsVisible(questionProgressIndex: Int): Boolean = {
+        if (!showSingleAnswerButtonToTeams) {
+          questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
+        } else {
+          questionProgressIndex == maxProgressIndex(includeAnswers = true)
+        }
+      }
+    }
+
+    case class MultipleQuestions(
+        question: String,
+        questionDetail: Option[String],
+        tag: Option[String],
+        answers: Seq[String],
+        answersHaveToBeInSameOrder: Boolean,
+        answerImage: Option[Image],
+        image: Option[Image],
+        audioSrc: Option[String],
+        videoSrc: Option[String],
+        pointsToGain: FixedPointNumber,
+        override val maxTime: Duration,
+    ) extends Question {
+
+      def validationErrors(): Seq[String] = {
+        // TODO: check that len(answres) >=  2
+        Seq()
+      }
+
+      override def getPointsToGain(
+          submissionValue: Option[SubmissionValue],
+          isCorrect: Option[Boolean],
+          previousCorrectSubmissionsExist: Boolean,
+      ): FixedPointNumber = {
+        isCorrect match {
+          case None        => FixedPointNumber(0)
+          case Some(true)  => pointsToGain
+          case Some(false) => FixedPointNumber(0)
+          // TODO: Partially correct
+        }
+      }
+
+      /**
+       * Steps:
+       * 0- Show preparatory title: "Question 2"
+       * 1- Show question: "This is the question, do you know the answer?"
+       * 2- Show answer
+       * 3- (if possible) Show answer and give points
+       */
+      override def progressStepsCount(includeAnswers: Boolean): Int = {
+        def oneIfTrue(b: Boolean): Int = if (b) 1 else 0
+        val includeStep2 = includeAnswers
+        val includeStep3 = includeAnswers
+
+        2 + oneIfTrue(includeStep2) + oneIfTrue(includeStep3)
+      }
+      override def shouldShowTimer(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex == 1
+      }
+
+      override def submissionAreOpen(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex == 1
+      }
+
+      override def onlyFirstGainsPoints: Boolean = false
+      override def showSingleAnswerButtonToTeams: Boolean = false
+      override def isMultipleChoice: Boolean = false
+      override def textualQuestion: String = question
+      override def maybeTextualChoices: Option[Seq[String]] = None
 
       override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
         submissionValue match {
@@ -420,7 +508,6 @@ object QuizConfig {
   }
 
   case class Image(
-      // Relative path in image directory
       src: String,
       size: String,
   ) {

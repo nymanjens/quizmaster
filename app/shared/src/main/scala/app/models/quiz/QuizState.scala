@@ -234,6 +234,7 @@ object QuizState {
       case object PressedTheOneButton extends SubmissionValue
       case class MultipleChoiceAnswer(answerIndex: Int) extends SubmissionValue
       case class FreeTextAnswer(answerString: String) extends SubmissionValue
+      case class MultipleTextAnswers(answerStrings: Seq[String]) extends SubmissionValue
     }
   }
 
