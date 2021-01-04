@@ -8,16 +8,16 @@ A web-app for conducting a quiz, including a page for players to enter their ans
 
 ![screenshot](screenshot.png "Screenshot")
 
-## Installation from prebuilt release
+## Installation
 
-### Manual installation (recommended)
+### From prebuilt release in zip file (recommended)
 
 - Download the [latest release](https://github.com/nymanjens/quizmaster/releases)
 - Unpack the archive and open a terminal in the unpacked folder
 - Run `bin/server` (UNIX) or `bin/server.bat` (Windows)
 - Browse to http://localhost:9000
 
-### Using prebuilt docker image
+### Using a prebuilt docker image
 
 - Run the following command:
 
@@ -27,7 +27,7 @@ docker run nymanjens/quizmaster:latest bin/server
 
 - Browse to http://localhost:9000
 
-## Building and running your own release with Docker
+### Building and running your own release with Docker
 
 
 - Run the following commands:
