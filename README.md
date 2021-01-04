@@ -10,7 +10,7 @@ A web-app for conducting a quiz, including a page for players to enter their ans
 
 ## Installation from prebuilt release
 
-### Manual installation
+### Manual installation (recommended)
 
 - Download the [latest release](https://github.com/nymanjens/quizmaster/releases)
 - Unpack the archive and open a terminal in the unpacked folder
@@ -25,27 +25,26 @@ A web-app for conducting a quiz, including a page for players to enter their ans
 docker run nymanjens/quizmaster:latest bin/server
 ```
 
+- Browse to http://localhost:9000
+
 ## Building and running your own release with Docker
 
-- Run the following command:
+
+- Run the following commands:
 
 ```
+git clone https://github.com/nymanjens/quizmaster.git
+cd quizmaster
 docker-compose up -d
 ```
 
-## Using the app
-
-Browse to `http://<ip_address>:9000`
+- Browse to http://localhost:9000
 
 ## Configuration
 
-- `conf/application.conf`:
-
-  - `play.i18n.langs`: The client language, `"en"` and `"nl"` are supported
-  - `app.development.loadDummyData`: If this is true: Start with 4 teams already configured (Team A, Team B, Team C, Team D)
-
 - `conf/quiz/quiz-config.yml`:<br>
-  Configure your quiz here (questions, choices, answers, images, ...)
+  Configure your quiz here (questions, choices, answers, images, ...). The existing one in the
+  release is a demo config that contains most of the options.
 
 ## Play
 
