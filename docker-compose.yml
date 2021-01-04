@@ -1,0 +1,12 @@
+version: "3.7"
+services:
+  app:
+    stdin_open: true
+    tty: true
+    image: quizmaster
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./conf/quiz:/src/dist/server-1.0/conf/quiz
+      - ./conf/application.conf:/src/dist/server-1.0/conf/application.conf
+    command: "dist/server-1.0/bin/server"

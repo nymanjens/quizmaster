@@ -1,5 +1,4 @@
-Quizmaster
-===============
+# Quizmaster
 
 [![Build Status](https://travis-ci.org/nymanjens/quizmaster.svg?branch=master)](https://travis-ci.org/nymanjens/quizmaster)
 
@@ -9,14 +8,16 @@ A web-app for conducting a quiz, including a page for players to enter their ans
 
 ![screenshot](screenshot.png "Screenshot")
 
-## Installation from release
+## Installation from prebuilt release
+
+### Manual installation
 
 - Download the [latest release](https://github.com/nymanjens/quizmaster/releases)
 - Unpack the archive and open a terminal in the unpacked folder
 - Run `bin/server` (UNIX) or `bin/server.bat` (Windows)
 - Browse to http://localhost:9000
 
-## Installation with Docker
+### Using prebuilt docker image
 
 - Run the following command:
 
@@ -24,13 +25,24 @@ A web-app for conducting a quiz, including a page for players to enter their ans
 docker run nymanjens/quizmaster:latest bin/server
 ```
 
-- Browse to `http://<ip_address>:9000`
+## Building and running your own release with Docker
+
+- Run the following command:
+
+```
+docker-compose up -d
+```
+
+## Using the app
+
+Browse to `http://<ip_address>:9000`
 
 ## Configuration
 
 - `conf/application.conf`:
-    - `play.i18n.langs`: The client language, `"en"` and `"nl"` are supported
-    - `app.development.loadDummyData`: If this is true: Start with 4 teams already configured (Team A, Team B, Team C, Team D)
+
+  - `play.i18n.langs`: The client language, `"en"` and `"nl"` are supported
+  - `app.development.loadDummyData`: If this is true: Start with 4 teams already configured (Team A, Team B, Team C, Team D)
 
 - `conf/quiz/quiz-config.yml`:<br>
   Configure your quiz here (questions, choices, answers, images, ...)
@@ -47,11 +59,11 @@ Follow these steps to host a quiz:
 - During a quiz, share the link to your server with all players. You
   can go to the same page and unlock the master controls via the padlock icon (if you configured a
   `masterSecret` in `quiz-config.yml`). The important pages during the quiz:
-    - The player's answer submission page: This is what players use to input their answers.
-    - The quiz page: This is the screen to show to all players. It shows the questions, player
-      scores and plays audio and video.
-    - The master page: This is a screen only for the quizmaster. It allows you to score player
-      answers and generally control the quiz flow.
+  - The player's answer submission page: This is what players use to input their answers.
+  - The quiz page: This is the screen to show to all players. It shows the questions, player
+    scores and plays audio and video.
+  - The master page: This is a screen only for the quizmaster. It allows you to score player
+    answers and generally control the quiz flow.
 
 ### Shortcuts
 
