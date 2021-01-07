@@ -5,6 +5,7 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.lang.Math.abs
 import java.net.URL
+import java.net.URLEncoder
 
 import hydro.common.time.JavaTimeImplicits._
 import java.time.Duration
@@ -520,14 +521,21 @@ final class ScalaJsApiServerFactory @Inject() (implicit
       "numberOfPlayers" -> teams.size,
       "numberOfQuestions" -> quizConfig.rounds.flatMap(_.questions).size,
       "numberOfSubmissions" -> submissions.size,
-      "medianScore" -> s"$medianScorePercentage%",
+      "medianScore" -> s"${medianScorePercentage}_pct",
       "language" -> quizConfig.languageCode,
-      "author" -> (if (quizConfig.usageStatistics.includeAuthor) quizConfig.author else "null"),
-      "quizTitle" -> (if (quizConfig.usageStatistics.includeQuizTitle) quizConfig.title else "null"),
+      "author" -> (if (quizConfig.usageStatistics.includeAuthor) quizConfig.author.getOrElse("") else "null"),
+      "quizTitle" -> (if (quizConfig.usageStatistics.includeQuizTitle) quizConfig.title.getOrElse("")
+                      else "null"),
     )
     val stringifiedParams = queryParameters
       .map { case (key, value) =>
-        val cleanedValue = value.toString.replace("&", "").replace("\"", "")
+        var cleanedValue =
+          value.toString
+            .replace("&", "")
+            .replace("\"", "")
+            .replace(" ", "_")
+        cleanedValue = URLEncoder.encode(cleanedValue, "UTF-8")
+
         s"$key=$cleanedValue"
       }
       .mkString("&")
