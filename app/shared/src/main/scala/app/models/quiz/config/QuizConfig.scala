@@ -220,9 +220,10 @@ object QuizConfig {
         isCorrect match {
           case None =>
             submissionValue match {
-              case None                                      => FixedPointNumber(0)
-              case Some(SubmissionValue.PressedTheOneButton) => FixedPointNumber(0)
-              case Some(SubmissionValue.FreeTextAnswer(_))   => FixedPointNumber(0)
+              case None                                          => FixedPointNumber(0)
+              case Some(SubmissionValue.PressedTheOneButton)     => FixedPointNumber(0)
+              case Some(SubmissionValue.MultipleChoiceAnswer(_)) => FixedPointNumber(0)
+              case Some(SubmissionValue.FreeTextAnswer(_))       => FixedPointNumber(0)
               case Some(SubmissionValue.MultipleTextAnswers(answers)) =>
                 val correctness = getCorrectnessPercentage(answers)
                 if (correctness < 1 && pointsToGain * correctness == pointsToGain) {
@@ -288,6 +289,10 @@ object QuizConfig {
       }
       override def answerIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
+      }
+
+      def answerAsString: String = {
+        answers.mkString(", ")
       }
 
       def createAutogradedAnswers(answerTexts: Seq[String]): Seq[MultipleTextAnswers.Answer] = {
