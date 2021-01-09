@@ -93,6 +93,17 @@ class QuizConfigParsableValueTest extends Specification {
         |        videoSrc: geography/about_bananas.mp4
         |        maxTimeSeconds: 15
         |
+        |      - questionType: multipleAnswers
+        |        question: List the band members of Metallica
+        |        questionDetail: (in 2021)
+        |        tag: metallica
+        |        answers: [James Hetfield, Lars Ulrich, Kirk Hammett, Robert Trujillo]
+        |        answersHaveToBeInSameOrder: false
+        |        answerDetail: Robert Trujillo joined Metallica in 2003.
+        |        image: https://upload.wikimedia.org/wikipedia/commons/9/9e/Metallica_-_2003.jpg
+        |        pointsToGain: 3
+        |        maxTimeSeconds: 130
+        |
         |  - name: Double questions round
         |    questions:
         |      - questionType: double
@@ -232,7 +243,21 @@ class QuizConfigParsableValueTest extends Specification {
               maxTime = Duration.ofSeconds(15),
               onlyFirstGainsPoints = false,
               showSingleAnswerButtonToTeams = false,
-            )
+            ),
+            Question.MultipleAnswers(
+              question = "List the band members of Metallica",
+              questionDetail = Some("(in 2021)"),
+              tag = Some("metallica"),
+              answers = Seq("James Hetfield", "Lars Ulrich", "Kirk Hammett", "Robert Trujillo"),
+              answersHaveToBeInSameOrder = false,
+              answerDetail = Some("Robert Trujillo joined Metallica in 2003."),
+              answerImage = None,
+              image = Some(Image("https://upload.wikimedia.org/wikipedia/commons/9/9e/Metallica_-_2003.jpg", "large")) ,
+              audioSrc = None,
+              videoSrc = None,
+              pointsToGain = FixedPointNumber(3),
+              maxTime = Duration.ofSeconds(130),
+            ),
           ),
         ),
         Round(

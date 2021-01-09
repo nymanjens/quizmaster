@@ -205,7 +205,7 @@ object ValidatingYamlParser {
           def apply[V](v: ListParsableValue[V]): Required[Seq[V]] = Required(v, valueIfInvalid = Seq())
           def apply(v: IntValue.type): Required[Int] = Required(v, valueIfInvalid = 0)
           def apply(v: StringValue.type): Required[String] = Required(v, valueIfInvalid = "")
-
+          def apply(v: BooleanValue.type): Required[Boolean] = Required(v, valueIfInvalid = false)
         }
         case class Optional(override val parsableValue: ParsableValue[_]) extends MaybeRequiredMapValue
       }

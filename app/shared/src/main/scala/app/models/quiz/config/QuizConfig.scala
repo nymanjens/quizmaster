@@ -198,6 +198,7 @@ object QuizConfig {
         tag: Option[String],
         answers: Seq[String],
         answersHaveToBeInSameOrder: Boolean,
+        answerDetail: Option[String],
         answerImage: Option[Image],
         image: Option[Image],
         audioSrc: Option[String],
@@ -208,7 +209,7 @@ object QuizConfig {
 
       def validationErrors(): Seq[String] = {
         Seq(
-          conditionalOption(answers.size >= 2, s"Expected at least 2 answers, but got ${answers.size}")
+          conditionalOption(answers.size < 2, s"Expected at least 2 answers, but got ${answers.size}")
         ).flatten
       }
 
