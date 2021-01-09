@@ -7,6 +7,7 @@ import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.QuizState
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.config.QuizConfig.UsageStatistics
+import app.models.quiz.QuizState.Submission.SubmissionValue.MultipleTextAnswers
 import hydro.common.CollectionUtils.conditionalOption
 import hydro.common.GuavaReplacement.ImmutableBiMap
 import hydro.common.GuavaReplacement.Splitter
@@ -24,6 +25,10 @@ case class QuizConfig(
     usageStatistics: UsageStatistics,
 )
 object QuizConfig {
+
+  private def normalizeTextForComparison(s: String): String = {
+    s.replace(" ", "").replace(".", "").replace("-", "").toLowerCase
+  }
 
   case class Round(
       name: String,
@@ -168,9 +173,6 @@ object QuizConfig {
           case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
             Some(choices.get.apply(answerIndex) == answer)
           case SubmissionValue.FreeTextAnswer(freeTextAnswer) =>
-            def normalizeTextForComparison(s: String): String = {
-              s.replace(" ", "").replace(".", "").replace("-", "").toLowerCase
-            }
             Some(normalizeTextForComparison(answer) == normalizeTextForComparison(freeTextAnswer))
         }
       }
@@ -182,15 +184,15 @@ object QuizConfig {
         questionProgressIndex >= 1
       }
       override def answerIsVisible(questionProgressIndex: Int): Boolean = {
-        if (!showSingleAnswerButtonToTeams) {
-          questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
-        } else {
+        if (showSingleAnswerButtonToTeams) {
           questionProgressIndex == maxProgressIndex(includeAnswers = true)
+        } else {
+          questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
         }
       }
     }
 
-    case class MultipleQuestions(
+    case class MultipleAnswers(
         question: String,
         questionDetail: Option[String],
         tag: Option[String],
@@ -205,8 +207,9 @@ object QuizConfig {
     ) extends Question {
 
       def validationErrors(): Seq[String] = {
-        // TODO: check that len(answres) >=  2
-        Seq()
+        Seq(
+          conditionalOption(answers.size >= 2, s"Expected at least 2 answers, but got ${answers.size}")
+        ).flatten
       }
 
       override def getPointsToGain(
@@ -215,11 +218,29 @@ object QuizConfig {
           previousCorrectSubmissionsExist: Boolean,
       ): FixedPointNumber = {
         isCorrect match {
-          case None        => FixedPointNumber(0)
+          case None =>
+            submissionValue match {
+              case None                                      => FixedPointNumber(0)
+              case Some(SubmissionValue.PressedTheOneButton) => FixedPointNumber(0)
+              case Some(SubmissionValue.FreeTextAnswer(_))   => FixedPointNumber(0)
+              case Some(SubmissionValue.MultipleTextAnswers(answers)) =>
+                val correctness = getCorrectnessPercentage(answers)
+                if (correctness < 1 && pointsToGain * correctness == pointsToGain) {
+                  // Ensure that non-perfect answers have at least 0.1 difference with correct answers
+                  pointsToGain - FixedPointNumber(0.1)
+                } else {
+                  pointsToGain * correctness
+                }
+
+            }
           case Some(true)  => pointsToGain
           case Some(false) => FixedPointNumber(0)
-          // TODO: Partially correct
         }
+      }
+
+      private def getCorrectnessPercentage(answers: Seq[MultipleTextAnswers.Answer]): Double = {
+        val correctAnswers = answers.count(_.isCorrectAnswer)
+        correctAnswers * 1.0 / this.answers.size
       }
 
       /**
@@ -230,11 +251,7 @@ object QuizConfig {
        * 3- (if possible) Show answer and give points
        */
       override def progressStepsCount(includeAnswers: Boolean): Int = {
-        def oneIfTrue(b: Boolean): Int = if (b) 1 else 0
-        val includeStep2 = includeAnswers
-        val includeStep3 = includeAnswers
-
-        2 + oneIfTrue(includeStep2) + oneIfTrue(includeStep3)
+        if (includeAnswers) 4 else 2
       }
       override def shouldShowTimer(questionProgressIndex: Int): Boolean = {
         questionProgressIndex == 1
@@ -252,28 +269,44 @@ object QuizConfig {
 
       override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
         submissionValue match {
-          case SubmissionValue.PressedTheOneButton => None
-          case SubmissionValue.MultipleChoiceAnswer(answerIndex) =>
-            Some(choices.get.apply(answerIndex) == answer)
-          case SubmissionValue.FreeTextAnswer(freeTextAnswer) =>
-            def normalizeTextForComparison(s: String): String = {
-              s.replace(" ", "").replace(".", "").replace("-", "").toLowerCase
+          case SubmissionValue.PressedTheOneButton     => None
+          case SubmissionValue.MultipleChoiceAnswer(_) => None
+          case SubmissionValue.FreeTextAnswer(_)       => None
+          case SubmissionValue.MultipleTextAnswers(answers) =>
+            if (getCorrectnessPercentage(answers) == 1.0) {
+              Some(true)
+            } else if (getCorrectnessPercentage(answers) == 0.0) {
+              Some(false)
+            } else {
+              None
             }
-            Some(normalizeTextForComparison(answer) == normalizeTextForComparison(freeTextAnswer))
         }
       }
 
       def questionIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 1
       }
-      def choicesAreVisible(questionProgressIndex: Int): Boolean = {
-        questionProgressIndex >= 1
-      }
       override def answerIsVisible(questionProgressIndex: Int): Boolean = {
-        if (!showSingleAnswerButtonToTeams) {
-          questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
+        questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
+      }
+
+      def createAutogradedAnswers(answerTexts: Seq[String]): Seq[MultipleTextAnswers.Answer] = {
+        if (answersHaveToBeInSameOrder) {
+          for ((correctAnswer, answerText) <- this.answers zip answerTexts)
+            yield MultipleTextAnswers.Answer(
+              text = answerText,
+              isCorrectAnswer =
+                normalizeTextForComparison(correctAnswer) == normalizeTextForComparison(answerText),
+            )
         } else {
-          questionProgressIndex == maxProgressIndex(includeAnswers = true)
+          val remainingNormalizedAnswers = mutable.Set(this.answers.map(normalizeTextForComparison): _*)
+          for (answerText <- answerTexts) yield {
+            val inAnswerPool = remainingNormalizedAnswers.remove(normalizeTextForComparison(answerText))
+            MultipleTextAnswers.Answer(
+              text = answerText,
+              isCorrectAnswer = inAnswerPool,
+            )
+          }
         }
       }
     }

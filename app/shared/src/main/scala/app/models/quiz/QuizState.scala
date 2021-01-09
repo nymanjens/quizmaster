@@ -12,6 +12,7 @@ import app.models.quiz.QuizState.GeneralQuizSettings
 import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.Submission.SubmissionValue
+import app.models.quiz.QuizState.Submission.SubmissionValue.MultipleTextAnswers.Answer
 import app.models.quiz.QuizState.TimerState
 import hydro.common.time.Clock
 import hydro.common.time.JavaTimeImplicits._
@@ -210,7 +211,7 @@ object QuizState {
         isCorrectAnswer = isCorrectAnswer,
         points = {
           if (value == SubmissionValue.PressedTheOneButton) {
-            // PressedTheOneButton is not automatically scoable, so this would always be zero. However in some
+            // PressedTheOneButton is not automatically scorable, so this would always be zero. However in some
             // cases where answers are found incrementally, it is useful to keep the old points so that they
             // can be further augmented.
             quizState.submissions
@@ -234,7 +235,14 @@ object QuizState {
       case object PressedTheOneButton extends SubmissionValue
       case class MultipleChoiceAnswer(answerIndex: Int) extends SubmissionValue
       case class FreeTextAnswer(answerString: String) extends SubmissionValue
-      case class MultipleTextAnswers(answerStrings: Seq[String]) extends SubmissionValue
+
+      case class MultipleTextAnswers(answers: Seq[Answer]) extends SubmissionValue
+      object MultipleTextAnswers {
+        case class Answer(
+            text: String,
+            isCorrectAnswer: Boolean,
+        )
+      }
     }
   }
 
