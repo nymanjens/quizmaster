@@ -55,7 +55,9 @@ private[quiz] object RawMusicPlayer extends HydroReactComponent.Stateless {
     ): Callback = LogExceptionsCallback {
       if (prevProps != currentProps) {
         htmlAudioElement match {
-          case Some(e) if currentProps.playing  => e.play()
+          case Some(e) if currentProps.playing =>
+            if (e.ended) { /* Do nothing because the music is already done */ }
+            else { e.play() }
           case Some(e) if !currentProps.playing => e.pause()
           case None                             =>
         }
