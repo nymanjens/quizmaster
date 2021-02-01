@@ -73,6 +73,7 @@ Follow these steps to host a quiz:
 - **Tools during question**
   - `spacebar`: Pause and resume the timer
   - `shift + r`: Play the current audio/video file from the beginning
-  - `shift + =/-`: Add/subtract 30 seconds from the current timer
+  - `shift + -/o`: Subtract 30 seconds from the current timer
+  - `shift + =/+/p`: Add 30 seconds from the current timer
   - `alt + enter`: Toggle enlarged image (if there is a visible image)
   - `a`: toggle the answer to be visible in the master view (http://localhost:9000/app/master)
