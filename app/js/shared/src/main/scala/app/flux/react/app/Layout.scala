@@ -32,7 +32,7 @@ final class Layout(implicit
     teamsList: TeamsList,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     quizConfig: QuizConfig,
-                   scalaJsApiClient: ScalaJsApiClient,
+    scalaJsApiClient: ScalaJsApiClient,
 ) extends HydroReactComponent {
 
   // Keep a reference to preloaded media to avoid garbage collection cleaning it up
