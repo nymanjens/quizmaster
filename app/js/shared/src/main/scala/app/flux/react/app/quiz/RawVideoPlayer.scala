@@ -68,7 +68,9 @@ private[quiz] object RawVideoPlayer extends HydroReactComponent.Stateless {
 
     private def trySetPlaying(playing: Boolean): Unit = {
       htmlVideoElement match {
-        case Some(e) if playing  => e.play()
+        case Some(e) if playing =>
+          if (e.ended) { /* Do nothing because the music is already done */ }
+          else { e.play() }
         case Some(e) if !playing => e.pause()
         case None                =>
       }
