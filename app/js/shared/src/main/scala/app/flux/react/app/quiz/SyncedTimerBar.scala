@@ -6,7 +6,6 @@ import app.api.ScalaJsApi.TeamOrQuizStateUpdate._
 import app.api.ScalaJsApiClient
 import app.flux.controllers.SoundEffectController
 import app.flux.stores.quiz.TeamsAndQuizStateStore
-import app.models.access.ModelFields
 import app.models.quiz.QuizState.TimerState
 import hydro.common.time.JavaTimeImplicits._
 import hydro.common.JsLoggingUtils.logExceptions
@@ -14,12 +13,9 @@ import hydro.common.time.Clock
 import hydro.flux.react.HydroReactComponent
 import hydro.flux.react.uielements.Bootstrap
 import hydro.flux.react.uielements.Bootstrap.Variant
-import hydro.jsfacades.Mousetrap
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import org.scalajs.dom
-
-import scala.concurrent.Future
 
 final class SyncedTimerBar(implicit
     clock: Clock,
@@ -79,8 +75,6 @@ final class SyncedTimerBar(implicit
     }
 
     override def didMount(props: Props, state: State): Callback = {
-      bindShortcuts()
-
       intervalHandle = Some(
         dom.window.setInterval(
           () => {
@@ -102,25 +96,6 @@ final class SyncedTimerBar(implicit
     override def willUnmount(props: Props, state: State): Callback = {
       for (handle <- intervalHandle) dom.window.clearInterval(handle)
       Callback.empty
-    }
-
-    private def bindShortcuts(): Unit = {
-      def bind(shortcut: String, runnable: () => Unit): Unit = {
-        Mousetrap.bind(
-          shortcut,
-          e => {
-            e.preventDefault()
-            runnable()
-          },
-        )
-      }
-      bind("space", () => scalaJsApiClient.doTeamOrQuizStateUpdate(ToggleTimerPaused()))
-      bind("shift+r", () => scalaJsApiClient.doTeamOrQuizStateUpdate(RestartMedia()))
-      bind("shift+-", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(-30))))
-      bind("shift+o", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(-30))))
-      bind("shift+=", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(30))))
-      bind("shift++", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(30))))
-      bind("shift+p", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(30))))
     }
 
     private def formatDuration(duration: Duration): String = {

@@ -1,5 +1,11 @@
 package app.flux.react.app
 
+import java.time.Duration
+
+import app.api.ScalaJsApi.TeamOrQuizStateUpdate.AddTimeToTimer
+import app.api.ScalaJsApi.TeamOrQuizStateUpdate.RestartMedia
+import app.api.ScalaJsApi.TeamOrQuizStateUpdate.ToggleTimerPaused
+import app.api.ScalaJsApiClient
 import app.common.FixedPointNumber
 import app.common.JsQuizAssets
 import app.flux.react.app.quiz.TeamsList
@@ -26,6 +32,7 @@ final class Layout(implicit
     teamsList: TeamsList,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     quizConfig: QuizConfig,
+                   scalaJsApiClient: ScalaJsApiClient,
 ) extends HydroReactComponent {
 
   // Keep a reference to preloaded media to avoid garbage collection cleaning it up
@@ -121,6 +128,14 @@ final class Layout(implicit
       bind("alt+shift+right", () => teamsAndQuizStateStore.goToNextRound())
       bind("alt+shift+r", () => teamsAndQuizStateStore.resetCurrentQuestion())
       bind("alt+enter", () => teamsAndQuizStateStore.toggleImageIsEnlarged())
+
+      bind("space", () => scalaJsApiClient.doTeamOrQuizStateUpdate(ToggleTimerPaused()))
+      bind("shift+r", () => scalaJsApiClient.doTeamOrQuizStateUpdate(RestartMedia()))
+      bind("shift+-", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(-30))))
+      bind("shift+o", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(-30))))
+      bind("shift+=", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(30))))
+      bind("shift++", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(30))))
+      bind("shift+p", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(30))))
 
       // Give points
       for ((teamIndex, shortkey) <- (0 to 10) zip ((1 to 9) :+ 0)) {
