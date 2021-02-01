@@ -7,6 +7,7 @@ import app.api.ScalaJsApiClient
 import app.flux.controllers.SoundEffectController
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.QuizState.TimerState
+import app.models.quiz.config.QuizConfig
 import hydro.common.time.JavaTimeImplicits._
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.time.Clock
@@ -22,11 +23,12 @@ final class SyncedTimerBar(implicit
     soundEffectController: SoundEffectController,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     scalaJsApiClient: ScalaJsApiClient,
+    quizConfig: QuizConfig,
 ) extends HydroReactComponent {
 
   // **************** API ****************//
-  def apply(maxTime: Duration): VdomElement = {
-    component(Props(maxTime = maxTime))
+  def apply(): VdomElement = {
+    component(Props())
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//
@@ -34,14 +36,27 @@ final class SyncedTimerBar(implicit
     ComponentConfig(backendConstructor = new Backend(_), initialState = State())
       .withStateStoresDependency(
         teamsAndQuizStateStore,
-        _.copy(timerState = teamsAndQuizStateStore.stateOrEmpty.quizState.timerState),
+        _.copy(
+          timerState = teamsAndQuizStateStore.stateOrEmpty.quizState.timerState,
+          maxTime = teamsAndQuizStateStore.stateOrEmpty.quizState.maybeQuestion match {
+            case Some(q) => q.maxTime
+            case None    => Duration.ZERO
+          },
+          timerIsEnabled = teamsAndQuizStateStore.stateOrEmpty.quizState.maybeQuestion match {
+            case Some(q) =>
+              q.shouldShowTimer(teamsAndQuizStateStore.stateOrEmpty.quizState.questionProgressIndex)
+            case None => false
+          },
+        ),
       )
 
   // **************** Implementation of HydroReactComponent types ****************//
-  protected case class Props(maxTime: Duration)
+  protected case class Props()
   protected case class State(
       timerState: TimerState = TimerState.nullInstance,
       elapsedTime: Duration = Duration.ZERO,
+      maxTime: Duration = Duration.ZERO,
+      timerIsEnabled: Boolean = false,
   )
 
   protected class Backend($ : BackendScope[Props, State])
@@ -52,14 +67,12 @@ final class SyncedTimerBar(implicit
     private var intervalHandle: Option[Int] = None
 
     override def render(props: Props, state: State): VdomElement = logExceptions {
-      val timeRemaining = Seq(props.maxTime - state.elapsedTime, Duration.ZERO).max
-      val timeRemainingFraction = timeRemaining / props.maxTime
+      if(state.timerIsEnabled) {
+      val timeRemaining = Seq(state.maxTime - state.elapsedTime, Duration.ZERO).max
+      val timeRemainingFraction = timeRemaining / state.maxTime
 
       <.div(
-        <.div(
-          ^.className := "time-left-label",
-          s"${formatDuration(timeRemaining)} / ${formatDuration(props.maxTime)}",
-        ),
+        ^.className := "synced-timer-bar",
         Bootstrap.ProgressBar(
           fraction = timeRemainingFraction,
           variant = {
@@ -70,8 +83,21 @@ final class SyncedTimerBar(implicit
             }
           },
           striped = !state.timerState.timerRunning,
+          label = <.div(
+            ^.className := "synced-timer-bar-label",
+            s"${formatDuration(timeRemaining)} / ${formatDuration(state.maxTime)}",
+          ),
         ),
       )
+      } else {
+        <.div(
+          ^.className := "synced-timer-bar",
+          Bootstrap.ProgressBar(
+            fraction = 0,
+            variant = Variant.default,
+          ),
+        )
+      }
     }
 
     override def didMount(props: Props, state: State): Callback = {
@@ -79,12 +105,18 @@ final class SyncedTimerBar(implicit
         dom.window.setInterval(
           () => {
             $.modState { state =>
-              val newElapsedTime = state.timerState.elapsedTime()
-              if (state.elapsedTime < props.maxTime && newElapsedTime >= props.maxTime) {
-                soundEffectController.playTimerRunsOut()
-                scalaJsApiClient.doTeamOrQuizStateUpdate(ToggleTimerPaused(timerRunningValue = Some(false)))
+              if (state.timerIsEnabled) {
+                val newElapsedTime = state.timerState.elapsedTime()
+                if (state.elapsedTime < state.maxTime && newElapsedTime >= state.maxTime) {
+                  soundEffectController.playTimerRunsOut()
+                  scalaJsApiClient.doTeamOrQuizStateUpdate(
+                    ToggleTimerPaused(timerRunningValue = Some(false))
+                  )
+                }
+                state.copy(elapsedTime = newElapsedTime)
+              } else {
+                state
               }
-              state.copy(elapsedTime = newElapsedTime)
             }.runNow()
           },
           /* timeout in millis */ 10,
@@ -99,7 +131,7 @@ final class SyncedTimerBar(implicit
     }
 
     private def formatDuration(duration: Duration): String = {
-      val seconds = duration.getSeconds();
+      val seconds = duration.getSeconds()
       "%d:%02d".format(seconds / 60, seconds % 60)
     }
   }

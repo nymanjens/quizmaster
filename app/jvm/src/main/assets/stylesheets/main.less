@@ -190,6 +190,20 @@ table.table-bordered {
 }
 
 /****** Global layout ******/
+.synced-timer-bar {
+  .progress {
+    margin: 0;
+    height: 25px;
+    .synced-timer-bar-label {
+      font-size: 18px;
+      padding-left: 10px;
+      padding-top: 3px;
+      text-align: left;
+      white-space: nowrap;
+    }
+  }
+}
+
 #content-wrapper {
   display: flex;
 
@@ -641,23 +655,6 @@ table.table-bordered {
     }
     .master-notes {
       font-size: 30px;
-    }
-    .timer {
-      padding-top: 25px;
-      .time-left-label {
-        font-size: 18px;
-      }
-      &.pull-to-top-of-page {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        padding: 0;
-        z-index: 999905;
-        .time-left-label {
-          display: none;
-        }
-      }
     }
   }
 }

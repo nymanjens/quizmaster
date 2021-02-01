@@ -12,6 +12,7 @@ import app.flux.react.app.quiz.TeamsList
 import app.flux.router.AppPages
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.flux.ClientApp.HtmlImage
+import app.flux.react.app.quiz.SyncedTimerBar
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
 import hydro.flux.react.ReactVdomUtils.<<
@@ -33,6 +34,7 @@ final class Layout(implicit
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     quizConfig: QuizConfig,
     scalaJsApiClient: ScalaJsApiClient,
+    syncedTimerBar: SyncedTimerBar,
 ) extends HydroReactComponent {
 
   // Keep a reference to preloaded media to avoid garbage collection cleaning it up
@@ -67,16 +69,21 @@ final class Layout(implicit
         title = "Quizmaster",
         leftMenu = <.span(),
         pageContent = <.div(
-          ^.id := "content-wrapper",
           <<.ifThen(AppPages.isMasterOnlyPage(router.currentPage)) {
-            <.div(
-              ^.id := "left-content-wrapper",
-              teamsList(showMasterControls = router.currentPage == AppPages.Master),
-            )
+            syncedTimerBar()
           },
           <.div(
-            ^.id := "right-content-wrapper",
-            props.children.toVdomArray,
+            ^.id := "content-wrapper",
+            <<.ifThen(AppPages.isMasterOnlyPage(router.currentPage)) {
+              <.div(
+                ^.id := "left-content-wrapper",
+                teamsList(showMasterControls = router.currentPage == AppPages.Master),
+              )
+            },
+            <.div(
+              ^.id := "right-content-wrapper",
+              props.children.toVdomArray,
+            ),
           ),
         ),
       )

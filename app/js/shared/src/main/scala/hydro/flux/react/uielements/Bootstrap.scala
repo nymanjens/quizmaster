@@ -101,7 +101,7 @@ object Bootstrap {
       fraction: Double,
       variant: Variant,
       striped: Boolean = false,
-      label: String = "",
+      label: VdomTag = <.span(),
   ): VdomTag = {
     val percentage = fraction * 100
     <.div(

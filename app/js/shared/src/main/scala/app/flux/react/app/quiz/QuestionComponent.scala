@@ -2,20 +2,13 @@ package app.flux.react.app.quiz
 
 import app.common.AnswerBullet
 import app.common.JsQuizAssets
-
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import scala.async.Async.async
-import scala.async.Async.await
 import app.flux.controllers.SoundEffectController
-import app.flux.stores.quiz.GamepadStore
-import app.flux.stores.quiz.GamepadStore.Arrow
 import app.flux.stores.quiz.TeamInputStore
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
 import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.QuizState
-import app.models.quiz.QuizState.GeneralQuizSettings.AnswerBulletType
 import app.models.quiz.QuizState.Submission
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.Team
@@ -35,15 +28,12 @@ import japgolly.scalajs.react.vdom.html_<^.<
 import japgolly.scalajs.react.vdom.VdomArray
 import japgolly.scalajs.react.vdom.VdomNode
 
-import scala.scalajs.js
-
 final class QuestionComponent(implicit
     pageHeader: PageHeader,
     i18n: I18n,
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
-    syncedTimerBar: SyncedTimerBar,
     obfuscatedAnswer: ObfuscatedAnswer,
     clock: Clock,
     soundEffectController: SoundEffectController,
@@ -292,15 +282,6 @@ final class QuestionComponent(implicit
             )
           }
         },
-        <<.ifThen(question.shouldShowTimer(props.questionProgressIndex)) {
-          <.div(
-            ^.className := "timer",
-            ^^.ifThen(props.quizState.imageIsEnlarged && !props.showMasterData) {
-              ^.className := "pull-to-top-of-page"
-            },
-            syncedTimerBar(maxTime = question.maxTime),
-          )
-        },
       )
     }
 
@@ -386,12 +367,6 @@ final class QuestionComponent(implicit
             Bootstrap.FontAwesomeIcon("gamepad")
           },
         ),
-        <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && correctSubmissionWasEntered) {
-          <.div(
-            ^.className := "timer",
-            syncedTimerBar(maxTime = question.maxTime),
-          )
-        },
       )
     }
 
@@ -479,15 +454,6 @@ final class QuestionComponent(implicit
               <<.nl2BrBlockWithLinks(answerDetail),
             )
           }
-        },
-        <<.ifThen(question.shouldShowTimer(props.questionProgressIndex)) {
-          <.div(
-            ^.className := "timer",
-            ^^.ifThen(props.quizState.imageIsEnlarged && !props.showMasterData) {
-              ^.className := "pull-to-top-of-page"
-            },
-            syncedTimerBar(maxTime = question.maxTime),
-          )
         },
       )
     }
