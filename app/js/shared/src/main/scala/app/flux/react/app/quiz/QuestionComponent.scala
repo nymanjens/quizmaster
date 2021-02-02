@@ -79,11 +79,10 @@ final class QuestionComponent(implicit
           case 0 if !props.showMasterData => showPreparatoryTitle(props.question)
           case _ =>
             props.question match {
-              case single: Question.Standard       => showSingleQuestion(single)
-              case double: Question.DoubleQ        => showDoubleQuestion(double)
-              case orderItems: Question.OrderItems => showOrderItemsQuestion(orderItems)
-              case multipleAnswers: Question.MultipleAnswers =>
-                ??? //showMultipleAnswersQuestion(multipleAnswers)
+              case single: Question.Standard                 => showSingleQuestion(single)
+              case multipleAnswers: Question.MultipleAnswers => showMultipleAnswersQuestion(multipleAnswers)
+              case double: Question.DoubleQ                  => showDoubleQuestion(double)
+              case orderItems: Question.OrderItems           => showOrderItemsQuestion(orderItems)
             }
         },
       )
@@ -234,6 +233,90 @@ final class QuestionComponent(implicit
         <<.ifThen(question.choices.isEmpty || !answerIsVisible) {
           answerIfVisible(question)
         },
+        answerDetailIfVisible(question),
+      )
+    }
+
+    private def showMultipleAnswersQuestion(
+        question: Question.MultipleAnswers
+    )(implicit props: Props): VdomElement = {
+      implicit val _ = props.quizState
+      val progressIndex = props.questionProgressIndex
+      val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
+      val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
+
+      <.div(
+        questionTitle(question),
+        questionDetail(question),
+        pointsMetadata(question),
+        masterNotes(question),
+        <.div(
+          ^.className := "image-and-choices-row",
+          <<.ifDefined(maybeImage) { image =>
+            ifVisibleOrMaster(progressIndex > 0) {
+              <.div(
+                ^.className := "image-holder",
+                ^.className := image.size,
+                <.img(
+                  ^.src := s"/quizassets/${JsQuizAssets.encodeSource(image.src)}",
+                  ^.className := image.size,
+                  ^^.ifThen(props.quizState.imageIsEnlarged) {
+                    if (props.showMasterData) {
+                      ^.className := "indicate-enlarged"
+                    } else {
+                      ^.className := "enlarged"
+                    }
+                  },
+                ),
+              )
+            }
+          },
+          <<.ifDefined(question.videoSrc) { videoSrc =>
+            ifVisibleOrMaster(question.submissionAreOpen(props.questionProgressIndex)) {
+              val timerState = props.quizState.timerState
+              val timerIsRunning = timerState.timerRunning && !timerState
+                .hasFinished(question.maxTime) && question.submissionAreOpen(props.questionProgressIndex)
+              <.div(
+                ^.className := "video-holder",
+                ^^.ifThen(props.quizState.imageIsEnlarged) {
+                  if (props.showMasterData) {
+                    ^.className := "indicate-enlarged"
+                  } else {
+                    ^.className := "enlarged"
+                  }
+                },
+                if (props.showMasterData) {
+                  videoHelpPlaceholder(
+                    videoSrc,
+                    playing = timerIsRunning,
+                  )
+                } else {
+                  videoPlayer(
+                    videoSrc,
+                    playing = timerIsRunning,
+                    key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
+                  )
+                },
+              )
+            }
+          },
+        ),
+        <.div(
+          ^.className := "submissions-without-choices",
+          showSubmissions(props.quizState.submissions),
+        ),
+        <<.ifDefined(question.audioSrc) { audioRelativePath =>
+          <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && !props.showMasterData) {
+            val timerState = props.quizState.timerState
+            val timerIsRunning = timerState.timerRunning && !timerState.hasFinished(question.maxTime)
+            audioPlayer(
+              audioRelativePath,
+              playing = timerIsRunning,
+              key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
+            )
+          }
+        },
+        answerIfVisible(question),
         answerDetailIfVisible(question),
       )
     }
