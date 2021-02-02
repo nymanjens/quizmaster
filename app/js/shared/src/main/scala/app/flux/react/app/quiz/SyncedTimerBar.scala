@@ -8,9 +8,11 @@ import app.flux.controllers.SoundEffectController
 import app.flux.stores.quiz.TeamsAndQuizStateStore
 import app.models.quiz.QuizState.TimerState
 import app.models.quiz.config.QuizConfig
+import app.models.quiz.QuizState
 import hydro.common.time.JavaTimeImplicits._
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.time.Clock
+import hydro.common.I18n
 import hydro.flux.react.HydroReactComponent
 import hydro.flux.react.uielements.Bootstrap
 import hydro.flux.react.uielements.Bootstrap.Variant
@@ -21,6 +23,7 @@ import org.scalajs.dom
 
 final class SyncedTimerBar(implicit
     clock: Clock,
+    i18n: I18n,
     soundEffectController: SoundEffectController,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
     scalaJsApiClient: ScalaJsApiClient,
@@ -37,28 +40,31 @@ final class SyncedTimerBar(implicit
     ComponentConfig(backendConstructor = new Backend(_), initialState = State())
       .withStateStoresDependency(
         teamsAndQuizStateStore,
-        _.copy(
-          timerState = teamsAndQuizStateStore.stateOrEmpty.quizState.timerState,
-          maxTime = teamsAndQuizStateStore.stateOrEmpty.quizState.maybeQuestion match {
-            case Some(q) => q.maxTime
-            case None    => Duration.ZERO
-          },
-          timerIsEnabled = teamsAndQuizStateStore.stateOrEmpty.quizState.maybeQuestion match {
-            case Some(q) =>
-              q.shouldShowTimer(teamsAndQuizStateStore.stateOrEmpty.quizState.questionProgressIndex)
-            case None => false
-          },
-        ),
+        _.copy(quizState = teamsAndQuizStateStore.stateOrEmpty.quizState),
       )
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props()
   protected case class State(
-      timerState: TimerState = TimerState.nullInstance,
       elapsedTime: Duration = Duration.ZERO,
-      maxTime: Duration = Duration.ZERO,
-      timerIsEnabled: Boolean = false,
-  )
+      quizState: QuizState = QuizState.nullInstance,
+  ) {
+    def timerState: TimerState = {
+      quizState.timerState
+    }
+    def maxTime: Duration = {
+      quizState.maybeQuestion match {
+        case Some(q) => q.maxTime
+        case None    => Duration.ZERO
+      }
+    }
+    def timerIsEnabled: Boolean = {
+      quizState.maybeQuestion match {
+        case Some(q) => q.shouldShowTimer(quizState.questionProgressIndex)
+        case None    => false
+      }
+    }
+  }
 
   protected class Backend($ : BackendScope[Props, State])
       extends BackendBase($)
@@ -110,11 +116,31 @@ final class SyncedTimerBar(implicit
     }
 
     private def renderQuizProgress(state: State): VdomElement = {
+      val allQuestions = quizConfig.rounds.flatMap(_.questions)
+      val precedingAndCurrentQuestion = {
+        for {
+          (round, roundIndex) <- quizConfig.rounds.zipWithIndex
+          if roundIndex <= state.quizState.roundIndex
+          (question, questionIndex) <- round.questions.zipWithIndex
+          if roundIndex < state.quizState.roundIndex || questionIndex <= state.quizState.questionIndex
+        } yield question
+      }
+
+      val totalNumberOfQuestions = allQuestions.size
+      val totalMaxDuration = allQuestions.map(_.maxTime).sum
+      val doneNumberOfQuestions = precedingAndCurrentQuestion.size
+      val doneMaxDuration = precedingAndCurrentQuestion.map(_.maxTime).sum
+
       <.div(
         ^.className := "synced-timer-bar",
         Bootstrap.ProgressBar(
-          fraction = 0,
-          variant = Variant.default,
+          fraction = doneMaxDuration.toMillis * 1.0 / totalMaxDuration.toMillis,
+          variant = Variant.info,
+          label = <.div(
+            ^.className := "synced-timer-bar-label",
+            s"$doneNumberOfQuestions / $totalNumberOfQuestions ${i18n("app.questions")} " +
+              s"(${doneMaxDuration.toMinutes} / ${totalMaxDuration.toMinutes} ${i18n("app.minutes")})",
+          ),
         ),
       )
     }
