@@ -231,9 +231,9 @@ final class QuestionComponent(implicit
           }
         },
         <<.ifThen(question.choices.isEmpty || !answerIsVisible) {
-          SubComponents.answerIfVisible(question)
+          SubComponents.answer(question)
         },
-        SubComponents.answerDetailIfVisible(question),
+        SubComponents.answerDetail(question),
       )
     }
 
@@ -316,8 +316,8 @@ final class QuestionComponent(implicit
             )
           }
         },
-        SubComponents.answerIfVisible(question),
-        SubComponents.answerDetailIfVisible(question),
+        SubComponents.answer(question),
+        SubComponents.answerDetail(question),
       )
     }
 
@@ -459,8 +459,8 @@ final class QuestionComponent(implicit
           ^.className := "submissions-without-choices",
           showSubmissions(props.quizState.submissions),
         ),
-        SubComponents.answerIfVisible(question),
-        SubComponents.answerDetailIfVisible(question),
+        SubComponents.answer(question),
+        SubComponents.answerDetail(question),
       )
     }
 
@@ -557,7 +557,7 @@ final class QuestionComponent(implicit
       }
     }
 
-    def answerIfVisible(question: Question)(implicit props: Props): VdomNode = {
+    def answer(question: Question)(implicit props: Props): VdomNode = {
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
 
       ifVisibleOrMaster(answerIsVisible) {
@@ -572,7 +572,7 @@ final class QuestionComponent(implicit
       }
     }
 
-    def answerDetailIfVisible(question: Question)(implicit props: Props): VdomNode = {
+    def answerDetail(question: Question)(implicit props: Props): VdomNode = {
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
 
       <<.ifThen(answerIsVisible) {
