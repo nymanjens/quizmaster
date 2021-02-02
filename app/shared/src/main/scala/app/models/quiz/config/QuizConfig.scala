@@ -74,6 +74,7 @@ object QuizConfig {
       maxProgressIndex(includeAnswers = quizState.generalQuizSettings.showAnswers)
     }
     def shouldShowTimer(questionProgressIndex: Int): Boolean
+    def questionIsVisible(questionProgressIndex: Int): Boolean
     def maxTime: Duration
 
     /** Returns true if it would make sense to add a QuizState.Submission for this question for this progressIndex. */
@@ -82,6 +83,9 @@ object QuizConfig {
     def answerIsVisible(questionProgressIndex: Int): Boolean
 
     def textualQuestion: String
+    def questionDetail: Option[String]
+    def tag: Option[String]
+    def answerDetail: Option[String]
     def maybeTextualChoices: Option[Seq[String]]
 
     /**
@@ -95,11 +99,11 @@ object QuizConfig {
   object Question {
     case class Standard(
         question: String,
-        questionDetail: Option[String],
-        tag: Option[String],
+        override val questionDetail: Option[String],
+        override val tag: Option[String],
         choices: Option[Seq[String]],
         answer: String,
-        answerDetail: Option[String],
+        override val answerDetail: Option[String],
         answerImage: Option[Image],
         masterNotes: Option[String],
         image: Option[Image],
@@ -177,7 +181,7 @@ object QuizConfig {
         }
       }
 
-      def questionIsVisible(questionProgressIndex: Int): Boolean = {
+      override def questionIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 1
       }
       def choicesAreVisible(questionProgressIndex: Int): Boolean = {
@@ -194,11 +198,11 @@ object QuizConfig {
 
     case class MultipleAnswers(
         question: String,
-        questionDetail: Option[String],
-        tag: Option[String],
+        override val questionDetail: Option[String],
+        override val tag: Option[String],
         answers: Seq[String],
         answersHaveToBeInSameOrder: Boolean,
-        answerDetail: Option[String],
+        override val answerDetail: Option[String],
         answerImage: Option[Image],
         image: Option[Image],
         audioSrc: Option[String],
@@ -285,7 +289,7 @@ object QuizConfig {
         }
       }
 
-      def questionIsVisible(questionProgressIndex: Int): Boolean = {
+      override def questionIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 1
       }
       override def answerIsVisible(questionProgressIndex: Int): Boolean = {
@@ -370,6 +374,9 @@ object QuizConfig {
 
       override def submissionAreOpen(questionProgressIndex: Int): Boolean = questionProgressIndex == 2
       override def isMultipleChoice: Boolean = true
+      override def questionDetail: Option[String] = None
+      override def tag: Option[String] = None
+      override def answerDetail: Option[String] = None
       override def maybeTextualChoices: Option[Seq[String]] = Some(textualChoices)
 
       override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
@@ -380,7 +387,7 @@ object QuizConfig {
         }
       }
 
-      def questionIsVisible(questionProgressIndex: Int): Boolean = {
+      override def questionIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 1
       }
       def choicesAreVisible(questionProgressIndex: Int): Boolean = {
@@ -393,10 +400,10 @@ object QuizConfig {
 
     case class OrderItems(
         question: String,
-        questionDetail: Option[String],
-        tag: Option[String],
+        override val questionDetail: Option[String],
+        override val tag: Option[String],
         orderedItemsThatWillBePresentedInAlphabeticalOrder: Seq[OrderItems.Item],
-        answerDetail: Option[String],
+        override val answerDetail: Option[String],
         pointsToGain: FixedPointNumber,
         override val maxTime: Duration,
     ) extends Question {
@@ -478,7 +485,7 @@ object QuizConfig {
       }
       override def isMultipleChoice: Boolean = false
 
-      def questionIsVisible(questionProgressIndex: Int): Boolean = {
+      override def questionIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 1
       }
       override def answerIsVisible(questionProgressIndex: Int): Boolean = {

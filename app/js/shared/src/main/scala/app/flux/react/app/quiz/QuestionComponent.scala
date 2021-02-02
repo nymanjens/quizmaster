@@ -75,23 +75,15 @@ final class QuestionComponent(implicit
       implicit val _1: Props = props
       <.div(
         ^.className := "question-wrapper",
-        props.question match {
-          case single: Question.Standard =>
-            props.questionProgressIndex match {
-              case 0 if !props.showMasterData => showPreparatoryTitle(single)
-              case _                          => showSingleQuestion(single)
-            }
-
-          case double: Question.DoubleQ =>
-            props.questionProgressIndex match {
-              case 0 if !props.showMasterData => showPreparatoryTitle(double)
-              case _                          => showDoubleQuestion(double)
-            }
-
-          case orderItems: Question.OrderItems =>
-            props.questionProgressIndex match {
-              case 0 if !props.showMasterData => showPreparatoryTitle(orderItems)
-              case _                          => showOrderItemsQuestion(orderItems)
+        props.questionProgressIndex match {
+          case 0 if !props.showMasterData => showPreparatoryTitle(props.question)
+          case _ =>
+            props.question match {
+              case single: Question.Standard       => showSingleQuestion(single)
+              case double: Question.DoubleQ        => showDoubleQuestion(double)
+              case orderItems: Question.OrderItems => showOrderItemsQuestion(orderItems)
+              case multipleAnswers: Question.MultipleAnswers =>
+                ??? //showMultipleAnswersQuestion(multipleAnswers)
             }
         },
       )
@@ -125,24 +117,8 @@ final class QuestionComponent(implicit
       val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
 
       <.div(
-        ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
-          <.div(
-            ^.className := "question",
-            <<.ifDefined(question.tag) { tag =>
-              Bootstrap.Label(BootstrapTags.toStableVariant(tag))(tag)
-            },
-            " ",
-            <<.nl2BrBlockWithLinks(question.question),
-          )
-        },
-        <<.ifDefined(question.questionDetail) { questionDetail =>
-          ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
-            <.div(
-              ^.className := "question-detail",
-              <<.nl2BrBlockWithLinks(questionDetail),
-            )
-          }
-        },
+        questionTitle(question),
+        questionDetail(question),
         pointsMetadata(question),
         <<.ifDefined(question.masterNotes) { masterNotes =>
           ifVisibleOrMaster(false) {
@@ -380,24 +356,8 @@ final class QuestionComponent(implicit
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
 
       <.div(
-        ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
-          <.div(
-            ^.className := "question",
-            <<.ifDefined(question.tag) { tag =>
-              Bootstrap.Label(BootstrapTags.toStableVariant(tag))(tag)
-            },
-            " ",
-            <<.nl2BrBlockWithLinks(question.question),
-          )
-        },
-        <<.ifDefined(question.questionDetail) { questionDetail =>
-          ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
-            <.div(
-              ^.className := "question-detail",
-              <<.nl2BrBlockWithLinks(questionDetail),
-            )
-          }
-        },
+        questionTitle(question),
+        questionDetail(question),
         pointsMetadata(question),
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
@@ -456,6 +416,30 @@ final class QuestionComponent(implicit
           }
         },
       )
+    }
+
+    private def questionTitle(question: Question)(implicit props: Props): VdomNode = {
+      ifVisibleOrMaster(question.questionIsVisible(props.questionProgressIndex)) {
+        <.div(
+          ^.className := "question",
+          <<.ifDefined(question.tag) { tag =>
+            Bootstrap.Label(BootstrapTags.toStableVariant(tag))(tag)
+          },
+          " ",
+          <<.nl2BrBlockWithLinks(question.textualQuestion),
+        )
+      }
+    }
+
+    private def questionDetail(question: Question)(implicit props: Props): VdomNode = {
+      <<.ifDefined(question.questionDetail) { questionDetail =>
+        ifVisibleOrMaster(question.questionIsVisible(props.questionProgressIndex)) {
+          <.div(
+            ^.className := "question-detail",
+            <<.nl2BrBlockWithLinks(questionDetail),
+          )
+        }
+      }
     }
 
     private def ifVisibleOrMaster(isVisible: Boolean)(vdomTag: VdomTag)(implicit props: Props): VdomNode = {
