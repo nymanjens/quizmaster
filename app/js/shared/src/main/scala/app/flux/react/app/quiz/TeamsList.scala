@@ -280,6 +280,20 @@ final class TeamsList(implicit
                 answerString,
               ),
             )
+          case SubmissionValue.MultipleTextAnswers(answers) =>
+            <.span(
+              maybeMasterSubmissionControls(submission),
+              <<.join(
+                ", ",
+                for ((answer, index) <- answers.zipWithIndex) yield {
+                  <.span(
+                    ^.key := s"answer-$index",
+                    ^.className := (if (answer.isCorrectAnswer) "correct" else "incorrect"),
+                    answer.text,
+                  ),
+                },
+              ),
+            )
         }
       )
     }
