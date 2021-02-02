@@ -84,6 +84,7 @@ object QuizConfig {
 
     def textualQuestion: String
     def questionDetail: Option[String]
+    def masterNotes: Option[String]
     def tag: Option[String]
     def answerDetail: Option[String]
     def maybeTextualChoices: Option[Seq[String]]
@@ -105,7 +106,7 @@ object QuizConfig {
         answer: String,
         override val answerDetail: Option[String],
         answerImage: Option[Image],
-        masterNotes: Option[String],
+        override val masterNotes: Option[String],
         image: Option[Image],
         audioSrc: Option[String],
         videoSrc: Option[String],
@@ -271,6 +272,7 @@ object QuizConfig {
       override def showSingleAnswerButtonToTeams: Boolean = false
       override def isMultipleChoice: Boolean = false
       override def textualQuestion: String = question
+      override def masterNotes: Option[String] = None
       override def maybeTextualChoices: Option[Seq[String]] = None
 
       override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
@@ -375,6 +377,7 @@ object QuizConfig {
       override def submissionAreOpen(questionProgressIndex: Int): Boolean = questionProgressIndex == 2
       override def isMultipleChoice: Boolean = true
       override def questionDetail: Option[String] = None
+      override def masterNotes: Option[String] = None
       override def tag: Option[String] = None
       override def answerDetail: Option[String] = None
       override def maybeTextualChoices: Option[Seq[String]] = Some(textualChoices)
@@ -492,6 +495,7 @@ object QuizConfig {
         questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
       }
       override def textualQuestion: String = question
+      override def masterNotes: Option[String] = None
       override def maybeTextualChoices: Option[Seq[String]] = None
       override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
         (submissionValue: @unchecked) match {

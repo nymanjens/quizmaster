@@ -120,14 +120,7 @@ final class QuestionComponent(implicit
         questionTitle(question),
         questionDetail(question),
         pointsMetadata(question),
-        <<.ifDefined(question.masterNotes) { masterNotes =>
-          ifVisibleOrMaster(false) {
-            <.div(
-              ^.className := "master-notes",
-              <<.nl2BrBlockWithLinks(masterNotes),
-            )
-          }
-        },
+        masterNotes(question),
         <.div(
           ^.className := "image-and-choices-row",
           <<.ifDefined(maybeImage) { image =>
@@ -301,6 +294,7 @@ final class QuestionComponent(implicit
           }
         },
         pointsMetadata(question),
+        masterNotes(question),
         <.div(
           ^.className := "image-and-choices-row",
           ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
@@ -359,6 +353,7 @@ final class QuestionComponent(implicit
         questionTitle(question),
         questionDetail(question),
         pointsMetadata(question),
+        masterNotes(question),
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
             ^.className := "image-and-choices-row",
@@ -437,6 +432,17 @@ final class QuestionComponent(implicit
           <.div(
             ^.className := "question-detail",
             <<.nl2BrBlockWithLinks(questionDetail),
+          )
+        }
+      }
+    }
+
+    private def masterNotes(question: Question)(implicit props: Props): VdomNode = {
+      <<.ifDefined(question.masterNotes) { masterNotes =>
+        ifVisibleOrMaster(false) {
+          <.div(
+            ^.className := "master-notes",
+            <<.nl2BrBlockWithLinks(masterNotes),
           )
         }
       }
