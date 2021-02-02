@@ -517,6 +517,7 @@ final class QuestionComponent(implicit
         src = s"/quizassets/${JsQuizAssets.encodeSource(audioRelativePath)}",
         playing = playing,
         key = key,
+        showControls = true,
       )
     }
 
