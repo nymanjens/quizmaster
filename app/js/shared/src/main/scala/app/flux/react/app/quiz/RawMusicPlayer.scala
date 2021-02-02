@@ -14,11 +14,13 @@ private[quiz] object RawMusicPlayer extends HydroReactComponent.Stateless {
   def apply(
       src: String,
       playing: Boolean,
-      key: String,
+      key: String = "raw-music-player",
+      showControls: Boolean = false,
   ): VdomElement = {
     val props = Props(
       src = src,
       playing = playing,
+      showControls = showControls,
     )
     component.withKey(key).apply(props)
   }
@@ -30,6 +32,7 @@ private[quiz] object RawMusicPlayer extends HydroReactComponent.Stateless {
   protected case class Props private[RawMusicPlayer] (
       src: String,
       playing: Boolean,
+      showControls: Boolean,
   )
 
   protected class Backend($ : BackendScope[Props, State])
@@ -66,7 +69,7 @@ private[quiz] object RawMusicPlayer extends HydroReactComponent.Stateless {
 
     override def render(props: Props, state: State) = logExceptions {
       <.audio(
-        ^.controls := true,
+        ^.controls := props.showControls,
         ^.src := props.src,
         ^.preload := "auto",
       ).withRef(audioRef)

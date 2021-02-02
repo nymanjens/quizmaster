@@ -126,6 +126,10 @@ final class Layout(implicit
         )
       }
 
+      def addTimeToTimer(duration: Duration): Unit = {
+        scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(duration))
+      }
+
       // Quiz navigation
       bind("left", () => teamsAndQuizStateStore.goToPreviousStep())
       bind("right", () => teamsAndQuizStateStore.goToNextStep())
@@ -138,11 +142,17 @@ final class Layout(implicit
 
       bind("space", () => scalaJsApiClient.doTeamOrQuizStateUpdate(ToggleTimerPaused()))
       bind("shift+r", () => scalaJsApiClient.doTeamOrQuizStateUpdate(RestartMedia()))
-      bind("shift+-", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(-30))))
-      bind("shift+o", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(-30))))
-      bind("shift+=", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(30))))
-      bind("shift++", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(30))))
-      bind("shift+p", () => scalaJsApiClient.doTeamOrQuizStateUpdate(AddTimeToTimer(Duration.ofSeconds(30))))
+      bind("shift+-", () => addTimeToTimer(Duration.ofSeconds(-30)))
+      bind("shift+o", () => addTimeToTimer(Duration.ofSeconds(-30)))
+      bind("shift+=", () => addTimeToTimer(Duration.ofSeconds(30)))
+      bind("shift++", () => addTimeToTimer(Duration.ofSeconds(30)))
+      bind("shift+p", () => addTimeToTimer(Duration.ofSeconds(30)))
+
+      bind("alt+shift+-", () => addTimeToTimer(Duration.ofSeconds(-10)))
+      bind("alt+shift+o", () => addTimeToTimer(Duration.ofSeconds(-10)))
+      bind("alt+shift+=", () => addTimeToTimer(Duration.ofSeconds(10)))
+      bind("alt+shift++", () => addTimeToTimer(Duration.ofSeconds(10)))
+      bind("alt+shift+p", () => addTimeToTimer(Duration.ofSeconds(10)))
 
       // Give points
       for ((teamIndex, shortkey) <- (0 to 10) zip ((1 to 9) :+ 0)) {
