@@ -18,6 +18,7 @@ import app.models.quiz.QuizState.Submission.SubmissionValue
 import hydro.common.I18n
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.time.Clock
+import hydro.common.GuavaReplacement
 import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
 import hydro.flux.react.uielements.PageHeader
@@ -217,6 +218,9 @@ final class TeamControllerView(implicit
 
       private val freeTextAnswerInputRef = TextInput.ref()
 
+      private val multipleAnswersInputRefs =
+        GuavaReplacement.LoadingCache.fromLoader[Int, TextInput.Reference](_ => TextInput.ref())
+
       override def render(props: Props, state: State): VdomElement = logExceptions {
         state.maybeTeam match {
           case None       => CreateTeamForm(props.router)
@@ -243,6 +247,7 @@ final class TeamControllerView(implicit
                 <.div(^.className := "question", question.textualQuestion),
                 question match {
                   case q: Question.OrderItems                      => orderItemsForm(q)
+                  case q: Question.MultipleAnswers                 => multipleAnswersForm(q)
                   case _ if question.showSingleAnswerButtonToTeams => singleAnswerButton(question)
                   case _ if question.isMultipleChoice              => multipleChoiceAnswerButtons(question)
                   case _                                           => freeTextAnswerForm(question)
@@ -407,6 +412,88 @@ final class TeamControllerView(implicit
           },
         )
       }
+      private def multipleAnswersForm(question: Question.MultipleAnswers)(implicit
+          team: Team,
+          quizState: QuizState,
+      ): VdomNode = {
+        val maybeCurrentSubmission = quizState.submissions.filter(_.teamId == team.id).lastOption
+        val maybeCurrentSubmissionAnswers =
+          maybeCurrentSubmission.map(_.value).flatMap {
+            case SubmissionValue.MultipleTextAnswers(a) => Some(a)
+            case _                                      => None
+          }
+        val canSubmitResponse = quizState.canSubmitResponse(team)
+        val showSubmissionCorrectness =
+          question.onlyFirstGainsPoints || question.answerIsVisible(quizState.questionProgressIndex)
+
+        <.form(
+          ^.className := "multiple-answers-form",
+          Bootstrap.FormGroup(
+            <.label(i18n("app.enter-your-answers"), ":"), {
+              for ((answer, index) <- question.answers.zipWithIndex) yield {
+                <.div(
+                  ^.key := s"answer-$index",
+                  TextInput(
+                    ref = multipleAnswersInputRefs.get(index),
+                    name = s"answer-$index",
+                    focusOnMount = index == 0,
+                    disabled = !canSubmitResponse,
+                    extraTagMods = Seq(^.autoComplete := "off"),
+                  ),
+                )
+              }
+            }.toVdomArray,
+          ),
+          <.div(
+            Bootstrap.Button(Variant.primary, Size.sm, tpe = "submit")(
+              ^.disabled := !canSubmitResponse,
+              ^.onClick ==> { (e: ReactEventFromInput) =>
+                e.preventDefault()
+
+                val answerTexts =
+                  for ((answer, index) <- question.answers.zipWithIndex)
+                    yield multipleAnswersInputRefs.get(index).apply().valueOrDefault
+                val alreadySubmittedThisValue = maybeCurrentSubmission.exists { submission =>
+                  submission.value match {
+                    case SubmissionValue.MultipleTextAnswers(answers) => true
+                    case _                                            => false
+                  }
+                }
+                if (answerTexts.forall(_.isEmpty) || alreadySubmittedThisValue) {
+                  Callback.empty
+                } else {
+                  submitResponse(
+                    SubmissionValue.MultipleTextAnswers(
+                      question.createAutogradedAnswers(answerTexts.map(makeWhitespaceVisible))
+                    )
+                  )
+                }
+              },
+              i18n("app.submit"),
+            )
+          ),
+          <<.ifDefined(maybeCurrentSubmissionAnswers) { currentSubmissionAnswers =>
+            <.div(
+              ^.className := "you-submitted",
+              i18n("app.you-submitted"),
+              ": ",
+              <.ul(
+                {
+                  for ((submittedAnswer, index) <- currentSubmissionAnswers.zipWithIndex) yield {
+                    <.li(
+                      ^.key := s"submitted-answer-$index",
+                      ^^.ifThen(showSubmissionCorrectness) {
+                        ^.className := (if (submittedAnswer.isCorrectAnswer) "correct" else "incorrect")
+                      },
+                      submittedAnswer.text,
+                    )
+                  }
+                }.toVdomArray
+              ),
+            )
+          },
+        )
+      }
 
       private def orderItemsForm(question: Question.OrderItems)(implicit
           team: Team,
@@ -523,7 +610,9 @@ final class TeamControllerView(implicit
       }
 
       private def makeWhitespaceVisible(s: String): String = {
-        if (s.trim.isEmpty) "<whitespace>" else s
+        if (s.isEmpty) "<empty>"
+        else if (s.trim.isEmpty) "<whitespace>"
+        else s
       }
 
       private def toTagMods(props: js.Dictionary[js.Object]): Seq[TagMod] = {
