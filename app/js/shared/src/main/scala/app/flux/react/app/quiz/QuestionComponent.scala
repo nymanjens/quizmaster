@@ -232,25 +232,9 @@ final class QuestionComponent(implicit
           }
         },
         <<.ifThen(question.choices.isEmpty || !answerIsVisible) {
-          ifVisibleOrMaster(answerIsVisible) {
-            if (answerIsVisible) {
-              <.div(
-                ^.className := "answer",
-                <<.nl2BrBlockWithLinks(question.answer),
-              )
-            } else {
-              <.div(obfuscatedAnswer(question.answer))
-            }
-          }
+          answerIfVisible(question)
         },
-        <<.ifThen(answerIsVisible) {
-          <<.ifDefined(question.answerDetail) { answerDetail =>
-            <.div(
-              ^.className := "answer-detail",
-              <<.nl2BrBlockWithLinks(answerDetail),
-            )
-          }
-        },
+        answerDetailIfVisible(question),
       )
     }
 
@@ -392,24 +376,8 @@ final class QuestionComponent(implicit
           ^.className := "submissions-without-choices",
           showSubmissions(props.quizState.submissions),
         ),
-        ifVisibleOrMaster(answerIsVisible) {
-          if (answerIsVisible) {
-            <.div(
-              ^.className := "answer",
-              <<.nl2BrBlockWithLinks(question.answerAsString),
-            )
-          } else {
-            <.div(obfuscatedAnswer(question.answerAsString))
-          }
-        },
-        <<.ifThen(answerIsVisible) {
-          <<.ifDefined(question.answerDetail) { answerDetail =>
-            <.div(
-              ^.className := "answer-detail",
-              <<.nl2BrBlockWithLinks(answerDetail),
-            )
-          }
-        },
+        answerIfVisible(question),
+        answerDetailIfVisible(question),
       )
     }
 
@@ -443,6 +411,34 @@ final class QuestionComponent(implicit
           <.div(
             ^.className := "master-notes",
             <<.nl2BrBlockWithLinks(masterNotes),
+          )
+        }
+      }
+    }
+
+    private def answerIfVisible(question: Question)(implicit props: Props): VdomNode = {
+      val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
+
+      ifVisibleOrMaster(answerIsVisible) {
+        if (answerIsVisible) {
+          <.div(
+            ^.className := "answer",
+            <<.nl2BrBlockWithLinks(question.answerAsString),
+          )
+        } else {
+          <.div(obfuscatedAnswer(question.answerAsString))
+        }
+      }
+    }
+
+    private def answerDetailIfVisible(question: Question)(implicit props: Props): VdomNode = {
+      val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
+
+      <<.ifThen(answerIsVisible) {
+        <<.ifDefined(question.answerDetail) { answerDetail =>
+          <.div(
+            ^.className := "answer-detail",
+            <<.nl2BrBlockWithLinks(answerDetail),
           )
         }
       }

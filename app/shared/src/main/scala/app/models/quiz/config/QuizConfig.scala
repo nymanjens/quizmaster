@@ -88,6 +88,7 @@ object QuizConfig {
     def tag: Option[String]
     def answerDetail: Option[String]
     def maybeTextualChoices: Option[Seq[String]]
+    def answerAsString: String
 
     /**
      * Returns true if the given submission is correct according to configured answer.
@@ -171,6 +172,7 @@ object QuizConfig {
       override def isMultipleChoice: Boolean = choices.nonEmpty
       override def textualQuestion: String = question
       override def maybeTextualChoices: Option[Seq[String]] = choices
+      override def answerAsString: String = answer
 
       override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
         submissionValue match {
@@ -298,7 +300,7 @@ object QuizConfig {
         questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
       }
 
-      def answerAsString: String = {
+      override def answerAsString: String = {
         answers.mkString(", ")
       }
 
@@ -381,6 +383,7 @@ object QuizConfig {
       override def tag: Option[String] = None
       override def answerDetail: Option[String] = None
       override def maybeTextualChoices: Option[Seq[String]] = Some(textualChoices)
+      override def answerAsString: String = textualAnswer
 
       override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
         (submissionValue: @unchecked) match {
@@ -511,7 +514,7 @@ object QuizConfig {
         }
       }
 
-      def answerAsString: String = {
+      override def answerAsString: String = {
         orderedItemsThatWillBePresentedInAlphabeticalOrder.map(i => toCharacterCode(i)).mkString
       }
 
