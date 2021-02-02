@@ -24,6 +24,7 @@ object Picklers extends StandardPicklers {
     .addConcreteType[Question.Standard]
     .addConcreteType[Question.DoubleQ]
     .addConcreteType[Question.OrderItems]
+    .addConcreteType[Question.MultipleAnswers]
 
   implicit val answerBulletTypePickler: Pickler[AnswerBulletType] = compositePickler[AnswerBulletType]
     .addConcreteType[AnswerBulletType.Arrows.type]
@@ -33,6 +34,7 @@ object Picklers extends StandardPicklers {
     .addConcreteType[SubmissionValue.PressedTheOneButton.type]
     .addConcreteType[SubmissionValue.MultipleChoiceAnswer]
     .addConcreteType[SubmissionValue.FreeTextAnswer]
+    .addConcreteType[SubmissionValue.MultipleTextAnswers]
 
   override implicit val entityPickler: Pickler[Entity] = compositePickler[Entity]
     .addConcreteType[Team]
