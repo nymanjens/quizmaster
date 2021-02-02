@@ -419,8 +419,8 @@ final class QuestionComponent(implicit
             }
             s"$gainN, $gainM"
           } else {
-            if (pointsToGain == 1) i18n("app.all-right-answers-gain-1-point")
-            else i18n("app.all-right-answers-gain-n-points", pointsToGain)
+            if (pointsToGain == 1) i18n("app.1-point")
+            else i18n("app.n-points", pointsToGain)
           }
         },
         <<.ifThen(question.defaultPointsToGainOnWrongAnswer != 0) {
