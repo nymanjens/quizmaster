@@ -69,46 +69,54 @@ final class SyncedTimerBar(implicit
 
     override def render(props: Props, state: State): VdomElement = logExceptions {
       if (state.timerIsEnabled) {
-        val timeRemaining = Seq(state.maxTime - state.elapsedTime, Duration.ZERO).max
-        val timeRemainingFraction = timeRemaining / state.maxTime
-
-        <.div(
-          ^.className := "synced-timer-bar",
-          Bootstrap.ProgressBar(
-            fraction = timeRemainingFraction,
-            variant = {
-              if (state.timerState.timerRunning) {
-                if (timeRemainingFraction < 0.1) Variant.danger else Variant.default
-              } else {
-                Variant.success
-              }
-            },
-            striped = !state.timerState.timerRunning,
-            label = <.div(
-              ^.className := "synced-timer-bar-label",
-              s"${formatDuration(timeRemaining)} / ${formatDuration(state.maxTime)}",
-            ),
-          ),
-          <<.ifThen(
-            timeRemaining > Duration.ZERO &&
-              timeRemaining < soundEffectController.timerAlmostRunningOutDetails.duration &&
-              soundEffectController.timerAlmostRunningOutDetails.canPlayOnCurrentPage
-          ) {
-            RawMusicPlayer(
-              src = soundEffectController.timerAlmostRunningOutDetails.filepath,
-              playing = state.timerState.timerRunning,
-            )
-          },
-        )
+        renderTimerCountingDown(state)
       } else {
-        <.div(
-          ^.className := "synced-timer-bar",
-          Bootstrap.ProgressBar(
-            fraction = 0,
-            variant = Variant.default,
-          ),
-        )
+        renderQuizProgress(state)
       }
+    }
+
+    private def renderTimerCountingDown(state: State): VdomElement = {
+      val timeRemaining = Seq(state.maxTime - state.elapsedTime, Duration.ZERO).max
+      val timeRemainingFraction = timeRemaining / state.maxTime
+
+      <.div(
+        ^.className := "synced-timer-bar",
+        Bootstrap.ProgressBar(
+          fraction = timeRemainingFraction,
+          variant = {
+            if (state.timerState.timerRunning) {
+              if (timeRemainingFraction < 0.1) Variant.danger else Variant.default
+            } else {
+              Variant.success
+            }
+          },
+          striped = !state.timerState.timerRunning,
+          label = <.div(
+            ^.className := "synced-timer-bar-label",
+            s"${formatDuration(timeRemaining)} / ${formatDuration(state.maxTime)}",
+          ),
+        ),
+        <<.ifThen(
+          timeRemaining > Duration.ZERO &&
+            timeRemaining < soundEffectController.timerAlmostRunningOutDetails.duration &&
+            soundEffectController.timerAlmostRunningOutDetails.canPlayOnCurrentPage
+        ) {
+          RawMusicPlayer(
+            src = soundEffectController.timerAlmostRunningOutDetails.filepath,
+            playing = state.timerState.timerRunning,
+          )
+        },
+      )
+    }
+
+    private def renderQuizProgress(state: State): VdomElement = {
+      <.div(
+        ^.className := "synced-timer-bar",
+        Bootstrap.ProgressBar(
+          fraction = 0,
+          variant = Variant.default,
+        ),
+      )
     }
 
     override def didMount(props: Props, state: State): Callback = {
