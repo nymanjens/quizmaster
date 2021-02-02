@@ -430,7 +430,7 @@ final class TeamControllerView(implicit
           ^.className := "multiple-answers-form",
           Bootstrap.FormGroup(
             <.label(i18n("app.enter-your-answers"), ":"), {
-              for ((answer, index) <- question.answers.zipWithIndex) yield {
+              for (index <- question.answers.indices) yield {
                 <.div(
                   ^.key := s"answer-$index",
                   TextInput(
@@ -451,21 +451,21 @@ final class TeamControllerView(implicit
                 e.preventDefault()
 
                 val answerTexts =
-                  for ((answer, index) <- question.answers.zipWithIndex)
+                  for (index <- question.answers.indices)
                     yield multipleAnswersInputRefs.get(index).apply().valueOrDefault
+                val answers = question.createAutogradedAnswers(answerTexts.map(makeWhitespaceVisible))
+
                 val alreadySubmittedThisValue = maybeCurrentSubmission.exists { submission =>
                   submission.value match {
-                    case SubmissionValue.MultipleTextAnswers(answers) => true
-                    case _                                            => false
+                    case SubmissionValue.MultipleTextAnswers(`answers`) => true
+                    case _                                              => false
                   }
                 }
                 if (answerTexts.forall(_.isEmpty) || alreadySubmittedThisValue) {
                   Callback.empty
                 } else {
                   submitResponse(
-                    SubmissionValue.MultipleTextAnswers(
-                      question.createAutogradedAnswers(answerTexts.map(makeWhitespaceVisible))
-                    )
+                    SubmissionValue.MultipleTextAnswers(answers)
                   )
                 }
               },
