@@ -14,6 +14,7 @@ import hydro.common.time.Clock
 import hydro.flux.react.HydroReactComponent
 import hydro.flux.react.uielements.Bootstrap
 import hydro.flux.react.uielements.Bootstrap.Variant
+import hydro.flux.react.ReactVdomUtils.<<
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import org.scalajs.dom
@@ -88,6 +89,13 @@ final class SyncedTimerBar(implicit
             s"${formatDuration(timeRemaining)} / ${formatDuration(state.maxTime)}",
           ),
         ),
+
+        <<.ifThen(timeRemaining < soundEffectController.timerAlmostRunningOutDetails.duration) {
+          RawMusicPlayer(
+            src = soundEffectController.timerAlmostRunningOutDetails.filepath,
+            playing = state.timerState.timerRunning,
+          )
+        },
       )
       } else {
         <.div(

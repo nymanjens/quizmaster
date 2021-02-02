@@ -43,11 +43,11 @@ final class SoundEffectController(implicit
 
   def timerAlmostRunningOutDetails: SoundDetails = SoundDetails(
     filepath = SoundEffect.TimerAlmostRunningOut.filepath,
-    duration = 12.seconds + 720.milliseconds,
+    duration = java.time.Duration.ofSeconds(12).plusMillis(720),
   )
 
   // **************** Public types ****************//
-  case class SoundDetails(filepath: String, duration: Duration)
+  case class SoundDetails(filepath: String, duration: java.time.Duration)
 
 
   // **************** Private helper methods ****************//
