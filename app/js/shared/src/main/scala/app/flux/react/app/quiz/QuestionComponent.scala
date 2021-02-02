@@ -183,10 +183,6 @@ final class QuestionComponent(implicit
     private def showMultipleAnswersQuestion(
         question: Question.MultipleAnswers
     )(implicit props: Props): VdomElement = {
-      implicit val _ = props.quizState
-      val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
-      val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
-
       <.div(
         SubComponents.questionTitle(question),
         SubComponents.questionDetail(question),
