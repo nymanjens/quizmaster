@@ -122,25 +122,7 @@ final class QuestionComponent(implicit
         SubComponents.masterNotes(question),
         <.div(
           ^.className := "image-and-choices-row",
-          <<.ifDefined(maybeImage) { image =>
-            ifVisibleOrMaster(progressIndex > 0) {
-              <.div(
-                ^.className := "image-holder",
-                ^.className := image.size,
-                <.img(
-                  ^.src := s"/quizassets/${JsQuizAssets.encodeSource(image.src)}",
-                  ^.className := image.size,
-                  ^^.ifThen(props.quizState.imageIsEnlarged) {
-                    if (props.showMasterData) {
-                      ^.className := "indicate-enlarged"
-                    } else {
-                      ^.className := "enlarged"
-                    }
-                  },
-                ),
-              )
-            }
-          },
+          SubComponents.image(question),
           <<.ifDefined(question.videoSrc) { videoSrc =>
             ifVisibleOrMaster(question.submissionAreOpen(props.questionProgressIndex)) {
               val timerState = props.quizState.timerState
@@ -252,25 +234,7 @@ final class QuestionComponent(implicit
         SubComponents.masterNotes(question),
         <.div(
           ^.className := "image-and-choices-row",
-          <<.ifDefined(maybeImage) { image =>
-            ifVisibleOrMaster(progressIndex > 0) {
-              <.div(
-                ^.className := "image-holder",
-                ^.className := image.size,
-                <.img(
-                  ^.src := s"/quizassets/${JsQuizAssets.encodeSource(image.src)}",
-                  ^.className := image.size,
-                  ^^.ifThen(props.quizState.imageIsEnlarged) {
-                    if (props.showMasterData) {
-                      ^.className := "indicate-enlarged"
-                    } else {
-                      ^.className := "enlarged"
-                    }
-                  },
-                ),
-              )
-            }
-          },
+          SubComponents.image(question),
           <<.ifDefined(question.videoSrc) { videoSrc =>
             ifVisibleOrMaster(question.submissionAreOpen(props.questionProgressIndex)) {
               val timerState = props.quizState.timerState
@@ -552,6 +516,31 @@ final class QuestionComponent(implicit
           <.div(
             ^.className := "master-notes",
             <<.nl2BrBlockWithLinks(masterNotes),
+          )
+        }
+      }
+    }
+
+    def image(question: Question)(implicit props: Props): VdomNode = {
+      val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
+      val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
+
+      <<.ifDefined(maybeImage) { image =>
+        ifVisibleOrMaster(question.questionIsVisible(props.questionProgressIndex)) {
+          <.div(
+            ^.className := "image-holder",
+            ^.className := image.size,
+            <.img(
+              ^.src := s"/quizassets/${JsQuizAssets.encodeSource(image.src)}",
+              ^.className := image.size,
+              ^^.ifThen(props.quizState.imageIsEnlarged) {
+                if (props.showMasterData) {
+                  ^.className := "indicate-enlarged"
+                } else {
+                  ^.className := "enlarged"
+                }
+              },
+            ),
           )
         }
       }

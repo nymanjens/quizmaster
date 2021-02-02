@@ -89,6 +89,8 @@ object QuizConfig {
     def answerDetail: Option[String]
     def maybeTextualChoices: Option[Seq[String]]
     def answerAsString: String
+    def image: Option[Image]
+    def answerImage: Option[Image]
 
     /**
      * Returns true if the given submission is correct according to configured answer.
@@ -106,9 +108,9 @@ object QuizConfig {
         choices: Option[Seq[String]],
         answer: String,
         override val answerDetail: Option[String],
-        answerImage: Option[Image],
         override val masterNotes: Option[String],
-        image: Option[Image],
+        override val image: Option[Image],
+        override val answerImage: Option[Image],
         audioSrc: Option[String],
         videoSrc: Option[String],
         pointsToGain: FixedPointNumber,
@@ -207,8 +209,8 @@ object QuizConfig {
         answers: Seq[String],
         answersHaveToBeInSameOrder: Boolean,
         override val answerDetail: Option[String],
-        answerImage: Option[Image],
-        image: Option[Image],
+        override val image: Option[Image],
+        override val answerImage: Option[Image],
         audioSrc: Option[String],
         videoSrc: Option[String],
         pointsToGain: FixedPointNumber,
@@ -385,6 +387,8 @@ object QuizConfig {
       override def answerDetail: Option[String] = None
       override def maybeTextualChoices: Option[Seq[String]] = Some(textualChoices)
       override def answerAsString: String = textualAnswer
+      override def image: Option[Image] = None
+      override def answerImage: Option[Image] = None
 
       override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
         (submissionValue: @unchecked) match {
@@ -518,6 +522,8 @@ object QuizConfig {
       override def answerAsString: String = {
         orderedItemsThatWillBePresentedInAlphabeticalOrder.map(i => toCharacterCode(i)).mkString
       }
+      override def image: Option[Image] = None
+      override def answerImage: Option[Image] = None
 
       lazy val itemsInAlphabeticalOrder: Seq[OrderItems.Item] = {
         orderedItemsThatWillBePresentedInAlphabeticalOrder.sortBy(_.item)
