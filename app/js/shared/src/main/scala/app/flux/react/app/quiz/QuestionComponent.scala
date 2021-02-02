@@ -107,7 +107,6 @@ final class QuestionComponent(implicit
         props: Props
     ): VdomElement = {
       implicit val _ = props.quizState
-      val progressIndex = props.questionProgressIndex
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
       val showSubmissionsOnChoices =
         question.isMultipleChoice && (question.onlyFirstGainsPoints || answerIsVisible)
@@ -125,7 +124,7 @@ final class QuestionComponent(implicit
           SubComponents.image(question),
           SubComponents.video(question),
           <<.ifDefined(question.choices) { choices =>
-            ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
+            ifVisibleOrMaster(question.choicesAreVisible(props.questionProgressIndex)) {
               <.div(
                 ^.className := "choices-holder",
                 ^^.ifThen(maybeImage.isDefined || question.videoSrc.isDefined) {
@@ -173,17 +172,7 @@ final class QuestionComponent(implicit
             showSubmissions(props.quizState.submissions)
           },
         ),
-        <<.ifDefined(question.audioSrc) { audioRelativePath =>
-          <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && !props.showMasterData) {
-            val timerState = props.quizState.timerState
-            val timerIsRunning = timerState.timerRunning && !timerState.hasFinished(question.maxTime)
-            SubComponents.audioPlayer(
-              audioRelativePath,
-              playing = timerIsRunning,
-              key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
-            )
-          }
-        },
+        SubComponents.audio(question),
         <<.ifThen(question.choices.isEmpty || !answerIsVisible) {
           SubComponents.answer(question)
         },
@@ -195,7 +184,6 @@ final class QuestionComponent(implicit
         question: Question.MultipleAnswers
     )(implicit props: Props): VdomElement = {
       implicit val _ = props.quizState
-      val progressIndex = props.questionProgressIndex
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
       val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
 
@@ -213,17 +201,7 @@ final class QuestionComponent(implicit
           ^.className := "submissions-without-choices",
           showSubmissions(props.quizState.submissions),
         ),
-        <<.ifDefined(question.audioSrc) { audioRelativePath =>
-          <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && !props.showMasterData) {
-            val timerState = props.quizState.timerState
-            val timerIsRunning = timerState.timerRunning && !timerState.hasFinished(question.maxTime)
-            SubComponents.audioPlayer(
-              audioRelativePath,
-              playing = timerIsRunning,
-              key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
-            )
-          }
-        },
+        SubComponents.audio(question),
         SubComponents.answer(question),
         SubComponents.answerDetail(question),
       )
@@ -522,6 +500,20 @@ final class QuestionComponent(implicit
       }
     }
 
+    def audio(question: Question)(implicit props: Props): VdomNode = {
+      <<.ifDefined(question.audioSrc) { audioRelativePath =>
+        <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && !props.showMasterData) {
+          val timerState = props.quizState.timerState
+          val timerIsRunning = timerState.timerRunning && !timerState.hasFinished(question.maxTime)
+          audioPlayer(
+            audioRelativePath,
+            playing = timerIsRunning,
+            key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
+          )
+        }
+      }
+    }
+
     def answer(question: Question)(implicit props: Props): VdomNode = {
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
 
@@ -551,7 +543,7 @@ final class QuestionComponent(implicit
     }
 
     /*private*/
-    def audioPlayer(audioRelativePath: String, playing: Boolean, key: String): VdomNode = {
+    private def audioPlayer(audioRelativePath: String, playing: Boolean, key: String): VdomNode = {
       RawMusicPlayer(
         src = s"/quizassets/${JsQuizAssets.encodeSource(audioRelativePath)}",
         playing = playing,
