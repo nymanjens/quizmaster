@@ -97,7 +97,7 @@ final class QuestionComponent(implicit
           " ",
           questionNumber,
         ),
-        pointsMetadata(question),
+        SubComponents.pointsMetadata(question),
       )
     }
 
@@ -116,10 +116,10 @@ final class QuestionComponent(implicit
       val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
 
       <.div(
-        questionTitle(question),
-        questionDetail(question),
-        pointsMetadata(question),
-        masterNotes(question),
+        SubComponents.questionTitle(question),
+        SubComponents.questionDetail(question),
+        SubComponents.pointsMetadata(question),
+        SubComponents.masterNotes(question),
         <.div(
           ^.className := "image-and-choices-row",
           <<.ifDefined(maybeImage) { image =>
@@ -156,12 +156,12 @@ final class QuestionComponent(implicit
                   }
                 },
                 if (props.showMasterData) {
-                  videoHelpPlaceholder(
+                  SubComponents.videoHelpPlaceholder(
                     videoSrc,
                     playing = timerIsRunning,
                   )
                 } else {
-                  videoPlayer(
+                  SubComponents.videoPlayer(
                     videoSrc,
                     playing = timerIsRunning,
                     key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
@@ -223,7 +223,7 @@ final class QuestionComponent(implicit
           <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && !props.showMasterData) {
             val timerState = props.quizState.timerState
             val timerIsRunning = timerState.timerRunning && !timerState.hasFinished(question.maxTime)
-            audioPlayer(
+            SubComponents.audioPlayer(
               audioRelativePath,
               playing = timerIsRunning,
               key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
@@ -231,9 +231,9 @@ final class QuestionComponent(implicit
           }
         },
         <<.ifThen(question.choices.isEmpty || !answerIsVisible) {
-          answerIfVisible(question)
+          SubComponents.answerIfVisible(question)
         },
-        answerDetailIfVisible(question),
+        SubComponents.answerDetailIfVisible(question),
       )
     }
 
@@ -246,10 +246,10 @@ final class QuestionComponent(implicit
       val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
 
       <.div(
-        questionTitle(question),
-        questionDetail(question),
-        pointsMetadata(question),
-        masterNotes(question),
+        SubComponents.questionTitle(question),
+        SubComponents.questionDetail(question),
+        SubComponents.pointsMetadata(question),
+        SubComponents.masterNotes(question),
         <.div(
           ^.className := "image-and-choices-row",
           <<.ifDefined(maybeImage) { image =>
@@ -286,12 +286,12 @@ final class QuestionComponent(implicit
                   }
                 },
                 if (props.showMasterData) {
-                  videoHelpPlaceholder(
+                  SubComponents.videoHelpPlaceholder(
                     videoSrc,
                     playing = timerIsRunning,
                   )
                 } else {
-                  videoPlayer(
+                  SubComponents.videoPlayer(
                     videoSrc,
                     playing = timerIsRunning,
                     key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
@@ -309,15 +309,15 @@ final class QuestionComponent(implicit
           <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && !props.showMasterData) {
             val timerState = props.quizState.timerState
             val timerIsRunning = timerState.timerRunning && !timerState.hasFinished(question.maxTime)
-            audioPlayer(
+            SubComponents.audioPlayer(
               audioRelativePath,
               playing = timerIsRunning,
               key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
             )
           }
         },
-        answerIfVisible(question),
-        answerDetailIfVisible(question),
+        SubComponents.answerIfVisible(question),
+        SubComponents.answerDetailIfVisible(question),
       )
     }
 
@@ -360,8 +360,8 @@ final class QuestionComponent(implicit
             )
           }
         },
-        pointsMetadata(question),
-        masterNotes(question),
+        SubComponents.pointsMetadata(question),
+        SubComponents.masterNotes(question),
         <.div(
           ^.className := "image-and-choices-row",
           ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
@@ -417,10 +417,10 @@ final class QuestionComponent(implicit
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
 
       <.div(
-        questionTitle(question),
-        questionDetail(question),
-        pointsMetadata(question),
-        masterNotes(question),
+        SubComponents.questionTitle(question),
+        SubComponents.questionDetail(question),
+        SubComponents.pointsMetadata(question),
+        SubComponents.masterNotes(question),
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
             ^.className := "image-and-choices-row",
@@ -459,12 +459,37 @@ final class QuestionComponent(implicit
           ^.className := "submissions-without-choices",
           showSubmissions(props.quizState.submissions),
         ),
-        answerIfVisible(question),
-        answerDetailIfVisible(question),
+        SubComponents.answerIfVisible(question),
+        SubComponents.answerDetailIfVisible(question),
       )
     }
 
-    private def questionTitle(question: Question)(implicit props: Props): VdomNode = {
+  }
+
+  private def ifVisibleOrMaster(isVisible: Boolean)(vdomTag: VdomTag)(implicit props: Props): VdomNode = {
+    if (isVisible) {
+      vdomTag
+    } else if (props.showMasterData) {
+      vdomTag(^.className := "admin-only-data")
+    } else {
+      VdomArray.empty()
+    }
+  }
+
+  private def showSubmissions(submissions: Seq[Submission])(implicit props: Props) = {
+    <<.joinWithSpaces(
+      for {
+        (submission, index) <- submissions.zipWithIndex
+        team <- props.teams.find(_.id == submission.teamId)
+      } yield TeamIcon(team)(
+        ^.key := s"${submission.teamId}-$index"
+      )
+    )
+  }
+
+  private object SubComponents {
+
+    def questionTitle(question: Question)(implicit props: Props): VdomNode = {
       ifVisibleOrMaster(question.questionIsVisible(props.questionProgressIndex)) {
         <.div(
           ^.className := "question",
@@ -477,7 +502,7 @@ final class QuestionComponent(implicit
       }
     }
 
-    private def questionDetail(question: Question)(implicit props: Props): VdomNode = {
+    def questionDetail(question: Question)(implicit props: Props): VdomNode = {
       <<.ifDefined(question.questionDetail) { questionDetail =>
         ifVisibleOrMaster(question.questionIsVisible(props.questionProgressIndex)) {
           <.div(
@@ -488,56 +513,7 @@ final class QuestionComponent(implicit
       }
     }
 
-    private def masterNotes(question: Question)(implicit props: Props): VdomNode = {
-      <<.ifDefined(question.masterNotes) { masterNotes =>
-        ifVisibleOrMaster(false) {
-          <.div(
-            ^.className := "master-notes",
-            <<.nl2BrBlockWithLinks(masterNotes),
-          )
-        }
-      }
-    }
-
-    private def answerIfVisible(question: Question)(implicit props: Props): VdomNode = {
-      val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
-
-      ifVisibleOrMaster(answerIsVisible) {
-        if (answerIsVisible) {
-          <.div(
-            ^.className := "answer",
-            <<.nl2BrBlockWithLinks(question.answerAsString),
-          )
-        } else {
-          <.div(obfuscatedAnswer(question.answerAsString))
-        }
-      }
-    }
-
-    private def answerDetailIfVisible(question: Question)(implicit props: Props): VdomNode = {
-      val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
-
-      <<.ifThen(answerIsVisible) {
-        <<.ifDefined(question.answerDetail) { answerDetail =>
-          <.div(
-            ^.className := "answer-detail",
-            <<.nl2BrBlockWithLinks(answerDetail),
-          )
-        }
-      }
-    }
-
-    private def ifVisibleOrMaster(isVisible: Boolean)(vdomTag: VdomTag)(implicit props: Props): VdomNode = {
-      if (isVisible) {
-        vdomTag
-      } else if (props.showMasterData) {
-        vdomTag(^.className := "admin-only-data")
-      } else {
-        VdomArray.empty()
-      }
-    }
-
-    private def pointsMetadata(question: Question): VdomElement = {
+    def pointsMetadata(question: Question): VdomElement = {
       val pointsToGainOnFirstAnswer = question.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = true)
       val pointsToGain = question.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false)
       <.div(
@@ -570,18 +546,47 @@ final class QuestionComponent(implicit
       )
     }
 
-    private def showSubmissions(submissions: Seq[Submission])(implicit props: Props) = {
-      <<.joinWithSpaces(
-        for {
-          (submission, index) <- submissions.zipWithIndex
-          team <- props.teams.find(_.id == submission.teamId)
-        } yield TeamIcon(team)(
-          ^.key := s"${submission.teamId}-$index"
-        )
-      )
+    def masterNotes(question: Question)(implicit props: Props): VdomNode = {
+      <<.ifDefined(question.masterNotes) { masterNotes =>
+        ifVisibleOrMaster(false) {
+          <.div(
+            ^.className := "master-notes",
+            <<.nl2BrBlockWithLinks(masterNotes),
+          )
+        }
+      }
     }
 
-    private def audioPlayer(audioRelativePath: String, playing: Boolean, key: String): VdomNode = {
+    def answerIfVisible(question: Question)(implicit props: Props): VdomNode = {
+      val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
+
+      ifVisibleOrMaster(answerIsVisible) {
+        if (answerIsVisible) {
+          <.div(
+            ^.className := "answer",
+            <<.nl2BrBlockWithLinks(question.answerAsString),
+          )
+        } else {
+          <.div(obfuscatedAnswer(question.answerAsString))
+        }
+      }
+    }
+
+    def answerDetailIfVisible(question: Question)(implicit props: Props): VdomNode = {
+      val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
+
+      <<.ifThen(answerIsVisible) {
+        <<.ifDefined(question.answerDetail) { answerDetail =>
+          <.div(
+            ^.className := "answer-detail",
+            <<.nl2BrBlockWithLinks(answerDetail),
+          )
+        }
+      }
+    }
+
+    /*private*/
+    def audioPlayer(audioRelativePath: String, playing: Boolean, key: String): VdomNode = {
       RawMusicPlayer(
         src = s"/quizassets/${JsQuizAssets.encodeSource(audioRelativePath)}",
         playing = playing,
@@ -590,7 +595,8 @@ final class QuestionComponent(implicit
       )
     }
 
-    private def videoPlayer(
+    /*private*/
+    def videoPlayer(
         videoRelativePath: String,
         playing: Boolean,
         key: String,
@@ -602,7 +608,8 @@ final class QuestionComponent(implicit
       )
     }
 
-    private def videoHelpPlaceholder(
+    /*private*/
+    def videoHelpPlaceholder(
         videoRelativePath: String,
         playing: Boolean,
     ): VdomNode = {
