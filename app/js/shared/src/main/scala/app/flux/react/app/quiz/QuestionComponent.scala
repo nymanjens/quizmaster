@@ -211,8 +211,6 @@ final class QuestionComponent(implicit
       implicit val _ = props.quizState
       val progressIndex = props.questionProgressIndex
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
-      val correctSubmissionWasEntered =
-        props.quizState.submissions.exists(s => s.isCorrectAnswer == Some(true))
 
       <.div(
         ifVisibleOrMaster(false) {
