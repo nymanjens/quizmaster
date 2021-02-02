@@ -252,7 +252,9 @@ class QuizConfigParsableValueTest extends Specification {
               answersHaveToBeInSameOrder = false,
               answerDetail = Some("Robert Trujillo joined Metallica in 2003."),
               answerImage = None,
-              image = Some(Image("https://upload.wikimedia.org/wikipedia/commons/9/9e/Metallica_-_2003.jpg", "large")) ,
+              image = Some(
+                Image("https://upload.wikimedia.org/wikipedia/commons/9/9e/Metallica_-_2003.jpg", "large")
+              ),
               audioSrc = None,
               videoSrc = None,
               pointsToGain = FixedPointNumber(3),
