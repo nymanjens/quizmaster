@@ -44,11 +44,15 @@ final class SoundEffectController(implicit
   def timerAlmostRunningOutDetails: SoundDetails = SoundDetails(
     filepath = SoundEffect.TimerAlmostRunningOut.filepath,
     duration = java.time.Duration.ofSeconds(12).plusMillis(720),
+    canPlayOnCurrentPage = canPlaySoundEffectsOnThisPage,
   )
 
   // **************** Public types ****************//
-  case class SoundDetails(filepath: String, duration: java.time.Duration)
-
+  case class SoundDetails(
+      filepath: String,
+      duration: java.time.Duration,
+      canPlayOnCurrentPage: Boolean,
+  )
 
   // **************** Private helper methods ****************//
   private def dispatcherListener: PartialFunction[Action, Unit] = {
