@@ -123,35 +123,7 @@ final class QuestionComponent(implicit
         <.div(
           ^.className := "image-and-choices-row",
           SubComponents.image(question),
-          <<.ifDefined(question.videoSrc) { videoSrc =>
-            ifVisibleOrMaster(question.submissionAreOpen(props.questionProgressIndex)) {
-              val timerState = props.quizState.timerState
-              val timerIsRunning = timerState.timerRunning && !timerState
-                .hasFinished(question.maxTime) && question.submissionAreOpen(props.questionProgressIndex)
-              <.div(
-                ^.className := "video-holder",
-                ^^.ifThen(props.quizState.imageIsEnlarged) {
-                  if (props.showMasterData) {
-                    ^.className := "indicate-enlarged"
-                  } else {
-                    ^.className := "enlarged"
-                  }
-                },
-                if (props.showMasterData) {
-                  SubComponents.videoHelpPlaceholder(
-                    videoSrc,
-                    playing = timerIsRunning,
-                  )
-                } else {
-                  SubComponents.videoPlayer(
-                    videoSrc,
-                    playing = timerIsRunning,
-                    key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
-                  )
-                },
-              )
-            }
-          },
+          SubComponents.video(question),
           <<.ifDefined(question.choices) { choices =>
             ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
               <.div(
@@ -235,35 +207,7 @@ final class QuestionComponent(implicit
         <.div(
           ^.className := "image-and-choices-row",
           SubComponents.image(question),
-          <<.ifDefined(question.videoSrc) { videoSrc =>
-            ifVisibleOrMaster(question.submissionAreOpen(props.questionProgressIndex)) {
-              val timerState = props.quizState.timerState
-              val timerIsRunning = timerState.timerRunning && !timerState
-                .hasFinished(question.maxTime) && question.submissionAreOpen(props.questionProgressIndex)
-              <.div(
-                ^.className := "video-holder",
-                ^^.ifThen(props.quizState.imageIsEnlarged) {
-                  if (props.showMasterData) {
-                    ^.className := "indicate-enlarged"
-                  } else {
-                    ^.className := "enlarged"
-                  }
-                },
-                if (props.showMasterData) {
-                  SubComponents.videoHelpPlaceholder(
-                    videoSrc,
-                    playing = timerIsRunning,
-                  )
-                } else {
-                  SubComponents.videoPlayer(
-                    videoSrc,
-                    playing = timerIsRunning,
-                    key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
-                  )
-                },
-              )
-            }
-          },
+          SubComponents.video(question),
         ),
         <.div(
           ^.className := "submissions-without-choices",
@@ -546,6 +490,38 @@ final class QuestionComponent(implicit
       }
     }
 
+    def video(question: Question)(implicit props: Props): VdomNode = {
+      <<.ifDefined(question.videoSrc) { videoSrc =>
+        ifVisibleOrMaster(question.submissionAreOpen(props.questionProgressIndex)) {
+          val timerState = props.quizState.timerState
+          val timerIsRunning = timerState.timerRunning && !timerState
+            .hasFinished(question.maxTime) && question.submissionAreOpen(props.questionProgressIndex)
+          <.div(
+            ^.className := "video-holder",
+            ^^.ifThen(props.quizState.imageIsEnlarged) {
+              if (props.showMasterData) {
+                ^.className := "indicate-enlarged"
+              } else {
+                ^.className := "enlarged"
+              }
+            },
+            if (props.showMasterData) {
+              videoHelpPlaceholder(
+                videoSrc,
+                playing = timerIsRunning,
+              )
+            } else {
+              videoPlayer(
+                videoSrc,
+                playing = timerIsRunning,
+                key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
+              )
+            },
+          )
+        }
+      }
+    }
+
     def answer(question: Question)(implicit props: Props): VdomNode = {
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
 
@@ -585,7 +561,7 @@ final class QuestionComponent(implicit
     }
 
     /*private*/
-    def videoPlayer(
+    private def videoPlayer(
         videoRelativePath: String,
         playing: Boolean,
         key: String,
@@ -598,7 +574,7 @@ final class QuestionComponent(implicit
     }
 
     /*private*/
-    def videoHelpPlaceholder(
+    private def videoHelpPlaceholder(
         videoRelativePath: String,
         playing: Boolean,
     ): VdomNode = {

@@ -91,6 +91,8 @@ object QuizConfig {
     def answerAsString: String
     def image: Option[Image]
     def answerImage: Option[Image]
+    def audioSrc: Option[String]
+    def videoSrc: Option[String]
 
     /**
      * Returns true if the given submission is correct according to configured answer.
@@ -111,8 +113,8 @@ object QuizConfig {
         override val masterNotes: Option[String],
         override val image: Option[Image],
         override val answerImage: Option[Image],
-        audioSrc: Option[String],
-        videoSrc: Option[String],
+        override val audioSrc: Option[String],
+        override val videoSrc: Option[String],
         pointsToGain: FixedPointNumber,
         pointsToGainOnFirstAnswer: FixedPointNumber,
         pointsToGainOnWrongAnswer: FixedPointNumber,
@@ -211,8 +213,8 @@ object QuizConfig {
         override val answerDetail: Option[String],
         override val image: Option[Image],
         override val answerImage: Option[Image],
-        audioSrc: Option[String],
-        videoSrc: Option[String],
+        override val audioSrc: Option[String],
+        override val videoSrc: Option[String],
         pointsToGain: FixedPointNumber,
         override val maxTime: Duration,
     ) extends Question {
@@ -389,6 +391,8 @@ object QuizConfig {
       override def answerAsString: String = textualAnswer
       override def image: Option[Image] = None
       override def answerImage: Option[Image] = None
+      override def audioSrc: Option[String] = None
+      override def videoSrc: Option[String] = None
 
       override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
         (submissionValue: @unchecked) match {
@@ -524,6 +528,8 @@ object QuizConfig {
       }
       override def image: Option[Image] = None
       override def answerImage: Option[Image] = None
+      override def audioSrc: Option[String] = None
+      override def videoSrc: Option[String] = None
 
       lazy val itemsInAlphabeticalOrder: Seq[OrderItems.Item] = {
         orderedItemsThatWillBePresentedInAlphabeticalOrder.sortBy(_.item)
