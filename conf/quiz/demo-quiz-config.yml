@@ -86,3 +86,4 @@ rounds:
         answers: [James Hetfield, Lars Ulrich, Kirk Hammett, Robert Trujillo]
         answersHaveToBeInSameOrder: false
         image: https://upload.wikimedia.org/wikipedia/commons/9/9e/Metallica_-_2003.jpg
+        pointsToGain: 4
