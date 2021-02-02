@@ -181,6 +181,7 @@ object QuizConfig {
             Some(choices.get.apply(answerIndex) == answer)
           case SubmissionValue.FreeTextAnswer(freeTextAnswer) =>
             Some(normalizeTextForComparison(answer) == normalizeTextForComparison(freeTextAnswer))
+          case SubmissionValue.MultipleTextAnswers(_) => None
         }
       }
 
