@@ -28,6 +28,8 @@ import japgolly.scalajs.react.vdom.html_<^.<
 import japgolly.scalajs.react.vdom.VdomArray
 import japgolly.scalajs.react.vdom.VdomNode
 
+import scala.scalajs.js
+
 final class QuestionComponent(implicit
     pageHeader: PageHeader,
     i18n: I18n,
@@ -188,6 +190,7 @@ final class QuestionComponent(implicit
         SubComponents.questionDetail(question),
         SubComponents.pointsMetadata(question),
         SubComponents.masterNotes(question),
+        SubComponents.multipleAnswersSubmissions(question),
         <.div(
           ^.className := "image-and-choices-row",
           SubComponents.image(question),
@@ -368,7 +371,6 @@ final class QuestionComponent(implicit
   }
 
   private object SubComponents {
-
     def questionTitle(question: Question)(implicit props: Props): VdomNode = {
       ifVisibleOrMaster(question.questionIsVisible(props.questionProgressIndex)) {
         <.div(
@@ -434,6 +436,53 @@ final class QuestionComponent(implicit
             <<.nl2BrBlockWithLinks(masterNotes),
           )
         }
+      }
+    }
+
+    def multipleAnswersSubmissions(question: Question.MultipleAnswers)(implicit props: Props): VdomNode = {
+      implicit val quizState: QuizState = props.quizState
+
+      <<.ifThen(props.showMasterData) {
+        <.ul(
+          ^.className := "multiple-answers-submissions",
+          (for (team <- props.teams.sorted(Team.ordering)) yield {
+            val maybeSubmission: Option[Submission] =
+              quizState.submissions.filter(_.teamId == team.id).lastOption
+
+            <.li(
+              ^.key := team.id,
+              ^.style := js.Dictionary("borderColor" -> TeamIcon.colorOf(team)),
+              <.div(
+                ^.className := "name",
+                team.name,
+                " ",
+                TeamIcon(team),
+              ),
+              <.ul(
+                maybeSubmission.map(_.value) match {
+                  case Some(SubmissionValue.MultipleTextAnswers(answers)) =>
+                    (
+                      for ((answer, index) <- answers.zipWithIndex) yield {
+                        <.li(
+                          ^.key := s"answer-${team.id}-$index",
+                          answer.text,
+                        )
+                      }
+                    ).toVdomArray
+                  case _ =>
+                    (
+                      for (index <- question.answers.indices) yield {
+                        <.li(
+                          ^.key := s"answer-${team.id}-$index",
+                          "...",
+                        )
+                      }
+                    ).toVdomArray
+                }
+              ),
+            )
+          }).toVdomArray,
+        )
       }
     }
 
