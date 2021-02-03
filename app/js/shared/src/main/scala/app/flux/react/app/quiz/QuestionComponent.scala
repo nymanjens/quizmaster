@@ -1,7 +1,7 @@
 package app.flux.react.app.quiz
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import app.api.ScalaJsApi.TeamOrQuizStateUpdate.SetSubmissionCorrectness
+import app.api.ScalaJsApi.TeamOrQuizStateUpdate.SetMultiAnswerCorrectness
 import app.api.ScalaJsApiClient
 import app.common.AnswerBullet
 import app.common.JsQuizAssets
@@ -506,7 +506,9 @@ final class QuestionComponent(implicit
           ^.disabled := !answer.isCorrectAnswer,
           ^.onClick --> Callback.future(
             scalaJsApiClient
-              .doTeamOrQuizStateUpdate(SetSubmissionCorrectness(submission.id, isCorrectAnswer = false))
+              .doTeamOrQuizStateUpdate(
+                SetMultiAnswerCorrectness(submission.id, answerIndex, isCorrectAnswer = false)
+              )
               .map(_ => Callback.empty)
           ),
           Bootstrap.FontAwesomeIcon("times"),
@@ -515,7 +517,9 @@ final class QuestionComponent(implicit
           ^.disabled := answer.isCorrectAnswer,
           ^.onClick --> Callback.future(
             scalaJsApiClient
-              .doTeamOrQuizStateUpdate(SetSubmissionCorrectness(submission.id, isCorrectAnswer = true))
+              .doTeamOrQuizStateUpdate(
+                SetMultiAnswerCorrectness(submission.id, answerIndex, isCorrectAnswer = true)
+              )
               .map(_ => Callback.empty)
           ),
           Bootstrap.FontAwesomeIcon("check"),

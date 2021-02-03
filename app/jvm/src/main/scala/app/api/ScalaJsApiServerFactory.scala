@@ -284,12 +284,47 @@ final class ScalaJsApiServerFactory @Inject() (implicit
               oldSubmission.copy(isCorrectAnswer = Some(isCorrectAnswer), points = pointsToGain)
             }
 
+          case SetMultiAnswerCorrectness(submissionId: Long, answerIndex: Int, isCorrectAnswer: Boolean) =>
+            updateSubmissionInStateAndEntity(submissionId) { oldSubmission =>
+              val newSubmissionValue = oldSubmission.value match {
+                case SubmissionValue.MultipleTextAnswers(answers) =>
+                  val newAnswer = answers(answerIndex).copy(isCorrectAnswer = isCorrectAnswer)
+                  SubmissionValue.MultipleTextAnswers(answers.updated(answerIndex, newAnswer))
+              }
+
+              val points =
+                fetchQuizState().pointsToGainBySubmission(
+                  isCorrectAnswer = None,
+                  submissionId = submissionId,
+                  submissionValue = newSubmissionValue,
+                )
+
+              val pointsForCorrectAnswer =
+                oldSubmission.question.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false)
+              val isCorrectGlobalAnswer = points match {
+                case _ if points <= 0                     => Some(false)
+                case _ if points < pointsForCorrectAnswer => None
+                case _                                    => Some(true)
+              }
+
+              if (oldSubmission.scored) {
+                // If scoring already happened, the current team score has to be updated
+                updateScore(oldSubmission.teamId, scoreDiff = points - oldSubmission.points)
+              }
+
+              oldSubmission.copy(
+                value = newSubmissionValue,
+                isCorrectAnswer = isCorrectGlobalAnswer,
+                points = points,
+              )
+            }
+
           case SetSubmissionPoints(submissionId: Long, points: FixedPointNumber) =>
             updateSubmissionInStateAndEntity(submissionId) { oldSubmission =>
               val pointsForCorrectAnswer =
                 oldSubmission.question.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false)
               val isCorrectAnswer = points match {
-                case _ if points < 0                      => Some(false)
+                case _ if points <= 0                     => Some(false)
                 case _ if points < pointsForCorrectAnswer => None
                 case _                                    => Some(true)
               }
