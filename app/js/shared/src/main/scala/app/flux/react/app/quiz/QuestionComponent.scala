@@ -1,5 +1,8 @@
 package app.flux.react.app.quiz
 
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import app.api.ScalaJsApi.TeamOrQuizStateUpdate.SetSubmissionCorrectness
+import app.api.ScalaJsApiClient
 import app.common.AnswerBullet
 import app.common.JsQuizAssets
 import app.flux.controllers.SoundEffectController
@@ -21,6 +24,7 @@ import hydro.flux.react.ReactVdomUtils.<<
 import hydro.flux.react.uielements.Bootstrap
 import hydro.flux.react.uielements.PageHeader
 import hydro.flux.react.ReactVdomUtils.^^
+import hydro.flux.react.uielements.Bootstrap.Size
 import hydro.flux.react.uielements.BootstrapTags
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
@@ -36,6 +40,7 @@ final class QuestionComponent(implicit
     dispatcher: Dispatcher,
     quizConfig: QuizConfig,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
+    scalaJsApiClient: ScalaJsApiClient,
     obfuscatedAnswer: ObfuscatedAnswer,
     clock: Clock,
     soundEffectController: SoundEffectController,
@@ -466,7 +471,11 @@ final class QuestionComponent(implicit
                       for ((answer, index) <- answers.zipWithIndex) yield {
                         <.li(
                           ^.key := s"answer-${team.id}-$index",
-                          answer.text,
+                          setMultiAnswerCorrectnessControls(maybeSubmission.get, answer, index),
+                          <.span(
+                            ^.className := (if (answer.isCorrectAnswer) "correct" else "incorrect"),
+                            answer.text,
+                          ),
                         )
                       }
                     ).toVdomArray
@@ -485,6 +494,33 @@ final class QuestionComponent(implicit
           }).toVdomArray,
         )
       }
+    }
+
+    private def setMultiAnswerCorrectnessControls(
+        submission: Submission,
+        answer: SubmissionValue.MultipleTextAnswers.Answer,
+        answerIndex: Int,
+    )(implicit quizState: QuizState, props: Props): VdomNode = {
+      Bootstrap.ButtonGroup(
+        Bootstrap.Button(size = Size.xs)(
+          ^.disabled := !answer.isCorrectAnswer,
+          ^.onClick --> Callback.future(
+            scalaJsApiClient
+              .doTeamOrQuizStateUpdate(SetSubmissionCorrectness(submission.id, isCorrectAnswer = false))
+              .map(_ => Callback.empty)
+          ),
+          Bootstrap.FontAwesomeIcon("times"),
+        ),
+        Bootstrap.Button(size = Size.xs)(
+          ^.disabled := answer.isCorrectAnswer,
+          ^.onClick --> Callback.future(
+            scalaJsApiClient
+              .doTeamOrQuizStateUpdate(SetSubmissionCorrectness(submission.id, isCorrectAnswer = true))
+              .map(_ => Callback.empty)
+          ),
+          Bootstrap.FontAwesomeIcon("check"),
+        ),
+      )
     }
 
     def image(question: Question)(implicit props: Props): VdomNode = {
