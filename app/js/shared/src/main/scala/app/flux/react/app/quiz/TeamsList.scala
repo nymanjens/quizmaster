@@ -96,12 +96,7 @@ final class TeamsList(implicit
           ^^.ifThen(state.teams.size > 10) {
             ^.className := "teams-list-smallerer"
           },
-          (for (
-            team <- state.teams.sortBy(team =>
-              if (quizState.generalQuizSettings.sortTeamsByScore) (team.score.negate, team.index)
-              else (FixedPointNumber(0), team.index)
-            )
-          ) yield {
+          (for (team <- state.teams.sorted(Team.ordering)) yield {
             val maybeSubmission =
               quizState.submissions.filter(_.teamId == team.id).lastOption
 

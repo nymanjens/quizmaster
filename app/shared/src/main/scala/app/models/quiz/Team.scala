@@ -30,4 +30,11 @@ object Team {
     }
     normalizeTextForComparison(name1) == normalizeTextForComparison(name2)
   }
+
+  def ordering(implicit quizState: QuizState): Ordering[Team] = {
+    Ordering.by(team =>
+      if (quizState.generalQuizSettings.sortTeamsByScore) (team.score.negate, team.index)
+      else (FixedPointNumber(0), team.index)
+    )
+  }
 }
