@@ -451,6 +451,7 @@ final class QuestionComponent(implicit
 
             <.li(
               ^.key := team.id,
+              ^.className := "team-box",
               ^.style := js.Dictionary("borderColor" -> TeamIcon.colorOf(team)),
               <.div(
                 ^.className := "name",
