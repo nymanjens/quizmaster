@@ -242,6 +242,9 @@ object QuizConfig {
                 if (correctness < 1 && pointsToGain * correctness == pointsToGain) {
                   // Ensure that non-perfect answers have at least 0.1 difference with correct answers
                   pointsToGain - FixedPointNumber(0.1)
+                } else if (correctness > 0 && pointsToGain * correctness == FixedPointNumber(0)) {
+                  // Ensure that non-perfect answers have at least 0.1 difference with incorrect answers
+                  FixedPointNumber(0.1)
                 } else {
                   pointsToGain * correctness
                 }
