@@ -8,6 +8,7 @@ import app.common.QuizAssets
 import scala.collection.JavaConverters._
 import app.models.quiz.config.QuizConfig.Image
 import app.models.quiz.config.QuizConfig.Question
+import app.models.quiz.config.QuizConfig.Question.MultipleQuestions.SubQuestion
 import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.config.QuizConfig.UsageStatistics
 import app.models.quiz.config.ValidatingYamlParser.ParsableValue
@@ -122,10 +123,10 @@ class QuizConfigParsableValue @Inject() (implicit
         val yamlMapWithoutQuestionType = (yamlMap - "questionType").asJava
 
         yamlMap.get("questionType") match {
-          case None | Some("standard") => StandardQuestionValue.parse(yamlMapWithoutQuestionType)
-          case Some("double")          => DoubleQuestionValue.parse(yamlMapWithoutQuestionType)
-          case Some("orderItems")      => OrderItemsQuestionValue.parse(yamlMapWithoutQuestionType)
-          case Some("multipleAnswers") => MultipleAnswersQuestionValue.parse(yamlMapWithoutQuestionType)
+          case None | Some("standard")   => StandardQuestionValue.parse(yamlMapWithoutQuestionType)
+          case Some("double")            => DoubleQuestionValue.parse(yamlMapWithoutQuestionType)
+          case Some("orderItems")        => OrderItemsQuestionValue.parse(yamlMapWithoutQuestionType)
+          case Some("multipleAnswers")   => MultipleAnswersQuestionValue.parse(yamlMapWithoutQuestionType)
           case Some("multipleQuestions") => MultipleQuestionsQuestionValue.parse(yamlMapWithoutQuestionType)
           case Some(other) =>
             ParseResult.onlyError(
@@ -231,11 +232,11 @@ class QuizConfigParsableValue @Inject() (implicit
     )
     override def parseFromParsedMapValues(map: StringMap) = {
       Question.MultipleAnswers(
-        question = map.required("question"),
+        question = map.required[String]("question"),
         questionDetail = map.optional("questionDetail"),
         tag = map.optional("tag"),
-        answers = map.required("answers"),
-        answersHaveToBeInSameOrder = map.required("answersHaveToBeInSameOrder"),
+        answers = map.required[Seq[String]]("answers"),
+        answersHaveToBeInSameOrder = map.required[Boolean]("answersHaveToBeInSameOrder"),
         answerDetail = map.optional("answerDetail"),
         image = map.optional("image"),
         answerImage = map.optional("answerImage"),
@@ -270,10 +271,10 @@ class QuizConfigParsableValue @Inject() (implicit
     )
     override def parseFromParsedMapValues(map: StringMap) = {
       Question.MultipleQuestions(
-        questionTitle = map.required("questionTitle"),
+        questionTitle = map.required[String]("questionTitle"),
         questionDetail = map.optional("questionDetail"),
         tag = map.optional("tag"),
-        subQuestions = map.required("questions"),
+        subQuestions = map.required[Seq[SubQuestion]]("questions"),
         answerDetail = map.optional("answerDetail"),
         image = map.optional("image"),
         answerImage = map.optional("answerImage"),
