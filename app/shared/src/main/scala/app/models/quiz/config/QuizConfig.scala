@@ -290,14 +290,14 @@ object QuizConfig {
         question: String,
         override val questionDetail: Option[String],
         override val tag: Option[String],
-        override protected val answers: Seq[String],
-        override protected val answersHaveToBeInSameOrder: Boolean,
+        override val answers: Seq[String],
+        override val answersHaveToBeInSameOrder: Boolean,
         override val answerDetail: Option[String],
         override val image: Option[Image],
         override val answerImage: Option[Image],
         override val audioSrc: Option[String],
         override val videoSrc: Option[String],
-        override protected val pointsToGain: FixedPointNumber,
+        override val pointsToGain: FixedPointNumber,
         override val maxTime: Duration,
     ) extends Standard4StepQuestionBase
         with MultipleAnswersBase {
