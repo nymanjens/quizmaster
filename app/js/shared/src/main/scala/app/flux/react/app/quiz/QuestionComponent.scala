@@ -86,10 +86,11 @@ final class QuestionComponent(implicit
           case 0 if !props.showMasterData => showPreparatoryTitle(props.question)
           case _ =>
             props.question match {
-              case single: Question.Standard                 => showSingleQuestion(single)
-              case multipleAnswers: Question.MultipleAnswers => showMultipleAnswersQuestion(multipleAnswers)
-              case double: Question.DoubleQ                  => showDoubleQuestion(double)
-              case orderItems: Question.OrderItems           => showOrderItemsQuestion(orderItems)
+              case question: Question.Standard          => showSingleQuestion(question)
+              case question: Question.MultipleAnswers   => showMultipleAnswersQuestion(question)
+              case question: Question.MultipleQuestions => showMultipleQuestionsQuestion(question)
+              case question: Question.DoubleQ           => showDoubleQuestion(question)
+              case question: Question.OrderItems        => showOrderItemsQuestion(question)
             }
         },
       )
@@ -189,6 +190,30 @@ final class QuestionComponent(implicit
 
     private def showMultipleAnswersQuestion(
         question: Question.MultipleAnswers
+    )(implicit props: Props): VdomElement = {
+      <.div(
+        SubComponents.questionTitle(question),
+        SubComponents.questionDetail(question),
+        SubComponents.pointsMetadata(question),
+        SubComponents.masterNotes(question),
+        SubComponents.multipleAnswersSubmissions(question),
+        <.div(
+          ^.className := "image-and-choices-row",
+          SubComponents.image(question),
+          SubComponents.video(question),
+        ),
+        <.div(
+          ^.className := "submissions-without-choices",
+          showSubmissions(props.quizState.submissions),
+        ),
+        SubComponents.audio(question),
+        SubComponents.answer(question),
+        SubComponents.answerDetail(question),
+      )
+    }
+
+    private def showMultipleQuestionsQuestion(
+        question: Question.MultipleQuestions
     )(implicit props: Props): VdomElement = {
       <.div(
         SubComponents.questionTitle(question),
@@ -444,7 +469,9 @@ final class QuestionComponent(implicit
       }
     }
 
-    def multipleAnswersSubmissions(question: Question.MultipleAnswersBase)(implicit props: Props): VdomNode = {
+    def multipleAnswersSubmissions(
+        question: Question.MultipleAnswersBase
+    )(implicit props: Props): VdomNode = {
       implicit val quizState: QuizState = props.quizState
 
       <<.ifThen(props.showMasterData) {
