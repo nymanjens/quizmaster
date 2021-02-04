@@ -103,6 +103,45 @@ object QuizConfig {
   }
 
   object Question {
+
+    sealed trait Standard4StepQuestionBase extends Question {
+
+      /**
+       * Steps:
+       * 0- Show preparatory title: "Question 2"
+       * 1- Show question: "This is the question, do you know the answer?"
+       * 2- Show answer
+       * 3- (if possible) Show answer and give points
+       */
+      override final def progressStepsCount(includeAnswers: Boolean): Int = {
+        def oneIfTrue(b: Boolean): Int = if (b) 1 else 0
+        val includeStep2 = includeAnswers
+        val includeStep3 = includeAnswers && !showSingleAnswerButtonToTeams
+
+        2 + oneIfTrue(includeStep2) + oneIfTrue(includeStep3)
+      }
+
+      override final def shouldShowTimer(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex == 1
+      }
+
+      override final def submissionAreOpen(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex == 1
+      }
+
+      override final def questionIsVisible(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex >= 1
+      }
+
+      override final def answerIsVisible(questionProgressIndex: Int): Boolean = {
+        if (showSingleAnswerButtonToTeams) {
+          questionProgressIndex == maxProgressIndex(includeAnswers = true)
+        } else {
+          questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
+        }
+      }
+    }
+
     case class Standard(
         question: String,
         override val questionDetail: Option[String],
@@ -121,7 +160,7 @@ object QuizConfig {
         override val maxTime: Duration,
         override val onlyFirstGainsPoints: Boolean,
         override val showSingleAnswerButtonToTeams: Boolean,
-    ) extends Question {
+    ) extends Standard4StepQuestionBase {
 
       def validationErrors(): Seq[String] = {
         choices match {
@@ -151,28 +190,6 @@ object QuizConfig {
         }
       }
 
-      /**
-       * Steps:
-       * 0- Show preparatory title: "Question 2"
-       * 1- Show question: "This is the question, do you know the answer?"
-       * 2- Show answer
-       * 3- (if possible) Show answer and give points
-       */
-      override def progressStepsCount(includeAnswers: Boolean): Int = {
-        def oneIfTrue(b: Boolean): Int = if (b) 1 else 0
-        val includeStep2 = includeAnswers
-        val includeStep3 = includeAnswers && !showSingleAnswerButtonToTeams
-
-        2 + oneIfTrue(includeStep2) + oneIfTrue(includeStep3)
-      }
-      override def shouldShowTimer(questionProgressIndex: Int): Boolean = {
-        questionProgressIndex == 1
-      }
-
-      override def submissionAreOpen(questionProgressIndex: Int): Boolean = {
-        questionProgressIndex == 1
-      }
-
       override def isMultipleChoice: Boolean = choices.nonEmpty
       override def textualQuestion: String = question
       override def maybeTextualChoices: Option[Seq[String]] = choices
@@ -189,20 +206,12 @@ object QuizConfig {
         }
       }
 
-      override def questionIsVisible(questionProgressIndex: Int): Boolean = {
-        questionProgressIndex >= 1
-      }
       def choicesAreVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= 1
       }
-      override def answerIsVisible(questionProgressIndex: Int): Boolean = {
-        if (showSingleAnswerButtonToTeams) {
-          questionProgressIndex == maxProgressIndex(includeAnswers = true)
-        } else {
-          questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
-        }
-      }
     }
+
+    sealed trait MultipleAnswersBase extends Question {}
 
     case class MultipleAnswers(
         question: String,
@@ -217,7 +226,8 @@ object QuizConfig {
         override val videoSrc: Option[String],
         pointsToGain: FixedPointNumber,
         override val maxTime: Duration,
-    ) extends Question {
+    ) extends Standard4StepQuestionBase
+        with MultipleAnswersBase {
 
       def validationErrors(): Seq[String] = {
         Seq(
@@ -260,24 +270,6 @@ object QuizConfig {
         correctAnswers * 1.0 / this.answers.size
       }
 
-      /**
-       * Steps:
-       * 0- Show preparatory title: "Question 2"
-       * 1- Show question: "This is the question, do you know the answer?"
-       * 2- Show answer
-       * 3- (if possible) Show answer and give points
-       */
-      override def progressStepsCount(includeAnswers: Boolean): Int = {
-        if (includeAnswers) 4 else 2
-      }
-      override def shouldShowTimer(questionProgressIndex: Int): Boolean = {
-        questionProgressIndex == 1
-      }
-
-      override def submissionAreOpen(questionProgressIndex: Int): Boolean = {
-        questionProgressIndex == 1
-      }
-
       override def onlyFirstGainsPoints: Boolean = false
       override def showSingleAnswerButtonToTeams: Boolean = false
       override def isMultipleChoice: Boolean = false
@@ -299,13 +291,6 @@ object QuizConfig {
               None
             }
         }
-      }
-
-      override def questionIsVisible(questionProgressIndex: Int): Boolean = {
-        questionProgressIndex >= 1
-      }
-      override def answerIsVisible(questionProgressIndex: Int): Boolean = {
-        questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
       }
 
       override def answerAsString: String = {
@@ -332,6 +317,8 @@ object QuizConfig {
         }
       }
     }
+
+//    case class MultipleQuestions() extends Standard4StepQuestionBase        with MultipleAnswersBase {
 
     // This cannot be "Double" because that conflicts with the scala native type
     case class DoubleQ(
@@ -424,7 +411,7 @@ object QuizConfig {
         override val answerDetail: Option[String],
         pointsToGain: FixedPointNumber,
         override val maxTime: Duration,
-    ) extends Question {
+    ) extends Standard4StepQuestionBase {
       def validationErrors(): Seq[String] = {
         val orderedItems = orderedItemsThatWillBePresentedInAlphabeticalOrder
         Seq(
@@ -483,32 +470,8 @@ object QuizConfig {
       override def onlyFirstGainsPoints: Boolean = false
       override def showSingleAnswerButtonToTeams: Boolean = false
 
-      /**
-       * Steps:
-       * 0- Show preparatory title: "Question 2"
-       * 1- Show question: "This is the question, do you know the answer?"
-       * 2- Show answer
-       * 3- Show answer and give points
-       */
-      override def progressStepsCount(includeAnswers: Boolean): Int = {
-        if (includeAnswers) 4 else 2
-      }
-
-      override def shouldShowTimer(questionProgressIndex: Int): Boolean = {
-        questionProgressIndex == 1
-      }
-
-      override def submissionAreOpen(questionProgressIndex: Int): Boolean = {
-        questionProgressIndex == 1
-      }
       override def isMultipleChoice: Boolean = false
 
-      override def questionIsVisible(questionProgressIndex: Int): Boolean = {
-        questionProgressIndex >= 1
-      }
-      override def answerIsVisible(questionProgressIndex: Int): Boolean = {
-        questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
-      }
       override def textualQuestion: String = question
       override def masterNotes: Option[String] = None
       override def maybeTextualChoices: Option[Seq[String]] = None
