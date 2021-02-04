@@ -248,7 +248,7 @@ object QuizConfig {
               case Some(SubmissionValue.MultipleChoiceAnswer(_)) => FixedPointNumber(0)
               case Some(SubmissionValue.FreeTextAnswer(_))       => FixedPointNumber(0)
               case Some(SubmissionValue.MultipleTextAnswers(answers)) =>
-                val correctness = getCorrectnessPercentage(answers)
+                val correctness = getCorrectnessFraction(answers)
                 if (correctness < 1 && pointsToGain * correctness == pointsToGain) {
                   // Ensure that non-perfect answers have at least 0.1 difference with correct answers
                   pointsToGain - FixedPointNumber(0.1)
@@ -265,7 +265,7 @@ object QuizConfig {
         }
       }
 
-      private def getCorrectnessPercentage(answers: Seq[MultipleTextAnswers.Answer]): Double = {
+      private def getCorrectnessFraction(answers: Seq[MultipleTextAnswers.Answer]): Double = {
         val correctAnswers = answers.count(_.isCorrectAnswer)
         correctAnswers * 1.0 / this.answers.size
       }
@@ -283,9 +283,9 @@ object QuizConfig {
           case SubmissionValue.MultipleChoiceAnswer(_) => None
           case SubmissionValue.FreeTextAnswer(_)       => None
           case SubmissionValue.MultipleTextAnswers(answers) =>
-            if (getCorrectnessPercentage(answers) == 1.0) {
+            if (getCorrectnessFraction(answers) == 1.0) {
               Some(true)
-            } else if (getCorrectnessPercentage(answers) == 0.0) {
+            } else if (getCorrectnessFraction(answers) == 0.0) {
               Some(false)
             } else {
               None
@@ -431,7 +431,7 @@ object QuizConfig {
               case None                                      => FixedPointNumber(0)
               case Some(SubmissionValue.PressedTheOneButton) => FixedPointNumber(0)
               case Some(SubmissionValue.FreeTextAnswer(a)) =>
-                val correctness = getCorrectnessPercentage(a)
+                val correctness = getCorrectnessFraction(a)
                 if (correctness < 1 && pointsToGain * correctness == pointsToGain) {
                   // Ensure that non-perfect answers have at least 0.1 difference with correct answers
                   pointsToGain - FixedPointNumber(0.1)
@@ -445,7 +445,7 @@ object QuizConfig {
         }
       }
 
-      private def getCorrectnessPercentage(answer: String): Double = {
+      private def getCorrectnessFraction(answer: String): Double = {
         val N = itemsInAlphabeticalOrder.size
         val maxNumberOfPairwiseSwaps = ((N - 1) * N) / 2
         val charactersInCorrectOrder = answerAsString
@@ -479,9 +479,9 @@ object QuizConfig {
         (submissionValue: @unchecked) match {
           case SubmissionValue.PressedTheOneButton => None
           case SubmissionValue.FreeTextAnswer(a) =>
-            if (getCorrectnessPercentage(a) == 1.0) {
+            if (getCorrectnessFraction(a) == 1.0) {
               Some(true)
-            } else if (getCorrectnessPercentage(a) == 0.0) {
+            } else if (getCorrectnessFraction(a) == 0.0) {
               Some(false)
             } else {
               None
