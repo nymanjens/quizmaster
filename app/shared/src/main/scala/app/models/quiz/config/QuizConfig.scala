@@ -214,8 +214,8 @@ object QuizConfig {
 
     sealed trait MultipleAnswersBase extends Question {
 
+      def answers: Seq[String]
       protected def answersHaveToBeInSameOrder: Boolean
-      protected def answers: Seq[String]
       protected def pointsToGain: FixedPointNumber
       protected def getCorrectnessFraction(answers: Seq[MultipleTextAnswers.Answer]): Double
 
@@ -345,12 +345,12 @@ object QuizConfig {
         ).flatten
       }
 
+      override def answers: Seq[String] = subQuestions.map(_.answer)
       override protected def getCorrectnessFraction(answers: Seq[MultipleTextAnswers.Answer]): Double = {
         val correctAnswers = answers.count(_.isCorrectAnswer)
         correctAnswers * 1.0 / this.answers.size
       }
       override protected def answersHaveToBeInSameOrder: Boolean = true
-      override protected def answers: Seq[String] = subQuestions.map(_.answer)
       override protected def pointsToGain: FixedPointNumber = subQuestions.map(_.pointsToGain).sum
 
       override def onlyFirstGainsPoints: Boolean = false

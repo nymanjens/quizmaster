@@ -444,7 +444,7 @@ final class QuestionComponent(implicit
       }
     }
 
-    def multipleAnswersSubmissions(question: Question.MultipleAnswers)(implicit props: Props): VdomNode = {
+    def multipleAnswersSubmissions(question: Question.MultipleAnswersBase)(implicit props: Props): VdomNode = {
       implicit val quizState: QuizState = props.quizState
 
       <<.ifThen(props.showMasterData) {
