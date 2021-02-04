@@ -240,8 +240,12 @@ final class QuestionComponent(implicit
                 for ((subQuestion, index) <- question.subQuestions.zipWithIndex)
                   yield <.li(
                     ^.key := index,
+                    Bootstrap.FontAwesomeIcon("chevron-circle-right")(^.className := "choice-arrow"),
                     subQuestion.question,
+                    <.span(
+                      ^.className  := "points-info",
                     s" (${toNPointsString(subQuestion.pointsToGain)})",
+                    ),
                   )
               ).toVdomArray,
             ),

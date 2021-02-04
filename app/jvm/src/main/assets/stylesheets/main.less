@@ -621,15 +621,19 @@ table.table-bordered {
           padding-left: 20px;
         }
 
-        .choices {
-          list-style: none;
+        .choices, .sub-questions {
           font-size: 35px;
           display: inline-block;
           text-align: left;
+          list-style: none;
           padding-left: 0;
+
           .choice-arrow {
             padding-right: 25px;
           }
+        }
+
+        .choices {
           .correct {
             color: green;
             font-weight: bold;
@@ -637,6 +641,12 @@ table.table-bordered {
           .incorrect {
             color: red;
             text-decoration: line-through;
+          }
+        }
+        .sub-questions {
+          .points-info {
+            font-size: 24px;
+            font-style: italic;
           }
         }
       }
