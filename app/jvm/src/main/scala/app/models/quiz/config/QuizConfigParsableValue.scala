@@ -126,6 +126,7 @@ class QuizConfigParsableValue @Inject() (implicit
           case Some("double")          => DoubleQuestionValue.parse(yamlMapWithoutQuestionType)
           case Some("orderItems")      => OrderItemsQuestionValue.parse(yamlMapWithoutQuestionType)
           case Some("multipleAnswers") => MultipleAnswersQuestionValue.parse(yamlMapWithoutQuestionType)
+          case Some("multipleQuestions") => MultipleQuestionsQuestionValue.parse(yamlMapWithoutQuestionType)
           case Some(other) =>
             ParseResult.onlyError(
               s"questionType expected to be one of these: [unset, 'standard', 'double', 'orderItems'], but found $other"
@@ -259,7 +260,7 @@ class QuizConfigParsableValue @Inject() (implicit
       "questionTitle" -> Required(StringValue),
       "questionDetail" -> Optional(StringValue),
       "tag" -> Optional(StringValue),
-      "questions" -> Required(        ListParsableValue(SubQuestionValue)(_.question)      ),
+      "questions" -> Required(ListParsableValue(SubQuestionValue)(_.question)),
       "answerDetail" -> Optional(StringValue),
       "image" -> Optional(ImageValue),
       "answerImage" -> Optional(ImageValue),
@@ -272,7 +273,7 @@ class QuizConfigParsableValue @Inject() (implicit
         questionTitle = map.required("questionTitle"),
         questionDetail = map.optional("questionDetail"),
         tag = map.optional("tag"),
-        questions = map.required("questions"),
+        subQuestions = map.required("questions"),
         answerDetail = map.optional("answerDetail"),
         image = map.optional("image"),
         answerImage = map.optional("answerImage"),
@@ -282,7 +283,7 @@ class QuizConfigParsableValue @Inject() (implicit
       )
     }
 
-    override def additionalValidationErrors(v: Question.MultipleAnswers) = {
+    override def additionalValidationErrors(v: Question.MultipleQuestions) = {
       Seq(
         v.validationErrors(),
         v.image.map(_.src).flatMap(quizAssets.assetExistsOrValidationError).toSet,
@@ -300,9 +301,10 @@ class QuizConfigParsableValue @Inject() (implicit
       "pointsToGain" -> Optional(FixedPointNumberValue),
     )
     override def parseFromParsedMapValues(map: StringMap) = {
-      Question.OrderItems.Item(
-        item = map.required[String]("item"),
-        answerDetail = map.optional("answerDetail"),
+      Question.MultipleQuestions.SubQuestion(
+        question = map.required[String]("question"),
+        answer = map.required[String]("answer"),
+        pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
       )
     }
   }
@@ -312,7 +314,9 @@ class QuizConfigParsableValue @Inject() (implicit
       "question" -> Required(StringValue),
       "questionDetail" -> Optional(StringValue),
       "tag" -> Optional(StringValue),
-      "orderedItemsThatWillBePresentedInAlphabeticalOrder" -> Required(        ListParsableValue(OrderItemValue)(_.item)      ),
+      "orderedItemsThatWillBePresentedInAlphabeticalOrder" -> Required(
+        ListParsableValue(OrderItemValue)(_.item)
+      ),
       "answerDetail" -> Optional(StringValue),
       "pointsToGain" -> Optional(FixedPointNumberValue),
       "maxTimeSeconds" -> Optional(IntValue),

@@ -95,6 +95,6 @@ rounds:
           With the lights out, it's less dangerous
           Here we are now, entertain us
         questions:
-          - {question: What is the song title?, answer: Smells Like Teen Spirit}
-          - {question: Which artist?, answer: Nirvana}
-          - {question: What year was the song released?, answer: 1991, pointsToGain: 2}
+          - {question: "What is the song title?", answer: "Smells Like Teen Spirit"}
+          - {question: "Which artist?", answer: Nirvana}
+          - {question: "What year was the song released?", answer: 1991, pointsToGain: 2}
