@@ -98,3 +98,4 @@ rounds:
           - {question: "What is the song title?", answer: "Smells Like Teen Spirit"}
           - {question: "Which artist?", answer: Nirvana}
           - {question: "What year was the song released?", answer: 1991, pointsToGain: 2}
+        image: https://cdn.pixabay.com/photo/2016/01/12/17/20/sheet-music-1136234_960_720.png
