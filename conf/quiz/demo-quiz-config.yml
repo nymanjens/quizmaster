@@ -78,3 +78,12 @@ rounds:
         answer: Summer
         answerDetail: (By Bensound)
         audioSrc: https://www.bensound.com/bensound-music/bensound-summer.mp3
+
+      # Special question type: Provide multiple answers
+      - questionType: multipleAnswers
+        question: List the band members of Metallica
+        questionDetail: (in 2021)
+        answers: [James Hetfield, Lars Ulrich, Kirk Hammett, Robert Trujillo]
+        answersHaveToBeInSameOrder: false
+        image: https://upload.wikimedia.org/wikipedia/commons/9/9e/Metallica_-_2003.jpg
+        pointsToGain: 4

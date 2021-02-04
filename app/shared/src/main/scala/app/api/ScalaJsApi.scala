@@ -112,6 +112,8 @@ object ScalaJsApi {
     case class AddSubmission(teamId: Long, submissionValue: SubmissionValue) extends TeamOrQuizStateUpdate
     case class SetSubmissionCorrectness(submissionId: Long, isCorrectAnswer: Boolean)
         extends TeamOrQuizStateUpdate
+    case class SetMultiAnswerCorrectness(submissionId: Long, answerIndex: Int, isCorrectAnswer: Boolean)
+        extends TeamOrQuizStateUpdate
 
     /** If the given points are non-zero, the correctness is also updated based on the sign of the given points. */
     case class SetSubmissionPoints(submissionId: Long, points: FixedPointNumber) extends TeamOrQuizStateUpdate

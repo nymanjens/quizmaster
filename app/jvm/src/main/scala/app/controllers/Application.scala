@@ -111,7 +111,7 @@ final class Application @Inject() (implicit
         val maybeZeroMinutes = questions
           .map(question =>
             question match {
-              case _: Question.Standard | _: Question.OrderItems =>
+              case _: Question.Standard | _: Question.OrderItems | _: Question.MultipleAnswers =>
                 if (question.maxTime > infiniteDurationThreshold) Duration.ofSeconds(30) else question.maxTime
               case _: Question.DoubleQ => Duration.ofSeconds(20)
             }
@@ -174,9 +174,10 @@ final class Application @Inject() (implicit
       for (q <- round.questions) {
         val textualAnswer =
           q match {
-            case question: Question.Standard   => question.answer
-            case question: Question.DoubleQ    => question.textualAnswer
-            case question: Question.OrderItems => question.answerAsString
+            case question: Question.Standard        => question.answer
+            case question: Question.DoubleQ         => question.textualAnswer
+            case question: Question.OrderItems      => question.answerAsString
+            case question: Question.MultipleAnswers => question.answerAsString
           }
         val maxTime =
           if (q.maxTime > infiniteDurationThreshold) "inf" else round1(q.maxTime.getSeconds / 60.0)

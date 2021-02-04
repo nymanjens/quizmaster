@@ -125,6 +125,7 @@ class QuizConfigParsableValue @Inject() (implicit
           case None | Some("standard") => StandardQuestionValue.parse(yamlMapWithoutQuestionType)
           case Some("double")          => DoubleQuestionValue.parse(yamlMapWithoutQuestionType)
           case Some("orderItems")      => OrderItemsQuestionValue.parse(yamlMapWithoutQuestionType)
+          case Some("multipleAnswers") => MultipleAnswersQuestionValue.parse(yamlMapWithoutQuestionType)
           case Some(other) =>
             ParseResult.onlyError(
               s"questionType expected to be one of these: [unset, 'standard', 'double', 'orderItems'], but found $other"
@@ -165,9 +166,9 @@ class QuizConfigParsableValue @Inject() (implicit
         choices = map.optional("choices"),
         answer = map.required[String]("answer"),
         answerDetail = map.optional("answerDetail"),
-        answerImage = map.optional("answerImage"),
         masterNotes = map.optional("masterNotes"),
         image = map.optional("image"),
+        answerImage = map.optional("answerImage"),
         audioSrc = map.optional("audioSrc"),
         videoSrc = map.optional("videoSrc"),
         pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
@@ -210,6 +211,48 @@ class QuizConfigParsableValue @Inject() (implicit
       )
     }
     override def additionalValidationErrors(v: Question.DoubleQ) = v.validationErrors()
+  }
+
+  private object MultipleAnswersQuestionValue extends MapParsableValue[Question.MultipleAnswers] {
+    override val supportedKeyValuePairs = Map(
+      "question" -> Required(StringValue),
+      "questionDetail" -> Optional(StringValue),
+      "tag" -> Optional(StringValue),
+      "answers" -> Required(ListParsableValue(StringValue)(s => s)),
+      "answersHaveToBeInSameOrder" -> Required(BooleanValue),
+      "answerDetail" -> Optional(StringValue),
+      "answerImage" -> Optional(ImageValue),
+      "image" -> Optional(ImageValue),
+      "audioSrc" -> Optional(StringValue),
+      "videoSrc" -> Optional(StringValue),
+      "pointsToGain" -> Optional(FixedPointNumberValue),
+      "maxTimeSeconds" -> Optional(IntValue),
+    )
+    override def parseFromParsedMapValues(map: StringMap) = {
+      Question.MultipleAnswers(
+        question = map.required("question"),
+        questionDetail = map.optional("questionDetail"),
+        tag = map.optional("tag"),
+        answers = map.required("answers"),
+        answersHaveToBeInSameOrder = map.required("answersHaveToBeInSameOrder"),
+        answerDetail = map.optional("answerDetail"),
+        image = map.optional("image"),
+        answerImage = map.optional("answerImage"),
+        audioSrc = map.optional("audioSrc"),
+        videoSrc = map.optional("videoSrc"),
+        pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
+        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", 180)),
+      )
+    }
+    override def additionalValidationErrors(v: Question.MultipleAnswers) = {
+      Seq(
+        v.validationErrors(),
+        v.image.map(_.src).flatMap(quizAssets.assetExistsOrValidationError).toSet,
+        v.answerImage.map(_.src).flatMap(quizAssets.assetExistsOrValidationError).toSet,
+        v.audioSrc.flatMap(quizAssets.assetExistsOrValidationError).toSet,
+        v.videoSrc.flatMap(quizAssets.assetExistsOrValidationError).toSet,
+      ).flatten
+    }
   }
 
   private object OrderItemsQuestionValue extends MapParsableValue[Question.OrderItems] {

@@ -268,8 +268,8 @@ final class ScalaJsApiServerFactory @Inject() (implicit
 
           case SetSubmissionCorrectness(submissionId: Long, isCorrectAnswer: Boolean) =>
             updateSubmissionInStateAndEntity(submissionId) { oldSubmission =>
-              // Reset pointsToGain as well because its old value is likely moot
-              val pointsToGain =
+              // Reset points as well because its old value is likely moot
+              val points =
                 fetchQuizState().pointsToGainBySubmission(
                   isCorrectAnswer = Some(isCorrectAnswer),
                   submissionId = submissionId,
@@ -278,10 +278,55 @@ final class ScalaJsApiServerFactory @Inject() (implicit
 
               if (oldSubmission.scored) {
                 // If scoring already happened, the current team score has to be updated
-                updateScore(oldSubmission.teamId, scoreDiff = pointsToGain - oldSubmission.points)
+                updateScore(oldSubmission.teamId, scoreDiff = points - oldSubmission.points)
               }
 
-              oldSubmission.copy(isCorrectAnswer = Some(isCorrectAnswer), points = pointsToGain)
+              val newSubmissionValue = oldSubmission.value match {
+                case SubmissionValue.MultipleTextAnswers(answers) =>
+                  SubmissionValue.MultipleTextAnswers(answers.map(_.copy(isCorrectAnswer = isCorrectAnswer)))
+                case oldValue => oldValue
+              }
+
+              oldSubmission.copy(
+                value = newSubmissionValue,
+                isCorrectAnswer = Some(isCorrectAnswer),
+                points = points,
+              )
+            }
+
+          case SetMultiAnswerCorrectness(submissionId: Long, answerIndex: Int, isCorrectAnswer: Boolean) =>
+            updateSubmissionInStateAndEntity(submissionId) { oldSubmission =>
+              val newSubmissionValue = oldSubmission.value match {
+                case SubmissionValue.MultipleTextAnswers(answers) =>
+                  val newAnswer = answers(answerIndex).copy(isCorrectAnswer = isCorrectAnswer)
+                  SubmissionValue.MultipleTextAnswers(answers.updated(answerIndex, newAnswer))
+              }
+
+              val points =
+                fetchQuizState().pointsToGainBySubmission(
+                  isCorrectAnswer = None,
+                  submissionId = submissionId,
+                  submissionValue = newSubmissionValue,
+                )
+
+              val pointsForCorrectAnswer =
+                oldSubmission.question.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false)
+              val isCorrectGlobalAnswer = points match {
+                case _ if points <= 0                     => Some(false)
+                case _ if points < pointsForCorrectAnswer => None
+                case _                                    => Some(true)
+              }
+
+              if (oldSubmission.scored) {
+                // If scoring already happened, the current team score has to be updated
+                updateScore(oldSubmission.teamId, scoreDiff = points - oldSubmission.points)
+              }
+
+              oldSubmission.copy(
+                value = newSubmissionValue,
+                isCorrectAnswer = isCorrectGlobalAnswer,
+                points = points,
+              )
             }
 
           case SetSubmissionPoints(submissionId: Long, points: FixedPointNumber) =>
@@ -289,7 +334,7 @@ final class ScalaJsApiServerFactory @Inject() (implicit
               val pointsForCorrectAnswer =
                 oldSubmission.question.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false)
               val isCorrectAnswer = points match {
-                case _ if points < 0                      => Some(false)
+                case _ if points <= 0                     => Some(false)
                 case _ if points < pointsForCorrectAnswer => None
                 case _                                    => Some(true)
               }

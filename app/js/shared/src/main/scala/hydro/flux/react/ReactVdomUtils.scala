@@ -47,7 +47,14 @@ object ReactVdomUtils {
         f: A => VdomNode,
         stringF: String => VdomNode,
     ): VdomArray = {
-      VdomArray.empty() ++= elems.flatMap(a => Seq(f(a), stringF(" ")))
+      join(glue = "", elems = elems)
+    }
+
+    def join[A](glue: String, elems: TraversableOnce[A])(implicit
+        f: A => VdomNode,
+        stringF: String => VdomNode,
+    ): VdomArray = {
+      VdomArray.empty() ++= elems.flatMap(a => Seq(f(a), stringF(glue)))
     }
 
     def nl2BrBlockWithLinks(string: String): VdomNode = {

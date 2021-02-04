@@ -138,6 +138,7 @@ final class Layout(implicit
       bind("alt+shift+left", () => teamsAndQuizStateStore.goToPreviousRound())
       bind("alt+shift+right", () => teamsAndQuizStateStore.goToNextRound())
       bind("alt+shift+r", () => teamsAndQuizStateStore.resetCurrentQuestion())
+      bind("ctrl+alt+r", () => teamsAndQuizStateStore.resetCurrentQuestion())
       bind("alt+enter", () => teamsAndQuizStateStore.toggleImageIsEnlarged())
 
       bind("space", () => scalaJsApiClient.doTeamOrQuizStateUpdate(ToggleTimerPaused()))

@@ -38,6 +38,10 @@ class FixedPointNumber private (
   def >(that: Int): Boolean = this > FixedPointNumber(that)
   def <(that: FixedPointNumber): Boolean = FixedPointNumberNumeric.lt(this, that)
   def <(that: Int): Boolean = this < FixedPointNumber(that)
+  def >=(that: FixedPointNumber): Boolean = FixedPointNumberNumeric.gteq(this, that)
+  def >=(that: Int): Boolean = this >= FixedPointNumber(that)
+  def <=(that: FixedPointNumber): Boolean = FixedPointNumberNumeric.lteq(this, that)
+  def <=(that: Int): Boolean = this <= FixedPointNumber(that)
 
   def ==(that: Int): Boolean = this == FixedPointNumber(that)
   def !=(that: Int): Boolean = this != FixedPointNumber(that)

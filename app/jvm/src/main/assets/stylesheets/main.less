@@ -430,6 +430,27 @@ table.table-bordered {
       }
     }
   }
+
+  .multiple-answers-form {
+    input {
+      width: 90%;
+      max-width: 500px;
+      margin-bottom: 14px;
+    }
+    .btn {
+      margin-bottom: 20px;
+    }
+    .you-submitted {
+      font-size: 17px;
+      .correct {
+        color: green;
+      }
+      .incorrect {
+        color: red;
+        text-decoration: line-through;
+      }
+    }
+  }
 }
 
 /****** Shared quiz-view / master-view ******/
@@ -655,6 +676,56 @@ table.table-bordered {
     }
     .master-notes {
       font-size: 30px;
+    }
+    ul.multiple-answers-submissions {
+      overflow: hidden;
+      list-style: none;
+
+      padding: 0;
+      margin: 0;
+
+      li.team-box {
+        width: 47%;
+
+        border: 2px solid #008;
+        border-radius: 13px;
+
+        margin-bottom: 30px;
+        margin-right: 10px;
+        padding: 10px;
+        text-align: left;
+
+        &:nth-child(odd) {
+          float: left;
+          clear: both;
+        }
+        &:nth-child(even) {
+          float: right;
+          clear: right;
+        }
+
+        .name {
+          font-weight: bold;
+          font-size: 20px;
+        }
+        ul {
+          padding-left: 25px;
+
+          li {
+            .btn-group {
+              padding-right: 10px;
+            }
+
+            span.correct {
+              color: green;
+            }
+            span.incorrect {
+              color: red;
+              text-decoration: line-through;
+            }
+          }
+        }
+      }
     }
   }
 }
