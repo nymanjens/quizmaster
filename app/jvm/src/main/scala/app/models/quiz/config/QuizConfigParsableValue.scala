@@ -146,9 +146,9 @@ class QuizConfigParsableValue @Inject() (implicit
       "choices" -> Optional(ListParsableValue(StringValue)(s => s)),
       "answer" -> Required(StringValue),
       "answerDetail" -> Optional(StringValue),
-      "answerImage" -> Optional(ImageValue),
       "masterNotes" -> Optional(StringValue),
       "image" -> Optional(ImageValue),
+      "answerImage" -> Optional(ImageValue),
       "audioSrc" -> Optional(StringValue),
       "videoSrc" -> Optional(StringValue),
       "pointsToGain" -> Optional(FixedPointNumberValue),
@@ -221,8 +221,8 @@ class QuizConfigParsableValue @Inject() (implicit
       "answers" -> Required(ListParsableValue(StringValue)(s => s)),
       "answersHaveToBeInSameOrder" -> Required(BooleanValue),
       "answerDetail" -> Optional(StringValue),
-      "answerImage" -> Optional(ImageValue),
       "image" -> Optional(ImageValue),
+      "answerImage" -> Optional(ImageValue),
       "audioSrc" -> Optional(StringValue),
       "videoSrc" -> Optional(StringValue),
       "pointsToGain" -> Optional(FixedPointNumberValue),
@@ -254,15 +254,65 @@ class QuizConfigParsableValue @Inject() (implicit
       ).flatten
     }
   }
+  private object MultipleQuestionsQuestionValue extends MapParsableValue[Question.MultipleQuestions] {
+    override val supportedKeyValuePairs = Map(
+      "questionTitle" -> Required(StringValue),
+      "questionDetail" -> Optional(StringValue),
+      "tag" -> Optional(StringValue),
+      "questions" -> Required(        ListParsableValue(SubQuestionValue)(_.question)      ),
+      "answerDetail" -> Optional(StringValue),
+      "image" -> Optional(ImageValue),
+      "answerImage" -> Optional(ImageValue),
+      "audioSrc" -> Optional(StringValue),
+      "videoSrc" -> Optional(StringValue),
+      "maxTimeSeconds" -> Optional(IntValue),
+    )
+    override def parseFromParsedMapValues(map: StringMap) = {
+      Question.MultipleQuestions(
+        questionTitle = map.required("questionTitle"),
+        questionDetail = map.optional("questionDetail"),
+        tag = map.optional("tag"),
+        questions = map.required("questions"),
+        answerDetail = map.optional("answerDetail"),
+        image = map.optional("image"),
+        answerImage = map.optional("answerImage"),
+        audioSrc = map.optional("audioSrc"),
+        videoSrc = map.optional("videoSrc"),
+        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", 180)),
+      )
+    }
+
+    override def additionalValidationErrors(v: Question.MultipleAnswers) = {
+      Seq(
+        v.validationErrors(),
+        v.image.map(_.src).flatMap(quizAssets.assetExistsOrValidationError).toSet,
+        v.answerImage.map(_.src).flatMap(quizAssets.assetExistsOrValidationError).toSet,
+        v.audioSrc.flatMap(quizAssets.assetExistsOrValidationError).toSet,
+        v.videoSrc.flatMap(quizAssets.assetExistsOrValidationError).toSet,
+      ).flatten
+    }
+  }
+
+  private object SubQuestionValue extends MapParsableValue[Question.MultipleQuestions.SubQuestion] {
+    override val supportedKeyValuePairs = Map(
+      "question" -> Required(StringValue),
+      "answer" -> Required(StringValue),
+      "pointsToGain" -> Optional(FixedPointNumberValue),
+    )
+    override def parseFromParsedMapValues(map: StringMap) = {
+      Question.OrderItems.Item(
+        item = map.required[String]("item"),
+        answerDetail = map.optional("answerDetail"),
+      )
+    }
+  }
 
   private object OrderItemsQuestionValue extends MapParsableValue[Question.OrderItems] {
     override val supportedKeyValuePairs = Map(
       "question" -> Required(StringValue),
       "questionDetail" -> Optional(StringValue),
       "tag" -> Optional(StringValue),
-      "orderedItemsThatWillBePresentedInAlphabeticalOrder" -> Required(
-        ListParsableValue(OrderItemValue)(_.item)
-      ),
+      "orderedItemsThatWillBePresentedInAlphabeticalOrder" -> Required(        ListParsableValue(OrderItemValue)(_.item)      ),
       "answerDetail" -> Optional(StringValue),
       "pointsToGain" -> Optional(FixedPointNumberValue),
       "maxTimeSeconds" -> Optional(IntValue),
