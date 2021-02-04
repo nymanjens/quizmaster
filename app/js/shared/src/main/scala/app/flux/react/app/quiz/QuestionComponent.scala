@@ -4,6 +4,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import app.api.ScalaJsApi.TeamOrQuizStateUpdate.SetMultiAnswerCorrectness
 import app.api.ScalaJsApiClient
 import app.common.AnswerBullet
+import app.common.FixedPointNumber
 import app.common.JsQuizAssets
 import app.flux.controllers.SoundEffectController
 import app.flux.stores.quiz.TeamInputStore
@@ -215,6 +216,9 @@ final class QuestionComponent(implicit
     private def showMultipleQuestionsQuestion(
         question: Question.MultipleQuestions
     )(implicit props: Props): VdomElement = {
+      val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
+      val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
+
       <.div(
         SubComponents.questionTitle(question),
         SubComponents.questionDetail(question),
@@ -225,6 +229,23 @@ final class QuestionComponent(implicit
           ^.className := "image-and-choices-row",
           SubComponents.image(question),
           SubComponents.video(question),
+          <.div(
+            ^.className := "choices-holder",
+            ^^.ifThen(maybeImage.isDefined || question.videoSrc.isDefined) {
+              ^.className := "including-image-or-video"
+            },
+            <.ul(
+              ^.className := "sub-questions",
+              (
+                for ((subQuestion, index) <- question.subQuestions.zipWithIndex)
+                  yield <.li(
+                    ^.key := index,
+                    subQuestion.question,
+                    s" (${toNPointsString(subQuestion.pointsToGain)})",
+                  )
+              ).toVdomArray,
+            ),
+          ),
         ),
         <.div(
           ^.className := "submissions-without-choices",
@@ -400,6 +421,11 @@ final class QuestionComponent(implicit
     )
   }
 
+  private def toNPointsString(pointsToGain: FixedPointNumber): String = {
+    if (pointsToGain == 1) i18n("app.1-point")
+    else i18n("app.n-points", pointsToGain)
+  }
+
   private object SubComponents {
     def questionTitle(question: Question)(implicit props: Props): VdomNode = {
       ifVisibleOrMaster(question.questionIsVisible(props.questionProgressIndex)) {
@@ -445,8 +471,7 @@ final class QuestionComponent(implicit
             }
             s"$gainN, $gainM"
           } else {
-            if (pointsToGain == 1) i18n("app.1-point")
-            else i18n("app.n-points", pointsToGain)
+            toNPointsString(pointsToGain)
           }
         },
         <<.ifThen(question.defaultPointsToGainOnWrongAnswer != 0) {
