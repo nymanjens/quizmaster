@@ -211,31 +211,14 @@ object QuizConfig {
       }
     }
 
-    sealed trait MultipleAnswersBase extends Question {}
+    sealed trait MultipleAnswersBase extends Question {
 
-    case class MultipleAnswers(
-        question: String,
-        override val questionDetail: Option[String],
-        override val tag: Option[String],
-        answers: Seq[String],
-        answersHaveToBeInSameOrder: Boolean,
-        override val answerDetail: Option[String],
-        override val image: Option[Image],
-        override val answerImage: Option[Image],
-        override val audioSrc: Option[String],
-        override val videoSrc: Option[String],
-        pointsToGain: FixedPointNumber,
-        override val maxTime: Duration,
-    ) extends Standard4StepQuestionBase
-        with MultipleAnswersBase {
+      protected def answersHaveToBeInSameOrder: Boolean
+      protected def answers: Seq[String]
+      protected def pointsToGain: FixedPointNumber
+      protected def getCorrectnessFraction(answers: Seq[MultipleTextAnswers.Answer]): Double
 
-      def validationErrors(): Seq[String] = {
-        Seq(
-          conditionalOption(answers.size < 2, s"Expected at least 2 answers, but got ${answers.size}")
-        ).flatten
-      }
-
-      override def getPointsToGain(
+      override final def getPointsToGain(
           submissionValue: Option[SubmissionValue],
           isCorrect: Option[Boolean],
           previousCorrectSubmissionsExist: Boolean,
@@ -265,18 +248,6 @@ object QuizConfig {
         }
       }
 
-      private def getCorrectnessFraction(answers: Seq[MultipleTextAnswers.Answer]): Double = {
-        val correctAnswers = answers.count(_.isCorrectAnswer)
-        correctAnswers * 1.0 / this.answers.size
-      }
-
-      override def onlyFirstGainsPoints: Boolean = false
-      override def showSingleAnswerButtonToTeams: Boolean = false
-      override def isMultipleChoice: Boolean = false
-      override def textualQuestion: String = question
-      override def masterNotes: Option[String] = None
-      override def maybeTextualChoices: Option[Seq[String]] = None
-
       override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
         submissionValue match {
           case SubmissionValue.PressedTheOneButton     => None
@@ -293,11 +264,8 @@ object QuizConfig {
         }
       }
 
-      override def answerAsString: String = {
-        answers.mkString(", ")
-      }
 
-      def createAutogradedAnswers(answerTexts: Seq[String]): Seq[MultipleTextAnswers.Answer] = {
+     final  def createAutogradedAnswers(answerTexts: Seq[String]): Seq[MultipleTextAnswers.Answer] = {
         if (answersHaveToBeInSameOrder) {
           for ((correctAnswer, answerText) <- this.answers zip answerTexts)
             yield MultipleTextAnswers.Answer(
@@ -315,6 +283,45 @@ object QuizConfig {
             )
           }
         }
+      }
+    }
+
+    case class MultipleAnswers(
+        question: String,
+        override val questionDetail: Option[String],
+        override val tag: Option[String],
+        override protected val answers: Seq[String],
+        override protected val answersHaveToBeInSameOrder: Boolean,
+        override val answerDetail: Option[String],
+        override val image: Option[Image],
+        override val answerImage: Option[Image],
+        override val audioSrc: Option[String],
+        override val videoSrc: Option[String],
+        override protected val pointsToGain: FixedPointNumber,
+        override val maxTime: Duration,
+    ) extends Standard4StepQuestionBase
+        with MultipleAnswersBase {
+
+      def validationErrors(): Seq[String] = {
+        Seq(
+          conditionalOption(answers.size < 2, s"Expected at least 2 answers, but got ${answers.size}")
+        ).flatten
+      }
+
+      override protected def getCorrectnessFraction(answers: Seq[MultipleTextAnswers.Answer]): Double = {
+        val correctAnswers = answers.count(_.isCorrectAnswer)
+        correctAnswers * 1.0 / this.answers.size
+      }
+
+      override def onlyFirstGainsPoints: Boolean = false
+      override def showSingleAnswerButtonToTeams: Boolean = false
+      override def isMultipleChoice: Boolean = false
+      override def textualQuestion: String = question
+      override def masterNotes: Option[String] = None
+      override def maybeTextualChoices: Option[Seq[String]] = None
+
+      override def answerAsString: String = {
+        answers.mkString(", ")
       }
     }
 
