@@ -610,10 +610,10 @@ final class QuestionComponent(implicit
 
     def video(question: Question)(implicit props: Props): VdomNode = {
       <<.ifDefined(question.videoSrc) { videoSrc =>
-        ifVisibleOrMaster(question.submissionAreOpen(props.questionProgressIndex)) {
+        ifVisibleOrMaster(question.audioVideoIsVisible(props.questionProgressIndex)) {
           val timerState = props.quizState.timerState
           val timerIsRunning = timerState.timerRunning && !timerState
-            .hasFinished(question.maxTime) && question.submissionAreOpen(props.questionProgressIndex)
+            .hasFinished(question.maxTime) && question.audioVideoIsVisible(props.questionProgressIndex)
           <.div(
             ^.className := "video-holder",
             ^^.ifThen(props.quizState.imageIsEnlarged) {
@@ -642,7 +642,7 @@ final class QuestionComponent(implicit
 
     def audio(question: Question)(implicit props: Props): VdomNode = {
       <<.ifDefined(question.audioSrc) { audioRelativePath =>
-        <<.ifThen(question.submissionAreOpen(props.questionProgressIndex) && !props.showMasterData) {
+        <<.ifThen(question.audioVideoIsVisible(props.questionProgressIndex) && !props.showMasterData) {
           val timerState = props.quizState.timerState
           val timerIsRunning = timerState.timerRunning && !timerState.hasFinished(question.maxTime)
           audioPlayer(
