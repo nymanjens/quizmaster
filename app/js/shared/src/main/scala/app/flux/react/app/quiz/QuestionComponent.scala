@@ -243,8 +243,8 @@ final class QuestionComponent(implicit
                     Bootstrap.FontAwesomeIcon("chevron-circle-right")(^.className := "choice-arrow"),
                     subQuestion.question,
                     <.span(
-                      ^.className  := "points-info",
-                    s" (${toNPointsString(subQuestion.pointsToGain)})",
+                      ^.className := "points-info",
+                      s" (${toNPointsString(subQuestion.pointsToGain)})",
                     ),
                   )
               ).toVdomArray,
