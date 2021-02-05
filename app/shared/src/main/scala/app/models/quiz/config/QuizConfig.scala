@@ -297,6 +297,7 @@ object QuizConfig {
         override val answers: Seq[String],
         override val answersHaveToBeInSameOrder: Boolean,
         override val answerDetail: Option[String],
+        override val masterNotes: Option[String],
         override val image: Option[Image],
         override val answerImage: Option[Image],
         override val audioSrc: Option[String],
@@ -321,7 +322,6 @@ object QuizConfig {
       override def showSingleAnswerButtonToTeams: Boolean = false
       override def isMultipleChoice: Boolean = false
       override def textualQuestion: String = question
-      override def masterNotes: Option[String] = None
       override def maybeTextualChoices: Option[Seq[String]] = None
     }
 
@@ -331,6 +331,7 @@ object QuizConfig {
         override val tag: Option[String],
         subQuestions: Seq[SubQuestion],
         override val answerDetail: Option[String],
+        override val masterNotes: Option[String],
         override val image: Option[Image],
         override val answerImage: Option[Image],
         override val audioSrc: Option[String],
@@ -357,7 +358,6 @@ object QuizConfig {
       override def showSingleAnswerButtonToTeams: Boolean = false
       override def isMultipleChoice: Boolean = false
       override def textualQuestion: String = questionTitle
-      override def masterNotes: Option[String] = None
       override def maybeTextualChoices: Option[Seq[String]] = None
     }
 
@@ -458,6 +458,7 @@ object QuizConfig {
         override val tag: Option[String],
         orderedItemsThatWillBePresentedInAlphabeticalOrder: Seq[OrderItems.Item],
         override val answerDetail: Option[String],
+        override val masterNotes: Option[String],
         pointsToGain: FixedPointNumber,
         override val maxTime: Duration,
     ) extends Standard4StepQuestionBase {
@@ -522,7 +523,6 @@ object QuizConfig {
       override def isMultipleChoice: Boolean = false
 
       override def textualQuestion: String = question
-      override def masterNotes: Option[String] = None
       override def maybeTextualChoices: Option[Seq[String]] = None
       override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
         (submissionValue: @unchecked) match {

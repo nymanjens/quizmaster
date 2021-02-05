@@ -62,6 +62,7 @@ rounds:
       - questionType: orderItems
         question: Order these cities from small to large
         questionDetail: Population according to Google on July 2020
+        masterNotes: Mention that this is not a trick question
         orderedItemsThatWillBePresentedInAlphabeticalOrder:
          - {item: Riga, answerDetail: ~600k}
          - {item: Stockholm, answerDetail: ~1M}
