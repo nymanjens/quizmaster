@@ -8,6 +8,7 @@ import app.models.quiz.QuizState
 import app.models.quiz.QuizState.Submission.SubmissionValue
 import app.models.quiz.config.QuizConfig.UsageStatistics
 import app.models.quiz.QuizState.Submission.SubmissionValue.MultipleTextAnswers
+import app.models.quiz.config.QuizConfig.Question.MultipleQuestions.SubQuestion
 import hydro.common.CollectionUtils.conditionalOption
 import hydro.common.GuavaReplacement.ImmutableBiMap
 import hydro.common.GuavaReplacement.Splitter
@@ -213,8 +214,8 @@ object QuizConfig {
 
     sealed trait MultipleAnswersBase extends Question {
 
+      def answers: Seq[String]
       protected def answersHaveToBeInSameOrder: Boolean
-      protected def answers: Seq[String]
       protected def pointsToGain: FixedPointNumber
       protected def getCorrectnessFraction(answers: Seq[MultipleTextAnswers.Answer]): Double
 
@@ -264,8 +265,11 @@ object QuizConfig {
         }
       }
 
+      override final def answerAsString: String = {
+        answers.mkString(", ")
+      }
 
-     final  def createAutogradedAnswers(answerTexts: Seq[String]): Seq[MultipleTextAnswers.Answer] = {
+      final def createAutogradedAnswers(answerTexts: Seq[String]): Seq[MultipleTextAnswers.Answer] = {
         if (answersHaveToBeInSameOrder) {
           for ((correctAnswer, answerText) <- this.answers zip answerTexts)
             yield MultipleTextAnswers.Answer(
@@ -319,13 +323,51 @@ object QuizConfig {
       override def textualQuestion: String = question
       override def masterNotes: Option[String] = None
       override def maybeTextualChoices: Option[Seq[String]] = None
-
-      override def answerAsString: String = {
-        answers.mkString(", ")
-      }
     }
 
-//    case class MultipleQuestions() extends Standard4StepQuestionBase        with MultipleAnswersBase {
+    case class MultipleQuestions(
+        questionTitle: String,
+        override val questionDetail: Option[String],
+        override val tag: Option[String],
+        subQuestions: Seq[SubQuestion],
+        override val answerDetail: Option[String],
+        override val image: Option[Image],
+        override val answerImage: Option[Image],
+        override val audioSrc: Option[String],
+        override val videoSrc: Option[String],
+        override val maxTime: Duration,
+    ) extends Standard4StepQuestionBase
+        with MultipleAnswersBase {
+
+      def validationErrors(): Seq[String] = {
+        Seq(
+          conditionalOption(answers.size < 2, s"Expected at least 2 answers, but got ${answers.size}")
+        ).flatten
+      }
+
+      override def answers: Seq[String] = subQuestions.map(_.answer)
+      override protected def getCorrectnessFraction(answers: Seq[MultipleTextAnswers.Answer]): Double = {
+        val correctAnswers = answers.count(_.isCorrectAnswer)
+        correctAnswers * 1.0 / this.answers.size
+      }
+      override protected def answersHaveToBeInSameOrder: Boolean = true
+      override protected def pointsToGain: FixedPointNumber = subQuestions.map(_.pointsToGain).sum
+
+      override def onlyFirstGainsPoints: Boolean = false
+      override def showSingleAnswerButtonToTeams: Boolean = false
+      override def isMultipleChoice: Boolean = false
+      override def textualQuestion: String = questionTitle
+      override def masterNotes: Option[String] = None
+      override def maybeTextualChoices: Option[Seq[String]] = None
+    }
+
+    object MultipleQuestions {
+      case class SubQuestion(
+          question: String,
+          answer: String,
+          pointsToGain: FixedPointNumber,
+      )
+    }
 
     // This cannot be "Double" because that conflicts with the scala native type
     case class DoubleQ(

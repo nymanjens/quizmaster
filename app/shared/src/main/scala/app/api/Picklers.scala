@@ -25,6 +25,7 @@ object Picklers extends StandardPicklers {
     .addConcreteType[Question.DoubleQ]
     .addConcreteType[Question.OrderItems]
     .addConcreteType[Question.MultipleAnswers]
+    .addConcreteType[Question.MultipleQuestions]
 
   implicit val answerBulletTypePickler: Pickler[AnswerBulletType] = compositePickler[AnswerBulletType]
     .addConcreteType[AnswerBulletType.Arrows.type]

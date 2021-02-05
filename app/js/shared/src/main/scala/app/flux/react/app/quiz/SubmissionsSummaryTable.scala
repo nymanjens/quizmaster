@@ -122,14 +122,7 @@ final class SubmissionsSummaryTable(implicit
     ): VdomNode = {
       <.tr(
         ^.key := s"question-$roundIndex-$questionIndex",
-        <.td(
-          question match {
-            case question: Question.Standard        => s"${question.question} (${question.answer})"
-            case question: Question.DoubleQ         => s"${question.textualQuestion} (${question.textualAnswer})"
-            case question: Question.OrderItems      => s"${question.question} (${question.answerAsString})"
-            case question: Question.MultipleAnswers => s"${question.question} (${question.answerAsString})"
-          }
-        ), {
+        <.td(s"${question.textualQuestion} (${question.answerAsString})"), {
           for (team <- state.teams)
             yield <.td(
               ^.key := s"$roundIndex-$questionIndex-${team.id}",

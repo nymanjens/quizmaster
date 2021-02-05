@@ -87,3 +87,15 @@ rounds:
         answersHaveToBeInSameOrder: false
         image: https://upload.wikimedia.org/wikipedia/commons/9/9e/Metallica_-_2003.jpg
         pointsToGain: 4
+
+      # Special question type: Ask multiple questions
+      - questionType: multipleQuestions
+        questionTitle: Can you recognize the song from the lyrics?
+        questionDetail: |
+          With the lights out, it's less dangerous
+          Here we are now, entertain us
+        questions:
+          - {question: "What is the song title?", answer: "Smells Like Teen Spirit"}
+          - {question: "Which artist?", answer: Nirvana}
+          - {question: "What year was the song released?", answer: 1991, pointsToGain: 2}
+        image: https://cdn.pixabay.com/photo/2016/01/12/17/20/sheet-music-1136234_960_720.png

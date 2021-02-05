@@ -6,6 +6,7 @@ import java.time.Duration
 import app.common.FixedPointNumber
 import app.models.quiz.config.QuizConfig.Image
 import app.models.quiz.config.QuizConfig.Question
+import app.models.quiz.config.QuizConfig.Question.MultipleQuestions.SubQuestion
 import app.models.quiz.config.QuizConfig.Round
 import app.models.quiz.config.QuizConfig.UsageStatistics
 import com.google.common.io.MoreFiles
@@ -103,6 +104,20 @@ class QuizConfigParsableValueTest extends Specification {
         |        image: https://upload.wikimedia.org/wikipedia/commons/9/9e/Metallica_-_2003.jpg
         |        pointsToGain: 3
         |        maxTimeSeconds: 130
+        |
+        |      - questionType: multipleQuestions
+        |        questionTitle: Can you recognize the song from the lyrics?
+        |        tag: Music
+        |        questionDetail: |
+        |          With the lights out, it's less dangerous
+        |          Here we are now, entertain us
+        |        questions:
+        |          - {question: "What is the song title?", answer: "Smells Like Teen Spirit"}
+        |          - {question: "Which artist?", answer: Nirvana}
+        |          - {question: "What year was the song released?", answer: 1991, pointsToGain: 2}
+        |        answerDetail: From the album Nevermind
+        |        maxTimeSeconds: 66
+        |
         |
         |  - name: Double questions round
         |    questions:
@@ -259,6 +274,35 @@ class QuizConfigParsableValueTest extends Specification {
               videoSrc = None,
               pointsToGain = FixedPointNumber(3),
               maxTime = Duration.ofSeconds(130),
+            ),
+            Question.MultipleQuestions(
+              questionTitle = "Can you recognize the song from the lyrics?",
+              questionDetail =
+                Some("With the lights out, it's less dangerous\nHere we are now, entertain us\n"),
+              tag = Some("Music"),
+              subQuestions = Seq(
+                SubQuestion(
+                  question = "What is the song title?",
+                  answer = "Smells Like Teen Spirit",
+                  pointsToGain = FixedPointNumber(1),
+                ),
+                SubQuestion(
+                  question = "Which artist?",
+                  answer = "Nirvana",
+                  pointsToGain = FixedPointNumber(1),
+                ),
+                SubQuestion(
+                  question = "What year was the song released?",
+                  answer = "1991",
+                  pointsToGain = FixedPointNumber(2),
+                ),
+              ),
+              answerDetail = Some("From the album Nevermind"),
+              image = None,
+              answerImage = None,
+              audioSrc = None,
+              videoSrc = None,
+              maxTime = Duration.ofSeconds(66),
             ),
           ),
         ),

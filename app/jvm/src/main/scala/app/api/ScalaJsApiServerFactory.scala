@@ -300,6 +300,7 @@ final class ScalaJsApiServerFactory @Inject() (implicit
                 case SubmissionValue.MultipleTextAnswers(answers) =>
                   val newAnswer = answers(answerIndex).copy(isCorrectAnswer = isCorrectAnswer)
                   SubmissionValue.MultipleTextAnswers(answers.updated(answerIndex, newAnswer))
+                case oldValue => oldValue
               }
 
               val points =
