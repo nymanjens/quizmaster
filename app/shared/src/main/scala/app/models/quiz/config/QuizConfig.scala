@@ -348,8 +348,11 @@ object QuizConfig {
 
       override def answers: Seq[String] = subQuestions.map(_.answer)
       override protected def getCorrectnessFraction(answers: Seq[MultipleTextAnswers.Answer]): Double = {
-        val correctAnswers = answers.count(_.isCorrectAnswer)
-        correctAnswers * 1.0 / this.answers.size
+        val pointsGainedByAnswers = (subQuestions zip answers).map {
+          case (subQuestion, answer) if answer.isCorrectAnswer => subQuestion.pointsToGain
+          case _                                               => FixedPointNumber(0)
+        }.sum
+        pointsGainedByAnswers.toDouble / this.pointsToGain.toDouble
       }
       override protected def answersHaveToBeInSameOrder: Boolean = true
       override protected def pointsToGain: FixedPointNumber = subQuestions.map(_.pointsToGain).sum
