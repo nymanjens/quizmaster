@@ -32,6 +32,9 @@ class QuizConfigParsableValue @Inject() (implicit
     quizAssets: QuizAssets,
     messagesApi: MessagesApi,
 ) extends MapParsableValue[QuizConfig] {
+
+  private val defaultMaxTimeSeconds: Int = 180
+
   override val supportedKeyValuePairs = Map(
     "title" -> Optional(StringValue),
     "author" -> Optional(StringValue),
@@ -177,7 +180,7 @@ class QuizConfigParsableValue @Inject() (implicit
         pointsToGainOnFirstAnswer = map.optional("pointsToGainOnFirstAnswer") getOrElse map
           .optional("pointsToGain", FixedPointNumber(1)),
         pointsToGainOnWrongAnswer = map.optional("pointsToGainOnWrongAnswer", FixedPointNumber(0)),
-        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", 180)),
+        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", defaultMaxTimeSeconds)),
         onlyFirstGainsPoints = map.optional("onlyFirstGainsPoints", false),
         showSingleAnswerButtonToTeams = map.optional("showSingleAnswerButtonToTeams", false),
       )
@@ -243,7 +246,7 @@ class QuizConfigParsableValue @Inject() (implicit
         audioSrc = map.optional("audioSrc"),
         videoSrc = map.optional("videoSrc"),
         pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
-        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", 180)),
+        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", defaultMaxTimeSeconds)),
       )
     }
     override def additionalValidationErrors(v: Question.MultipleAnswers) = {
@@ -280,7 +283,7 @@ class QuizConfigParsableValue @Inject() (implicit
         answerImage = map.optional("answerImage"),
         audioSrc = map.optional("audioSrc"),
         videoSrc = map.optional("videoSrc"),
-        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", 180)),
+        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", defaultMaxTimeSeconds)),
       )
     }
 
@@ -331,7 +334,7 @@ class QuizConfigParsableValue @Inject() (implicit
           map.required[Seq[Question.OrderItems.Item]]("orderedItemsThatWillBePresentedInAlphabeticalOrder"),
         answerDetail = map.optional("answerDetail"),
         pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
-        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", 180)),
+        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", defaultMaxTimeSeconds)),
       )
     }
     override def additionalValidationErrors(v: Question.OrderItems) = v.validationErrors()
