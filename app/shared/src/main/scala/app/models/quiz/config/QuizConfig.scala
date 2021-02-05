@@ -105,7 +105,7 @@ object QuizConfig {
 
   object Question {
 
-    sealed trait Standard4StepQuestionBase extends Question {
+    sealed trait StandardSinglePartQuestionBase extends Question {
 
       /**
        * Steps:
@@ -161,7 +161,7 @@ object QuizConfig {
         override val maxTime: Duration,
         override val onlyFirstGainsPoints: Boolean,
         override val showSingleAnswerButtonToTeams: Boolean,
-    ) extends Standard4StepQuestionBase {
+    ) extends StandardSinglePartQuestionBase {
 
       def validationErrors(): Seq[String] = {
         choices match {
@@ -304,7 +304,7 @@ object QuizConfig {
         override val videoSrc: Option[String],
         override val pointsToGain: FixedPointNumber,
         override val maxTime: Duration,
-    ) extends Standard4StepQuestionBase
+    ) extends StandardSinglePartQuestionBase
         with MultipleAnswersBase {
 
       def validationErrors(): Seq[String] = {
@@ -337,7 +337,7 @@ object QuizConfig {
         override val audioSrc: Option[String],
         override val videoSrc: Option[String],
         override val maxTime: Duration,
-    ) extends Standard4StepQuestionBase
+    ) extends StandardSinglePartQuestionBase
         with MultipleAnswersBase {
 
       def validationErrors(): Seq[String] = {
@@ -464,7 +464,7 @@ object QuizConfig {
         override val masterNotes: Option[String],
         pointsToGain: FixedPointNumber,
         override val maxTime: Duration,
-    ) extends Standard4StepQuestionBase {
+    ) extends StandardSinglePartQuestionBase {
       def validationErrors(): Seq[String] = {
         val orderedItems = orderedItemsThatWillBePresentedInAlphabeticalOrder
         Seq(
