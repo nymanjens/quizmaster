@@ -93,7 +93,9 @@ object QuizConfig {
     def image: Option[Image]
     def answerImage: Option[Image]
     def audioSrc: Option[String]
+    def answerAudioSrc: Option[String]
     def videoSrc: Option[String]
+    def answerVideoSrc: Option[String]
 
     /**
      * Returns true if the given submission is correct according to configured answer.
