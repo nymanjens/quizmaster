@@ -90,8 +90,8 @@ class QuizConfigParsableValueTest extends Specification {
         |        questionDetail: (Royalty Free Music from Bensound)
         |        answer: Summer
         |        answerDetail: (By Bensound)
-        |        audioSrc: music_round/bensound-summer.mp3
-        |        videoSrc: geography/about_bananas.mp4
+        |        audio: music_round/bensound-summer.mp3
+        |        video: geography/about_bananas.mp4
         |        maxTimeSeconds: 15
         |
         |      - questionType: multipleAnswers
