@@ -246,8 +246,10 @@ final class TeamControllerView(implicit
               <.span(
                 <.div(^.className := "question", question.textualQuestion),
                 question match {
-                  case q: Question.OrderItems                      => orderItemsForm(q)
-                  case q: Question.MultipleAnswers                 => multipleAnswersForm(q)
+                  case q: Question.OrderItems      => orderItemsForm(q)
+                  case q: Question.MultipleAnswers => multipleAnswersForm(q)
+                  case q: Question.MultipleQuestions =>
+                    multipleAnswersForm(q, subQuestions = q.subQuestions.map(_.question))
                   case _ if question.showSingleAnswerButtonToTeams => singleAnswerButton(question)
                   case _ if question.isMultipleChoice              => multipleChoiceAnswerButtons(question)
                   case _                                           => freeTextAnswerForm(question)
@@ -412,10 +414,14 @@ final class TeamControllerView(implicit
           },
         )
       }
-      private def multipleAnswersForm(question: Question.MultipleAnswers)(implicit
+      private def multipleAnswersForm(
+          question: Question.MultipleAnswersBase,
+          subQuestions: Seq[String] = null,
+      )(implicit
           team: Team,
           quizState: QuizState,
       ): VdomNode = {
+        val maybeSubQuestions = Option(subQuestions)
         val maybeCurrentSubmission = quizState.submissions.filter(_.teamId == team.id).lastOption
         val maybeCurrentSubmissionAnswers =
           maybeCurrentSubmission.map(_.value).flatMap {
@@ -433,6 +439,13 @@ final class TeamControllerView(implicit
               for (index <- question.answers.indices) yield {
                 <.div(
                   ^.key := s"answer-$index",
+                  <<.ifDefined(maybeSubQuestions) { subQuestions =>
+                    <.div(
+                      <.label(
+                        subQuestions(index)
+                      )
+                    )
+                  },
                   TextInput(
                     ref = multipleAnswersInputRefs.get(index),
                     name = s"answer-$index",
