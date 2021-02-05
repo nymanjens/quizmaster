@@ -612,8 +612,9 @@ final class QuestionComponent(implicit
       <<.ifDefined(question.videoSrc) { videoSrc =>
         ifVisibleOrMaster(question.audioVideoIsVisible(props.questionProgressIndex)) {
           val timerState = props.quizState.timerState
-          val timerIsRunning = timerState.timerRunning && !timerState
-            .hasFinished(question.maxTime) && question.audioVideoIsVisible(props.questionProgressIndex)
+          val timerIsRunning = timerState.timerRunning &&
+            !timerState.hasFinished(question.maxTime) &&
+            question.audioVideoIsVisible(props.questionProgressIndex)
           <.div(
             ^.className := "video-holder",
             ^^.ifThen(props.quizState.imageIsEnlarged) {
