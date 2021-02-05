@@ -82,6 +82,8 @@ object QuizConfig {
     def submissionAreOpen(questionProgressIndex: Int): Boolean
     def isMultipleChoice: Boolean
     def answerIsVisible(questionProgressIndex: Int): Boolean
+    def audioVideoIsVisible(questionProgressIndex: Int): Boolean
+    def answerAudioVideoIsVisible(questionProgressIndex: Int): Boolean
 
     def textualQuestion: String
     def questionDetail: Option[String]
@@ -110,18 +112,34 @@ object QuizConfig {
     sealed trait StandardSinglePartQuestionBase extends Question {
 
       /**
-       * Steps:
+       * Steps without answerAudio/Video:
        * 0- Show preparatory title: "Question 2"
        * 1- Show question: "This is the question, do you know the answer?"
        * 2- Show answer
        * 3- (if possible) Show answer and give points
+       *
+       * Steps with answerAudio/Video:
+       * 0- Show preparatory title: "Question 2"
+       * 1- Show question: "This is the question, do you know the answer?"
+       * 2- Show answerAudio/Video
+       * 3- Show answer
+       * 4- (if possible) Show answer and give points
        */
       override final def progressStepsCount(includeAnswers: Boolean): Int = {
         def oneIfTrue(b: Boolean): Int = if (b) 1 else 0
-        val includeStep2 = includeAnswers
-        val includeStep3 = includeAnswers && !showSingleAnswerButtonToTeams
 
-        2 + oneIfTrue(includeStep2) + oneIfTrue(includeStep3)
+        if (answerAudioSrc.isDefined || answerVideoSrc.isDefined) {
+          val includeStep2 = includeAnswers
+          val includeStep3 = includeAnswers
+          val includeStep4 = includeAnswers && !showSingleAnswerButtonToTeams
+
+          2 + oneIfTrue(includeStep2) + oneIfTrue(includeStep3) + oneIfTrue(includeStep4)
+        } else {
+          val includeStep2 = includeAnswers
+          val includeStep3 = includeAnswers && !showSingleAnswerButtonToTeams
+
+          2 + oneIfTrue(includeStep2) + oneIfTrue(includeStep3)
+        }
       }
 
       override final def shouldShowTimer(questionProgressIndex: Int): Boolean = {
@@ -141,6 +159,17 @@ object QuizConfig {
           questionProgressIndex == maxProgressIndex(includeAnswers = true)
         } else {
           questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
+        }
+      }
+
+      override final def audioVideoIsVisible(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex == 1
+      }
+      override final def answerAudioVideoIsVisible(questionProgressIndex: Int): Boolean = {
+        if (answerAudioSrc.isDefined || answerVideoSrc.isDefined) {
+          questionProgressIndex == 2
+        } else {
+          false
         }
       }
     }
@@ -462,6 +491,12 @@ object QuizConfig {
       }
       override def answerIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
+      }
+      def audioVideoIsVisible(questionProgressIndex: Int): Boolean = {
+        false
+      }
+      def answerAudioVideoIsVisible(questionProgressIndex: Int): Boolean = {
+        false
       }
     }
 
