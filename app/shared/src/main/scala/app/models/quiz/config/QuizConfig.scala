@@ -156,7 +156,9 @@ object QuizConfig {
         override val image: Option[Image],
         override val answerImage: Option[Image],
         override val audioSrc: Option[String],
+        override val answerAudioSrc: Option[String],
         override val videoSrc: Option[String],
+        override val answerVideoSrc: Option[String],
         pointsToGain: FixedPointNumber,
         pointsToGainOnFirstAnswer: FixedPointNumber,
         pointsToGainOnWrongAnswer: FixedPointNumber,
@@ -303,7 +305,9 @@ object QuizConfig {
         override val image: Option[Image],
         override val answerImage: Option[Image],
         override val audioSrc: Option[String],
+        override val answerAudioSrc: Option[String],
         override val videoSrc: Option[String],
+        override val answerVideoSrc: Option[String],
         override val pointsToGain: FixedPointNumber,
         override val maxTime: Duration,
     ) extends StandardSinglePartQuestionBase
@@ -337,7 +341,9 @@ object QuizConfig {
         override val image: Option[Image],
         override val answerImage: Option[Image],
         override val audioSrc: Option[String],
+        override val answerAudioSrc: Option[String],
         override val videoSrc: Option[String],
+        override val answerVideoSrc: Option[String],
         override val maxTime: Duration,
     ) extends StandardSinglePartQuestionBase
         with MultipleAnswersBase {
@@ -436,7 +442,9 @@ object QuizConfig {
       override def image: Option[Image] = None
       override def answerImage: Option[Image] = None
       override def audioSrc: Option[String] = None
+      override def answerAudioSrc: Option[String] = None
       override def videoSrc: Option[String] = None
+      override def answerVideoSrc: Option[String] = None
 
       override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
         (submissionValue: @unchecked) match {
@@ -549,7 +557,9 @@ object QuizConfig {
       override def image: Option[Image] = None
       override def answerImage: Option[Image] = None
       override def audioSrc: Option[String] = None
+      override def answerAudioSrc: Option[String] = None
       override def videoSrc: Option[String] = None
+      override def answerVideoSrc: Option[String] = None
 
       lazy val itemsInAlphabeticalOrder: Seq[OrderItems.Item] = {
         orderedItemsThatWillBePresentedInAlphabeticalOrder.sortBy(_.item)

@@ -155,7 +155,9 @@ class QuizConfigParsableValue @Inject() (implicit
       "image" -> Optional(ImageValue),
       "answerImage" -> Optional(ImageValue),
       "audio" -> Optional(StringValue),
+      "answerAudio" -> Optional(StringValue),
       "video" -> Optional(StringValue),
+      "answerVideo" -> Optional(StringValue),
       "pointsToGain" -> Optional(FixedPointNumberValue),
       "pointsToGainOnFirstAnswer" -> Optional(FixedPointNumberValue),
       "pointsToGainOnWrongAnswer" -> Optional(FixedPointNumberValue),
@@ -175,7 +177,9 @@ class QuizConfigParsableValue @Inject() (implicit
         image = map.optional("image"),
         answerImage = map.optional("answerImage"),
         audioSrc = map.optional("audio"),
+        answerAudioSrc = map.optional("answerAudio"),
         videoSrc = map.optional("video"),
+        answerVideoSrc = map.optional("answerVideo"),
         pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
         pointsToGainOnFirstAnswer = map.optional("pointsToGainOnFirstAnswer") getOrElse map
           .optional("pointsToGain", FixedPointNumber(1)),
@@ -230,7 +234,9 @@ class QuizConfigParsableValue @Inject() (implicit
       "image" -> Optional(ImageValue),
       "answerImage" -> Optional(ImageValue),
       "audio" -> Optional(StringValue),
+      "answerAudio" -> Optional(StringValue),
       "video" -> Optional(StringValue),
+      "answerVideo" -> Optional(StringValue),
       "pointsToGain" -> Optional(FixedPointNumberValue),
       "maxTimeSeconds" -> Optional(IntValue),
     )
@@ -246,7 +252,9 @@ class QuizConfigParsableValue @Inject() (implicit
         image = map.optional("image"),
         answerImage = map.optional("answerImage"),
         audioSrc = map.optional("audio"),
+        answerAudioSrc = map.optional("answerAudio"),
         videoSrc = map.optional("video"),
+        answerVideoSrc = map.optional("answerVideo"),
         pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
         maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", defaultMaxTimeSeconds)),
       )
@@ -272,7 +280,9 @@ class QuizConfigParsableValue @Inject() (implicit
       "image" -> Optional(ImageValue),
       "answerImage" -> Optional(ImageValue),
       "audio" -> Optional(StringValue),
+      "answerAudio" -> Optional(StringValue),
       "video" -> Optional(StringValue),
+      "answerVideo" -> Optional(StringValue),
       "maxTimeSeconds" -> Optional(IntValue),
     )
     override def parseFromParsedMapValues(map: StringMap) = {
@@ -286,7 +296,9 @@ class QuizConfigParsableValue @Inject() (implicit
         image = map.optional("image"),
         answerImage = map.optional("answerImage"),
         audioSrc = map.optional("audio"),
+        answerAudioSrc = map.optional("answerAudio"),
         videoSrc = map.optional("video"),
+        answerVideoSrc = map.optional("answerVideo"),
         maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", defaultMaxTimeSeconds)),
       )
     }
