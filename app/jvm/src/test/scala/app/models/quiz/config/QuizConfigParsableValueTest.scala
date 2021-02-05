@@ -91,7 +91,9 @@ class QuizConfigParsableValueTest extends Specification {
         |        answer: Summer
         |        answerDetail: (By Bensound)
         |        audio: music_round/bensound-summer.mp3
+        |        answerAudio: music_round/bensound-summer.mp3
         |        video: geography/about_bananas.mp4
+        |        answerVideo: geography/about_bananas.mp4
         |        maxTimeSeconds: 15
         |
         |      - questionType: multipleAnswers
@@ -160,7 +162,9 @@ class QuizConfigParsableValueTest extends Specification {
               masterNotes = Some("This is a very simple question"),
               image = Some(Image("geography/france.png", "small")),
               audioSrc = None,
+              answerAudioSrc = None,
               videoSrc = None,
+              answerVideoSrc = None,
               pointsToGain = FixedPointNumber(2.1),
               pointsToGainOnFirstAnswer = FixedPointNumber(4.2),
               pointsToGainOnWrongAnswer = FixedPointNumber(-1.3),
@@ -179,7 +183,9 @@ class QuizConfigParsableValueTest extends Specification {
               masterNotes = None,
               image = None,
               audioSrc = None,
+              answerAudioSrc = None,
               videoSrc = None,
+              answerVideoSrc = None,
               pointsToGain = FixedPointNumber(1),
               pointsToGainOnFirstAnswer = FixedPointNumber(1),
               pointsToGainOnWrongAnswer = FixedPointNumber(0),
@@ -198,7 +204,9 @@ class QuizConfigParsableValueTest extends Specification {
               masterNotes = None,
               image = None,
               audioSrc = None,
+              answerAudioSrc = None,
               videoSrc = None,
+              answerVideoSrc = None,
               pointsToGain = FixedPointNumber(1),
               pointsToGainOnFirstAnswer = FixedPointNumber(1),
               pointsToGainOnWrongAnswer = FixedPointNumber(0),
@@ -210,6 +218,7 @@ class QuizConfigParsableValueTest extends Specification {
               question = "Order these cities from small to large",
               questionDetail = Some("Population according to Google on July 2020"),
               tag = None,
+              masterNotes = None,
               orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
                 Question.OrderItems.Item(item = "Riga", answerDetail = None),
                 Question.OrderItems.Item(item = "Stockholm", answerDetail = None),
@@ -224,6 +233,7 @@ class QuizConfigParsableValueTest extends Specification {
               question = "Order these cities from small to large",
               questionDetail = None,
               tag = None,
+              masterNotes = None,
               orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
                 Question.OrderItems.Item(item = "Riga", answerDetail = Some("~600k")),
                 Question.OrderItems.Item(item = "Stockholm", answerDetail = Some("~1M")),
@@ -251,7 +261,9 @@ class QuizConfigParsableValueTest extends Specification {
               masterNotes = None,
               image = None,
               audioSrc = Some("music_round/bensound-summer.mp3"),
+              answerAudioSrc = Some("music_round/bensound-summer.mp3"),
               videoSrc = Some("geography/about_bananas.mp4"),
+              answerVideoSrc = Some("geography/about_bananas.mp4"),
               pointsToGain = FixedPointNumber(1),
               pointsToGainOnFirstAnswer = FixedPointNumber(1),
               pointsToGainOnWrongAnswer = FixedPointNumber(0),
@@ -267,11 +279,14 @@ class QuizConfigParsableValueTest extends Specification {
               answersHaveToBeInSameOrder = false,
               answerDetail = Some("Robert Trujillo joined Metallica in 2003."),
               answerImage = None,
+              masterNotes = None,
               image = Some(
                 Image("https://upload.wikimedia.org/wikipedia/commons/9/9e/Metallica_-_2003.jpg", "large")
               ),
               audioSrc = None,
+              answerAudioSrc = None,
               videoSrc = None,
+              answerVideoSrc = None,
               pointsToGain = FixedPointNumber(3),
               maxTime = Duration.ofSeconds(130),
             ),
@@ -300,8 +315,11 @@ class QuizConfigParsableValueTest extends Specification {
               answerDetail = Some("From the album Nevermind"),
               image = None,
               answerImage = None,
+              masterNotes = None,
               audioSrc = None,
+              answerAudioSrc = None,
               videoSrc = None,
+              answerVideoSrc = None,
               maxTime = Duration.ofSeconds(66),
             ),
           ),
