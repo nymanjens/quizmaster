@@ -42,6 +42,7 @@ rounds:
         answer: Paris
         image: https://raw.githubusercontent.com/nymanjens/quizmaster/master/conf/quiz/assets/geography/france.png
         answerImage: geography/france-answer.png
+        # You can also use answerAudio: and answerVideo:, which are similar to audio: and video:.
         answerDetail: |
           Image released under Creative Commons by Destination2
           (www.destination2.co.uk)
@@ -52,7 +53,7 @@ rounds:
       # players can stop the timer to attempt an answer
       - question: What city does this video from 1935 show?
         answer: Guatemala City
-        videoSrc: geography/about_bananas.mp4
+        video: geography/about_bananas.mp4
         pointsToGain: 2
         onlyFirstGainsPoints: true # See who can answer this question first
         showSingleAnswerButtonToTeams: true # Show a button to stop the timer. Answers can then be
@@ -78,7 +79,7 @@ rounds:
         questionDetail: (Royalty Free Music from Bensound)
         answer: Summer
         answerDetail: (By Bensound)
-        audioSrc: https://www.bensound.com/bensound-music/bensound-summer.mp3
+        audio: https://www.bensound.com/bensound-music/bensound-summer.mp3
 
       # Special question type: Provide multiple answers
       - questionType: multipleAnswers

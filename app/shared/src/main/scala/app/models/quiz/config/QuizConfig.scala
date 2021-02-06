@@ -82,6 +82,8 @@ object QuizConfig {
     def submissionAreOpen(questionProgressIndex: Int): Boolean
     def isMultipleChoice: Boolean
     def answerIsVisible(questionProgressIndex: Int): Boolean
+    def audioVideoIsVisible(questionProgressIndex: Int): Boolean
+    def answerAudioVideoIsVisible(questionProgressIndex: Int): Boolean
 
     def textualQuestion: String
     def questionDetail: Option[String]
@@ -93,7 +95,9 @@ object QuizConfig {
     def image: Option[Image]
     def answerImage: Option[Image]
     def audioSrc: Option[String]
+    def answerAudioSrc: Option[String]
     def videoSrc: Option[String]
+    def answerVideoSrc: Option[String]
 
     /**
      * Returns true if the given submission is correct according to configured answer.
@@ -108,18 +112,34 @@ object QuizConfig {
     sealed trait StandardSinglePartQuestionBase extends Question {
 
       /**
-       * Steps:
+       * Steps without answerAudio/Video:
        * 0- Show preparatory title: "Question 2"
        * 1- Show question: "This is the question, do you know the answer?"
        * 2- Show answer
        * 3- (if possible) Show answer and give points
+       *
+       * Steps with answerAudio/Video:
+       * 0- Show preparatory title: "Question 2"
+       * 1- Show question: "This is the question, do you know the answer?"
+       * 2- Show answerAudio/Video
+       * 3- Show answer
+       * 4- (if possible) Show answer and give points
        */
       override final def progressStepsCount(includeAnswers: Boolean): Int = {
         def oneIfTrue(b: Boolean): Int = if (b) 1 else 0
-        val includeStep2 = includeAnswers
-        val includeStep3 = includeAnswers && !showSingleAnswerButtonToTeams
 
-        2 + oneIfTrue(includeStep2) + oneIfTrue(includeStep3)
+        if (answerAudioSrc.isDefined || answerVideoSrc.isDefined) {
+          val includeStep2 = includeAnswers
+          val includeStep3 = includeAnswers
+          val includeStep4 = includeAnswers && !showSingleAnswerButtonToTeams
+
+          2 + oneIfTrue(includeStep2) + oneIfTrue(includeStep3) + oneIfTrue(includeStep4)
+        } else {
+          val includeStep2 = includeAnswers
+          val includeStep3 = includeAnswers && !showSingleAnswerButtonToTeams
+
+          2 + oneIfTrue(includeStep2) + oneIfTrue(includeStep3)
+        }
       }
 
       override final def shouldShowTimer(questionProgressIndex: Int): Boolean = {
@@ -141,6 +161,17 @@ object QuizConfig {
           questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
         }
       }
+
+      override final def audioVideoIsVisible(questionProgressIndex: Int): Boolean = {
+        questionProgressIndex == 1
+      }
+      override final def answerAudioVideoIsVisible(questionProgressIndex: Int): Boolean = {
+        if (answerAudioSrc.isDefined || answerVideoSrc.isDefined) {
+          questionProgressIndex == 2
+        } else {
+          false
+        }
+      }
     }
 
     case class Standard(
@@ -154,7 +185,9 @@ object QuizConfig {
         override val image: Option[Image],
         override val answerImage: Option[Image],
         override val audioSrc: Option[String],
+        override val answerAudioSrc: Option[String],
         override val videoSrc: Option[String],
+        override val answerVideoSrc: Option[String],
         pointsToGain: FixedPointNumber,
         pointsToGainOnFirstAnswer: FixedPointNumber,
         pointsToGainOnWrongAnswer: FixedPointNumber,
@@ -301,7 +334,9 @@ object QuizConfig {
         override val image: Option[Image],
         override val answerImage: Option[Image],
         override val audioSrc: Option[String],
+        override val answerAudioSrc: Option[String],
         override val videoSrc: Option[String],
+        override val answerVideoSrc: Option[String],
         override val pointsToGain: FixedPointNumber,
         override val maxTime: Duration,
     ) extends StandardSinglePartQuestionBase
@@ -335,7 +370,9 @@ object QuizConfig {
         override val image: Option[Image],
         override val answerImage: Option[Image],
         override val audioSrc: Option[String],
+        override val answerAudioSrc: Option[String],
         override val videoSrc: Option[String],
+        override val answerVideoSrc: Option[String],
         override val maxTime: Duration,
     ) extends StandardSinglePartQuestionBase
         with MultipleAnswersBase {
@@ -434,7 +471,9 @@ object QuizConfig {
       override def image: Option[Image] = None
       override def answerImage: Option[Image] = None
       override def audioSrc: Option[String] = None
+      override def answerAudioSrc: Option[String] = None
       override def videoSrc: Option[String] = None
+      override def answerVideoSrc: Option[String] = None
 
       override def isCorrectAnswer(submissionValue: SubmissionValue): Option[Boolean] = {
         (submissionValue: @unchecked) match {
@@ -452,6 +491,12 @@ object QuizConfig {
       }
       override def answerIsVisible(questionProgressIndex: Int): Boolean = {
         questionProgressIndex >= maxProgressIndex(includeAnswers = true) - 1
+      }
+      def audioVideoIsVisible(questionProgressIndex: Int): Boolean = {
+        false
+      }
+      def answerAudioVideoIsVisible(questionProgressIndex: Int): Boolean = {
+        false
       }
     }
 
@@ -547,7 +592,9 @@ object QuizConfig {
       override def image: Option[Image] = None
       override def answerImage: Option[Image] = None
       override def audioSrc: Option[String] = None
+      override def answerAudioSrc: Option[String] = None
       override def videoSrc: Option[String] = None
+      override def answerVideoSrc: Option[String] = None
 
       lazy val itemsInAlphabeticalOrder: Seq[OrderItems.Item] = {
         orderedItemsThatWillBePresentedInAlphabeticalOrder.sortBy(_.item)
