@@ -609,12 +609,25 @@ final class QuestionComponent(implicit
     }
 
     def video(question: Question)(implicit props: Props): VdomNode = {
-      <<.ifDefined(question.videoSrc) { videoSrc =>
-        ifVisibleOrMaster(question.audioVideoIsVisible(props.questionProgressIndex)) {
+      val (maybeVideoSrc, isVisible) = {
+        if (props.questionProgressIndex == 0) {
+          (question.videoSrc, false)
+        } else if (question.audioVideoIsVisible(props.questionProgressIndex)) {
+          (question.videoSrc, true)
+        } else if (question.answerAudioVideoIsVisible(props.questionProgressIndex)) {
+          (question.answerVideoSrc, true)
+        } else {
+          (None, false)
+        }
+      }
+
+      <<.ifDefined(maybeVideoSrc) { videoSrc =>
+        ifVisibleOrMaster(isVisible) {
           val timerState = props.quizState.timerState
           val timerIsRunning = timerState.timerRunning &&
             !timerState.hasFinished(question.maxTime) &&
             question.audioVideoIsVisible(props.questionProgressIndex)
+
           <.div(
             ^.className := "video-holder",
             ^^.ifThen(props.quizState.imageIsEnlarged) {
@@ -642,8 +655,18 @@ final class QuestionComponent(implicit
     }
 
     def audio(question: Question)(implicit props: Props): VdomNode = {
-      <<.ifDefined(question.audioSrc) { audioRelativePath =>
-        <<.ifThen(question.audioVideoIsVisible(props.questionProgressIndex) && !props.showMasterData) {
+      val maybeAudioSrc = {
+        if (question.audioVideoIsVisible(props.questionProgressIndex)) {
+          question.audioSrc
+        } else if (question.answerAudioVideoIsVisible(props.questionProgressIndex)) {
+          question.answerAudioSrc
+        } else {
+          None
+        }
+      }
+
+      <<.ifDefined(maybeAudioSrc) { audioRelativePath =>
+        <<.ifThen(!props.showMasterData) {
           val timerState = props.quizState.timerState
           val timerIsRunning = timerState.timerRunning && !timerState.hasFinished(question.maxTime)
           audioPlayer(
