@@ -42,6 +42,7 @@ rounds:
         answer: Paris
         image: https://raw.githubusercontent.com/nymanjens/quizmaster/master/conf/quiz/assets/geography/france.png
         answerImage: geography/france-answer.png
+        # You can also use answerAudio: and answerVideo:, which are similar to audio: and video:.
         answerDetail: |
           Image released under Creative Commons by Destination2
           (www.destination2.co.uk)
