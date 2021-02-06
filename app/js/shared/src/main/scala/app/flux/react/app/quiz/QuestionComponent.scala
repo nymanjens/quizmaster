@@ -626,7 +626,7 @@ final class QuestionComponent(implicit
           val timerState = props.quizState.timerState
           val timerIsRunning = timerState.timerRunning &&
             !timerState.hasFinished(question.maxTime) &&
-            question.audioVideoIsVisible(props.questionProgressIndex)
+            isVisible
 
           <.div(
             ^.className := "video-holder",
