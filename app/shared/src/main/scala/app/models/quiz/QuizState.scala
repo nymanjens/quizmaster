@@ -80,7 +80,7 @@ case class QuizState(
     maybeQuestion match {
       case None => false
       case Some(question) =>
-        val submissionAreOpen = question.submissionAreOpen(questionProgressIndex)
+        val submissionsAreOpen = question.submissionsAreOpen(questionProgressIndex)
         val hinderedByTimer =
           if (question.shouldShowTimer(questionProgressIndex))
             !timerState.timerRunning || timerState.hasFinished(question.maxTime)
@@ -90,7 +90,7 @@ case class QuizState(
           question.onlyFirstGainsPoints && alreadyAnsweredCorrectly
         }
 
-        submissionAreOpen && !hinderedByTimer && !earlierSubmissionFinishedTheQuestion
+        submissionsAreOpen && !hinderedByTimer && !earlierSubmissionFinishedTheQuestion
     }
   }
   def canSubmitResponse(team: Team)(implicit quizConfig: QuizConfig, clock: Clock): Boolean = {
