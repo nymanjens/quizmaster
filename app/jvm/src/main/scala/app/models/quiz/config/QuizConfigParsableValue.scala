@@ -33,7 +33,7 @@ class QuizConfigParsableValue @Inject() (implicit
     messagesApi: MessagesApi,
 ) extends MapParsableValue[QuizConfig] {
 
-  private val defaultMaxTimeSeconds: Int = 180
+  private val defaultMaxTimeSeconds: Int = 120
 
   override val supportedKeyValuePairs = Map(
     "title" -> Optional(StringValue),
