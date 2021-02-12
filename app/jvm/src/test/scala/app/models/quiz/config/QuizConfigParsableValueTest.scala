@@ -242,7 +242,7 @@ class QuizConfigParsableValueTest extends Specification {
               ),
               answerDetail = None,
               pointsToGain = FixedPointNumber(1),
-              maxTime = Duration.ofSeconds(180),
+              maxTime = Duration.ofSeconds(120),
             ),
           ),
         ),
