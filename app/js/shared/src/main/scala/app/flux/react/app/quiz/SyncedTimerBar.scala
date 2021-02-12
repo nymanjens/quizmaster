@@ -31,8 +31,8 @@ final class SyncedTimerBar(implicit
 ) extends HydroReactComponent {
 
   // **************** API ****************//
-  def apply(): VdomElement = {
-    component(Props())
+  def apply(showMasterData: Boolean): VdomElement = {
+    component(Props(showMasterData))
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//
@@ -44,7 +44,9 @@ final class SyncedTimerBar(implicit
       )
 
   // **************** Implementation of HydroReactComponent types ****************//
-  protected case class Props()
+  protected case class Props(
+      showMasterData: Boolean
+  )
   protected case class State(
       elapsedTime: Duration = Duration.ZERO,
       quizState: QuizState = QuizState.nullInstance,
@@ -77,7 +79,7 @@ final class SyncedTimerBar(implicit
       if (state.timerIsEnabled) {
         renderTimerCountingDown(state)
       } else {
-        renderQuizProgress(state)
+        renderQuizProgress(props, state)
       }
     }
 
@@ -115,7 +117,7 @@ final class SyncedTimerBar(implicit
       )
     }
 
-    private def renderQuizProgress(state: State): VdomElement = {
+    private def renderQuizProgress(props: Props, state: State): VdomElement = {
       val allQuestions = quizConfig.rounds.flatMap(_.questions)
       val precedingAndCurrentQuestion = {
         for {
@@ -140,6 +142,8 @@ final class SyncedTimerBar(implicit
             ^.className := "synced-timer-bar-label",
             s"$doneNumberOfQuestions / $totalNumberOfQuestions ${i18n("app.questions")} " +
               s"(${doneMaxDuration.toMinutes} / ${totalMaxDuration.toMinutes} ${i18n("app.minutes")})",
+            " • ",
+            roundProgress(state.quizState, props.showMasterData),
           ),
         ),
       )
@@ -173,6 +177,40 @@ final class SyncedTimerBar(implicit
     override def willUnmount(props: Props, state: State): Callback = {
       for (handle <- intervalHandle) dom.window.clearInterval(handle)
       Callback.empty
+    }
+
+    private def roundProgress(quizState: QuizState, showMasterData: Boolean): VdomNode = {
+      implicit val _: QuizState = quizState
+
+      quizState match {
+        case _ if quizState.quizIsBeingSetUp =>
+          <.span()
+        case _ if quizState.quizHasEnded =>
+          <.span()
+        case _ =>
+          <.span(
+            i18n("app.round-i-of-n", quizState.roundIndex + 1, quizConfig.rounds.size),
+            s" (${quizState.round.name}). ",
+            if (quizState.maybeQuestion.isDefined) {
+              i18n("app.question-i-of-n", quizState.questionIndex + 1, quizState.round.questions.size)
+            } else {
+              s"${quizState.round.questions.size} ${i18n("app.questions")}"
+            },
+            ". ",
+            <<.ifThen(showMasterData) {
+              <<.ifDefined(quizState.maybeQuestion) { question =>
+                {
+                  for (i <- 0 to question.progressStepsCount - 1) yield {
+                    Bootstrap.FontAwesomeIcon("circle")(
+                      ^.key := i,
+                      ^.className := (if (i <= quizState.questionProgressIndex) "seen" else "unseen"),
+                    )
+                  }
+                }.toVdomArray
+              }
+            },
+          )
+      }
     }
 
     private def formatDuration(duration: Duration): String = {
