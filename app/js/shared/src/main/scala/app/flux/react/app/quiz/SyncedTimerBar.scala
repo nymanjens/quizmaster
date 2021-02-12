@@ -142,8 +142,12 @@ final class SyncedTimerBar(implicit
             ^.className := "synced-timer-bar-label",
             s"$doneNumberOfQuestions / $totalNumberOfQuestions ${i18n("app.questions")} " +
               s"(${doneMaxDuration.toMinutes} / ${totalMaxDuration.toMinutes} ${i18n("app.minutes")})",
-            " • ",
-            roundProgress(state.quizState, props.showMasterData),
+            <<.ifDefined(roundProgress(state.quizState, props.showMasterData)) { progress =>
+              <.span(
+                " • ",
+                progress,
+              )
+            },
           ),
         ),
       )
@@ -179,36 +183,38 @@ final class SyncedTimerBar(implicit
       Callback.empty
     }
 
-    private def roundProgress(quizState: QuizState, showMasterData: Boolean): VdomNode = {
+    private def roundProgress(quizState: QuizState, showMasterData: Boolean): Option[VdomNode] = {
       implicit val _: QuizState = quizState
 
       quizState match {
         case _ if quizState.quizIsBeingSetUp =>
-          <.span()
+          None
         case _ if quizState.quizHasEnded =>
-          <.span()
+          None
         case _ =>
-          <.span(
-            i18n("app.round-i-of-n", quizState.roundIndex + 1, quizConfig.rounds.size),
-            s" (${quizState.round.name}). ",
-            if (quizState.maybeQuestion.isDefined) {
-              i18n("app.question-i-of-n", quizState.questionIndex + 1, quizState.round.questions.size)
-            } else {
-              s"${quizState.round.questions.size} ${i18n("app.questions")}"
-            },
-            ". ",
-            <<.ifThen(showMasterData) {
-              <<.ifDefined(quizState.maybeQuestion) { question =>
-                {
-                  for (i <- 0 to question.progressStepsCount - 1) yield {
-                    Bootstrap.FontAwesomeIcon("circle")(
-                      ^.key := i,
-                      ^.className := (if (i <= quizState.questionProgressIndex) "seen" else "unseen"),
-                    )
-                  }
-                }.toVdomArray
-              }
-            },
+          Some(
+            <.span(
+              i18n("app.round-i-of-n", quizState.roundIndex + 1, quizConfig.rounds.size),
+              s" (${quizState.round.name}). ",
+              if (quizState.maybeQuestion.isDefined) {
+                i18n("app.question-i-of-n", quizState.questionIndex + 1, quizState.round.questions.size)
+              } else {
+                s"${quizState.round.questions.size} ${i18n("app.questions")}"
+              },
+              ". ",
+              <<.ifThen(showMasterData) {
+                <<.ifDefined(quizState.maybeQuestion) { question =>
+                  {
+                    for (i <- 0 to question.progressStepsCount - 1) yield {
+                      Bootstrap.FontAwesomeIcon("circle")(
+                        ^.key := i,
+                        ^.className := (if (i <= quizState.questionProgressIndex) "seen" else "unseen"),
+                      )
+                    }
+                  }.toVdomArray
+                }
+              },
+            )
           )
       }
     }
