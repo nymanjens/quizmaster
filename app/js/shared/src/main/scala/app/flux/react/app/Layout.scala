@@ -70,7 +70,7 @@ final class Layout(implicit
         leftMenu = <.span(),
         pageContent = <.div(
           <<.ifThen(AppPages.isMasterOnlyPage(router.currentPage)) {
-            syncedTimerBar()
+            syncedTimerBar(showMasterData = router.currentPage == AppPages.Master)
           },
           <.div(
             ^.id := "content-wrapper",

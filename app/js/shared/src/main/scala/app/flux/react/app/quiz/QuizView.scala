@@ -26,7 +26,6 @@ final class QuizView(implicit
     quizConfig: QuizConfig,
     teamEditor: TeamEditor,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
-    quizProgressIndicator: QuizProgressIndicator,
     questionComponent: QuestionComponent,
     soundEffectController: SoundEffectController,
     teamInputStore: TeamInputStore,
@@ -125,7 +124,6 @@ final class QuizView(implicit
 
       <.span(
         ^.className := "quiz-view",
-        quizProgressIndicator(state.quizState, showMasterData = false),
         quizState.maybeQuestion match {
           case None => roundComponent(quizState.round)
           case Some(question) =>

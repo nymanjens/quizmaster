@@ -31,7 +31,6 @@ final class MasterView(implicit
     quizConfig: QuizConfig,
     quizSettingsPanels: QuizSettingsPanels,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
-    quizProgressIndicator: QuizProgressIndicator,
     questionComponent: QuestionComponent,
     getInitialDataResponse: GetInitialDataResponse,
     roundComponent: RoundComponent,
@@ -68,7 +67,6 @@ final class MasterView(implicit
         ^.className := "master-view",
         masterBanner(),
         quizNavigationButtons(state.quizState),
-        quizProgressIndicator(state.quizState, showMasterData = true),
         state.quizState match {
           case quizState =>
             quizState.maybeQuestion match {
