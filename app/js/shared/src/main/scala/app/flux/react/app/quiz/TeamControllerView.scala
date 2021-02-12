@@ -51,7 +51,6 @@ final class TeamControllerView(implicit
     scalaJsApiClient: ScalaJsApiClient,
     teamEditor: TeamEditor,
     teamsAndQuizStateStore: TeamsAndQuizStateStore,
-    quizProgressIndicator: QuizProgressIndicator,
     questionComponent: QuestionComponent,
     submissionsSummaryChart: SubmissionsSummaryChart,
     submissionsSummaryTable: SubmissionsSummaryTable,

@@ -10,7 +10,6 @@ import app.flux.react.app.quiz.ImportBackupPanel
 import app.flux.react.app.quiz.MasterView
 import app.flux.react.app.quiz.ObfuscatedAnswer
 import app.flux.react.app.quiz.QuestionComponent
-import app.flux.react.app.quiz.QuizProgressIndicator
 import app.flux.react.app.quiz.QuizSettingsPanels
 import app.flux.react.app.quiz.QuizView
 import app.flux.react.app.quiz.RoundComponent
@@ -60,7 +59,6 @@ final class Module(implicit
 
   implicit private val syncedTimerBar: SyncedTimerBar = new SyncedTimerBar()
   implicit private val obfuscatedAnswer: ObfuscatedAnswer = new ObfuscatedAnswer()
-  implicit private val quizProgressIndicator: QuizProgressIndicator = new QuizProgressIndicator()
   implicit private val importBackupPanel: ImportBackupPanel = new ImportBackupPanel()
   implicit private val teamEditor: TeamEditor = new TeamEditor()
   implicit private val teamsList: TeamsList = new TeamsList()
