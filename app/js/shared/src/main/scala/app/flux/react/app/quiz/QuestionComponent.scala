@@ -252,7 +252,7 @@ final class QuestionComponent(implicit
                     <.span(
                       ^.className := "points-info",
                       s" (${toNPointsString(subQuestion.pointsToGain)})",
-                      <<.ifThen(answerIsVisible) {
+                      ifVisibleOrMaster(answerIsVisible) {
                         <.div(
                           ^.className := "sub-answer",
                           <<.nl2BrBlockWithLinks(subQuestion.answer),
@@ -269,9 +269,6 @@ final class QuestionComponent(implicit
           showSubmissions(props.quizState.submissions),
         ),
         SubComponents.audio(question),
-        <<.ifThen(!answerIsVisible) {
-          SubComponents.answer(question)
-        },
         SubComponents.answerDetail(question),
       )
     }
