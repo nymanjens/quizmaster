@@ -103,7 +103,11 @@ class QuizConfigParsableValueTest extends Specification {
         |        question: List the band members of Metallica
         |        questionDetail: (in 2021)
         |        tag: metallica
-        |        answers: [James Hetfield, Lars Ulrich, Kirk Hammett, Robert Trujillo]
+        |        answers:
+        |          - James Hetfield
+        |          - {answer: Lars Ulrich, answerDetail: Drums}
+        |          - Kirk Hammett
+        |          - Robert Trujillo
         |        answersHaveToBeInSameOrder: false
         |        answerDetail: Robert Trujillo joined Metallica in 2003.
         |        image: https://upload.wikimedia.org/wikipedia/commons/9/9e/Metallica_-_2003.jpg
@@ -259,7 +263,12 @@ class QuizConfigParsableValueTest extends Specification {
                 question = "List the band members of Metallica",
                 questionDetail = Some("(in 2021)"),
                 tag = Some("metallica"),
-                answers = Seq("James Hetfield", "Lars Ulrich", "Kirk Hammett", "Robert Trujillo"),
+                answers = Seq(
+                  Question.MultipleAnswers.Answer(answer = "James Hetfield", answerDetail = None),
+                  Question.MultipleAnswers.Answer(answer = "Lars Ulrich", answerDetail = Some("Drums")),
+                  Question.MultipleAnswers.Answer(answer = "Kirk Hammett", answerDetail = None),
+                  Question.MultipleAnswers.Answer(answer = "Robert Trujillo", answerDetail = None),
+                ),
                 answersHaveToBeInSameOrder = false,
                 answerDetail = Some("Robert Trujillo joined Metallica in 2003."),
                 answerImage = None,
@@ -441,7 +450,10 @@ class QuizConfigParsableValueTest extends Specification {
                 question = "HHH",
                 questionDetail = None,
                 tag = None,
-                answers = Seq("III", "JJJ"),
+                answers = Seq(
+                  Question.MultipleAnswers.Answer(answer = "III", answerDetail = None),
+                  Question.MultipleAnswers.Answer(answer = "JJJ", answerDetail = None),
+                ),
                 answersHaveToBeInSameOrder = false,
                 answerDetail = None,
                 answerImage = None,

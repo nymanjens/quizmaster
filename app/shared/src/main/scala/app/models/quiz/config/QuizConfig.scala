@@ -247,7 +247,7 @@ object QuizConfig {
 
     sealed trait MultipleAnswersBase extends Question {
 
-      def answers: Seq[String]
+      def answerStrings: Seq[String]
       protected def answersHaveToBeInSameOrder: Boolean
       protected def pointsToGain: FixedPointNumber
       protected def getCorrectnessFraction(answers: Seq[MultipleTextAnswers.Answer]): Double
@@ -299,19 +299,19 @@ object QuizConfig {
       }
 
       override final def answerAsString: String = {
-        answers.mkString(", ")
+        answerStrings.mkString(", ")
       }
 
       final def createAutogradedAnswers(answerTexts: Seq[String]): Seq[MultipleTextAnswers.Answer] = {
         if (answersHaveToBeInSameOrder) {
-          for ((correctAnswer, answerText) <- this.answers zip answerTexts)
+          for ((correctAnswer, answerText) <- this.answerStrings zip answerTexts)
             yield MultipleTextAnswers.Answer(
               text = answerText,
               isCorrectAnswer =
                 normalizeTextForComparison(correctAnswer) == normalizeTextForComparison(answerText),
             )
         } else {
-          val remainingNormalizedAnswers = mutable.Set(this.answers.map(normalizeTextForComparison): _*)
+          val remainingNormalizedAnswers = mutable.Set(this.answerStrings.map(normalizeTextForComparison): _*)
           for (answerText <- answerTexts) yield {
             val inAnswerPool = remainingNormalizedAnswers.remove(normalizeTextForComparison(answerText))
             MultipleTextAnswers.Answer(
@@ -327,7 +327,7 @@ object QuizConfig {
         question: String,
         override val questionDetail: Option[String],
         override val tag: Option[String],
-        override val answers: Seq[String],
+        answers: Seq[MultipleAnswers.Answer],
         override val answersHaveToBeInSameOrder: Boolean,
         override val answerDetail: Option[String],
         override val masterNotes: Option[String],
@@ -344,10 +344,11 @@ object QuizConfig {
 
       def validationErrors(): Seq[String] = {
         Seq(
-          conditionalOption(answers.size < 2, s"Expected at least 2 answers, but got ${answers.size}")
+          conditionalOption(answers.size < 2, s"Expected at least 2 answers, but got ${answerStrings.size}")
         ).flatten
       }
 
+      override def answerStrings: Seq[String] = answers.map(_.answer)
       override protected def getCorrectnessFraction(answers: Seq[MultipleTextAnswers.Answer]): Double = {
         val correctAnswers = answers.count(_.isCorrectAnswer)
         correctAnswers * 1.0 / this.answers.size
@@ -358,6 +359,12 @@ object QuizConfig {
       override def isMultipleChoice: Boolean = false
       override def textualQuestion: String = question
       override def maybeTextualChoices: Option[Seq[String]] = None
+    }
+    object MultipleAnswers {
+      case class Answer(
+          answer: String,
+          answerDetail: Option[String],
+      )
     }
 
     case class MultipleQuestions(
@@ -379,11 +386,14 @@ object QuizConfig {
 
       def validationErrors(): Seq[String] = {
         Seq(
-          conditionalOption(answers.size < 2, s"Expected at least 2 answers, but got ${answers.size}")
+          conditionalOption(
+            subQuestions.size < 2,
+            s"Expected at least 2 questions, but got ${subQuestions.size}",
+          )
         ).flatten
       }
 
-      override def answers: Seq[String] = subQuestions.map(_.answer)
+      override def answerStrings: Seq[String] = subQuestions.map(_.answer)
       override protected def getCorrectnessFraction(answers: Seq[MultipleTextAnswers.Answer]): Double = {
         val pointsGainedByAnswers = (subQuestions zip answers).map {
           case (subQuestion, answer) if answer.isCorrectAnswer => subQuestion.pointsToGain
@@ -400,7 +410,6 @@ object QuizConfig {
       override def textualQuestion: String = questionTitle
       override def maybeTextualChoices: Option[Seq[String]] = None
     }
-
     object MultipleQuestions {
       case class SubQuestion(
           question: String,

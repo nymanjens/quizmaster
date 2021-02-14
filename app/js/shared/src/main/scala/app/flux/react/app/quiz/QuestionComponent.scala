@@ -209,7 +209,10 @@ final class QuestionComponent(implicit
                       ^.key := index,
                       ^.className := "sub-answer",
                       Bootstrap.FontAwesomeIcon("chevron-circle-right")(^.className := "choice-arrow"),
-                      answer,
+                      answer.answer,
+                      <<.ifDefined(answer.answerDetail) { answerDetail =>
+                        s" ($answerDetail)"
+                      },
                     )
                 ).toVdomArray,
               )
@@ -547,7 +550,7 @@ final class QuestionComponent(implicit
                     ).toVdomArray
                   case _ =>
                     (
-                      for (index <- question.answers.indices) yield {
+                      for (index <- question.answerStrings.indices) yield {
                         <.li(
                           ^.key := s"answer-${team.id}-$index",
                           "...",

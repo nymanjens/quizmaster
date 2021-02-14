@@ -319,7 +319,7 @@ class QuizConfigParsableValue @Inject() (implicit
       "questionDetail" -> Optional(StringValue),
       "masterNotes" -> Optional(StringValue),
       "tag" -> Optional(StringValue),
-      "answers" -> Required(ListParsableValue(StringValue)(s => s)),
+      "answers" -> Required(ListParsableValue(MultipleAnswersAnswerValue)(_.answer)),
       "answersHaveToBeInSameOrder" -> Required(BooleanValue),
       "answerDetail" -> Optional(StringValue),
       "image" -> Optional(ImageValue),
@@ -332,13 +332,12 @@ class QuizConfigParsableValue @Inject() (implicit
       "maxTimeSeconds" -> Optional(IntValue),
     )
     override def parseFromParsedMapValues(map: StringMap) = {
-      val answers = map.required[Seq[String]]("answers")
       Question.MultipleAnswers(
         question = map.required[String]("question"),
         questionDetail = map.optional("questionDetail"),
         masterNotes = map.optional("masterNotes"),
         tag = map.optional("tag"),
-        answers = answers,
+        answers = map.required[Seq[Question.MultipleAnswers.Answer]]("answers"),
         answersHaveToBeInSameOrder = map.required[Boolean]("answersHaveToBeInSameOrder"),
         answerDetail = map.optional("answerDetail"),
         image = map.optional("image"),
@@ -361,6 +360,28 @@ class QuizConfigParsableValue @Inject() (implicit
       ).flatten
     }
   }
+  private val MultipleAnswersAnswerValue: ParsableValue[Question.MultipleAnswers.Answer] = {
+    WithStringSimplification(RawMultipleAnswersAnswerValue)(
+      stringToValue = s =>
+        Question.MultipleAnswers.Answer(
+          answer = s,
+          answerDetail = None,
+        )
+    )
+  }
+  private object RawMultipleAnswersAnswerValue extends MapParsableValue[Question.MultipleAnswers.Answer] {
+    override val supportedKeyValuePairs = Map(
+      "answer" -> Required(StringValue),
+      "answerDetail" -> Optional(StringValue),
+    )
+    override def parseFromParsedMapValues(map: StringMap) = {
+      Question.MultipleAnswers.Answer(
+        answer = map.required[String]("answer"),
+        answerDetail = map.optional("answerDetail"),
+      )
+    }
+  }
+
   private object MultipleQuestionsQuestionValue extends MapParsableValue[Question.MultipleQuestions] {
     override val supportedKeyValuePairs = Map(
       "questionTitle" -> Required(StringValue),

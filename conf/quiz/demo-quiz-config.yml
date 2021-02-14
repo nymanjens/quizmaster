@@ -92,7 +92,11 @@ rounds:
       - questionType: multipleAnswers
         question: List the band members of Metallica
         questionDetail: (in 2021)
-        answers: [James Hetfield, Lars Ulrich, Kirk Hammett, Robert Trujillo]
+        answers:
+          - {answer: James Hetfield, answerDetail: Lead vocalist}
+          - Lars Ulrich
+          - Kirk Hammett
+          - Robert Trujillo
         answersHaveToBeInSameOrder: false
         image: https://upload.wikimedia.org/wikipedia/commons/9/9e/Metallica_-_2003.jpg
         pointsToGain: 4
