@@ -207,7 +207,9 @@ final class Application @Inject() (implicit
         }
       }
 
+      result += "\n"
       result += s"  ${questionsInfo(round.questions, round.expectedTime)}\n"
+      result += "\n"
       result += "\n"
     }
     result += "\n"
