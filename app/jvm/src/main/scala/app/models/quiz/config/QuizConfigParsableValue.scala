@@ -332,13 +332,12 @@ class QuizConfigParsableValue @Inject() (implicit
       "maxTimeSeconds" -> Optional(IntValue),
     )
     override def parseFromParsedMapValues(map: StringMap) = {
-      val answers = map.required[Seq[String]]("answers")
       Question.MultipleAnswers(
         question = map.required[String]("question"),
         questionDetail = map.optional("questionDetail"),
         masterNotes = map.optional("masterNotes"),
         tag = map.optional("tag"),
-        answers = answers,
+        answers = map.required[Seq[Question.MultipleAnswers.Answer]]("answers"),
         answersHaveToBeInSameOrder = map.required[Boolean]("answersHaveToBeInSameOrder"),
         answerDetail = map.optional("answerDetail"),
         image = map.optional("image"),
