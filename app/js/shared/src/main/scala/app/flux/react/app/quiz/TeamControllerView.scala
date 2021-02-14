@@ -435,7 +435,7 @@ final class TeamControllerView(implicit
           ^.className := "multiple-answers-form",
           Bootstrap.FormGroup(
             <.label(i18n("app.enter-your-answers"), ":"), {
-              for (index <- question.answers.indices) yield {
+              for (index <- question.answerStrings.indices) yield {
                 <.div(
                   ^.key := s"answer-$index",
                   <<.ifDefined(maybeSubQuestions) { subQuestions =>
@@ -463,7 +463,7 @@ final class TeamControllerView(implicit
                 e.preventDefault()
 
                 val answerTexts =
-                  for (index <- question.answers.indices)
+                  for (index <- question.answerStrings.indices)
                     yield multipleAnswersInputRefs.get(index).apply().valueOrDefault
                 val answers = question.createAutogradedAnswers(answerTexts.map(makeWhitespaceVisible))
 
