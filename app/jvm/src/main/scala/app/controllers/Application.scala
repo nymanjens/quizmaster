@@ -193,12 +193,12 @@ final class Application @Inject() (implicit
           if (q.maxTime > infiniteDurationThreshold) "inf" else round1(q.maxTime.getSeconds / 60.0)
 
         if(simplifiedView) {
-          result += s"    - ${indent(3, q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false))} points;  " +
+          result += s"    - ${indent(4, q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false))} points;  " +
             s"${indent(5, maxTime)} min; " +
             s"${indent(60, q.textualQuestion)}; " +
             s"${indent(60, q.answerAsString)}\n"
         } else {
-        result += s"    - toGain: ${indent(3, q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false))};  " +
+        result += s"    - toGain: ${indent(4, q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false))};  " +
           s"first: ${indent(3, q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = true))};   " +
           s"onlyFirst: ${indent(5, q.onlyFirstGainsPoints)}; " +
           s"${indent(5, maxTime)} min; " +
