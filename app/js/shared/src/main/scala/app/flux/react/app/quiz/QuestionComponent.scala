@@ -121,7 +121,6 @@ final class QuestionComponent(implicit
         question.isMultipleChoice && (question.onlyFirstGainsPoints || answerIsVisible)
       val showGamepadIconUnderChoices =
         props.quizState.submissions.nonEmpty || (props.quizState.canAnyTeamSubmitResponse && question.onlyFirstGainsPoints)
-      val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
 
       <.div(
         SubComponents.questionTitle(question),
@@ -188,6 +187,8 @@ final class QuestionComponent(implicit
     private def showMultipleAnswersQuestion(
         question: Question.MultipleAnswers
     )(implicit props: Props): VdomElement = {
+      val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
+
       <.div(
         SubComponents.questionTitle(question),
         SubComponents.questionDetail(question),
@@ -198,13 +199,29 @@ final class QuestionComponent(implicit
           ^.className := "image-and-choices-row",
           SubComponents.image(question),
           SubComponents.video(question),
+          ifVisibleOrMaster(answerIsVisible) {
+            SubComponents.choicesHolder(question)(
+              <.ul(
+                ^.className := "answers",
+                (
+                  for ((answer, index) <- question.answers.zipWithIndex)
+                    yield <.li(
+                      ^.key := index,
+                      ^.className := "sub-answer",
+                      Bootstrap.FontAwesomeIcon("chevron-circle-right")(^.className := "choice-arrow"),
+                      answer,
+                    )
+                  ).toVdomArray,
+              ),
+            )
+          }
+          ,
         ),
         <.div(
           ^.className := "submissions-without-choices",
           showSubmissions(props.quizState.submissions),
         ),
         SubComponents.audio(question),
-        SubComponents.answer(question),
         SubComponents.answerDetail(question),
       )
     }
@@ -213,7 +230,6 @@ final class QuestionComponent(implicit
         question: Question.MultipleQuestions
     )(implicit props: Props): VdomElement = {
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
-      val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
 
       <.div(
         SubComponents.questionTitle(question),

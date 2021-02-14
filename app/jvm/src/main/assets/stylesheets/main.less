@@ -487,8 +487,8 @@ table.table-bordered {
   }
   .question-wrapper {
     text-align: center;
-    .admin-only-data {
-      color: #DDD;
+    .admin-only-data, .admin-only-data li {
+      color: #DDD !important;
     }
     .question {
       padding-top: 5px;
@@ -624,7 +624,7 @@ table.table-bordered {
           padding-left: 20px;
         }
 
-        .choices, .sub-questions {
+        .choices, .answers, .sub-questions {
           font-size: 35px;
           display: inline-block;
           text-align: left;
@@ -646,7 +646,7 @@ table.table-bordered {
             text-decoration: line-through;
           }
         }
-        .sub-questions {
+        .sub-questions, .answers {
           .points-info {
             font-size: 24px;
             font-style: italic;
