@@ -334,7 +334,7 @@ class QuizConfigParsableValueTest extends Specification {
               textualQuestion = "How many sides does a triangle have?",
               textualAnswer = "3",
               textualChoices = Seq("3", "4", "5", "6"),
-              pointsToGain = FixedPointNumber(2),
+              pointsToGain = FixedPointNumber(1),
             )
           ),
         ),
