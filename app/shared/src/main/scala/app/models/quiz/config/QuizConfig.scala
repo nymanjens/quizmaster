@@ -327,7 +327,7 @@ object QuizConfig {
         question: String,
         override val questionDetail: Option[String],
         override val tag: Option[String],
-        override val answers: Seq[String],
+        override val answers: Seq[MultipleAnswers.Answer],
         override val answersHaveToBeInSameOrder: Boolean,
         override val answerDetail: Option[String],
         override val masterNotes: Option[String],
@@ -358,6 +358,12 @@ object QuizConfig {
       override def isMultipleChoice: Boolean = false
       override def textualQuestion: String = question
       override def maybeTextualChoices: Option[Seq[String]] = None
+    }
+    object MultipleAnswers {
+      case class Answer(
+          answer: String,
+          answerDetail: Option[String],
+      )
     }
 
     case class MultipleQuestions(
@@ -400,7 +406,6 @@ object QuizConfig {
       override def textualQuestion: String = questionTitle
       override def maybeTextualChoices: Option[Seq[String]] = None
     }
-
     object MultipleQuestions {
       case class SubQuestion(
           question: String,

@@ -209,7 +209,10 @@ final class QuestionComponent(implicit
                       ^.key := index,
                       ^.className := "sub-answer",
                       Bootstrap.FontAwesomeIcon("chevron-circle-right")(^.className := "choice-arrow"),
-                      answer,
+                      answer.answer,
+                      <<.ifDefined(answer.answerDetail) { answerDetail =>
+                        s" ($answerDetail)"
+                      },
                     )
                 ).toVdomArray,
               )
