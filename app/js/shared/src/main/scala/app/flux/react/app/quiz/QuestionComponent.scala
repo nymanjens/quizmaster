@@ -697,10 +697,17 @@ final class QuestionComponent(implicit
     def choicesHolder(question: Question)(innerNodes: TagMod*)(implicit props: Props): VdomTag = {
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
       val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
+      val videoIsVisible = {
+        if (props.questionProgressIndex == 0) false
+        else if (question.audioVideoIsVisible(props.questionProgressIndex)) question.videoSrc.isDefined
+        else if (question.answerAudioVideoIsVisible(props.questionProgressIndex))
+          question.answerVideoSrc.isDefined
+        else false
+      }
 
       <.div(
         ^.className := "choices-holder",
-        ^^.ifThen(maybeImage.isDefined || question.videoSrc.isDefined) {
+        ^^.ifThen(maybeImage.isDefined || videoIsVisible) {
           ^.className := "including-image-or-video"
         },
       )(innerNodes: _*)
