@@ -114,7 +114,8 @@ class QuizConfigParsableValue @Inject() (implicit
               ),
               maxTime = replaceMaxTime(q.maxTime),
             )
-          case q: Question.DoubleQ => q.copy(pointsToGain = replacePoints(q.pointsToGain))
+          case q: Question.DoubleQ =>
+            q.copy(pointsToGain = replacePoints(q.pointsToGain))
           case q: Question.OrderItems =>
             q.copy(
               pointsToGain = replacePoints(q.pointsToGain, defaults.orderItemsPointsToGainInTotal),
