@@ -414,6 +414,7 @@ object QuizConfig {
       case class SubQuestion(
           question: String,
           answer: String,
+          answerDetail: Option[String],
           pointsToGain: FixedPointNumber,
       )
     }

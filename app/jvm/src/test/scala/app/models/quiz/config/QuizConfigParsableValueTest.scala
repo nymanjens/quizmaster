@@ -121,7 +121,7 @@ class QuizConfigParsableValueTest extends Specification {
         |          With the lights out, it's less dangerous
         |          Here we are now, entertain us
         |        questions:
-        |          - {question: "What is the song title?", answer: "Smells Like Teen Spirit"}
+        |          - {question: "What is the song title?", answer: "Smells Like Teen Spirit", answerDetail: 1991}
         |          - {question: "Which artist?", answer: Nirvana}
         |          - {question: "What year was the song released?", answer: 1991, pointsToGain: 2}
         |        answerDetail: From the album Nevermind
@@ -292,16 +292,19 @@ class QuizConfigParsableValueTest extends Specification {
                   SubQuestion(
                     question = "What is the song title?",
                     answer = "Smells Like Teen Spirit",
+                    answerDetail = Some("1991"),
                     pointsToGain = FixedPointNumber(1.7),
                   ),
                   SubQuestion(
                     question = "Which artist?",
                     answer = "Nirvana",
+                    answerDetail = None,
                     pointsToGain = FixedPointNumber(1.7),
                   ),
                   SubQuestion(
                     question = "What year was the song released?",
                     answer = "1991",
+                    answerDetail = None,
                     pointsToGain = FixedPointNumber(2),
                   ),
                 ),
@@ -428,11 +431,13 @@ class QuizConfigParsableValueTest extends Specification {
                   SubQuestion(
                     question = "DDD",
                     answer = "EEE",
+                    answerDetail = None,
                     pointsToGain = FixedPointNumber(1),
                   ),
                   SubQuestion(
                     question = "FFF",
                     answer = "GGG",
+                    answerDetail = None,
                     pointsToGain = FixedPointNumber(1),
                   ),
                 ),

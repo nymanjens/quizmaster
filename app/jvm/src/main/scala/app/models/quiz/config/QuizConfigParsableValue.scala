@@ -431,12 +431,14 @@ class QuizConfigParsableValue @Inject() (implicit
     override val supportedKeyValuePairs = Map(
       "question" -> Required(StringValue),
       "answer" -> Required(StringValue),
+      "answerDetail" -> Optional(StringValue),
       "pointsToGain" -> Optional(FixedPointNumberValue),
     )
     override def parseFromParsedMapValues(map: StringMap) = {
       Question.MultipleQuestions.SubQuestion(
         question = map.required[String]("question"),
         answer = map.required[String]("answer"),
+        answerDetail = map.optional("answerDetail"),
         pointsToGain = map.optional("pointsToGain", magicDefaultPointsToGain),
       )
     }
