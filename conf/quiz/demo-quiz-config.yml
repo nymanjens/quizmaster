@@ -22,6 +22,14 @@ usageStatistics:
     #includeAuthor: true
     #includeQuizTitle: true
 
+# Optional - Define custom defaults
+defaults:
+  maxTimeSeconds: 120
+  pointsToGain: 1
+  multipleAnswers_pointsToGainPerAnswer: 1
+  multipleQuestions_pointsToGainPerQuestion: 1
+  orderItems_pointsToGainInTotal: 2
+
 rounds:
   - name: Geography
     questions:
@@ -33,7 +41,7 @@ rounds:
       - question: What is the capital of Belgium?
         choices: [Paris, London, Brussels, Berlin]
         answer: Brussels
-        pointsToGain: 1 # This is the default
+        pointsToGain: 1
         pointsToGainOnFirstAnswer: 2 # Double points for first right answer
 
       # Multiple-choice question - only the first right answer gets points
@@ -47,14 +55,13 @@ rounds:
           Image released under Creative Commons by Destination2
           (www.destination2.co.uk)
         pointsToGain: 0 # This question won't give any points
-        maxTimeSeconds: 120 # This is 3 minutes by default
+        maxTimeSeconds: 120
 
       # Question to be answered verbally (with video) - only the first right answer gets points,
       # players can stop the timer to attempt an answer
       - question: What city does this video from 1935 show?
         answer: Guatemala City
         video: geography/about_bananas.mp4
-        pointsToGain: 2
         onlyFirstGainsPoints: true # See who can answer this question first
         showSingleAnswerButtonToTeams: true # Show a button to stop the timer. Answers can then be
                                             # given verbally.
@@ -69,7 +76,7 @@ rounds:
          - {item: Stockholm, answerDetail: ~1M}
          - {item: Berlin, answerDetail: ~4M}
          - {item: London, answerDetail: ~9M}
-        pointsToGain: 2
+        pointsToGain: 3
 
 
   - name: Music round

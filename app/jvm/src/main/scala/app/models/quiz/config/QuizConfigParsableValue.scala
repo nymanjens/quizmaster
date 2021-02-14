@@ -33,7 +33,8 @@ class QuizConfigParsableValue @Inject() (implicit
     messagesApi: MessagesApi,
 ) extends MapParsableValue[QuizConfig] {
 
-  private val defaultMaxTimeSeconds: Int = 120
+  private val magicDefaultMaxTimeSeconds: Int = -129379821
+  private val magicDefaultPointsToGain: FixedPointNumber = FixedPointNumber(-918237)
 
   override val supportedKeyValuePairs = Map(
     "title" -> Optional(StringValue),
@@ -43,25 +44,84 @@ class QuizConfigParsableValue @Inject() (implicit
     "zipRoundsWithGenericRoundNames" -> Optional(BooleanValue),
     "language" -> Optional(StringValue),
     "usageStatistics" -> Optional(UsageStatisticsValue),
+    "defaults" -> Optional(QuizConfigDefaultsValue),
     "rounds" -> Required(ListParsableValue(RoundValue)(_.name)),
   )
 
   override def parseFromParsedMapValues(map: StringMap) = {
+    val quizConfigDefaults =
+      map.optional("defaults", QuizConfigDefaultsValue.parse(new java.util.HashMap()).maybeValue.get)
     val languageCode = map.optional("language", "en")
 
-    QuizConfig(
-      title = map.optional("title"),
-      author = map.optional("author"),
-      instructionsOnFirstSlide = map.optional("instructionsOnFirstSlide"),
-      masterSecret = map.optional("masterSecret", "*"),
-      rounds = {
-        val rounds = map.required[Seq[Round]]("rounds")
-        if (map.optional("zipRoundsWithGenericRoundNames", false))
-          zipRoundsWithGenericRoundNames(rounds, languageCode)
-        else rounds
-      },
-      languageCode = languageCode,
-      usageStatistics = map.optional("usageStatistics", UsageStatistics.default),
+    replaceMagicDefaultsByConfiguredDefaults(
+      quizConfigDefaults,
+      QuizConfig(
+        title = map.optional("title"),
+        author = map.optional("author"),
+        instructionsOnFirstSlide = map.optional("instructionsOnFirstSlide"),
+        masterSecret = map.optional("masterSecret", "*"),
+        rounds = {
+          val rounds = map.required[Seq[Round]]("rounds")
+          if (map.optional("zipRoundsWithGenericRoundNames", false))
+            zipRoundsWithGenericRoundNames(rounds, languageCode)
+          else rounds
+        },
+        languageCode = languageCode,
+        usageStatistics = map.optional("usageStatistics", UsageStatistics.default),
+      ),
+    )
+  }
+
+  private def replaceMagicDefaultsByConfiguredDefaults(
+      defaults: QuizConfigDefaults,
+      config: QuizConfig,
+  ): QuizConfig = {
+    def replacePoints(
+        points: FixedPointNumber,
+        replacementForMagic: FixedPointNumber = defaults.pointsToGain,
+    ): FixedPointNumber = {
+      if (points == magicDefaultPointsToGain) replacementForMagic else points
+    }
+    def replaceMaxTime(
+        maxTime: Duration
+    ): Duration = {
+      if (maxTime == Duration.ofSeconds(magicDefaultMaxTimeSeconds))
+        Duration.ofSeconds(defaults.maxTimeSeconds)
+      else maxTime
+    }
+
+    config.copy(rounds =
+      config.rounds.map(round =>
+        round.copy(questions = round.questions.map {
+          case q: Question.Standard =>
+            q.copy(
+              pointsToGain = replacePoints(q.pointsToGain),
+              pointsToGainOnFirstAnswer = replacePoints(q.pointsToGainOnFirstAnswer),
+              maxTime = replaceMaxTime(q.maxTime),
+            )
+          case q: Question.MultipleAnswers =>
+            q.copy(
+              pointsToGain =
+                replacePoints(q.pointsToGain, defaults.multipleAnswersPointsToGainPerAnswer * q.answers.size),
+              maxTime = replaceMaxTime(q.maxTime),
+            )
+          case q: Question.MultipleQuestions =>
+            q.copy(
+              subQuestions = q.subQuestions.map(subQ =>
+                subQ.copy(pointsToGain =
+                  replacePoints(subQ.pointsToGain, defaults.multipleQuestionsPointsToGainPerQuestion)
+                )
+              ),
+              maxTime = replaceMaxTime(q.maxTime),
+            )
+          case q: Question.DoubleQ => q.copy(pointsToGain = replacePoints(q.pointsToGain))
+          case q: Question.OrderItems =>
+            q.copy(
+              pointsToGain = replacePoints(q.pointsToGain, defaults.orderItemsPointsToGainInTotal),
+              maxTime = replaceMaxTime(q.maxTime),
+            )
+        })
+      )
     )
   }
 
@@ -100,6 +160,36 @@ class QuizConfigParsableValue @Inject() (implicit
         sendAnonymousUsageDataAtEndOfQuiz = map.optional("sendAnonymousUsageDataAtEndOfQuiz", false),
         includeAuthor = map.optional("includeAuthor", false),
         includeQuizTitle = map.optional("includeQuizTitle", false),
+      )
+    }
+  }
+
+  private case class QuizConfigDefaults(
+      maxTimeSeconds: Int,
+      pointsToGain: FixedPointNumber,
+      multipleAnswersPointsToGainPerAnswer: FixedPointNumber,
+      multipleQuestionsPointsToGainPerQuestion: FixedPointNumber,
+      orderItemsPointsToGainInTotal: FixedPointNumber,
+  )
+
+  private object QuizConfigDefaultsValue extends MapParsableValue[QuizConfigDefaults] {
+    override val supportedKeyValuePairs = Map(
+      "maxTimeSeconds" -> Optional(IntValue),
+      "pointsToGain" -> Optional(FixedPointNumberValue),
+      "multipleAnswers_pointsToGainPerAnswer" -> Optional(FixedPointNumberValue),
+      "multipleQuestions_pointsToGainPerQuestion" -> Optional(FixedPointNumberValue),
+      "orderItems_pointsToGainInTotal" -> Optional(FixedPointNumberValue),
+    )
+    override def parseFromParsedMapValues(map: StringMap) = {
+      val defaultPointsToGain = map.optional("pointsToGain", FixedPointNumber(1))
+      QuizConfigDefaults(
+        maxTimeSeconds = map.optional("maxTimeSeconds", 120),
+        pointsToGain = defaultPointsToGain,
+        multipleAnswersPointsToGainPerAnswer =
+          map.optional("multipleAnswers_pointsToGainPerAnswer", defaultPointsToGain),
+        multipleQuestionsPointsToGainPerQuestion =
+          map.optional("multipleQuestions_pointsToGainPerQuestion", defaultPointsToGain),
+        orderItemsPointsToGainInTotal = map.optional("orderItems_pointsToGainInTotal", defaultPointsToGain),
       )
     }
   }
@@ -166,6 +256,7 @@ class QuizConfigParsableValue @Inject() (implicit
       "showSingleAnswerButtonToTeams" -> Optional(BooleanValue),
     )
     override def parseFromParsedMapValues(map: StringMap) = {
+      val pointsToGain = map.optional("pointsToGain", magicDefaultPointsToGain)
       Question.Standard(
         question = map.required[String]("question"),
         questionDetail = map.optional("questionDetail"),
@@ -180,11 +271,10 @@ class QuizConfigParsableValue @Inject() (implicit
         answerAudioSrc = map.optional("answerAudio"),
         videoSrc = map.optional("video"),
         answerVideoSrc = map.optional("answerVideo"),
-        pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
-        pointsToGainOnFirstAnswer = map.optional("pointsToGainOnFirstAnswer") getOrElse map
-          .optional("pointsToGain", FixedPointNumber(1)),
+        pointsToGain = pointsToGain,
+        pointsToGainOnFirstAnswer = map.optional("pointsToGainOnFirstAnswer") getOrElse pointsToGain,
         pointsToGainOnWrongAnswer = map.optional("pointsToGainOnWrongAnswer", FixedPointNumber(0)),
-        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", defaultMaxTimeSeconds)),
+        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", magicDefaultMaxTimeSeconds)),
         onlyFirstGainsPoints = map.optional("onlyFirstGainsPoints", false),
         showSingleAnswerButtonToTeams = map.optional("showSingleAnswerButtonToTeams", false),
       )
@@ -216,7 +306,7 @@ class QuizConfigParsableValue @Inject() (implicit
         textualQuestion = map.required[String]("textualQuestion"),
         textualAnswer = map.required[String]("textualAnswer"),
         textualChoices = map.required[Seq[String]]("textualChoices"),
-        pointsToGain = map.optional("pointsToGain", FixedPointNumber(2)),
+        pointsToGain = map.optional("pointsToGain", magicDefaultPointsToGain),
       )
     }
     override def additionalValidationErrors(v: Question.DoubleQ) = v.validationErrors()
@@ -256,8 +346,8 @@ class QuizConfigParsableValue @Inject() (implicit
         answerAudioSrc = map.optional("answerAudio"),
         videoSrc = map.optional("video"),
         answerVideoSrc = map.optional("answerVideo"),
-        pointsToGain = map.optional("pointsToGain", FixedPointNumber(answers.size)),
-        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", defaultMaxTimeSeconds)),
+        pointsToGain = map.optional("pointsToGain", magicDefaultPointsToGain),
+        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", magicDefaultMaxTimeSeconds)),
       )
     }
     override def additionalValidationErrors(v: Question.MultipleAnswers) = {
@@ -300,7 +390,7 @@ class QuizConfigParsableValue @Inject() (implicit
         answerAudioSrc = map.optional("answerAudio"),
         videoSrc = map.optional("video"),
         answerVideoSrc = map.optional("answerVideo"),
-        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", defaultMaxTimeSeconds)),
+        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", magicDefaultMaxTimeSeconds)),
       )
     }
 
@@ -325,7 +415,7 @@ class QuizConfigParsableValue @Inject() (implicit
       Question.MultipleQuestions.SubQuestion(
         question = map.required[String]("question"),
         answer = map.required[String]("answer"),
-        pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
+        pointsToGain = map.optional("pointsToGain", magicDefaultPointsToGain),
       )
     }
   }
@@ -352,8 +442,8 @@ class QuizConfigParsableValue @Inject() (implicit
         orderedItemsThatWillBePresentedInAlphabeticalOrder =
           map.required[Seq[Question.OrderItems.Item]]("orderedItemsThatWillBePresentedInAlphabeticalOrder"),
         answerDetail = map.optional("answerDetail"),
-        pointsToGain = map.optional("pointsToGain", FixedPointNumber(1)),
-        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", defaultMaxTimeSeconds)),
+        pointsToGain = map.optional("pointsToGain", magicDefaultPointsToGain),
+        maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", magicDefaultMaxTimeSeconds)),
       )
     }
     override def additionalValidationErrors(v: Question.OrderItems) = v.validationErrors()
