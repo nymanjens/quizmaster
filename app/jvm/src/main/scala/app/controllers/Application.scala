@@ -95,6 +95,16 @@ final class Application @Inject() (implicit
   def roundsInfo(secret: String) = Action { implicit request =>
     require(secret == quizConfig.masterSecret)
 
+    val simplifiedView =
+      !quizConfig.rounds.flatMap(_.questions).exists(_.onlyFirstGainsPoints) &&
+        !quizConfig.rounds
+          .flatMap(_.questions)
+          .exists(q =>
+            q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = true) != q
+              .defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false)
+          ) &&
+        !quizConfig.rounds.exists(_.expectedTime.isDefined)
+
     val infiniteDurationThreshold = Duration.ofMinutes(900)
     def round1(double: Double): String = "%,.1f".format(double)
     def indent(width: Int, any: Any): String = {
@@ -138,11 +148,17 @@ final class Application @Inject() (implicit
       val maxString =
         s", max: ${indent(3, maxPoints)} (${indent(3, round1(maxPoints.toDouble / expectedMinutes))} per min)"
 
+      if(simplifiedView) {
+        s"${indent(3, questions.size)} questions;        " +
+          s"maxTime: ${indent(3, expectedMinutes.round)} min;        " +
+          s"points: ${indent(5, round1(avgPoints4PerfectTeams))} (${indent(3, round1(avgPoints4PerfectTeams / expectedMinutes))} per min)"
+      } else {
       s"${indent(3, questions.size)} questions; " +
         s"Time: {expected: ${indent(3, expectedMinutes.round)} min, max ${indent(3, maxMinutes.round)} min};    " +
         s"points: {avg4PerfectTeams: ${indent(5, round1(avgPoints4PerfectTeams))} (${indent(3, round1(avgPoints4PerfectTeams / expectedMinutes))} per min)" +
         (if (showMax) maxString else "") +
         "}"
+      }
     }
 
     def sumExpectedTimeOrNone(rounds: Seq[QuizConfig.Round]): Option[Duration] = {
@@ -176,15 +192,22 @@ final class Application @Inject() (implicit
         val maxTime =
           if (q.maxTime > infiniteDurationThreshold) "inf" else round1(q.maxTime.getSeconds / 60.0)
 
+        if(simplifiedView) {
+          result += s"    - ${indent(3, q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false))} points;  " +
+            s"${indent(5, maxTime)} min; " +
+            s"${indent(60, q.textualQuestion)}; " +
+            s"${indent(60, q.answerAsString)}\n"
+        } else {
         result += s"    - toGain: ${indent(3, q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false))};  " +
           s"first: ${indent(3, q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = true))};   " +
           s"onlyFirst: ${indent(5, q.onlyFirstGainsPoints)}; " +
           s"${indent(5, maxTime)} min; " +
           s"${indent(50, q.textualQuestion)}; " +
           s"${indent(40, q.answerAsString)}\n"
+        }
       }
 
-      result += s"     ${questionsInfo(round.questions, round.expectedTime)}\n"
+      result += s"  ${questionsInfo(round.questions, round.expectedTime)}\n"
       result += "\n"
     }
     result += "\n"
