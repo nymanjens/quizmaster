@@ -1,6 +1,6 @@
 package app.models.quiz.config;
 
-import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import java.nio.file.Paths
 import java.time.Duration
 
@@ -41,6 +41,12 @@ class QuizConfigParsableValueTest extends Specification {
         |    sendAnonymousUsageDataAtEndOfQuiz: true
         |    includeAuthor: true
         |    includeQuizTitle: true
+        |defaults:
+        |  maxTimeSeconds: 999
+        |  pointsToGain: 1.9
+        |  multipleAnswers_pointsToGainPerAnswer: 1.8
+        |  multipleQuestions_pointsToGainPerQuestion: 1.7
+        |  orderItems_pointsToGainInTotal: 2.6
         |
         |rounds:
         |  - name: Geography
@@ -58,16 +64,12 @@ class QuizConfigParsableValueTest extends Specification {
         |        pointsToGainOnWrongAnswer: -1.3
         |        maxTimeSeconds: 8
         |        onlyFirstGainsPoints: true
+        |        showSingleAnswerButtonToTeams: true
         |
         |      - question: What is the capital of Belgium?
         |        answer: Brussels
         |        choices: [Paris, London, Brussels, Berlin]
         |        maxTimeSeconds: 60
-        |
-        |      - question: Who was the country Columbia named after?
-        |        answer: Christoffer Columbus
-        |        maxTimeSeconds: 8
-        |        showSingleAnswerButtonToTeams: true
         |
         |      - questionType: orderItems
         |        question: Order these cities from small to large
@@ -173,7 +175,7 @@ class QuizConfigParsableValueTest extends Specification {
                 pointsToGainOnWrongAnswer = FixedPointNumber(-1.3),
                 maxTime = Duration.ofSeconds(8),
                 onlyFirstGainsPoints = true,
-                showSingleAnswerButtonToTeams = false,
+                showSingleAnswerButtonToTeams = true,
               ),
               Question.Standard(
                 question = "What is the capital of Belgium?",
@@ -189,33 +191,12 @@ class QuizConfigParsableValueTest extends Specification {
                 answerAudioSrc = None,
                 videoSrc = None,
                 answerVideoSrc = None,
-                pointsToGain = FixedPointNumber(1),
-                pointsToGainOnFirstAnswer = FixedPointNumber(1),
+                pointsToGain = FixedPointNumber(1.9),
+                pointsToGainOnFirstAnswer = FixedPointNumber(1.9),
                 pointsToGainOnWrongAnswer = FixedPointNumber(0),
                 maxTime = Duration.ofSeconds(60),
                 onlyFirstGainsPoints = false,
                 showSingleAnswerButtonToTeams = false,
-              ),
-              Question.Standard(
-                question = "Who was the country Columbia named after?",
-                questionDetail = None,
-                tag = None,
-                choices = None,
-                answer = "Christoffer Columbus",
-                answerDetail = None,
-                answerImage = None,
-                masterNotes = None,
-                image = None,
-                audioSrc = None,
-                answerAudioSrc = None,
-                videoSrc = None,
-                answerVideoSrc = None,
-                pointsToGain = FixedPointNumber(1),
-                pointsToGainOnFirstAnswer = FixedPointNumber(1),
-                pointsToGainOnWrongAnswer = FixedPointNumber(0),
-                maxTime = Duration.ofSeconds(8),
-                onlyFirstGainsPoints = false,
-                showSingleAnswerButtonToTeams = true,
               ),
               Question.OrderItems(
                 question = "Order these cities from small to large",
@@ -244,8 +225,8 @@ class QuizConfigParsableValueTest extends Specification {
                   Question.OrderItems.Item(item = "London", answerDetail = Some("~9M")),
                 ),
                 answerDetail = None,
-                pointsToGain = FixedPointNumber(1),
-                maxTime = Duration.ofSeconds(120),
+                pointsToGain = FixedPointNumber(2.6),
+                maxTime = Duration.ofSeconds(999),
               ),
             ),
           ),
@@ -267,8 +248,8 @@ class QuizConfigParsableValueTest extends Specification {
                 answerAudioSrc = Some("music_round/bensound-summer.mp3"),
                 videoSrc = Some("geography/about_bananas.mp4"),
                 answerVideoSrc = Some("geography/about_bananas.mp4"),
-                pointsToGain = FixedPointNumber(1),
-                pointsToGainOnFirstAnswer = FixedPointNumber(1),
+                pointsToGain = FixedPointNumber(1.9),
+                pointsToGainOnFirstAnswer = FixedPointNumber(1.9),
                 pointsToGainOnWrongAnswer = FixedPointNumber(0),
                 maxTime = Duration.ofSeconds(15),
                 onlyFirstGainsPoints = false,
@@ -302,12 +283,12 @@ class QuizConfigParsableValueTest extends Specification {
                   SubQuestion(
                     question = "What is the song title?",
                     answer = "Smells Like Teen Spirit",
-                    pointsToGain = FixedPointNumber(1),
+                    pointsToGain = FixedPointNumber(1.7),
                   ),
                   SubQuestion(
                     question = "Which artist?",
                     answer = "Nirvana",
-                    pointsToGain = FixedPointNumber(1),
+                    pointsToGain = FixedPointNumber(1.7),
                   ),
                   SubQuestion(
                     question = "What year was the song released?",
@@ -337,7 +318,7 @@ class QuizConfigParsableValueTest extends Specification {
                 textualQuestion = "How many sides does a triangle have?",
                 textualAnswer = "3",
                 textualChoices = Seq("3", "4", "5", "6"),
-                pointsToGain = FixedPointNumber(1),
+                pointsToGain = FixedPointNumber(1.9),
               )
             ),
           ),
@@ -553,7 +534,8 @@ class QuizConfigParsableValueTest extends Specification {
         .replace("List", "Seq")
         .replace("Vector", "Seq")
     }
-    assertThat(toPrettyString(actual)) isEqualTo toPrettyString(expected)
+    assertWithMessage(s"${toPrettyString(actual)}\n\n!=\n\n${toPrettyString(expected)}")
+      .that(toPrettyString(actual)) isEqualTo toPrettyString(expected)
     actual mustEqual expected
   }
 }
