@@ -259,6 +259,9 @@ final class QuestionComponent(implicit
                         <.div(
                           ^.className := "sub-answer",
                           <<.nl2BrBlockWithLinks(subQuestion.answer),
+                          <<.ifDefined(subQuestion.answerDetail) { answerDetail =>
+                            s" ($answerDetail)"
+                          },
                         )
                       },
                     ),
