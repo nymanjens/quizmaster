@@ -148,16 +148,16 @@ final class Application @Inject() (implicit
       val maxString =
         s", max: ${indent(3, maxPoints)} (${indent(3, round1(maxPoints.toDouble / expectedMinutes))} per min)"
 
-      if(simplifiedView) {
+      if (simplifiedView) {
         s"${indent(3, questions.size)} questions;        " +
           s"maxTime: ${indent(3, expectedMinutes.round)} min;        " +
           s"points: ${indent(5, round1(avgPoints4PerfectTeams))} (${indent(3, round1(avgPoints4PerfectTeams / expectedMinutes))} per min)"
       } else {
-      s"${indent(3, questions.size)} questions; " +
-        s"Time: {expected: ${indent(3, expectedMinutes.round)} min, max ${indent(3, maxMinutes.round)} min};    " +
-        s"points: {avg4PerfectTeams: ${indent(5, round1(avgPoints4PerfectTeams))} (${indent(3, round1(avgPoints4PerfectTeams / expectedMinutes))} per min)" +
-        (if (showMax) maxString else "") +
-        "}"
+        s"${indent(3, questions.size)} questions; " +
+          s"Time: {expected: ${indent(3, expectedMinutes.round)} min, max ${indent(3, maxMinutes.round)} min};    " +
+          s"points: {avg4PerfectTeams: ${indent(5, round1(avgPoints4PerfectTeams))} (${indent(3, round1(avgPoints4PerfectTeams / expectedMinutes))} per min)" +
+          (if (showMax) maxString else "") +
+          "}"
       }
     }
 
@@ -192,18 +192,18 @@ final class Application @Inject() (implicit
         val maxTime =
           if (q.maxTime > infiniteDurationThreshold) "inf" else round1(q.maxTime.getSeconds / 60.0)
 
-        if(simplifiedView) {
+        if (simplifiedView) {
           result += s"    - ${indent(4, q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false))} points;  " +
             s"${indent(5, maxTime)} min; " +
             s"${indent(60, q.textualQuestion)}; " +
             s"${indent(60, q.answerAsString)}\n"
         } else {
-        result += s"    - toGain: ${indent(4, q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false))};  " +
-          s"first: ${indent(3, q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = true))};   " +
-          s"onlyFirst: ${indent(5, q.onlyFirstGainsPoints)}; " +
-          s"${indent(5, maxTime)} min; " +
-          s"${indent(50, q.textualQuestion)}; " +
-          s"${indent(40, q.answerAsString)}\n"
+          result += s"    - toGain: ${indent(4, q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = false))};  " +
+            s"first: ${indent(3, q.defaultPointsToGainOnCorrectAnswer(isFirstCorrectAnswer = true))};   " +
+            s"onlyFirst: ${indent(5, q.onlyFirstGainsPoints)}; " +
+            s"${indent(5, maxTime)} min; " +
+            s"${indent(50, q.textualQuestion)}; " +
+            s"${indent(40, q.answerAsString)}\n"
         }
       }
 

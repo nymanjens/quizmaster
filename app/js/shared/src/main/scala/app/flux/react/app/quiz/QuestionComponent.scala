@@ -161,7 +161,7 @@ final class QuestionComponent(implicit
                         showSubmissions(visibleSubmissions),
                       )
                     }).toVdomArray,
-                ),
+                )
               )
             }
           },
@@ -211,11 +211,10 @@ final class QuestionComponent(implicit
                       Bootstrap.FontAwesomeIcon("chevron-circle-right")(^.className := "choice-arrow"),
                       answer,
                     )
-                  ).toVdomArray,
-              ),
+                ).toVdomArray,
+              )
             )
-          }
-          ,
+          },
         ),
         <.div(
           ^.className := "submissions-without-choices",
@@ -262,7 +261,7 @@ final class QuestionComponent(implicit
                     ),
                   )
               ).toVdomArray,
-            ),
+            )
           ),
         ),
         <.div(
@@ -347,7 +346,7 @@ final class QuestionComponent(implicit
                       showSubmissions(submissions),
                     )
                   }).toVdomArray,
-              ),
+              )
             )
           },
         ),
@@ -403,7 +402,7 @@ final class QuestionComponent(implicit
                       )
                     }).toVdomArray
                 },
-              ),
+              )
             ),
           )
         },
