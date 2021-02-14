@@ -134,11 +134,7 @@ final class QuestionComponent(implicit
           SubComponents.video(question),
           <<.ifDefined(question.choices) { choices =>
             ifVisibleOrMaster(question.choicesAreVisible(props.questionProgressIndex)) {
-              <.div(
-                ^.className := "choices-holder",
-                ^^.ifThen(maybeImage.isDefined || question.videoSrc.isDefined) {
-                  ^.className := "including-image-or-video"
-                },
+              SubComponents.choicesHolder(question)(
                 <.ul(
                   ^.className := "choices",
                   (for ((choice, answerBullet) <- choices zip AnswerBullet.all)
@@ -229,11 +225,7 @@ final class QuestionComponent(implicit
           ^.className := "image-and-choices-row",
           SubComponents.image(question),
           SubComponents.video(question),
-          <.div(
-            ^.className := "choices-holder",
-            ^^.ifThen(maybeImage.isDefined || question.videoSrc.isDefined) {
-              ^.className := "including-image-or-video"
-            },
+          SubComponents.choicesHolder(question)(
             <.ul(
               ^.className := "sub-questions",
               (
@@ -311,8 +303,7 @@ final class QuestionComponent(implicit
         <.div(
           ^.className := "image-and-choices-row",
           ifVisibleOrMaster(question.choicesAreVisible(progressIndex)) {
-            <.div(
-              ^.className := "choices-holder",
+            SubComponents.choicesHolder(question)(
               <.ul(
                 ^.className := "choices",
                 (for ((choice, answerBullet) <- question.textualChoices zip AnswerBullet.all)
@@ -370,8 +361,7 @@ final class QuestionComponent(implicit
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
             ^.className := "image-and-choices-row",
-            <.div(
-              ^.className := "choices-holder",
+            SubComponents.choicesHolder(question)(
               <.ul(
                 ^.className := "choices",
                 if (answerIsVisible) {
@@ -684,6 +674,18 @@ final class QuestionComponent(implicit
           )
         }
       }
+    }
+
+    def choicesHolder(question: Question)(innerNodes: TagMod*)(implicit props: Props): VdomTag = {
+      val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
+      val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
+
+      <.div(
+        ^.className := "choices-holder",
+        ^^.ifThen(maybeImage.isDefined || question.videoSrc.isDefined) {
+          ^.className := "including-image-or-video"
+        },
+      )(innerNodes: _*)
     }
 
     def answer(question: Question)(implicit props: Props): VdomNode = {
