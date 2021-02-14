@@ -1,5 +1,6 @@
 package app.models.quiz.config;
 
+import com.google.common.truth.Truth.assertThat
 import java.nio.file.Paths
 import java.time.Duration
 
@@ -134,208 +135,211 @@ class QuizConfigParsableValueTest extends Specification {
       createQuizConfigParsableValue("../../conf/quiz/demo-quiz-config.yml"),
     )
 
-    quizConfig mustEqual QuizConfig(
-      title = Some("Demo quiz"),
-      author = Some("Jens Nyman"),
-      instructionsOnFirstSlide = Some("Don't look up the answers online"),
-      masterSecret = "quiz",
-      languageCode = "nl",
-      usageStatistics = UsageStatistics(
-        sendAnonymousUsageDataAtEndOfQuiz = true,
-        includeAuthor = true,
-        includeQuizTitle = true,
-      ),
-      rounds = Seq(
-        Round(
-          name = "Geography",
-          expectedTime = Some(Duration.ofMinutes(2)),
-          questions = Seq(
-            Question.Standard(
-              question = "What is the capital of France?",
-              questionDetail = None,
-              tag = None,
-              choices = Some(Seq("Paris", "London", "Brussels", "Berlin")),
-              answer = "Paris",
-              answerDetail =
-                Some("Image released under Creative Commons by Destination2 (www.destination2.co.uk)"),
-              answerImage = Some(Image("geography/france-answer.png", "large")),
-              masterNotes = Some("This is a very simple question"),
-              image = Some(Image("geography/france.png", "small")),
-              audioSrc = None,
-              answerAudioSrc = None,
-              videoSrc = None,
-              answerVideoSrc = None,
-              pointsToGain = FixedPointNumber(2.1),
-              pointsToGainOnFirstAnswer = FixedPointNumber(4.2),
-              pointsToGainOnWrongAnswer = FixedPointNumber(-1.3),
-              maxTime = Duration.ofSeconds(8),
-              onlyFirstGainsPoints = true,
-              showSingleAnswerButtonToTeams = false,
-            ),
-            Question.Standard(
-              question = "What is the capital of Belgium?",
-              questionDetail = None,
-              tag = None,
-              choices = Some(Seq("Paris", "London", "Brussels", "Berlin")),
-              answer = "Brussels",
-              answerDetail = None,
-              answerImage = None,
-              masterNotes = None,
-              image = None,
-              audioSrc = None,
-              answerAudioSrc = None,
-              videoSrc = None,
-              answerVideoSrc = None,
-              pointsToGain = FixedPointNumber(1),
-              pointsToGainOnFirstAnswer = FixedPointNumber(1),
-              pointsToGainOnWrongAnswer = FixedPointNumber(0),
-              maxTime = Duration.ofSeconds(60),
-              onlyFirstGainsPoints = false,
-              showSingleAnswerButtonToTeams = false,
-            ),
-            Question.Standard(
-              question = "Who was the country Columbia named after?",
-              questionDetail = None,
-              tag = None,
-              choices = None,
-              answer = "Christoffer Columbus",
-              answerDetail = None,
-              answerImage = None,
-              masterNotes = None,
-              image = None,
-              audioSrc = None,
-              answerAudioSrc = None,
-              videoSrc = None,
-              answerVideoSrc = None,
-              pointsToGain = FixedPointNumber(1),
-              pointsToGainOnFirstAnswer = FixedPointNumber(1),
-              pointsToGainOnWrongAnswer = FixedPointNumber(0),
-              maxTime = Duration.ofSeconds(8),
-              onlyFirstGainsPoints = false,
-              showSingleAnswerButtonToTeams = true,
-            ),
-            Question.OrderItems(
-              question = "Order these cities from small to large",
-              questionDetail = Some("Population according to Google on July 2020"),
-              tag = None,
-              masterNotes = None,
-              orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
-                Question.OrderItems.Item(item = "Riga", answerDetail = None),
-                Question.OrderItems.Item(item = "Stockholm", answerDetail = None),
-                Question.OrderItems.Item(item = "Berlin", answerDetail = None),
-                Question.OrderItems.Item(item = "London", answerDetail = None),
+    assertEqualWithPrettyPrint(
+      quizConfig,
+      QuizConfig(
+        title = Some("Demo quiz"),
+        author = Some("Jens Nyman"),
+        instructionsOnFirstSlide = Some("Don't look up the answers online"),
+        masterSecret = "quiz",
+        languageCode = "nl",
+        usageStatistics = UsageStatistics(
+          sendAnonymousUsageDataAtEndOfQuiz = true,
+          includeAuthor = true,
+          includeQuizTitle = true,
+        ),
+        rounds = Seq(
+          Round(
+            name = "Geography",
+            expectedTime = Some(Duration.ofMinutes(2)),
+            questions = Seq(
+              Question.Standard(
+                question = "What is the capital of France?",
+                questionDetail = None,
+                tag = None,
+                choices = Some(Seq("Paris", "London", "Brussels", "Berlin")),
+                answer = "Paris",
+                answerDetail =
+                  Some("Image released under Creative Commons by Destination2 (www.destination2.co.uk)"),
+                answerImage = Some(Image("geography/france-answer.png", "large")),
+                masterNotes = Some("This is a very simple question"),
+                image = Some(Image("geography/france.png", "small")),
+                audioSrc = None,
+                answerAudioSrc = None,
+                videoSrc = None,
+                answerVideoSrc = None,
+                pointsToGain = FixedPointNumber(2.1),
+                pointsToGainOnFirstAnswer = FixedPointNumber(4.2),
+                pointsToGainOnWrongAnswer = FixedPointNumber(-1.3),
+                maxTime = Duration.ofSeconds(8),
+                onlyFirstGainsPoints = true,
+                showSingleAnswerButtonToTeams = false,
               ),
-              answerDetail = Some("Riga: ~600k, Stockholm: ~1M, Berlin: ~4M, London: ~9M"),
-              pointsToGain = FixedPointNumber(2),
-              maxTime = Duration.ofSeconds(180),
-            ),
-            Question.OrderItems(
-              question = "Order these cities from small to large",
-              questionDetail = None,
-              tag = None,
-              masterNotes = None,
-              orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
-                Question.OrderItems.Item(item = "Riga", answerDetail = Some("~600k")),
-                Question.OrderItems.Item(item = "Stockholm", answerDetail = Some("~1M")),
-                Question.OrderItems.Item(item = "Berlin", answerDetail = Some("~4M")),
-                Question.OrderItems.Item(item = "London", answerDetail = Some("~9M")),
+              Question.Standard(
+                question = "What is the capital of Belgium?",
+                questionDetail = None,
+                tag = None,
+                choices = Some(Seq("Paris", "London", "Brussels", "Berlin")),
+                answer = "Brussels",
+                answerDetail = None,
+                answerImage = None,
+                masterNotes = None,
+                image = None,
+                audioSrc = None,
+                answerAudioSrc = None,
+                videoSrc = None,
+                answerVideoSrc = None,
+                pointsToGain = FixedPointNumber(1),
+                pointsToGainOnFirstAnswer = FixedPointNumber(1),
+                pointsToGainOnWrongAnswer = FixedPointNumber(0),
+                maxTime = Duration.ofSeconds(60),
+                onlyFirstGainsPoints = false,
+                showSingleAnswerButtonToTeams = false,
               ),
-              answerDetail = None,
-              pointsToGain = FixedPointNumber(1),
-              maxTime = Duration.ofSeconds(120),
+              Question.Standard(
+                question = "Who was the country Columbia named after?",
+                questionDetail = None,
+                tag = None,
+                choices = None,
+                answer = "Christoffer Columbus",
+                answerDetail = None,
+                answerImage = None,
+                masterNotes = None,
+                image = None,
+                audioSrc = None,
+                answerAudioSrc = None,
+                videoSrc = None,
+                answerVideoSrc = None,
+                pointsToGain = FixedPointNumber(1),
+                pointsToGainOnFirstAnswer = FixedPointNumber(1),
+                pointsToGainOnWrongAnswer = FixedPointNumber(0),
+                maxTime = Duration.ofSeconds(8),
+                onlyFirstGainsPoints = false,
+                showSingleAnswerButtonToTeams = true,
+              ),
+              Question.OrderItems(
+                question = "Order these cities from small to large",
+                questionDetail = Some("Population according to Google on July 2020"),
+                tag = None,
+                masterNotes = None,
+                orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
+                  Question.OrderItems.Item(item = "Riga", answerDetail = None),
+                  Question.OrderItems.Item(item = "Stockholm", answerDetail = None),
+                  Question.OrderItems.Item(item = "Berlin", answerDetail = None),
+                  Question.OrderItems.Item(item = "London", answerDetail = None),
+                ),
+                answerDetail = Some("Riga: ~600k, Stockholm: ~1M, Berlin: ~4M, London: ~9M"),
+                pointsToGain = FixedPointNumber(2),
+                maxTime = Duration.ofSeconds(180),
+              ),
+              Question.OrderItems(
+                question = "Order these cities from small to large",
+                questionDetail = None,
+                tag = None,
+                masterNotes = None,
+                orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
+                  Question.OrderItems.Item(item = "Riga", answerDetail = Some("~600k")),
+                  Question.OrderItems.Item(item = "Stockholm", answerDetail = Some("~1M")),
+                  Question.OrderItems.Item(item = "Berlin", answerDetail = Some("~4M")),
+                  Question.OrderItems.Item(item = "London", answerDetail = Some("~9M")),
+                ),
+                answerDetail = None,
+                pointsToGain = FixedPointNumber(1),
+                maxTime = Duration.ofSeconds(120),
+              ),
             ),
           ),
-        ),
-        Round(
-          name = "Music round",
-          expectedTime = None,
-          questions = Seq(
-            Question.Standard(
-              question = "After which season is this track named?",
-              questionDetail = Some("(Royalty Free Music from Bensound)"),
-              tag = None,
-              choices = None,
-              answer = "Summer",
-              answerDetail = Some("(By Bensound)"),
-              answerImage = None,
-              masterNotes = None,
-              image = None,
-              audioSrc = Some("music_round/bensound-summer.mp3"),
-              answerAudioSrc = Some("music_round/bensound-summer.mp3"),
-              videoSrc = Some("geography/about_bananas.mp4"),
-              answerVideoSrc = Some("geography/about_bananas.mp4"),
-              pointsToGain = FixedPointNumber(1),
-              pointsToGainOnFirstAnswer = FixedPointNumber(1),
-              pointsToGainOnWrongAnswer = FixedPointNumber(0),
-              maxTime = Duration.ofSeconds(15),
-              onlyFirstGainsPoints = false,
-              showSingleAnswerButtonToTeams = false,
-            ),
-            Question.MultipleAnswers(
-              question = "List the band members of Metallica",
-              questionDetail = Some("(in 2021)"),
-              tag = Some("metallica"),
-              answers = Seq("James Hetfield", "Lars Ulrich", "Kirk Hammett", "Robert Trujillo"),
-              answersHaveToBeInSameOrder = false,
-              answerDetail = Some("Robert Trujillo joined Metallica in 2003."),
-              answerImage = None,
-              masterNotes = None,
-              image = Some(
-                Image("https://upload.wikimedia.org/wikipedia/commons/9/9e/Metallica_-_2003.jpg", "large")
+          Round(
+            name = "Music round",
+            expectedTime = None,
+            questions = Seq(
+              Question.Standard(
+                question = "After which season is this track named?",
+                questionDetail = Some("(Royalty Free Music from Bensound)"),
+                tag = None,
+                choices = None,
+                answer = "Summer",
+                answerDetail = Some("(By Bensound)"),
+                answerImage = None,
+                masterNotes = None,
+                image = None,
+                audioSrc = Some("music_round/bensound-summer.mp3"),
+                answerAudioSrc = Some("music_round/bensound-summer.mp3"),
+                videoSrc = Some("geography/about_bananas.mp4"),
+                answerVideoSrc = Some("geography/about_bananas.mp4"),
+                pointsToGain = FixedPointNumber(1),
+                pointsToGainOnFirstAnswer = FixedPointNumber(1),
+                pointsToGainOnWrongAnswer = FixedPointNumber(0),
+                maxTime = Duration.ofSeconds(15),
+                onlyFirstGainsPoints = false,
+                showSingleAnswerButtonToTeams = false,
               ),
-              audioSrc = None,
-              answerAudioSrc = None,
-              videoSrc = None,
-              answerVideoSrc = None,
-              pointsToGain = FixedPointNumber(3),
-              maxTime = Duration.ofSeconds(130),
-            ),
-            Question.MultipleQuestions(
-              questionTitle = "Can you recognize the song from the lyrics?",
-              questionDetail =
-                Some("With the lights out, it's less dangerous\nHere we are now, entertain us\n"),
-              tag = Some("Music"),
-              subQuestions = Seq(
-                SubQuestion(
-                  question = "What is the song title?",
-                  answer = "Smells Like Teen Spirit",
-                  pointsToGain = FixedPointNumber(1),
+              Question.MultipleAnswers(
+                question = "List the band members of Metallica",
+                questionDetail = Some("(in 2021)"),
+                tag = Some("metallica"),
+                answers = Seq("James Hetfield", "Lars Ulrich", "Kirk Hammett", "Robert Trujillo"),
+                answersHaveToBeInSameOrder = false,
+                answerDetail = Some("Robert Trujillo joined Metallica in 2003."),
+                answerImage = None,
+                masterNotes = None,
+                image = Some(
+                  Image("https://upload.wikimedia.org/wikipedia/commons/9/9e/Metallica_-_2003.jpg", "large")
                 ),
-                SubQuestion(
-                  question = "Which artist?",
-                  answer = "Nirvana",
-                  pointsToGain = FixedPointNumber(1),
-                ),
-                SubQuestion(
-                  question = "What year was the song released?",
-                  answer = "1991",
-                  pointsToGain = FixedPointNumber(2),
-                ),
+                audioSrc = None,
+                answerAudioSrc = None,
+                videoSrc = None,
+                answerVideoSrc = None,
+                pointsToGain = FixedPointNumber(3),
+                maxTime = Duration.ofSeconds(130),
               ),
-              answerDetail = Some("From the album Nevermind"),
-              image = None,
-              answerImage = None,
-              masterNotes = None,
-              audioSrc = None,
-              answerAudioSrc = None,
-              videoSrc = None,
-              answerVideoSrc = None,
-              maxTime = Duration.ofSeconds(66),
+              Question.MultipleQuestions(
+                questionTitle = "Can you recognize the song from the lyrics?",
+                questionDetail =
+                  Some("With the lights out, it's less dangerous\nHere we are now, entertain us\n"),
+                tag = Some("Music"),
+                subQuestions = Seq(
+                  SubQuestion(
+                    question = "What is the song title?",
+                    answer = "Smells Like Teen Spirit",
+                    pointsToGain = FixedPointNumber(1),
+                  ),
+                  SubQuestion(
+                    question = "Which artist?",
+                    answer = "Nirvana",
+                    pointsToGain = FixedPointNumber(1),
+                  ),
+                  SubQuestion(
+                    question = "What year was the song released?",
+                    answer = "1991",
+                    pointsToGain = FixedPointNumber(2),
+                  ),
+                ),
+                answerDetail = Some("From the album Nevermind"),
+                image = None,
+                answerImage = None,
+                masterNotes = None,
+                audioSrc = None,
+                answerAudioSrc = None,
+                videoSrc = None,
+                answerVideoSrc = None,
+                maxTime = Duration.ofSeconds(66),
+              ),
             ),
           ),
-        ),
-        Round(
-          name = "Double questions round",
-          expectedTime = None,
-          questions = Seq(
-            Question.DoubleQ(
-              verbalQuestion = "How many sides does a rectangle have?",
-              verbalAnswer = "4",
-              textualQuestion = "How many sides does a triangle have?",
-              textualAnswer = "3",
-              textualChoices = Seq("3", "4", "5", "6"),
-              pointsToGain = FixedPointNumber(1),
-            )
+          Round(
+            name = "Double questions round",
+            expectedTime = None,
+            questions = Seq(
+              Question.DoubleQ(
+                verbalQuestion = "How many sides does a rectangle have?",
+                verbalAnswer = "4",
+                textualQuestion = "How many sides does a triangle have?",
+                textualAnswer = "3",
+                textualChoices = Seq("3", "4", "5", "6"),
+                pointsToGain = FixedPointNumber(1),
+              )
+            ),
           ),
         ),
       ),
@@ -351,14 +355,141 @@ class QuizConfigParsableValueTest extends Specification {
       createQuizConfigParsableValue("../../conf/quiz/demo-quiz-config.yml"),
     )
 
-    quizConfig mustEqual QuizConfig(
-      title = Some("Demo quiz"),
-      author = None,
-      instructionsOnFirstSlide = None,
-      masterSecret = "*",
-      languageCode = "en",
-      usageStatistics = UsageStatistics.default,
-      rounds = Seq(),
+    assertEqualWithPrettyPrint(
+      quizConfig,
+      QuizConfig(
+        title = Some("Demo quiz"),
+        author = None,
+        instructionsOnFirstSlide = None,
+        masterSecret = "*",
+        languageCode = "en",
+        usageStatistics = UsageStatistics.default,
+        rounds = Seq(),
+      ),
+    )
+  }
+
+  "parse file with minimal questions" in {
+    val quizConfig = ValidatingYamlParser.parse(
+      """
+        |title: Demo quiz
+        |rounds:
+        |  - name: onlyRound
+        |    questions:
+        |      - question: AAA
+        |        answer: BBB
+        |      - questionType: multipleQuestions
+        |        questionTitle: CCC
+        |        questions:
+        |          - {question: "DDD", answer: "EEE"}
+        |          - {question: "FFF", answer: "GGG"}
+        |
+        |      - questionType: multipleAnswers
+        |        question: HHH
+        |        answers: [III, JJJ]
+        |        answersHaveToBeInSameOrder: false
+        |
+        |      - questionType: orderItems
+        |        question: KKK
+        |        orderedItemsThatWillBePresentedInAlphabeticalOrder: [LLL, MMM]
+        |""".stripMargin,
+      createQuizConfigParsableValue("../../conf/quiz/demo-quiz-config.yml"),
+    )
+
+    assertEqualWithPrettyPrint(
+      quizConfig,
+      QuizConfig(
+        title = Some("Demo quiz"),
+        author = None,
+        instructionsOnFirstSlide = None,
+        masterSecret = "*",
+        languageCode = "en",
+        usageStatistics = UsageStatistics.default,
+        rounds = Seq(
+          Round(
+            name = "onlyRound",
+            questions = Seq(
+              Question.Standard(
+                question = "AAA",
+                questionDetail = None,
+                tag = None,
+                choices = None,
+                answer = "BBB",
+                answerDetail = None,
+                answerImage = None,
+                masterNotes = None,
+                image = None,
+                audioSrc = None,
+                answerAudioSrc = None,
+                videoSrc = None,
+                answerVideoSrc = None,
+                pointsToGain = FixedPointNumber(1),
+                pointsToGainOnFirstAnswer = FixedPointNumber(1),
+                pointsToGainOnWrongAnswer = FixedPointNumber(0),
+                maxTime = Duration.ofSeconds(120),
+                onlyFirstGainsPoints = false,
+                showSingleAnswerButtonToTeams = false,
+              ),
+              Question.MultipleQuestions(
+                questionTitle = "CCC",
+                questionDetail = None,
+                tag = None,
+                subQuestions = Seq(
+                  SubQuestion(
+                    question = "DDD",
+                    answer = "EEE",
+                    pointsToGain = FixedPointNumber(1),
+                  ),
+                  SubQuestion(
+                    question = "FFF",
+                    answer = "GGG",
+                    pointsToGain = FixedPointNumber(1),
+                  ),
+                ),
+                answerDetail = None,
+                image = None,
+                answerImage = None,
+                masterNotes = None,
+                audioSrc = None,
+                answerAudioSrc = None,
+                videoSrc = None,
+                answerVideoSrc = None,
+                maxTime = Duration.ofSeconds(120),
+              ),
+              Question.MultipleAnswers(
+                question = "HHH",
+                questionDetail = None,
+                tag = None,
+                answers = Seq("III", "JJJ"),
+                answersHaveToBeInSameOrder = false,
+                answerDetail = None,
+                answerImage = None,
+                masterNotes = None,
+                image = None,
+                audioSrc = None,
+                answerAudioSrc = None,
+                videoSrc = None,
+                answerVideoSrc = None,
+                pointsToGain = FixedPointNumber(2),
+                maxTime = Duration.ofSeconds(120),
+              ),
+              Question.OrderItems(
+                question = "KKK",
+                questionDetail = None,
+                tag = None,
+                masterNotes = None,
+                orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
+                  Question.OrderItems.Item(item = "LLL", answerDetail = None),
+                  Question.OrderItems.Item(item = "MMM", answerDetail = None),
+                ),
+                answerDetail = None,
+                pointsToGain = FixedPointNumber(1),
+                maxTime = Duration.ofSeconds(120),
+              ),
+            ),
+          )
+        ),
+      ),
     )
   }
 
@@ -412,5 +543,17 @@ class QuizConfigParsableValueTest extends Specification {
       if !(path.toString contains "/0_")
       if !(path.toString contains "/export")
     } yield path.toString
+  }
+
+  private def assertEqualWithPrettyPrint(actual: QuizConfig, expected: QuizConfig) = {
+    def toPrettyString(config: QuizConfig): String = {
+      pprint.PPrinter.BlackWhite
+        .apply(config)
+        .toString
+        .replace("List", "Seq")
+        .replace("Vector", "Seq")
+    }
+    assertThat(toPrettyString(actual)) isEqualTo toPrettyString(expected)
+    actual mustEqual expected
   }
 }
