@@ -69,9 +69,7 @@ final class Layout(implicit
         title = "Quizmaster",
         leftMenu = <.span(),
         pageContent = <.div(
-          <<.ifThen(AppPages.isMasterOnlyPage(router.currentPage)) {
-            syncedTimerBar(showMasterData = router.currentPage == AppPages.Master)
-          },
+          syncedTimerBar(showMasterData = router.currentPage == AppPages.Master),
           <.div(
             ^.id := "content-wrapper",
             <<.ifThen(AppPages.isMasterOnlyPage(router.currentPage)) {
