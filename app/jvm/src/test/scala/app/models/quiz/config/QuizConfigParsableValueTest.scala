@@ -111,7 +111,7 @@ class QuizConfigParsableValueTest extends Specification {
         |        answersHaveToBeInSameOrder: false
         |        answerDetail: Robert Trujillo joined Metallica in 2003.
         |        image: https://upload.wikimedia.org/wikipedia/commons/9/9e/Metallica_-_2003.jpg
-        |        pointsToGain: 3
+        |        pointsToGainPerAnswer: 0.9
         |        maxTimeSeconds: 130
         |
         |      - questionType: multipleQuestions
@@ -280,7 +280,7 @@ class QuizConfigParsableValueTest extends Specification {
                 answerAudioSrc = None,
                 videoSrc = None,
                 answerVideoSrc = None,
-                pointsToGain = FixedPointNumber(3),
+                pointsToGainPerAnswer = FixedPointNumber(0.9),
                 maxTime = Duration.ofSeconds(130),
               ),
               Question.MultipleQuestions(
@@ -468,7 +468,7 @@ class QuizConfigParsableValueTest extends Specification {
                 answerAudioSrc = None,
                 videoSrc = None,
                 answerVideoSrc = None,
-                pointsToGain = FixedPointNumber(2),
+                pointsToGainPerAnswer = FixedPointNumber(1),
                 maxTime = Duration.ofSeconds(120),
               ),
               Question.OrderItems(

@@ -337,7 +337,7 @@ object QuizConfig {
         override val answerAudioSrc: Option[String],
         override val videoSrc: Option[String],
         override val answerVideoSrc: Option[String],
-        override val pointsToGain: FixedPointNumber,
+        pointsToGainPerAnswer: FixedPointNumber,
         override val maxTime: Duration,
     ) extends StandardSinglePartQuestionBase
         with MultipleAnswersBase {
@@ -359,6 +359,7 @@ object QuizConfig {
       override def isMultipleChoice: Boolean = false
       override def textualQuestion: String = question
       override def maybeTextualChoices: Option[Seq[String]] = None
+      override protected def pointsToGain: FixedPointNumber = pointsToGainPerAnswer * answers.size
     }
     object MultipleAnswers {
       case class Answer(

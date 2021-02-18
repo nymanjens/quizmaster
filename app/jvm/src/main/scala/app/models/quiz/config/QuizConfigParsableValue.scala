@@ -101,8 +101,8 @@ class QuizConfigParsableValue @Inject() (implicit
             )
           case q: Question.MultipleAnswers =>
             q.copy(
-              pointsToGain =
-                replacePoints(q.pointsToGain, defaults.multipleAnswersPointsToGainPerAnswer * q.answers.size),
+              pointsToGainPerAnswer =
+                replacePoints(q.pointsToGainPerAnswer, defaults.multipleAnswersPointsToGainPerAnswer),
               maxTime = replaceMaxTime(q.maxTime),
             )
           case q: Question.MultipleQuestions =>
@@ -328,7 +328,7 @@ class QuizConfigParsableValue @Inject() (implicit
       "answerAudio" -> Optional(StringValue),
       "video" -> Optional(StringValue),
       "answerVideo" -> Optional(StringValue),
-      "pointsToGain" -> Optional(FixedPointNumberValue),
+      "pointsToGainPerAnswer" -> Optional(FixedPointNumberValue),
       "maxTimeSeconds" -> Optional(IntValue),
     )
     override def parseFromParsedMapValues(map: StringMap) = {
@@ -346,7 +346,7 @@ class QuizConfigParsableValue @Inject() (implicit
         answerAudioSrc = map.optional("answerAudio"),
         videoSrc = map.optional("video"),
         answerVideoSrc = map.optional("answerVideo"),
-        pointsToGain = map.optional("pointsToGain", magicDefaultPointsToGain),
+        pointsToGainPerAnswer = map.optional("pointsToGainPerAnswer", magicDefaultPointsToGain),
         maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", magicDefaultMaxTimeSeconds)),
       )
     }
