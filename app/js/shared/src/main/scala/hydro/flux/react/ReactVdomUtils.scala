@@ -43,18 +43,24 @@ object ReactVdomUtils {
       ifThen(option.isDefined)(thenElement(option.get))
     }
 
-    def joinWithSpaces[A](elems: TraversableOnce[A])(implicit
+    def joinWithSpaces[A](elems: Traversable[A])(implicit
         f: A => VdomNode,
         stringF: String => VdomNode,
     ): VdomArray = {
-      join(glue = "", elems = elems)
+      join(glue = " ", elems = elems)
     }
 
-    def join[A](glue: String, elems: TraversableOnce[A])(implicit
+    def join[A](glue: String, elems: Traversable[A])(implicit
         f: A => VdomNode,
         stringF: String => VdomNode,
     ): VdomArray = {
-      VdomArray.empty() ++= elems.flatMap(a => Seq(f(a), stringF(glue)))
+      if (elems.isEmpty) {
+        VdomArray.empty()
+      } else {
+        VdomArray.empty() ++= elems.toVector.map(a => Seq(f(a))).reduce[Seq[VdomNode]] { case (l, r) =>
+          (l :+ stringF(glue)) ++ r
+        }
+      }
     }
 
     def nl2BrBlockWithLinks(string: String): VdomNode = {
