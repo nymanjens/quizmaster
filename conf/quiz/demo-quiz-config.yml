@@ -34,7 +34,7 @@ rounds:
   - name: Geography
     questions:
       # Standard textual question
-      - question: Who was the country Columbia named after?
+      - question: Who was the country Colombia named after?
         answer: Christoffer Columbus
 
       # Standard multiple-choice question
