@@ -44,7 +44,7 @@ final class SoundEffectController(implicit
   def timerAlmostRunningOutDetails: SoundDetails = SoundDetails(
     filepath = SoundEffect.TimerAlmostRunningOut.filepath,
     duration = java.time.Duration.ofSeconds(12).plusMillis(720),
-    canPlayOnCurrentPage = canPlaySoundEffectsOnThisPage,
+    canPlayOnCurrentPage = canPlaySoundEffectsOnThisPage(SoundEffect.TimerAlmostRunningOut),
   )
 
   // **************** Public types ****************//
@@ -60,11 +60,17 @@ final class SoundEffectController(implicit
       this.currentPage = currentPage
   }
 
-  private def canPlaySoundEffectsOnThisPage: Boolean = {
+  private def canPlaySoundEffectsOnThisPage(soundEffect: SoundEffect): Boolean = {
     currentPage match {
-      case AppPages.Quiz              => true
-      case _: AppPages.TeamController => true
-      case _                          => false
+      case AppPages.Quiz => true
+      case _: AppPages.TeamController =>
+        soundEffect match {
+          case SoundEffect.NewSubmission       => true
+          case SoundEffect.CorrectSubmission   => true
+          case SoundEffect.IncorrectSubmission => true
+          case _                               => false
+        }
+      case _ => false
     }
   }
 
@@ -72,7 +78,7 @@ final class SoundEffectController(implicit
       soundEffect: SoundEffect,
       minTimeBetweenPlays: Option[FiniteDuration] = None,
   ): Unit = logExceptions {
-    if (canPlaySoundEffectsOnThisPage) {
+    if (canPlaySoundEffectsOnThisPage(soundEffect)) {
       if (minTimeBetweenPlays.isDefined && (soundsPlaying contains soundEffect)) {
         // Skip
       } else {
