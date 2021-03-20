@@ -2,6 +2,7 @@ version: "3.7"
 services:
   app:
     build: .
+    image: quizmaster
     stdin_open: true
     tty: true
     ports:
