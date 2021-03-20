@@ -1,8 +1,7 @@
 version: "3.7"
 services:
   app:
-    build:
-      context: .
+    build: .
     stdin_open: true
     tty: true
     ports:
