@@ -35,7 +35,7 @@ docker run nymanjens/quizmaster:latest bin/server
 ```
 git clone https://github.com/nymanjens/quizmaster.git
 cd quizmaster
-docker-compose up -d
+docker-compose up
 ```
 
 - Browse to http://localhost:9000
