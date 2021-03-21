@@ -138,7 +138,7 @@ class QuizConfigParsableValueTest extends Specification {
         |        textualChoices: [3, 4, 5, 6]
         |
         |""".stripMargin,
-      createQuizConfigParsableValue("../../conf/quiz/demo-quiz-config.yml"),
+      createQuizConfigParsableValue("../../conf/quiz/quiz-config.yml"),
     )
 
     assertEqualWithPrettyPrint(
@@ -345,7 +345,7 @@ class QuizConfigParsableValueTest extends Specification {
          |title: Demo quiz
          |rounds: []
          |""".stripMargin,
-      createQuizConfigParsableValue("../../conf/quiz/demo-quiz-config.yml"),
+      createQuizConfigParsableValue("../../conf/quiz/quiz-config.yml"),
     )
 
     assertEqualWithPrettyPrint(
@@ -386,7 +386,7 @@ class QuizConfigParsableValueTest extends Specification {
         |        question: KKK
         |        orderedItemsThatWillBePresentedInAlphabeticalOrder: [LLL, MMM]
         |""".stripMargin,
-      createQuizConfigParsableValue("../../conf/quiz/demo-quiz-config.yml"),
+      createQuizConfigParsableValue("../../conf/quiz/quiz-config.yml"),
     )
 
     assertEqualWithPrettyPrint(
@@ -494,7 +494,7 @@ class QuizConfigParsableValueTest extends Specification {
   // Test all known config files
   {
     val knownQuizConfigs =
-      Seq("../../conf/quiz/demo-quiz-config.yml") ++
+      Seq("../../conf/quiz/quiz-config.yml") ++
         recursivelyFindYamlFiles("../../../hydro/quizmaster")
 
     for (knownQuizConfig <- knownQuizConfigs) yield {
