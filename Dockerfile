@@ -10,7 +10,7 @@ RUN cd dist && unzip /src/app/jvm/target/universal/*.zip
 
 
 # STAGE 2: Run the binary
-FROM openjdk:8-jre
+FROM openjdk:11-jre
 
 COPY --from=builder /src/dist/server-1.0 /app
 
