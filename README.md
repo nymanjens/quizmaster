@@ -19,10 +19,12 @@ A web-app for conducting a quiz, including a page for players to enter their ans
 
 ### Using a prebuilt docker image
 
-- Run the following command:
+- Run the following commands:
 
 ```
-docker run nymanjens/quizmaster:latest bin/server
+git clone https://github.com/nymanjens/quizmaster.git
+cd quizmaster
+docker-compose --file=docker-compose-prebuilt.yml up
 ```
 
 - Browse to http://localhost:9000
@@ -35,7 +37,7 @@ docker run nymanjens/quizmaster:latest bin/server
 ```
 git clone https://github.com/nymanjens/quizmaster.git
 cd quizmaster
-docker-compose up
+docker-compose --file=docker-compose-build-locally.yml up
 ```
 
 - Browse to http://localhost:9000
