@@ -94,7 +94,30 @@ final class Application @Inject() (implicit
         source = source,
         rangeHeader = request.headers.get(RANGE),
         fileName = None,
-        contentType = None, // TODO: Set content type
+        contentType = FilePathUtils.maybeGetExtensionIncludingDot(encodedSource) match {
+          case Some(".aac")  => Some("audio/aac")
+          case Some(".avi")  => Some("video/x-msvideo")
+          case Some(".bmp")  => Some("image/bmp")
+          case Some(".jpeg") => Some("image/jpeg")
+          case Some(".jpg")  => Some("image/jpeg")
+          case Some(".mp3")  => Some("audio/mpeg")
+          case Some(".mp4")  => Some("video/mp4")
+          case Some(".gif")  => Some("image/gif")
+          case Some(".svg")  => Some("image/svg+xml")
+          case Some(".mpeg") => Some("video/mpeg")
+          case Some(".oga")  => Some("audio/ogg")
+          case Some(".ogv")  => Some("video/ogg")
+          case Some(".ogx")  => Some("application/ogg")
+          case Some(".opus") => Some("audio/opus")
+          case Some(".png")  => Some("image/png")
+          case Some(".tif")  => Some("image/tiff")
+          case Some(".tiff") => Some("image/tiff")
+          case Some(".wav")  => Some("audio/wav")
+          case Some(".weba") => Some("audio/webm")
+          case Some(".webm") => Some("video/webm")
+          case Some(".webp") => Some("image/webp")
+          case _             => None
+        },
       )
   }
 
