@@ -20,6 +20,7 @@ import app.models.quiz.config.QuizConfig
 import app.models.quiz.config.QuizConfig.Question
 import app.AppVersion
 import app.api.ScalaJsApi
+import app.common.FilePathUtils
 import com.google.common.io.BaseEncoding
 import com.google.inject.Inject
 import hydro.common.time.Clock
@@ -78,7 +79,12 @@ final class Application @Inject() (implicit
 
   def quizAssets(encodedSource: String): Action[AnyContent] = Action { implicit request =>
     val assetPath =
-      quizAssets.toFullPath(new String(BaseEncoding.base64().decode(encodedSource), StandardCharsets.UTF_8))
+      quizAssets.toFullPath(
+        new String(
+          BaseEncoding.base64().decode(FilePathUtils.maybeStripExtension(encodedSource)),
+          StandardCharsets.UTF_8,
+        )
+      )
     val connection = assetPath.toFile.toURI.toURL.openConnection()
     val stream = connection.getInputStream
     val source = StreamConverters.fromInputStream(() => stream)
