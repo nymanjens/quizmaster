@@ -74,6 +74,7 @@ class QuizConfigParsableValueTest extends Specification {
         |      - questionType: orderItems
         |        question: Order these cities from small to large
         |        questionDetail: Population according to Google on July 2020
+        |        image: {src: geography/globe.png, size: small}
         |        orderedItemsThatWillBePresentedInAlphabeticalOrder: [Riga, Stockholm, Berlin, London]
         |        answerDetail: "Riga: ~600k, Stockholm: ~1M, Berlin: ~4M, London: ~9M"
         |        pointsToGain: 2
@@ -207,6 +208,7 @@ class QuizConfigParsableValueTest extends Specification {
                 questionDetail = Some("Population according to Google on July 2020"),
                 tag = None,
                 masterNotes = None,
+                image = Some(Image("geography/globe.png", "small")),
                 orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
                   Question.OrderItems.Item(item = "Riga", answerDetail = None),
                   Question.OrderItems.Item(item = "Stockholm", answerDetail = None),
@@ -222,6 +224,7 @@ class QuizConfigParsableValueTest extends Specification {
                 questionDetail = None,
                 tag = None,
                 masterNotes = None,
+                image = None,
                 orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
                   Question.OrderItems.Item(item = "Riga", answerDetail = Some("~600k")),
                   Question.OrderItems.Item(item = "Stockholm", answerDetail = Some("~1M")),
@@ -476,6 +479,7 @@ class QuizConfigParsableValueTest extends Specification {
                 questionDetail = None,
                 tag = None,
                 masterNotes = None,
+                image = None,
                 orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
                   Question.OrderItems.Item(item = "LLL", answerDetail = None),
                   Question.OrderItems.Item(item = "MMM", answerDetail = None),
