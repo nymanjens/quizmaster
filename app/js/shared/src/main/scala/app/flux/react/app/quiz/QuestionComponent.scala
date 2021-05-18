@@ -379,6 +379,7 @@ final class QuestionComponent(implicit
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
             ^.className := "image-and-choices-row",
+            SubComponents.image(question),
             SubComponents.choicesHolder(question)(
               <.ul(
                 ^.className := "choices",
