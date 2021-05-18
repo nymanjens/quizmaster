@@ -71,7 +71,7 @@ rounds:
         question: Order these cities from small to large
         questionDetail: Population according to Google on July 2020
         masterNotes: Mention that this is not a trick question
-        image: https://static.thenounproject.com/png/3315776-200.png
+        image: {src: geography/globe.png, size: small} 
         orderedItemsThatWillBePresentedInAlphabeticalOrder:
          - {item: Riga, answerDetail: ~600k}
          - {item: Stockholm, answerDetail: ~1M}
