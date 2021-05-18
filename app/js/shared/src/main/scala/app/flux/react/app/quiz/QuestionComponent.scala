@@ -374,6 +374,7 @@ final class QuestionComponent(implicit
       <.div(
         SubComponents.questionTitle(question),
         SubComponents.questionDetail(question),
+        SubComponents.image(question),
         SubComponents.pointsMetadata(question),
         SubComponents.masterNotes(question),
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
