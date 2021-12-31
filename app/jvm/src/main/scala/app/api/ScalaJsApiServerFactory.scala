@@ -379,13 +379,17 @@ final class ScalaJsApiServerFactory @Inject() (implicit
         val question = quizState.maybeQuestion.get
         val isCorrectAnswer = question.isCorrectAnswer(submissionValue)
         val shouldPauseTimerBecauseAllTeamsHaveSubmission = {
-          def teamHasSubmission(thisTeam: Team): Boolean =
-            quizState.submissions.exists(_.teamId == thisTeam.id)
-          val allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
-          // Only pause if this submission is the one that changes the state from "not all teams have
-          // submitted" to "all teams have submitted". This means that this team shouldn't already have a
-          // submission.
-          allOtherTeamsHaveSubmission && !teamHasSubmission(team)
+          // def teamHasSubmission(thisTeam: Team): Boolean =
+          //   quizState.submissions.exists(_.teamId == thisTeam.id)
+          // val allOtherTeamsHaveSubmission = allTeams.filter(_ != team).forall(teamHasSubmission)
+          // // Only pause if this submission is the one that changes the state from "not all teams have
+          // // submitted" to "all teams have submitted". This means that this team shouldn't already have a
+          // // submission.
+          // allOtherTeamsHaveSubmission && !teamHasSubmission(team)
+
+          // Disabled auto-pause in the hopes of fixing a mysterious bug that pauses the timer at seemingly
+          // random instants.
+          false
         }
 
         if (question.isMultipleChoice) {
