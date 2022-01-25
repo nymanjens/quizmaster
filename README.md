@@ -1,6 +1,6 @@
 # Quizmaster
 
-[![Build Status](https://travis-ci.org/nymanjens/quizmaster.svg?branch=master)](https://travis-ci.org/nymanjens/quizmaster)
+[![CI Status](https://github.com/nymanjens/quizmaster/actions/workflows/ci.yml/badge.svg)](https://github.com/nymanjens/quizmaster/actions)
 
 A web-app for conducting a quiz, including a page for players to enter their answers. Lots of
 question types are suported, which are configured in a YAML file.
