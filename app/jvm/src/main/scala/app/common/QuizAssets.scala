@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-
 import com.google.common.base.CharMatcher
 import com.google.common.hash
 import com.google.common.hash.Hashing
@@ -21,6 +20,7 @@ import hydro.common.GuavaReplacement.Iterables.getOnlyElement
 import hydro.common.GuavaReplacement.Splitter
 import hydro.common.ResourceFiles
 
+import scala.collection.immutable.Seq
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
@@ -46,11 +46,33 @@ final class QuizAssets @Inject() (implicit
     }
   }
 
-  private def fullPathOrValidationError(source: String): Try[Path] = {
-    if (source.toLowerCase.startsWith("http://") || source.toLowerCase.startsWith("https://")) {
-      fullPathOrValidationErrorFromUrl(source)
+  /**
+   * If the given source is local, inserts extensions until a local file exists that matches the path.
+   */
+  def toLenientlyMatchedLocalPath(path: String, extensions: Seq[String]): String = {
+    if (isLocalFile(path)) {
+      val matchedPaths = for {
+        pathToTry <- path +: extensions.map(path + "." + _)
+        assetFolder <- Seq("assets", "images", "audio", "video")
+        fullPath <- Some(configPath.resolve(assetFolder).resolve(pathToTry))
+        if Files.exists(fullPath)
+      } yield pathToTry
+
+      matchedPaths.headOption getOrElse path
     } else {
+      path // Do nothing
+    }
+  }
+
+  private def isLocalFile(source: String): Boolean = {
+    !source.toLowerCase.startsWith("http://") && !source.toLowerCase.startsWith("https://")
+  }
+
+  private def fullPathOrValidationError(source: String): Try[Path] = {
+    if (isLocalFile(source)) {
       fullPathOrValidationErrorFromRelativePath(source)
+    } else {
+      fullPathOrValidationErrorFromUrl(source)
     }
   }
 

@@ -245,10 +245,10 @@ class QuizConfigParsableValue @Inject() (implicit
       "masterNotes" -> Optional(StringValue),
       "image" -> Optional(ImageValue),
       "answerImage" -> Optional(ImageValue),
-      "audio" -> Optional(StringValue),
-      "answerAudio" -> Optional(StringValue),
-      "video" -> Optional(StringValue),
-      "answerVideo" -> Optional(StringValue),
+      "audio" -> Optional(AudioValue),
+      "answerAudio" -> Optional(AudioValue),
+      "video" -> Optional(VideoValue),
+      "answerVideo" -> Optional(VideoValue),
       "pointsToGain" -> Optional(FixedPointNumberValue),
       "pointsToGainOnFirstAnswer" -> Optional(FixedPointNumberValue),
       "pointsToGainOnWrongAnswer" -> Optional(FixedPointNumberValue),
@@ -280,15 +280,7 @@ class QuizConfigParsableValue @Inject() (implicit
         showSingleAnswerButtonToTeams = map.optional("showSingleAnswerButtonToTeams", false),
       )
     }
-    override def additionalValidationErrors(v: Question.Standard) = {
-      Seq(
-        v.validationErrors(),
-        v.image.map(_.src).flatMap(quizAssets.assetExistsOrValidationError).toSet,
-        v.answerImage.map(_.src).flatMap(quizAssets.assetExistsOrValidationError).toSet,
-        v.audioSrc.flatMap(quizAssets.assetExistsOrValidationError).toSet,
-        v.videoSrc.flatMap(quizAssets.assetExistsOrValidationError).toSet,
-      ).flatten
-    }
+    override def additionalValidationErrors(v: Question.Standard) = v.validationErrors()
   }
 
   private object DoubleQuestionValue extends MapParsableValue[Question.DoubleQ] {
@@ -324,10 +316,10 @@ class QuizConfigParsableValue @Inject() (implicit
       "answerDetail" -> Optional(StringValue),
       "image" -> Optional(ImageValue),
       "answerImage" -> Optional(ImageValue),
-      "audio" -> Optional(StringValue),
-      "answerAudio" -> Optional(StringValue),
-      "video" -> Optional(StringValue),
-      "answerVideo" -> Optional(StringValue),
+      "audio" -> Optional(AudioValue),
+      "answerAudio" -> Optional(AudioValue),
+      "video" -> Optional(VideoValue),
+      "answerVideo" -> Optional(VideoValue),
       "pointsToGainPerAnswer" -> Optional(FixedPointNumberValue),
       "maxTimeSeconds" -> Optional(IntValue),
     )
@@ -350,23 +342,11 @@ class QuizConfigParsableValue @Inject() (implicit
         maxTime = Duration.ofSeconds(map.optional[Int]("maxTimeSeconds", magicDefaultMaxTimeSeconds)),
       )
     }
-    override def additionalValidationErrors(v: Question.MultipleAnswers) = {
-      Seq(
-        v.validationErrors(),
-        v.image.map(_.src).flatMap(quizAssets.assetExistsOrValidationError).toSet,
-        v.answerImage.map(_.src).flatMap(quizAssets.assetExistsOrValidationError).toSet,
-        v.audioSrc.flatMap(quizAssets.assetExistsOrValidationError).toSet,
-        v.videoSrc.flatMap(quizAssets.assetExistsOrValidationError).toSet,
-      ).flatten
-    }
+    override def additionalValidationErrors(v: Question.MultipleAnswers) = v.validationErrors()
   }
   private val MultipleAnswersAnswerValue: ParsableValue[Question.MultipleAnswers.Answer] = {
     WithStringSimplification(RawMultipleAnswersAnswerValue)(
-      stringToValue = s =>
-        Question.MultipleAnswers.Answer(
-          answer = s,
-          answerDetail = None,
-        )
+      stringToDelegateInput = s => Map("answer" -> s)
     )
   }
   private object RawMultipleAnswersAnswerValue extends MapParsableValue[Question.MultipleAnswers.Answer] {
@@ -392,10 +372,10 @@ class QuizConfigParsableValue @Inject() (implicit
       "answerDetail" -> Optional(StringValue),
       "image" -> Optional(ImageValue),
       "answerImage" -> Optional(ImageValue),
-      "audio" -> Optional(StringValue),
-      "answerAudio" -> Optional(StringValue),
-      "video" -> Optional(StringValue),
-      "answerVideo" -> Optional(StringValue),
+      "audio" -> Optional(AudioValue),
+      "answerAudio" -> Optional(AudioValue),
+      "video" -> Optional(VideoValue),
+      "answerVideo" -> Optional(VideoValue),
       "maxTimeSeconds" -> Optional(IntValue),
     )
     override def parseFromParsedMapValues(map: StringMap) = {
@@ -416,15 +396,7 @@ class QuizConfigParsableValue @Inject() (implicit
       )
     }
 
-    override def additionalValidationErrors(v: Question.MultipleQuestions) = {
-      Seq(
-        v.validationErrors(),
-        v.image.map(_.src).flatMap(quizAssets.assetExistsOrValidationError).toSet,
-        v.answerImage.map(_.src).flatMap(quizAssets.assetExistsOrValidationError).toSet,
-        v.audioSrc.flatMap(quizAssets.assetExistsOrValidationError).toSet,
-        v.videoSrc.flatMap(quizAssets.assetExistsOrValidationError).toSet,
-      ).flatten
-    }
+    override def additionalValidationErrors(v: Question.MultipleQuestions) = v.validationErrors()
   }
 
   private object SubQuestionValue extends MapParsableValue[Question.MultipleQuestions.SubQuestion] {
@@ -477,10 +449,9 @@ class QuizConfigParsableValue @Inject() (implicit
 
   private val OrderItemValue: ParsableValue[Question.OrderItems.Item] = {
     WithStringSimplification(RawOrderItemValue)(
-      stringToValue = s =>
-        Question.OrderItems.Item(
-          item = s,
-          answerDetail = None,
+      stringToDelegateInput = s =>
+        Map(
+          "item" -> s
         )
     )
   }
@@ -500,11 +471,7 @@ class QuizConfigParsableValue @Inject() (implicit
 
   private val ImageValue: ParsableValue[Image] = {
     WithStringSimplification(RawImageValue)(
-      stringToValue = s =>
-        Image(
-          src = s,
-          size = "large",
-        )
+      stringToDelegateInput = s => Map("src" -> s)
     )
   }
 
@@ -515,7 +482,10 @@ class QuizConfigParsableValue @Inject() (implicit
     )
     override def parseFromParsedMapValues(map: StringMap) = {
       Image(
-        src = map.required[String]("src"),
+        src = quizAssets.toLenientlyMatchedLocalPath(
+          map.required[String]("src"),
+          extensions = Seq("bmp", "gif", "jpeg", "jpg", "png", "svg", "tif", "tiff", "webp"),
+        ),
         size = map.optional("size", "large"),
       )
     }
@@ -524,6 +494,34 @@ class QuizConfigParsableValue @Inject() (implicit
         v.validationErrors(),
         quizAssets.assetExistsOrValidationError(v.src).toSet,
       ).flatten
+    }
+  }
+
+  private val AudioValue: ParsableValue[String] = (yamlValue: Any) => {
+    StringValue.parse(yamlValue) flatMap { path =>
+      val candidate = quizAssets.toLenientlyMatchedLocalPath(
+        path,
+        extensions = Seq("aac", "mp3", "oga", "opus", "wav", "weba"),
+      )
+
+      quizAssets.assetExistsOrValidationError(candidate) match {
+        case None        => ParseResult.success(candidate)
+        case Some(error) => ParseResult.onlyError(error)
+      }
+    }
+  }
+
+  private val VideoValue: ParsableValue[String] = (yamlValue: Any) => {
+    StringValue.parse(yamlValue) flatMap { path =>
+      val candidate = quizAssets.toLenientlyMatchedLocalPath(
+        path,
+        extensions = Seq("mp4", "mpeg", "webm", "avi"),
+      )
+
+      quizAssets.assetExistsOrValidationError(candidate) match {
+        case None        => ParseResult.success(candidate)
+        case Some(error) => ParseResult.onlyError(error)
+      }
     }
   }
 

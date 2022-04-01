@@ -495,6 +495,85 @@ class QuizConfigParsableValueTest extends Specification {
     )
   }
 
+  "parse file with missing validation errors" in {
+    "Missing image src" in {
+      "map" in {
+        ValidatingYamlParser.parse(
+          """
+            |title: Demo quiz
+            |rounds:
+            |  - name: onlyRound
+            |    questions:
+            |      - question: AAA
+            |        answer: BBB
+            |        image: {src: doesNotExist}
+            |""".stripMargin,
+          createQuizConfigParsableValue("../../conf/quiz/quiz-config.yml"),
+        ) must throwA[RuntimeException](".*Could not find path.*/doesNotExist.*")
+      }
+
+      "string" in {
+        ValidatingYamlParser.parse(
+          """
+            |title: Demo quiz
+            |rounds:
+            |  - name: onlyRound
+            |    questions:
+            |      - question: AAA
+            |        answer: BBB
+            |        image: doesNotExist
+            |""".stripMargin,
+          createQuizConfigParsableValue("../../conf/quiz/quiz-config.yml"),
+        ) must throwA[RuntimeException](".*Could not find path.*/doesNotExist.*")
+      }
+    }
+
+    "Wrong image size" in {
+      ValidatingYamlParser.parse(
+        """
+          |title: Demo quiz
+          |rounds:
+          |  - name: onlyRound
+          |    questions:
+          |      - question: AAA
+          |        answer: BBB
+          |        image: {src: geography/france.png, size: XXXL}
+          |""".stripMargin,
+        createQuizConfigParsableValue("../../conf/quiz/quiz-config.yml"),
+      ) must throwA[RuntimeException](".*XXXL")
+    }
+
+    "Missing audio src" in {
+      ValidatingYamlParser.parse(
+        """
+            |title: Demo quiz
+            |rounds:
+            |  - name: onlyRound
+            |    questions:
+            |      - question: AAA
+            |        answer: BBB
+            |        audio: doesNotExist
+            |""".stripMargin,
+        createQuizConfigParsableValue("../../conf/quiz/quiz-config.yml"),
+      ) must throwA[RuntimeException](".*Could not find path.*/doesNotExist.*")
+    }
+
+    "Missing video src" in {
+      ValidatingYamlParser.parse(
+        """
+              |title: Demo quiz
+              |rounds:
+              |  - name: onlyRound
+              |    questions:
+              |      - question: AAA
+              |        answer: BBB
+              |        video: doesNotExist
+              |""".stripMargin,
+        createQuizConfigParsableValue("../../conf/quiz/quiz-config.yml"),
+      ) must throwA[RuntimeException](".*Could not find path.*/doesNotExist.*")
+    }
+  }
+
   // Test all known config files
   {
     val knownQuizConfigs =
