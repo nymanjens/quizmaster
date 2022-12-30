@@ -422,6 +422,7 @@ class QuizConfigParsableValue @Inject() (implicit
       "questionDetail" -> Optional(StringValue),
       "masterNotes" -> Optional(StringValue),
       "image" -> Optional(ImageValue),
+      "answerImage" -> Optional(ImageValue),
       "tag" -> Optional(StringValue),
       "orderedItemsThatWillBePresentedInAlphabeticalOrder" -> Required(
         ListParsableValue(OrderItemValue)(_.item)
@@ -435,6 +436,7 @@ class QuizConfigParsableValue @Inject() (implicit
         question = map.required[String]("question"),
         questionDetail = map.optional("questionDetail"),
         image = map.optional("image"),
+        answerImage = map.optional("answerImage"),
         masterNotes = map.optional("masterNotes"),
         tag = map.optional("tag"),
         orderedItemsThatWillBePresentedInAlphabeticalOrder =

@@ -519,6 +519,7 @@ object QuizConfig {
         override val answerDetail: Option[String],
         override val masterNotes: Option[String],
         override val image: Option[Image],
+        override val answerImage: Option[Image],
         pointsToGain: FixedPointNumber,
         override val maxTime: Duration,
     ) extends StandardSinglePartQuestionBase {
@@ -601,7 +602,6 @@ object QuizConfig {
       override def answerAsString: String = {
         orderedItemsThatWillBePresentedInAlphabeticalOrder.map(i => toCharacterCode(i)).mkString
       }
-      override def answerImage: Option[Image] = None
       override def audioSrc: Option[String] = None
       override def answerAudioSrc: Option[String] = None
       override def videoSrc: Option[String] = None
