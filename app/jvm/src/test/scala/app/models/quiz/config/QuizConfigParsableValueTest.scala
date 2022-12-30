@@ -209,6 +209,7 @@ class QuizConfigParsableValueTest extends Specification {
                 tag = None,
                 masterNotes = None,
                 image = Some(Image("geography/globe.png", "small")),
+                answerImage = None,
                 orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
                   Question.OrderItems.Item(item = "Riga", answerDetail = None),
                   Question.OrderItems.Item(item = "Stockholm", answerDetail = None),
@@ -225,6 +226,7 @@ class QuizConfigParsableValueTest extends Specification {
                 tag = None,
                 masterNotes = None,
                 image = None,
+                answerImage = None,
                 orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
                   Question.OrderItems.Item(item = "Riga", answerDetail = Some("~600k")),
                   Question.OrderItems.Item(item = "Stockholm", answerDetail = Some("~1M")),
@@ -480,6 +482,7 @@ class QuizConfigParsableValueTest extends Specification {
                 tag = None,
                 masterNotes = None,
                 image = None,
+                answerImage = None,
                 orderedItemsThatWillBePresentedInAlphabeticalOrder = Seq(
                   Question.OrderItems.Item(item = "LLL", answerDetail = None),
                   Question.OrderItems.Item(item = "MMM", answerDetail = None),
