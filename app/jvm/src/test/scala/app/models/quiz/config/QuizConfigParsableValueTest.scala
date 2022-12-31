@@ -146,6 +146,7 @@ class QuizConfigParsableValueTest extends Specification {
       quizConfig,
       QuizConfig(
         title = Some("Demo quiz"),
+        image = None,
         author = Some("Jens Nyman"),
         instructionsOnFirstSlide = Some("Don't look up the answers online"),
         masterSecret = "quiz",
@@ -158,6 +159,7 @@ class QuizConfigParsableValueTest extends Specification {
         rounds = Seq(
           Round(
             name = "Geography",
+            image = None,
             expectedTime = Some(Duration.ofMinutes(2)),
             questions = Seq(
               Question.Standard(
@@ -241,6 +243,7 @@ class QuizConfigParsableValueTest extends Specification {
           ),
           Round(
             name = "Music round",
+            image = None,
             expectedTime = None,
             questions = Seq(
               Question.Standard(
@@ -327,6 +330,7 @@ class QuizConfigParsableValueTest extends Specification {
           ),
           Round(
             name = "Double questions round",
+            image = None,
             expectedTime = None,
             questions = Seq(
               Question.DoubleQ(
