@@ -36,8 +36,9 @@ class QuizConfigParsableValue @Inject() (implicit
   private val magicDefaultMaxTimeSeconds: Int = -129379821
   private val magicDefaultPointsToGain: FixedPointNumber = FixedPointNumber(-918237)
 
-  override val supportedKeyValuePairs = Map(
+  override lazy val supportedKeyValuePairs = Map(
     "title" -> Optional(StringValue),
+    "image" -> Optional(ImageValue),
     "author" -> Optional(StringValue),
     "instructionsOnFirstSlide" -> Optional(StringValue),
     "masterSecret" -> Optional(StringValue),
@@ -57,6 +58,7 @@ class QuizConfigParsableValue @Inject() (implicit
       quizConfigDefaults,
       QuizConfig(
         title = map.optional("title"),
+        image = map.optional("image"),
         author = map.optional("author"),
         instructionsOnFirstSlide = map.optional("instructionsOnFirstSlide"),
         masterSecret = map.optional("masterSecret", "*"),
@@ -144,6 +146,7 @@ class QuizConfigParsableValue @Inject() (implicit
         Round(
           name = i18n("app.round-n", String.valueOf(i + 1)),
           questions = rounds.map(_.questions(i)),
+          image = None,
           expectedTime = None,
         )
       }
@@ -199,12 +202,14 @@ class QuizConfigParsableValue @Inject() (implicit
     override val supportedKeyValuePairs = Map(
       "name" -> Required(StringValue),
       "questions" -> Required(ListParsableValue(QuestionValue)(_.textualQuestion)),
+      "image" -> Optional(ImageValue),
       "expectedTimeMinutes" -> Optional(IntValue),
     )
     override def parseFromParsedMapValues(map: StringMap) = {
       Round(
         name = map.required[String]("name"),
         questions = map.required[Seq[Question]]("questions"),
+        image = map.optional("image"),
         expectedTime = map.optional[Int]("expectedTimeMinutes").map(t => Duration.ofMinutes(t.toLong)),
       )
     }

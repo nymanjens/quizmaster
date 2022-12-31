@@ -19,6 +19,7 @@ import scala.collection.mutable
 case class QuizConfig(
     rounds: Seq[Round],
     title: Option[String],
+    image: Option[QuizConfig.Image],
     author: Option[String],
     instructionsOnFirstSlide: Option[String],
     masterSecret: String,
@@ -34,6 +35,7 @@ object QuizConfig {
   case class Round(
       name: String,
       questions: Seq[Question],
+      image: Option[Image],
       expectedTime: Option[Duration] = None,
   )
 

@@ -167,18 +167,30 @@ final class Layout(implicit
     }
 
     private def preloadMedia(): Unit = {
+      def preloadImage(image: QuizConfig.Image): Unit = {
+        val htmlImage = new HtmlImage()
+        htmlImage.asInstanceOf[js.Dynamic].src = s"/quizassets/${JsQuizAssets.encodeSource(image.src)}"
+        preloadedImages.append(htmlImage)
+      }
+
       println("  Preloading media...")
+
+      for (image <- quizConfig.image) {
+        preloadImage(image)
+      }
 
       for {
         round <- quizConfig.rounds
         question <- round.questions
       } {
+        for (image <- round.image) {
+          preloadImage(image)
+        }
+
         question match {
           case single: Question.Standard =>
             for (image <- Seq() ++ single.image ++ single.answerImage) {
-              val htmlImage = new HtmlImage()
-              htmlImage.asInstanceOf[js.Dynamic].src = s"/quizassets/${JsQuizAssets.encodeSource(image.src)}"
-              preloadedImages.append(htmlImage)
+              preloadImage(image)
             }
 
             for (audioSrc <- single.audioSrc) {

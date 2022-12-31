@@ -56,12 +56,13 @@ case class QuizState(
     if (roundIndex < 0) {
       Round(
         name = quizConfig.title getOrElse i18n("app.welcome"),
+        image = quizConfig.image,
         questions = Seq(),
       )
     } else if (roundIndex < quizConfig.rounds.size) {
       quizConfig.rounds(roundIndex)
     } else {
-      Round(name = i18n("app.end-of-the-quiz"), questions = Seq())
+      Round(name = i18n("app.end-of-the-quiz"), questions = Seq(), image = None)
     }
   }
 

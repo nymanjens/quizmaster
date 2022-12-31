@@ -1,9 +1,12 @@
 package app.flux.react.app.quiz
 
+import app.common.JsQuizAssets
 import app.models.quiz.config.QuizConfig
 import app.models.quiz.QuizState
+import app.models.quiz.config.QuizConfig.Image
 import hydro.common.I18n
 import hydro.flux.react.ReactVdomUtils.<<
+import hydro.flux.react.ReactVdomUtils.^^
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.html_<^.<
 
@@ -58,12 +61,34 @@ final class RoundComponent(implicit
           i18n("app.first-round-help"),
         )
       },
+      <<.ifDefined(round.image)(img => imageComponent(img, showMasterData)),
       <<.ifThen(quizState.quizHasEnded) {
         <.div(
           submissionsSummaryChart(selectedTeamId = None),
           submissionsSummaryTable(selectedTeamId = None),
         )
       },
+    )
+  }
+
+  def imageComponent(image: Image, showMasterData: Boolean)(implicit quizState: QuizState): VdomNode = {
+    <.div(
+      ^.className := "image-and-choices-row",
+      <.div(
+        ^.className := "image-holder",
+        ^.className := image.size,
+        <.img(
+          ^.src := s"/quizassets/${JsQuizAssets.encodeSource(image.src)}",
+          ^.className := image.size,
+          ^^.ifThen(quizState.imageIsEnlarged) {
+            if (showMasterData) {
+              ^.className := "indicate-enlarged"
+            } else {
+              ^.className := "enlarged"
+            }
+          },
+        ),
+      ),
     )
   }
 }
