@@ -2,6 +2,7 @@
 # This file contains all fields that you might want to update when creating your own quiz.
 
 title: Demo quiz
+image: https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/OOUI_Talk_icon_-_Question_2.svg/1024px-OOUI_Talk_icon_-_Question_2.svg.png # optional
 author: Jens Nyman # Change this to your name
 instructionsOnFirstSlide: Please, don't look up the answers online
 masterSecret: quiz # Remove this line to allow anyone to access the master controls
@@ -32,6 +33,7 @@ defaults:
 
 rounds:
   - name: Geography
+    image: https://freesvg.org/img/globe-310324.png # optional
     questions:
       # Standard textual question
       - question: Who was the country Colombia named after?
@@ -81,6 +83,7 @@ rounds:
 
 
   - name: Music round
+    image: https://upload.wikimedia.org/wikipedia/commons/f/f6/Music_1_-_The_Noun_Project.svg # optional
     questions:
       # Standard textual question with audio
       - question: After which season is this track named?
