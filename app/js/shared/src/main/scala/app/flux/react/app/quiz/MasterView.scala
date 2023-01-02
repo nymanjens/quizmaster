@@ -76,6 +76,7 @@ final class MasterView(implicit
               teams = state.teams,
             )
         },
+        keyboardShortcutsHelp(state.quizState),
       )
     }
 
@@ -113,6 +114,64 @@ final class MasterView(implicit
             ")",
           )
         },
+      )
+    }
+
+    private def keyboardShortcutsHelp(quizState: QuizState): VdomTag = {
+      def rowSet(topic: String, namesAndShortcuts: (String, VdomTag)*): VdomArray = {
+        (for (((name, shortcut), i) <- namesAndShortcuts.zipWithIndex)
+          yield <.tr(
+            ^.key := name + i,
+            <<.ifThen(i == 0) {
+              <.td(^.rowSpan := namesAndShortcuts.size, topic)
+            },
+            <.td(name),
+            <.td(shortcut),
+          )).toVdomArray
+      }
+
+      val alt = <.kbd("alt")
+      val shift = <.kbd("shift")
+      val left = <.kbd(Bootstrap.FontAwesomeIcon("caret-left"))
+      val right = <.kbd(Bootstrap.FontAwesomeIcon("caret-right"))
+
+      <.div(
+        ^.className := "keyboard-shortcuts-help",
+        <.table(
+          ^.className := "table",
+          <.thead(
+            <.tr(
+              <.th(^.colSpan := 2, "Keyboard Shortcuts")
+            )
+          ),
+          <.tbody(
+            <<.ifThen(quizState.maybeQuestion.exists(q => q.audioSrc.isDefined))(
+              rowSet("Audio", "restart" -> <.span(shift, " + ", <.kbd("R")))
+            ),
+            <<.ifThen(quizState.maybeQuestion.exists(q => q.image.isDefined || q.answerImage.isDefined))(
+              rowSet("Image", "toggle enlarged" -> <.span(alt, " + ", <.kbd("enter")))
+            ),
+            <<.ifThen(
+              quizState.maybeQuestion.exists(
+                _.shouldShowTimer(questionProgressIndex = quizState.questionProgressIndex)
+              )
+            )(
+              rowSet(
+                "Timer",
+                "pause/resume" -> <.kbd("spacebar"),
+                "subtract 10s" -> <.span(alt, " + ", shift, " + ", <.kbd("-"), "/", <.kbd("O")),
+                "add 10s" -> <.span(alt, " + ", shift, " + ", <.kbd("+"), "/", <.kbd("P")),
+                "subtract 30s" -> <.span(shift, " + ", <.kbd("-"), "/", <.kbd("O")),
+                "add 30s" -> <.span(shift, " + ", <.kbd("+"), "/", <.kbd("P")),
+              )
+            ),
+            rowSet(
+              "Navigation",
+              "Go to previous/next question" -> <.span(alt, " + ", left, "/", right),
+              "Go to previous/next round" -> <.span(alt, " + ", shift, " + ", left, "/", right),
+            ),
+          ),
+        ),
       )
     }
   }
