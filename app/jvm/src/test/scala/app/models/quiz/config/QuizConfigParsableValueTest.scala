@@ -412,6 +412,7 @@ class QuizConfigParsableValueTest extends Specification {
         rounds = Seq(
           Round(
             name = "onlyRound",
+            image = None,
             questions = Seq(
               Question.Standard(
                 question = "AAA",
