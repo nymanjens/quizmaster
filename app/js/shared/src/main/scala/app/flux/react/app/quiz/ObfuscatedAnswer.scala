@@ -41,6 +41,9 @@ final class ObfuscatedAnswer(implicit
           },
           <<.nl2BrBlockWithLinks(props.answer),
         ),
+        "(Toggle with ",
+        <.kbd("A"),
+        " )",
       )
     }
 

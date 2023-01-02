@@ -100,7 +100,9 @@ final class MasterView(implicit
             Bootstrap.Button(Variant.primary, Size.lg)(
               ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.goToPreviousStep()).void,
               Bootstrap.Glyphicon("arrow-left"),
-              " Previous",
+              " Previous (",
+              <.kbd(Bootstrap.FontAwesomeIcon("caret-left")),
+              ")",
             ),
             " ",
           )
@@ -109,7 +111,9 @@ final class MasterView(implicit
           Bootstrap.Button(Variant.primary, Size.lg)(
             ^.onClick --> LogExceptionsCallback(teamsAndQuizStateStore.goToNextStep()).void,
             Bootstrap.Glyphicon("arrow-right"),
-            " Next",
+            " Next (",
+            <.kbd(Bootstrap.FontAwesomeIcon("caret-right")),
+            ")",
           )
         },
       )
