@@ -67,17 +67,14 @@ final class MasterView(implicit
         ^.className := "master-view",
         masterBanner(),
         quizNavigationButtons(state.quizState),
-        state.quizState match {
-          case quizState =>
-            quizState.maybeQuestion match {
-              case None => roundComponent(quizState.round, showMasterData = true)(quizState)
-              case Some(question) =>
-                questionComponent(
-                  showMasterData = true,
-                  quizState = state.quizState,
-                  teams = state.teams,
-                )
-            }
+        state.quizState.maybeQuestion match {
+          case None => roundComponent(state.quizState.round, showMasterData = true)(state.quizState)
+          case Some(question) =>
+            questionComponent(
+              showMasterData = true,
+              quizState = state.quizState,
+              teams = state.teams,
+            )
         },
       )
     }
