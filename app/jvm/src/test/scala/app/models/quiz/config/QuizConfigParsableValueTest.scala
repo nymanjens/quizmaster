@@ -361,6 +361,7 @@ class QuizConfigParsableValueTest extends Specification {
       quizConfig,
       QuizConfig(
         title = Some("Demo quiz"),
+        image = None,
         author = None,
         instructionsOnFirstSlide = None,
         masterSecret = "*",
@@ -402,6 +403,7 @@ class QuizConfigParsableValueTest extends Specification {
       quizConfig,
       QuizConfig(
         title = Some("Demo quiz"),
+        image = None,
         author = None,
         instructionsOnFirstSlide = None,
         masterSecret = "*",
