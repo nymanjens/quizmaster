@@ -26,7 +26,7 @@ final class ObfuscatedAnswer(implicit
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(answer: String)
-  protected case class State(obfuscated: Boolean = false)
+  protected case class State(obfuscated: Boolean = true)
 
   protected class Backend($ : BackendScope[Props, State]) extends BackendBase($) with DidMount {
 
