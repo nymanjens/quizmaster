@@ -19,6 +19,8 @@ import app.models.quiz.Team
 import hydro.common.JsLoggingUtils.logExceptions
 import hydro.common.time.Clock
 import hydro.common.I18n
+import hydro.common.ScalaUtils
+import hydro.common.ScalaUtils.ifThenOption
 import hydro.flux.action.Dispatcher
 import hydro.flux.react.HydroReactComponent
 import hydro.flux.react.ReactVdomUtils.<<
@@ -129,8 +131,7 @@ final class QuestionComponent(implicit
         SubComponents.masterNotes(question),
         <.div(
           ^.className := "image-and-choices-row",
-          SubComponents.image(question),
-          SubComponents.video(question),
+          SubComponents.videoOrImage(question),
           <<.ifDefined(question.choices) { choices =>
             ifVisibleOrMaster(question.choicesAreVisible(props.questionProgressIndex)) {
               SubComponents.choicesHolder(question)(
@@ -197,8 +198,7 @@ final class QuestionComponent(implicit
         SubComponents.multipleAnswersSubmissions(question),
         <.div(
           ^.className := "image-and-choices-row",
-          SubComponents.image(question),
-          SubComponents.video(question),
+          SubComponents.videoOrImage(question),
           ifVisibleOrMaster(answerIsVisible) {
             SubComponents.choicesHolder(question)(
               <.ul(
@@ -241,8 +241,7 @@ final class QuestionComponent(implicit
         SubComponents.multipleAnswersSubmissions(question),
         <.div(
           ^.className := "image-and-choices-row",
-          SubComponents.image(question),
-          SubComponents.video(question),
+          SubComponents.videoOrImage(question),
           SubComponents.choicesHolder(question)(
             <.ul(
               ^.className := "sub-questions",
@@ -379,7 +378,7 @@ final class QuestionComponent(implicit
         ifVisibleOrMaster(question.questionIsVisible(progressIndex)) {
           <.div(
             ^.className := "image-and-choices-row",
-            SubComponents.image(question),
+            SubComponents.videoOrImage(question),
             SubComponents.choicesHolder(question)(
               <.ul(
                 ^.className := "choices",
@@ -600,6 +599,19 @@ final class QuestionComponent(implicit
       )
     }
 
+    /** Video and image are combined because we never want to show both in one view. */
+    def videoOrImage(question: Question)(implicit props: Props): VdomNode = {
+      if (props.showMasterData) {
+        // Always show everything in master view
+        <.span(
+          maybeVideo(question) getOrElse VdomArray.empty(),
+          image(question),
+        )
+      } else {
+        maybeVideo(question) getOrElse image(question)
+      }
+    }
+
     def image(question: Question)(implicit props: Props): VdomNode = {
       val answerIsVisible = question.answerIsVisible(props.questionProgressIndex)
       val maybeImage = if (answerIsVisible) question.answerImage orElse question.image else question.image
@@ -625,7 +637,7 @@ final class QuestionComponent(implicit
       }
     }
 
-    def video(question: Question)(implicit props: Props): VdomNode = {
+    def maybeVideo(question: Question)(implicit props: Props): Option[VdomNode] = {
       val (maybeVideoSrc, isVisible) = {
         if (props.questionProgressIndex == 0) {
           (question.videoSrc, false)
@@ -638,35 +650,37 @@ final class QuestionComponent(implicit
         }
       }
 
-      <<.ifDefined(maybeVideoSrc) { videoSrc =>
-        ifVisibleOrMaster(isVisible) {
-          val timerState = props.quizState.timerState
-          val timerIsRunning = timerState.timerRunning &&
-            !timerState.hasFinished(question.maxTime) &&
-            isVisible
+      maybeVideoSrc.flatMap { videoSrc =>
+        ifThenOption(isVisible || props.showMasterData) {
+          ifVisibleOrMaster(isVisible) {
+            val timerState = props.quizState.timerState
+            val timerIsRunning = timerState.timerRunning &&
+              !timerState.hasFinished(question.maxTime) &&
+              isVisible
 
-          <.div(
-            ^.className := "video-holder",
-            ^^.ifThen(props.quizState.imageIsEnlarged) {
+            <.div(
+              ^.className := "video-holder",
+              ^^.ifThen(props.quizState.imageIsEnlarged) {
+                if (props.showMasterData) {
+                  ^.className := "indicate-enlarged"
+                } else {
+                  ^.className := "enlarged"
+                }
+              },
               if (props.showMasterData) {
-                ^.className := "indicate-enlarged"
+                videoHelpPlaceholder(
+                  videoSrc,
+                  playing = timerIsRunning,
+                )
               } else {
-                ^.className := "enlarged"
-              }
-            },
-            if (props.showMasterData) {
-              videoHelpPlaceholder(
-                videoSrc,
-                playing = timerIsRunning,
-              )
-            } else {
-              videoPlayer(
-                videoSrc,
-                playing = timerIsRunning,
-                key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
-              )
-            },
-          )
+                videoPlayer(
+                  videoSrc,
+                  playing = timerIsRunning,
+                  key = props.quizState.timerState.uniqueIdOfMediaPlaying.toString,
+                )
+              },
+            )
+          }
         }
       }
     }
