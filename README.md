@@ -13,7 +13,8 @@ question types are suported, which are configured in a YAML file.
 
 ### From prebuilt release in zip file (recommended)
 
-- Download the [latest release](https://github.com/nymanjens/quizmaster/releases)
+- Download "Binaries (compiled files) with demo configuration" from the [latest
+  release](https://github.com/nymanjens/quizmaster/releases)
 - Unpack the archive and open a terminal in the unpacked folder
 - Run `bin/server` (UNIX) or `bin/server.bat` (Windows)
 - Browse to http://localhost:9000
