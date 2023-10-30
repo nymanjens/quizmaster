@@ -67,10 +67,10 @@ lazy val server = (project in file("app/jvm"))
     libraryDependencies ++= BuildSettings.jvmDependencies.value,
     libraryDependencies += guice,
     javaOptions := Seq("-Dconfig.file=conf/application.conf"),
-    javaOptions in Test := Seq("-Dconfig.resource=test-application.conf"),
+    Test / javaOptions := Seq("-Dconfig.resource=test-application.conf"),
     // connect to the client project
     scalaJSProjects := clientProjects,
-    pipelineStages in Assets := Seq(scalaJSPipeline),
+    Assets / pipelineStages := Seq(scalaJSPipeline),
     pipelineStages := Seq(scalaJSProd, digest, gzip),
     // Expose as sbt-web assets some files retrieved from the NPM packages of the `client` project
     // @formatter:off
@@ -81,7 +81,7 @@ lazy val server = (project in file("app/jvm"))
     npmAssets ++= NpmAssets.ofProject(client) { modules => (modules / "startbootstrap-sb-admin-2").allPaths }.value,
     // @formatter:on
     // compress CSS
-    LessKeys.compress in Assets := true
+    Assets / LessKeys.compress := true
   )
   .enablePlugins(PlayScala, WebScalaJSBundlerPlugin)
   .disablePlugins(PlayFilters) // Don't use the default filters

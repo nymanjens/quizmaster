@@ -1,3 +1,6 @@
+// // repository for Typesafe plugins
+resolvers += "Typesafe Releases" at "https://repo.typesafe.com/typesafe/releases/"
+
 // The Play plugin
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.9.0") // Must be the same as BuildSettings.versions.play
 // addSbtPlugin("com.vmunier" % "sbt-play-scalajs" % "0.3.1")
