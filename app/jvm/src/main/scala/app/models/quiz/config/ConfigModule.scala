@@ -18,6 +18,8 @@ import play.api.Logger
 
 final class ConfigModule(exitOnFailure: Boolean = true) extends AbstractModule {
 
+  val logger: Logger = Logger(this.getClass())
+
   override def configure() = {}
 
   @Provides()
@@ -44,7 +46,7 @@ final class ConfigModule(exitOnFailure: Boolean = true) extends AbstractModule {
     } catch {
       case e: Throwable =>
         val stackTrace = Throwables.getStackTraceAsString(e)
-        Logger.error(s"Error when parsing ${configLocation}:\n\n$stackTrace")
+        logger.error(s"Error when parsing ${configLocation}:\n\n$stackTrace")
         // Make error output less noisy by shutting down early (instead of 20+ Guice exceptions while injecting QuizConfig)
         if (exitOnFailure) {
           // Sleep for 1 second so that Logger.error() has time to write the error message
