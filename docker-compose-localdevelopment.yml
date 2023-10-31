@@ -1,5 +1,5 @@
 # To run all tests and repeat on each source change:
-#   docker-compose --file=docker-compose-for-tests.yaml up
+#   docker-compose --file=docker-compose-localdevelopment.yml up
 
 version: "3.7"
 
@@ -8,9 +8,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.run
+    ports: ["9000:9000"]
     tty: true
     volumes:
-      # Run the test on the current directory
+      # Develop on the current directory
       - .:/src
       # Exclude all target folders from the previous volume binding by explicitly binding them to an
       # empty volume
@@ -23,7 +24,8 @@ services:
       - /src/app/jvm/target/
       - /src/project/target/
       - /src/project/project/target/
-    command: 'sbt -mem 2048 "~testQuick"'
+    command: >
+      sbt -mem 2048 '; set javaOptions += "-Dconfig.file=conf/application-for-local-development.conf"; run 9000'
 
 # Fixes Docker network issue: https://stackoverflow.com/a/62333327
 networks: {default: {ipam: {config: [{subnet: 172.17.0.0/16}]}}}

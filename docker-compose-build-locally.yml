@@ -1,7 +1,9 @@
 version: "3.7"
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.build_and_run
     stdin_open: true
     tty: true
     ports: ["9000:9000"]
