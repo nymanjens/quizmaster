@@ -21,3 +21,4 @@ tmp
 node_modules/
 package-lock.json
 /conf/quiz/assets_cache
+.bsp
