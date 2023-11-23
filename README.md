@@ -81,3 +81,4 @@ Follow these steps to host a quiz:
   - `shift + =/+/p`: Add 30 seconds from the current timer
   - `alt + enter`: Toggle enlarged image (if there is a visible image)
   - `a`: toggle the answer to be visible in the master view (http://localhost:9000/app/master)
+
