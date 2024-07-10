@@ -13,6 +13,7 @@ question types are suported, which are configured in a YAML file.
 
 ### From prebuilt release in zip file (recommended)
 
+- Install Java 11 (JDK 11) on your server
 - Download "Binaries (compiled files) with demo configuration" from the [latest
   release](https://github.com/nymanjens/quizmaster/releases)
 - Unpack the archive and open a terminal in the unpacked folder
