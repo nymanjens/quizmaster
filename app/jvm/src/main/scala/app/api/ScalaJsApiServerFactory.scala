@@ -6,11 +6,10 @@ import java.io.InputStreamReader
 import java.lang.Math.abs
 import java.net.URL
 import java.net.URLEncoder
-
 import hydro.common.time.JavaTimeImplicits._
+
 import java.time.Duration
 import java.util.concurrent.Executors
-
 import app.api.ScalaJsApi._
 import app.api.ScalaJsApi.TeamOrQuizStateUpdate._
 import app.common.FixedPointNumber
@@ -43,6 +42,8 @@ import hydro.models.modification.EntityType
 import hydro.models.Entity
 import hydro.models.access.DbQuery
 import hydro.models.access.DbQuery.Sorting
+import play.api.mvc.RequestHeader
+import play.mvc.Http
 
 import scala.collection.immutable.ListMap
 import scala.collection.immutable.Seq
@@ -66,7 +67,11 @@ final class ScalaJsApiServerFactory @Inject() (implicit
   private val singleThreadedExecutor =
     ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor())
 
-  def create()(implicit user: User): ScalaJsApi = new ScalaJsApi() {
+  def create(request: RequestHeader)(implicit user: User): ScalaJsApi = new ScalaJsApi() {
+
+    private def getRemoteIpAddress(): String = {
+      s"${request.remoteAddress}"
+    }
 
     override def getInitialData() =
       GetInitialDataResponse(
@@ -219,7 +224,9 @@ final class ScalaJsApiServerFactory @Inject() (implicit
               val timerState = state.timerState
               val newTimerRunning = timerRunningValue getOrElse (!timerState.timerRunning)
               if (!newTimerRunning) {
-                println(s"**** Timer paused via ToggleTimerPaused(source=${source})")
+                println(
+                  s"**** Timer paused via ToggleTimerPaused(source=${source}, ip=${getRemoteIpAddress()})"
+                )
               }
               state.copy(
                 timerState = TimerState(
@@ -463,7 +470,9 @@ final class ScalaJsApiServerFactory @Inject() (implicit
             if (resetTimer) TimerState.createStarted()
             else if (pauseTimer) {
               val team = fetchAllTeams().find(_.id == submission.teamId).get
-              println(s"**** Timer paused via addVerifiedSubmission(), team=${team}")
+              println(
+                s"**** Timer paused via addVerifiedSubmission(), team=${team}, ip=${getRemoteIpAddress()}"
+              )
 
               TimerState(
                 lastSnapshotInstant = clock.nowInstant,

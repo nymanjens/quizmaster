@@ -1,7 +1,6 @@
 package hydro.controllers
 
 import java.nio.ByteBuffer
-
 import akka.actor.ActorSystem
 import akka.stream.scaladsl._
 import app.api.Picklers._
@@ -28,6 +27,7 @@ import org.reactivestreams.Publisher
 import play.api.i18n.I18nSupport
 import play.api.i18n.MessagesApi
 import play.api.mvc._
+import play.mvc.Http
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
@@ -58,11 +58,11 @@ final class InternalApi @Inject() (implicit
     Ok(bytes)
   }
 
-  def scalaJsApiWebsocket = WebSocket.accept[Array[Byte], Array[Byte]] { request =>
+  def scalaJsApiWebsocket = WebSocket.accept[Array[Byte], Array[Byte]] { implicit requestHeader =>
     Flow[Array[Byte]].map { requestBytes =>
-      val request = Unpickle[ScalaJsApiRequest].fromBytes(ByteBuffer.wrap(requestBytes))
+      val apiRequest = Unpickle[ScalaJsApiRequest].fromBytes(ByteBuffer.wrap(requestBytes))
 
-      doScalaJsApiCall(request.path, request.args)
+      doScalaJsApiCall(apiRequest.path, apiRequest.args)
     }
   }
 
@@ -110,7 +110,7 @@ final class InternalApi @Inject() (implicit
 
   // Note: This action manually implements what autowire normally does automatically. Unfortunately, autowire
   // doesn't seem to work for some reason.
-  private def doScalaJsApiCall(path: String, argsMap: Map[String, ByteBuffer]): Array[Byte] = {
+  private def doScalaJsApiCall(path: String, argsMap: Map[String, ByteBuffer])(implicit request: RequestHeader): Array[Byte] = {
     val responseBuffer = scalaJsApiCaller(path, argsMap)
 
     val data: Array[Byte] = Array.ofDim[Byte](responseBuffer.remaining())
@@ -120,7 +120,7 @@ final class InternalApi @Inject() (implicit
 }
 object InternalApi {
   trait ScalaJsApiCaller {
-    def apply(path: String, argsMap: Map[String, ByteBuffer]): ByteBuffer
+    def apply(path: String, argsMap: Map[String, ByteBuffer])(implicit request: RequestHeader): ByteBuffer
   }
 
   @Singleton

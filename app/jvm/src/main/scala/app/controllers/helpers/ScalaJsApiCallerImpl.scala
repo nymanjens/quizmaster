@@ -1,7 +1,6 @@
 package app.controllers.helpers
 
 import java.nio.ByteBuffer
-
 import app.api.Picklers._
 import app.api.ScalaJsApi.TeamOrQuizStateUpdate
 import app.api.ScalaJsApiServerFactory
@@ -14,14 +13,16 @@ import hydro.controllers.InternalApi.ScalaJsApiCaller
 import hydro.models.Entity
 import hydro.models.modification.EntityModification
 import hydro.models.modification.EntityType
+import play.api.mvc.RequestHeader
+import play.mvc.Http
 
 import scala.collection.immutable.Seq
 
 final class ScalaJsApiCallerImpl @Inject() (implicit scalaJsApiServerFactory: ScalaJsApiServerFactory)
     extends ScalaJsApiCaller {
 
-  override def apply(path: String, argsMap: Map[String, ByteBuffer]): ByteBuffer = {
-    val scalaJsApiServer = scalaJsApiServerFactory.create()
+  override def apply(path: String, argsMap: Map[String, ByteBuffer])(implicit request: RequestHeader): ByteBuffer = {
+    val scalaJsApiServer = scalaJsApiServerFactory.create(request)
 
     path match {
       case "getInitialData" =>
