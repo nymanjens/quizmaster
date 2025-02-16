@@ -217,11 +217,15 @@ final class ScalaJsApiServerFactory @Inject() (implicit
           case ToggleTimerPaused(timerRunningValue: Option[Boolean]) =>
             StateUpsertHelper.doQuizStateUpsert { state =>
               val timerState = state.timerState
+              val newTimerRunning = timerRunningValue getOrElse (!timerState.timerRunning)
+              if (!newTimerRunning) {
+                println("$$$$ Timer paused via ToggleTimerPaused()")
+              }
               state.copy(
                 timerState = TimerState(
                   lastSnapshotInstant = clock.nowInstant,
                   lastSnapshotElapsedTime = timerState.elapsedTime(),
-                  timerRunning = timerRunningValue getOrElse (!timerState.timerRunning),
+                  timerRunning = newTimerRunning,
                   uniqueIdOfMediaPlaying = timerState.uniqueIdOfMediaPlaying,
                 )
               )
@@ -457,14 +461,15 @@ final class ScalaJsApiServerFactory @Inject() (implicit
         quizState.copy(
           timerState =
             if (resetTimer) TimerState.createStarted()
-            else if (pauseTimer)
+            else if (pauseTimer) {
+              println("$$$$ Timer paused via addVerifiedSubmission()")
               TimerState(
                 lastSnapshotInstant = clock.nowInstant,
                 lastSnapshotElapsedTime = quizState.timerState.elapsedTime(),
                 timerRunning = false,
                 uniqueIdOfMediaPlaying = quizState.timerState.uniqueIdOfMediaPlaying,
               )
-            else quizState.timerState,
+            } else quizState.timerState,
           submissions = newSubmissions,
         )
       }
