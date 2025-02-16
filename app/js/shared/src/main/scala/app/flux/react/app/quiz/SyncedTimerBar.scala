@@ -1,7 +1,6 @@
 package app.flux.react.app.quiz
 
 import java.time.Duration
-
 import app.api.ScalaJsApi.TeamOrQuizStateUpdate._
 import app.api.ScalaJsApiClient
 import app.flux.controllers.SoundEffectController
@@ -17,6 +16,7 @@ import hydro.flux.react.HydroReactComponent
 import hydro.flux.react.uielements.Bootstrap
 import hydro.flux.react.uielements.Bootstrap.Variant
 import hydro.flux.react.ReactVdomUtils.<<
+import hydro.flux.router.RouterContext
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import org.scalajs.dom
@@ -33,8 +33,8 @@ final class SyncedTimerBar(implicit
 ) extends HydroReactComponent {
 
   // **************** API ****************//
-  def apply(showMasterData: Boolean): VdomElement = {
-    component(Props(showMasterData))
+  def apply(showMasterData: Boolean)(implicit router: RouterContext): VdomElement = {
+    component(Props(showMasterData, router))
   }
 
   // **************** Implementation of HydroReactComponent methods ****************//
@@ -47,7 +47,8 @@ final class SyncedTimerBar(implicit
 
   // **************** Implementation of HydroReactComponent types ****************//
   protected case class Props(
-      showMasterData: Boolean
+      showMasterData: Boolean,
+      router: RouterContext,
   )
   protected case class State(
       elapsedTime: Duration = Duration.ZERO,
@@ -169,7 +170,10 @@ final class SyncedTimerBar(implicit
                 if (state.elapsedTime < state.maxTime && newElapsedTime >= state.maxTime) {
                   soundEffectController.playTimerRunsOut()
                   scalaJsApiClient.doTeamOrQuizStateUpdate(
-                    ToggleTimerPaused(timerRunningValue = Some(false))
+                    ToggleTimerPaused(
+                      timerRunningValue = Some(false),
+                      source = s"SyncedTimerBar(${props.router.currentPage})",
+                    )
                   )
                 }
                 state.copy(elapsedTime = newElapsedTime)

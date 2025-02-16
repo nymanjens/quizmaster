@@ -103,7 +103,8 @@ object ScalaJsApi {
     case class SetSortTeamsByScore(sortTeamsByScore: Boolean) extends TeamOrQuizStateUpdate
     case class SetShowAnswers(showAnswers: Boolean) extends TeamOrQuizStateUpdate
     case class SetAnswerBulletType(answerBulletType: AnswerBulletType) extends TeamOrQuizStateUpdate
-    case class ToggleTimerPaused(timerRunningValue: Option[Boolean] = None) extends TeamOrQuizStateUpdate
+    case class ToggleTimerPaused(timerRunningValue: Option[Boolean] = None, source: String)
+        extends TeamOrQuizStateUpdate
     case class AddTimeToTimer(duration: Duration) extends TeamOrQuizStateUpdate
 
     /** Start from the beginning if audio/video is playing. */

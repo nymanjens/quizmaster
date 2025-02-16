@@ -95,14 +95,14 @@ final class Layout(implicit
           val updatedState = $.state.runNow()
           if (!updatedState.boundShortcutsAndPreloadedMedia) {
             $.modState(_.copy(boundShortcutsAndPreloadedMedia = true)).runNow()
-            bindShortcuts()
+            bindShortcuts(router)
             preloadMedia()
           }
         }
       }
     }
 
-    private def bindShortcuts(): Unit = {
+    private def bindShortcuts(router: RouterContext): Unit = {
       println("  Binding shortcuts...")
 
       def bind(shortcut: String, runnable: () => Unit): Unit = {
@@ -139,7 +139,13 @@ final class Layout(implicit
       bind("ctrl+alt+r", () => teamsAndQuizStateStore.resetCurrentQuestion())
       bind("alt+enter", () => teamsAndQuizStateStore.toggleImageIsEnlarged())
 
-      bind("space", () => scalaJsApiClient.doTeamOrQuizStateUpdate(ToggleTimerPaused()))
+      bind(
+        "space",
+        () =>
+          scalaJsApiClient.doTeamOrQuizStateUpdate(
+            ToggleTimerPaused(source = s"pressed_spacebar(${router.currentPage})")
+          ),
+      )
       bind("shift+r", () => scalaJsApiClient.doTeamOrQuizStateUpdate(RestartMedia()))
       bind("shift+-", () => addTimeToTimer(Duration.ofSeconds(-30)))
       bind("shift+o", () => addTimeToTimer(Duration.ofSeconds(-30)))

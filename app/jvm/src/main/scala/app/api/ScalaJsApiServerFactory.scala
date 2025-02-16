@@ -214,12 +214,12 @@ final class ScalaJsApiServerFactory @Inject() (implicit
               )
             }
 
-          case ToggleTimerPaused(timerRunningValue: Option[Boolean]) =>
+          case ToggleTimerPaused(timerRunningValue: Option[Boolean], source: String) =>
             StateUpsertHelper.doQuizStateUpsert { state =>
               val timerState = state.timerState
               val newTimerRunning = timerRunningValue getOrElse (!timerState.timerRunning)
               if (!newTimerRunning) {
-                println("**** Timer paused via ToggleTimerPaused()")
+                println(s"**** Timer paused via ToggleTimerPaused(source=${source})")
               }
               state.copy(
                 timerState = TimerState(
