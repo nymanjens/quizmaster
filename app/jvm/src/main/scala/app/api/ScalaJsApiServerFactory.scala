@@ -219,7 +219,7 @@ final class ScalaJsApiServerFactory @Inject() (implicit
               val timerState = state.timerState
               val newTimerRunning = timerRunningValue getOrElse (!timerState.timerRunning)
               if (!newTimerRunning) {
-                println("$$$$ Timer paused via ToggleTimerPaused()")
+                println("**** Timer paused via ToggleTimerPaused()")
               }
               state.copy(
                 timerState = TimerState(
@@ -462,7 +462,9 @@ final class ScalaJsApiServerFactory @Inject() (implicit
           timerState =
             if (resetTimer) TimerState.createStarted()
             else if (pauseTimer) {
-              println("$$$$ Timer paused via addVerifiedSubmission()")
+              val team = fetchAllTeams().find(_.id == submission.teamId).get
+              println(s"**** Timer paused via addVerifiedSubmission(), team=${team}")
+
               TimerState(
                 lastSnapshotInstant = clock.nowInstant,
                 lastSnapshotElapsedTime = quizState.timerState.elapsedTime(),
