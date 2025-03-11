@@ -168,9 +168,6 @@ final class SyncedTimerBar(implicit
                 val newElapsedTime = state.timerState.elapsedTime()
                 if (state.elapsedTime < state.maxTime && newElapsedTime >= state.maxTime) {
                   soundEffectController.playTimerRunsOut()
-                  scalaJsApiClient.doTeamOrQuizStateUpdate(
-                    ToggleTimerPaused(timerRunningValue = Some(false))
-                  )
                 }
                 state.copy(elapsedTime = newElapsedTime)
               } else {
