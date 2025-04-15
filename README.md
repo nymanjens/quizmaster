@@ -42,6 +42,12 @@ git clone https://github.com/nymanjens/quizmaster.git
 cd quizmaster
 docker-compose --file=docker-compose-build-locally.yml up
 ```
+- Run this command
+- This way, users can force Docker to recreate containers using the --force-recreate option.
+```
+- sudo docker-compose -f docker-compose-prebuilt.yml up --force-recreate
+```
+
 
 - Browse to http://localhost:9000
 
