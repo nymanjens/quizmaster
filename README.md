@@ -32,6 +32,13 @@ docker-compose --file=docker-compose-prebuilt.yml up
 
 - Browse to http://localhost:9000
 
+Tip: After updating `quiz-config.yml`, you can force recreate the containers as
+follows:
+
+```
+docker-compose --file=docker-compose-prebuilt.yml up --force-recreate
+```
+
 ### Building and running your own release with Docker
 
 
@@ -50,11 +57,6 @@ docker-compose --file=docker-compose-build-locally.yml up
   Configure your quiz here (questions, choices, answers, images, ...). The existing one in the
   release is a demo config that contains most of the options.
 
-## After saving the file
-- This way, users can force Docker to recreate containers using the --force-recreate option.
-```
-sudo docker-compose -f docker-compose-prebuilt.yml up --force-recreate
-```
 
 ## Play
 
