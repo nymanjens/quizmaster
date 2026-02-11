@@ -34,11 +34,11 @@ object BuildSettings {
 
   /** Declare global dependency versions here to avoid mismatches in multi part dependencies */
   object versions {
-    val scala = "2.12.2" // Must be the same as in .travis.yml
-    val play = "2.8.20" // Must be the same as the Play sbt-plugin in plugins.sbt
+    val scala = "2.13.12" // Must be the same as in .travis.yml
+    val play = "2.8.21" // Must be the same as the Play sbt-plugin in plugins.sbt
 
-    val uTest = "0.4.7"
-    val scalajsReact = "1.2.1"
+    val uTest = "0.8.1"
+    val scalajsReact = "2.1.1"
   }
 
   /**
@@ -47,33 +47,33 @@ object BuildSettings {
     */
   val sharedDependencies = Def.setting(
     Seq(
-      "org.scala-lang.modules" %% "scala-async" % "0.9.6",
-      "com.lihaoyi" %%% "autowire" % "0.2.6",
-      "me.chrons" %%% "boopickle" % "1.2.5"
+      "org.scala-lang.modules" %% "scala-async" % "1.0.1",
+      "com.lihaoyi" %%% "autowire" % "0.3.3",
+      "io.suzaku" %%% "boopickle" % "1.4.0"
     ))
 
   /** Dependencies only used by the JVM project */
   val jvmDependencies = Def.setting(
     Seq(
-      "com.vmunier" %% "scalajs-scripts" % "1.1.2",
+      "com.vmunier" %% "scalajs-scripts" % "1.2.0",
       "com.lihaoyi" %% "utest" % versions.uTest % Test,
       "com.typesafe.play" %% "play-jdbc" % versions.play,
       "com.typesafe.play" %% "play-cache" % versions.play,
       "com.typesafe.play" %% "play-ws" % versions.play,
       "com.typesafe.play" %% "play-specs2" % versions.play % Test,
-      "com.lihaoyi" %% "pprint" % "0.5.6" % Test,
-      "com.google.truth" % "truth" % "1.1.2" % Test,
-      "com.typesafe.slick" %% "slick" % "3.2.0",
-      "com.typesafe.slick" %% "slick-hikaricp" % "3.2.0",
+      "com.lihaoyi" %% "pprint" % "0.9.0" % Test,
+      "com.google.truth" % "truth" % "1.1.5" % Test,
+      "com.typesafe.slick" %% "slick" % "3.4.1",
+      "com.typesafe.slick" %% "slick-hikaricp" % "3.4.1",
       "commons-lang" % "commons-lang" % "2.6",
-      "mysql" % "mysql-connector-java" % "5.1.36",
-      "com.h2database" % "h2" % "1.4.195",
-      "org.xerial" % "sqlite-jdbc" % "3.8.11.2",
-      "com.google.code.findbugs" % "jsr305" % "1.3.9",
+      "mysql" % "mysql-connector-java" % "8.0.33",
+      "com.h2database" % "h2" % "2.2.224",
+      "org.xerial" % "sqlite-jdbc" % "3.42.0.0",
+      "com.google.code.findbugs" % "jsr305" % "3.0.2",
       "org" % "jaudiotagger" % "2.0.3",
-      "com.google.guava" % "guava" % "30.1-jre",
+      "com.google.guava" % "guava" % "32.1.2-jre",
       "com.googlecode.json-simple" % "json-simple" % "1.1.1",
-      "org.yaml" % "snakeyaml" % "1.14",
+      "org.yaml" % "snakeyaml" % "2.2",
       "org.scalaj" %% "scalaj-http" % "2.4.2",
       "net.jcip" % "jcip-annotations" % "1.0"
     ))
@@ -84,8 +84,8 @@ object BuildSettings {
       "com.github.japgolly.scalajs-react" %%% "core" % versions.scalajsReact,
       "com.github.japgolly.scalajs-react" %%% "extra" % versions.scalajsReact,
       "com.github.japgolly.scalajs-react" %%% "test" % versions.scalajsReact % Test,
-      "org.scala-js" %%% "scalajs-dom" % "0.9.1",
-      "org.scala-js" %%% "scalajs-java-time" % "0.2.0",
+      "org.scala-js" %%% "scalajs-dom" % "2.8.0",
+      "org.scala-js" %%% "scalajs-java-time" % "1.0.0",
       "com.lihaoyi" %%% "utest" % versions.uTest % Test
     ))
 
