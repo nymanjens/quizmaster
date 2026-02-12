@@ -11,6 +11,22 @@ question types are suported, which are configured in a YAML file.
 
 ## Installation
 
+### Prerequisites
+- **Java 11** or higher (JDK 11 recommended)
+- **sbt** (Scala Build Tool) 1.9.7 or higher
+
+### Running from Source
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/nymanjens/quizmaster.git
+   cd quizmaster
+   ```
+2. Run the application:
+   ```bash
+   sbt run
+   ```
+3. Browse to http://localhost:9000
+
 ### From prebuilt release in zip file (recommended)
 
 - Install Java 11 (JDK 11) on your server
@@ -39,20 +55,7 @@ follows:
 docker-compose --file=docker-compose-prebuilt.yml up --force-recreate
 ```
 
-### Building and running your own release with Docker
-
-
-- Run the following commands:
-
-```
-git clone https://github.com/nymanjens/quizmaster.git
-cd quizmaster
-docker-compose --file=docker-compose-build-locally.yml up
-```
-- Browse to http://localhost:9000
-
 ## Configuration
-
 - `conf/quiz/quiz-config.yml`:<br>
   Configure your quiz here (questions, choices, answers, images, ...). The existing one in the
   release is a demo config that contains most of the options.

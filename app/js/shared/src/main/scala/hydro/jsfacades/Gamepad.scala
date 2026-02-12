@@ -4,7 +4,7 @@ import hydro.jsfacades.Gamepad.GamepadButton
 import hydro.jsfacades.Gamepad.VibrationActuator
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSGlobalScope
+
 
 @js.native
 trait Gamepad extends js.Object {

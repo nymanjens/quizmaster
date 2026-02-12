@@ -1,21 +1,25 @@
-name: Build and tests
-on: [pull_request, push]
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Downgrade NPM version
-      uses: actions/setup-node@v2
-      with:
-        node-version: '8'
-    - name: Setup JDK
-      uses: actions/setup-java@v2
-      with:
-        distribution: temurin
-        java-version: 11
-    - name: Setup sbt launcher
-      uses: sbt/setup-sbt@v1
-    - name: Build and Test
-      run: sbt -v +test
+      - uses: actions/checkout@v4
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+          cache: 'sbt'
+      - name: Setup sbt
+        uses: sbt/setup-sbt@v1
+      - name: Run sbt test
+        run: sbt test
+      - name: Run sbt compile
+        run: sbt compile

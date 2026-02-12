@@ -10,7 +10,7 @@ object GuavaReplacement {
 
   // **************** Iterables **************** //
   object Iterables {
-    def getOnlyElement[T](traversable: Traversable[T]): T = {
+    def getOnlyElement[T](traversable: Iterable[T]): T = {
       val list = traversable.toList
       require(list.size == 1, s"Given traversable can only have one element but is $list")
       list.head

@@ -43,14 +43,14 @@ object ReactVdomUtils {
       ifThen(option.isDefined)(thenElement(option.get))
     }
 
-    def joinWithSpaces[A](elems: Traversable[A])(implicit
+    def joinWithSpaces[A](elems: Iterable[A])(implicit
         f: A => VdomNode,
         stringF: String => VdomNode,
     ): VdomArray = {
       join(glue = " ", elems = elems)
     }
 
-    def join[A](glue: String, elems: Traversable[A])(implicit
+    def join[A](glue: String, elems: Iterable[A])(implicit
         f: A => VdomNode,
         stringF: String => VdomNode,
     ): VdomArray = {

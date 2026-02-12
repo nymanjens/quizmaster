@@ -83,10 +83,9 @@ lazy val server = (project in file("app/jvm"))
     npmAssets ++= NpmAssets.ofProject(client) { modules => (modules / "font-awesome").allPaths }.value,
     npmAssets ++= NpmAssets.ofProject(client) { modules => (modules / "startbootstrap-sb-admin-2").allPaths }.value,
     // @formatter:on
-    // compress CSS
     Assets / LessKeys.compress := true
   )
-  .enablePlugins(PlayScala, WebScalaJSBundlerPlugin)
+  .enablePlugins(PlayScala, WebScalaJS)
   .disablePlugins(PlayFilters) // Don't use the default filters
   .disablePlugins(PlayLayoutPlugin) // use the standard directory layout instead of Play's custom
   .aggregate(clientProjects.map(projectToRef): _*)

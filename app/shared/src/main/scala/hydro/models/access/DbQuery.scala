@@ -104,10 +104,10 @@ object DbQuery {
       override def apply(entity: E) = !(field.get(entity) contains value)
     }
     case class Or[E](filters: Seq[Filter[E]]) extends Filter[E] {
-      override def apply(entity: E) = filters.toStream.exists(_.apply(entity))
+      override def apply(entity: E) = filters.iterator.exists(_.apply(entity))
     }
     case class And[E](filters: Seq[Filter[E]]) extends Filter[E] {
-      override def apply(entity: E) = filters.toStream.forall(_.apply(entity))
+      override def apply(entity: E) = filters.iterator.forall(_.apply(entity))
     }
   }
 
@@ -118,12 +118,12 @@ object DbQuery {
       Sorting(fieldsWithDirection :+ FieldWithDirection[V, E](field, isDesc = isDesc))
 
     def toOrdering: Ordering[E] = (x: E, y: E) => {
-      fieldsWithDirection.toStream.flatMap { case f @ DbQuery.Sorting.FieldWithDirection(field, _) =>
+      fieldsWithDirection.iterator.flatMap { case f @ DbQuery.Sorting.FieldWithDirection(field, _) =>
         f.ordering.compare(field.get(x), field.get(y)) match {
           case 0      => None
           case result => Some(result)
         }
-      }.headOption getOrElse 0
+      }.nextOption().getOrElse(0)
     }
 
     def reversed: Sorting[E] =

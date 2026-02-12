@@ -30,8 +30,8 @@ object DbQueryExecutor {
     override def data(dbQuery: DbQuery[E]) = stream(dbQuery).toVector
     override def count(dbQuery: DbQuery[E]) = stream(dbQuery).size
 
-    private def stream(dbQuery: DbQuery[E]): Stream[E] = {
-      var stream = entities.toStream.filter(dbQuery.filter.apply)
+    private def stream(dbQuery: DbQuery[E]): LazyList[E] = {
+      var stream = entities.to(LazyList).filter(dbQuery.filter.apply)
       for (sorting <- dbQuery.sorting) {
         stream = stream.sorted(sorting.toOrdering)
       }

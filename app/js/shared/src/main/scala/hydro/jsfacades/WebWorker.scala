@@ -1,10 +1,10 @@
 package hydro.jsfacades
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSGlobalScope
+import scala.scalajs.js.annotation.JSGlobal
 
 @js.native
-@JSGlobalScope
+@JSGlobal
 object WebWorker extends js.Object {
 
   def addEventListener(`type`: String, f: js.Function): Unit = js.native

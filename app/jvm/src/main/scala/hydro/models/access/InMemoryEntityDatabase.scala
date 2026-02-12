@@ -111,29 +111,29 @@ object InMemoryEntityDatabase {
     override def data(dbQuery: DbQuery[E]): Seq[E] = valuesAsStream(dbQuery).toVector
     override def count(dbQuery: DbQuery[E]): Int = valuesAsStream(dbQuery).size
 
-    private def valuesAsStream(dbQuery: DbQuery[E]): Stream[E] = {
-      def applySorting(stream: Stream[E]): Stream[E] = dbQuery.sorting match {
+    private def valuesAsStream(dbQuery: DbQuery[E]): LazyList[E] = {
+      def applySorting(stream: LazyList[E]): LazyList[E] = dbQuery.sorting match {
         case Some(sorting) => stream.sorted(sorting.toOrdering)
         case None          => stream
       }
-      def applyLimit(stream: Stream[E]): Stream[E] = dbQuery.limit match {
+      def applyLimit(stream: LazyList[E]): LazyList[E] = dbQuery.limit match {
         case Some(limit) => stream.take(limit)
         case None        => stream
       }
 
       dbQuery.sorting match {
         case Some(sorting) if sortings contains sorting =>
-          var stream = sortingToEntities(sorting).iterator().asScala.toStream
+          var stream = sortingToEntities(sorting).iterator().asScala.to(LazyList)
           stream = stream.filter(dbQuery.filter.apply)
           stream = applyLimit(stream)
           stream
         case Some(sortingReversed) if sortings contains sortingReversed.reversed =>
-          var stream = sortingToEntities(sortingReversed.reversed).descendingIterator().asScala.toStream
+          var stream = sortingToEntities(sortingReversed.reversed).descendingIterator().asScala.to(LazyList)
           stream = stream.filter(dbQuery.filter.apply)
           stream = applyLimit(stream)
           stream
         case _ =>
-          var stream = idToEntityMap.values().iterator().asScala.toStream
+          var stream = idToEntityMap.values().iterator().asScala.to(LazyList)
           stream = stream.filter(dbQuery.filter.apply)
           stream = applySorting(stream)
           stream = applyLimit(stream)
