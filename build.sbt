@@ -86,7 +86,6 @@ lazy val server = (project in file("app/jvm"))
     Assets / LessKeys.compress := true
   )
   .enablePlugins(PlayScala, WebScalaJS)
-  // .enablePlugins(PlayScala, WebScalaJSBundlerPlugin)
   .disablePlugins(PlayFilters) // Don't use the default filters
   .disablePlugins(PlayLayoutPlugin) // use the standard directory layout instead of Play's custom
   .aggregate(clientProjects.map(projectToRef): _*)
